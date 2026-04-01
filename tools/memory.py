@@ -35,7 +35,7 @@ def init_memory_graph(path: Path) -> Dict[str, Any]:
     """Create a new empty memory TRUG."""
     graph = {
         "name": "LLM Memory",
-        "version": "0.9.1",
+        "version": "1.0.0",
         "type": "MEMORY",
         "description": "Persistent memory graph for LLM sessions. Memories are nodes, associations are edges.",
         "dimensions": {
@@ -46,7 +46,7 @@ def init_memory_graph(path: Path) -> Dict[str, Any]:
         },
         "capabilities": {
             "extensions": [],
-            "vocabularies": ["core_v0.9.1"],
+            "vocabularies": ["core_v1.0.0"],
             "profiles": []
         },
         "nodes": [

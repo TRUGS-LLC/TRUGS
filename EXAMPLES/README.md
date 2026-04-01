@@ -1,6 +1,6 @@
 # TRUGS Examples Gallery
 
-Examples for **7 domains** demonstrating the TRUGS v0.9.1 specification. All examples pass validation (16 rules, 0 errors).
+Examples for **7 domains** demonstrating the TRUGS v1.0.0 specification. All examples pass validation (16 rules, 0 errors).
 
 **Total:** 20 validated JSON files across 7 domains.
 

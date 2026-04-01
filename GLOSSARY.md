@@ -1,6 +1,6 @@
 # TRUGS Glossary
 
-> Alphabetical reference of all terminology in the TRUGS v0.9.1 specification: protocol concepts, semantic primitives, language grammar, node/edge fields, branch vocabularies, and tools.
+> Alphabetical reference of all terminology in the TRUGS v1.0.0 specification: protocol concepts, semantic primitives, language grammar, node/edge fields, branch vocabularies, and tools.
 
 ---
 
@@ -416,7 +416,7 @@
 
 **VALID** — Modifier (State). Satisfies all declared constraints.
 
-**Validation rule** — A mechanical check that a TRUG must pass. 16 rules: 9 structural (always enforced), 7 compositional (enforced when core_v0.9.1 declared).
+**Validation rule** — A mechanical check that a TRUG must pass. 16 rules: 9 structural (always enforced), 7 compositional (enforced when core_v1.0.0 declared).
 
 **VALIDATE** — Operation (Obligate). Assert data satisfies condition; halt if not. CORE primitive.
 
@@ -434,4 +434,4 @@
 
 ---
 
-*214 glossary entries covering the complete TRUGS v0.9.1 specification: semantic primitives, protocol concepts, language grammar, and tools.*
+*214 glossary entries covering the complete TRUGS v1.0.0 specification: semantic primitives, protocol concepts, language grammar, and tools.*

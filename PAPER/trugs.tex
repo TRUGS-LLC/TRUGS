@@ -213,7 +213,7 @@ Recent work on constrained decoding \citep{willard2023efficient, tam2025slot} fo
 
 Having introduced the executable graph concept informally, we now specify its structure precisely. A TRUG is a JSON-serialized directed graph comprising typed nodes, labeled edges encoding directional relationships, and hierarchical containment. The format is intentionally minimal: it imposes structural invariants that guarantee universal tooling compatibility and agent-agnostic traversal, while leaving property schemas, node type vocabularies, and domain semantics to extension layers.
 
-Every TRUG must satisfy 7 structural boundaries. An additional 7 compositional rules are enforced when a graph declares the \texttt{core\_v0.9.1} vocabulary capability.
+Every TRUG must satisfy 7 structural boundaries. An additional 7 compositional rules are enforced when a graph declares the \texttt{core\_v1.0.0} vocabulary capability.
 
 \subsection{Structural Foundation}
 
@@ -283,7 +283,7 @@ The first 5 classes (Operation, Relation, Entity, Constraint, Boundary) define \
 
 \subsection{Validation Rules}
 
-TRUGS enforces 16 validation rules. Rules 1--9 are structural and always enforced. Rules 10--16 are compositional and enforced when the graph declares the \texttt{core\_v0.9.1} vocabulary capability.
+TRUGS enforces 16 validation rules. Rules 1--9 are structural and always enforced. Rules 10--16 are compositional and enforced when the graph declares the \texttt{core\_v1.0.0} vocabulary capability.
 
 \begin{table}[h]
 \centering
@@ -641,7 +641,7 @@ The TRUGS Language definition is itself a TRUG (\texttt{language.trug.json}). Th
 
 \begin{itemize}
     \item The language definition validates against the same rules it defines.
-    \item Version control is built in: language v0.9.1 is a specific graph.
+    \item Version control is built in: language v1.0.0 is a specific graph.
     \item Domain extensibility is natural: a medical opening TRUG adds \texttt{DIAGNOSE}, \texttt{PRESCRIBE} as WORD nodes.
     \item A computational agent can validate its own understanding by checking its behavior against the opening TRUG.
 \end{itemize}
@@ -741,7 +741,7 @@ The reference validator implements all 16 CORE rules in a single Python file (52
 \begin{itemize}
     \item All 9 structural rules (pass and fail cases)
     \item All 7 compositional rules (pass, fail, and edge cases)
-    \item Opt-in behavior (compositional rules only fire when \texttt{core\_v0.9.1} declared)
+    \item Opt-in behavior (compositional rules only fire when \texttt{core\_v1.0.0} declared)
     \item File I/O (valid JSON, invalid JSON, missing file)
 \end{itemize}
 
@@ -781,7 +781,7 @@ This exercise demonstrates two things: first, that the validator catches real er
 As a practical demonstration, we built a TRUG-based memory system for LLMs with 5 operations:
 
 \begin{itemize}
-    \item \texttt{init} --- create an empty memory TRUG (declares \texttt{core\_v0.9.1})
+    \item \texttt{init} --- create an empty memory TRUG (declares \texttt{core\_v1.0.0})
     \item \texttt{remember} --- add a memory node with type, tags, and source
     \item \texttt{recall} --- query by keyword, type, recency, or retrieve all
     \item \texttt{forget} --- remove a memory and its associated edges

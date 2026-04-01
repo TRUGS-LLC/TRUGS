@@ -1,7 +1,7 @@
 """TRUGS validator — enforces all 16 CORE rules.
 
 Rules 1-9: Structural (always enforced)
-Rules 10-16: Compositional (enforced when core_v0.9.1 declared)
+Rules 10-16: Compositional (enforced when core_v1.0.0 declared)
 
 Usage:
     python -m trugs_llc.tools.validate <file.trug.json>
@@ -144,7 +144,7 @@ def _op_class(operation: str) -> Optional[str]:
 def _has_core_v091(trug: Dict[str, Any]) -> bool:
     caps = trug.get("capabilities", {})
     vocabs = caps.get("vocabularies", [])
-    return "core_v0.9.1" in vocabs
+    return "core_v1.0.0" in vocabs
 
 
 # ─── Rules 1-9: Structural ────────────────────────────────────────────────────
@@ -276,7 +276,7 @@ def rule_9_metric_level_format(trug: Dict[str, Any], r: ValidationResult):
             r.error("INVALID_METRIC_FORMAT", f"Invalid SI prefix '{prefix}' in '{ml}'", node_id=node.get("id"))
 
 
-# ─── Rules 10-16: Compositional (opt-in via core_v0.9.1) ──────────────────────
+# ─── Rules 10-16: Compositional (opt-in via core_v1.0.0) ──────────────────────
 
 def rule_10_subject_operation(trug: Dict[str, Any], r: ValidationResult):
     """Subject-Operation compatibility."""
@@ -452,7 +452,7 @@ def validate(trug: Dict[str, Any]) -> ValidationResult:
     rule_8_extension_declaration(trug, r)
     rule_9_metric_level_format(trug, r)
 
-    # Rules 10-16: only when core_v0.9.1 declared
+    # Rules 10-16: only when core_v1.0.0 declared
     if _has_core_v091(trug):
         rule_10_subject_operation(trug, r)
         rule_11_operation_object(trug, r)

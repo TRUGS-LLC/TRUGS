@@ -1,7 +1,7 @@
 # TRUGS CORE
 
-**Version:** 0.9.1
-**Status:** DRAFT — pre-release
+**Version:** 1.0.0
+**Status:** RELEASED
 **Purpose:** The universal foundation for all TRUGs
 
 ---
@@ -625,7 +625,7 @@ Tool-specific metadata
 
 ## Validation Rules
 
-Every TRUG must pass these 16 checks (rules 1-9 are structural; rules 10-16 are compositional and only enforced when `capabilities.vocabularies` includes `"core_v0.9.1"`):
+Every TRUG must pass these 16 checks (rules 1-9 are structural; rules 10-16 are compositional and only enforced when `capabilities.vocabularies` includes `"core_v1.0.0"`):
 
 ### Rule 1: Node ID Uniqueness
 
@@ -805,7 +805,7 @@ def validate_metric_level(level_name):
 
 ### Rule 10: Subject-Operation Compatibility
 
-When a TRUG uses semantic primitives (core_v0.9.1), the subject entity of an operation must be compatible with the operation class.
+When a TRUG uses semantic primitives (core_v1.0.0), the subject entity of an operation must be compatible with the operation class.
 
 | Subject Entity | Transform | Move | Obligate | Permit | Prohibit | Control | Bind | Resolve |
 |---|---|---|---|---|---|---|---|---|
@@ -1355,7 +1355,7 @@ Every primitive belongs to exactly one class. No ambiguity.
 
 # Part 3: Composition Rules
 
-Composition rules define which primitives can combine with which. These are the type system for the graph. When `capabilities.vocabularies` includes `"core_v0.9.1"`, these rules are enforced as validation rules 10-16 (defined above in the Validation Rules section).
+Composition rules define which primitives can combine with which. These are the type system for the graph. When `capabilities.vocabularies` includes `"core_v1.0.0"`, these rules are enforced as validation rules 10-16 (defined above in the Validation Rules section).
 
 For the complete compatibility matrices, see:
 - **Validation Rule 10:** Subject-Operation compatibility
@@ -1523,7 +1523,7 @@ python -m trugs_tools.validate --core-only my_graph.json
 
 **The 16 Validation Rules:**
 - Rules 1-9: structural (always enforced)
-- Rules 10-16: compositional (enforced when core_v0.9.1 declared)
+- Rules 10-16: compositional (enforced when core_v1.0.0 declared)
 
 **What this enables:**
 - Universal validation (16 mechanical rules)
@@ -1546,7 +1546,7 @@ python -m trugs_tools.validate --core-only my_graph.json
 
 ---
 
-**TRUGS Core v0.9.1 — The universal foundation**
+**TRUGS Core v1.0.0 — The universal foundation**
 
 ---
 

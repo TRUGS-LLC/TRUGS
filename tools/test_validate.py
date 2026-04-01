@@ -41,11 +41,11 @@ MINIMAL_VALID = {
 }
 
 MINIMAL_V091 = {
-    "name": "Test v0.9.1",
-    "version": "0.9.1",
+    "name": "Test v1.0.0",
+    "version": "1.0.0",
     "type": "CODE",
     "dimensions": {"d": {"description": "test"}},
-    "capabilities": {"extensions": [], "vocabularies": ["core_v0.9.1"], "profiles": []},
+    "capabilities": {"extensions": [], "vocabularies": ["core_v1.0.0"], "profiles": []},
     "nodes": [
         {
             "id": "system",
@@ -330,7 +330,7 @@ def test_rule_10_container_can_transform():
 
 
 def test_rule_10_not_triggered_without_v091():
-    """Rules 10-16 only fire with core_v0.9.1 capability."""
+    """Rules 10-16 only fire with core_v1.0.0 capability."""
     t = _make(
         nodes=[
             {"id": "d", "type": "DATA", "properties": {}, "parent_id": None, "contains": [], "metric_level": "BASE_DATA", "dimension": "d"},
@@ -502,8 +502,8 @@ def test_not_a_dict():
 
 
 def test_v091_opt_in():
-    """core_v0.9.1 rules only fire when declared."""
-    # This TRUG has DATA doing FILTER (invalid under rule 10) but no core_v0.9.1
+    """core_v1.0.0 rules only fire when declared."""
+    # This TRUG has DATA doing FILTER (invalid under rule 10) but no core_v1.0.0
     t = _make(
         nodes=[
             {"id": "d", "type": "DATA", "properties": {}, "parent_id": None, "contains": [], "metric_level": "BASE_DATA", "dimension": "d"},
@@ -513,8 +513,8 @@ def test_v091_opt_in():
     r = validate(t)
     assert r.valid  # No compositional rules fired
 
-    # Same TRUG with core_v0.9.1 — should fail
-    t["capabilities"]["vocabularies"] = ["core_v0.9.1"]
+    # Same TRUG with core_v1.0.0 — should fail
+    t["capabilities"]["vocabularies"] = ["core_v1.0.0"]
     r = validate(t)
     assert not r.valid
 

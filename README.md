@@ -1,6 +1,6 @@
 # TRUGS — Traceable Recursive Universal Graph Specification
 
-**Version:** 0.9.1
+**Version:** 1.0.0
 **License:** Apache 2.0
 **Maintained by:** TRUGS LLC
 
