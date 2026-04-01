@@ -1,0 +1,139 @@
+\begin{thebibliography}{25}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[{Anthropic}(2025)]{mcp2025}
+{Anthropic}.
+\newblock Model context protocol specification.
+\newblock \url{https://modelcontextprotocol.io/specification/2025-11-25}, 2025.
+
+\bibitem[Backus(1959)]{backus1959syntax}
+John~W. Backus.
+\newblock The syntax and semantics of the proposed international algebraic language of the {Zurich ACM-GAMM} conference.
+\newblock \emph{Proceedings of the International Conference on Information Processing}, pages 125--131, 1959.
+
+\bibitem[Bian(2025)]{bian2025llm}
+Haonan Bian.
+\newblock {LLM}-empowered knowledge graph construction: A survey.
+\newblock In \emph{Proceedings of ICAIS 2025}, 2025.
+\newblock arXiv:2510.20345.
+
+\bibitem[Bradner(1997)]{rfc2119}
+Scott Bradner.
+\newblock Key words for use in {RFC}s to indicate requirement levels.
+\newblock RFC 2119, 1997.
+\newblock URL \url{https://datatracker.ietf.org/doc/html/rfc2119}.
+
+\bibitem[Chamberlin(2012)]{chamberlin2012early}
+Donald~D. Chamberlin.
+\newblock Early history of {SQL}.
+\newblock \emph{IEEE Annals of the History of Computing}, 34\penalty0 (4):\penalty0 78--82, 2012.
+
+\bibitem[Chamberlin and Boyce(1974)]{chamberlin1974sequel}
+Donald~D. Chamberlin and Raymond~F. Boyce.
+\newblock {SEQUEL}: A structured {English} query language.
+\newblock In \emph{Proceedings of the 1974 ACM SIGFIDET Workshop on Data Description, Access and Control}, pages 249--264. ACM, 1974.
+
+\bibitem[Clark et~al.(2005)Clark, Harrison, Jenkins, Thompson, and Wojcik]{clark2005class}
+Peter Clark, Phil Harrison, Tom Jenkins, John Thompson, and Richard Wojcik.
+\newblock Acquiring and using world knowledge using a restricted subset of english.
+\newblock In \emph{Proceedings of FLAIRS}, 2005.
+
+\bibitem[Cregan et~al.(2007)Cregan, Schwitter, and Meyer]{cregan2007sydney}
+Anne Cregan, Rolf Schwitter, and Thomas Meyer.
+\newblock Sydney {OWL} syntax --- towards a controlled natural language syntax for {OWL} 1.1.
+\newblock In \emph{Proceedings of OWLED 2007}, 2007.
+
+\bibitem[Fuchs et~al.(2008)Fuchs, Kaljurand, and Kuhn]{fuchs2008attempto}
+Norbert~E. Fuchs, Kaarel Kaljurand, and Tobias Kuhn.
+\newblock Attempto controlled english for knowledge representation.
+\newblock In \emph{Reasoning Web}, pages 104--124. Springer, 2008.
+
+\bibitem[Gruber(1993)]{gruber1993translation}
+Thomas~R. Gruber.
+\newblock A translation approach to portable ontology specifications.
+\newblock \emph{Knowledge Acquisition}, 5\penalty0 (2):\penalty0 199--220, 1993.
+
+\bibitem[Hohfeld(1919)]{hohfeld1919fundamental}
+Wesley~Newcomb Hohfeld.
+\newblock \emph{Fundamental Legal Conceptions as Applied in Judicial Reasoning}.
+\newblock Yale University Press, 1919.
+
+\bibitem[Hutton(2016)]{hutton2016programming}
+Graham Hutton.
+\newblock \emph{Programming in Haskell}.
+\newblock Cambridge University Press, 2nd edition, 2016.
+\newblock Defines map, filter, foldr as universal higher-order functions across functional languages.
+
+\bibitem[Kuhn(2014)]{kuhn2014survey}
+Tobias Kuhn.
+\newblock A survey and classification of controlled natural languages.
+\newblock \emph{Computational Linguistics}, 40\penalty0 (1):\penalty0 121--170, 2014.
+\newblock \doi{10.1162/COLI_a_00168}.
+
+\bibitem[Montague(1973)]{montague1973proper}
+Richard Montague.
+\newblock The proper treatment of quantification in ordinary english.
+\newblock In Julius Hintikka, Julius Moravcsik, and Patrick Suppes, editors, \emph{Approaches to Natural Language}, pages 221--242. D. Reidel, 1973.
+
+\bibitem[{Neo4j, Inc.}(2024)]{neo4j}
+{Neo4j, Inc.}
+\newblock The {Neo4j} graph database.
+\newblock \url{https://neo4j.com}, 2024.
+
+\bibitem[Nyazee(2022)]{nyazee2022comparison}
+Imran~Ahsan Nyazee.
+\newblock Comparison between {Islamic} law, civil law and common law.
+\newblock \emph{SSRN Electronic Journal}, 2022.
+\newblock \doi{10.2139/ssrn.4163738}.
+
+\bibitem[Pan et~al.(2024)Pan, Luo, Wang, Chen, Wang, and Wu]{pan2024unifying}
+Shirui Pan, Linhao Luo, Yufei Wang, Chen Chen, Jiapu Wang, and Xindong Wu.
+\newblock Unifying large language models and knowledge graphs: A roadmap.
+\newblock \emph{IEEE Transactions on Knowledge and Data Engineering}, 36\penalty0 (7):\penalty0 3580--3599, 2024.
+
+\bibitem[Schwitter(2002)]{schwitter2002english}
+Rolf Schwitter.
+\newblock English as a formal specification language.
+\newblock In \emph{Proceedings of DEXA Workshops}, pages 228--232. IEEE, 2002.
+
+\bibitem[Sproat and Shih(1991)]{sproat1991crosslinguistic}
+Richard Sproat and Chilin Shih.
+\newblock The cross-linguistic distribution of adjective ordering restrictions.
+\newblock In Carol Georgopoulos and Roberta Ishihara, editors, \emph{Interdisciplinary Approaches to Language}, pages 565--593. Kluwer Academic Publishers, 1991.
+
+\bibitem[Tam et~al.(2025)]{tam2025slot}
+Adrian Tam et~al.
+\newblock {SLOT}: Structuring the output of large language models.
+\newblock In \emph{Proceedings of EMNLP 2025 Industry Track}, 2025.
+
+\bibitem[von Wright(1951)]{vonwright1951deontic}
+Georg~Henrik von Wright.
+\newblock Deontic logic.
+\newblock volume~60, pages 1--15. 1951.
+
+\bibitem[{W3C}(2012)]{owl2012}
+{W3C}.
+\newblock {OWL} 2 web ontology language document overview.
+\newblock W3c recommendation, World Wide Web Consortium, 2012.
+
+\bibitem[{W3C}(2014)]{rdf2014}
+{W3C}.
+\newblock {RDF} 1.1 concepts and abstract syntax.
+\newblock W3c recommendation, World Wide Web Consortium, 2014.
+
+\bibitem[{W3C}(2020)]{jsonld2020}
+{W3C}.
+\newblock {JSON-LD} 1.1.
+\newblock W3c recommendation, World Wide Web Consortium, 2020.
+
+\bibitem[Willard and Louf(2023)]{willard2023efficient}
+Brandon~T. Willard and R\'emi Louf.
+\newblock Efficient guided generation for large language models.
+\newblock In \emph{Proceedings of ICML 2024 Workshop on Structured Probabilistic Inference}, 2023.
+\newblock arXiv:2307.09702.
+
+\end{thebibliography}
