@@ -1,0 +1,1990 @@
+\documentclass{article}
+
+% arxiv-style based on NeurIPS
+\usepackage[final]{neurips_2024}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{nicefrac}
+\usepackage{microtype}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{multirow}
+\usepackage{CJKutf8}
+\usepackage{natbib}
+\bibliographystyle{plainnat}
+
+% Code listing style
+\lstdefinestyle{trugs}{
+  basicstyle=\ttfamily\small,
+  keywordstyle=\bfseries,
+  breaklines=true,
+  frame=single,
+  backgroundcolor=\color{gray!5},
+}
+
+\lstdefinestyle{json}{
+  basicstyle=\ttfamily\small,
+  breaklines=true,
+  frame=single,
+  backgroundcolor=\color{gray!5},
+}
+
+\title{TRUGS: A Formalized Language Specification for Executable Graph Communication Between Humans and Large Language Models}
+
+\author{
+  Xepayac \\
+  TRUGS LLC \\
+  \texttt{contact@trugs.dev}
+}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Effective communication between humans and large language models (LLMs) currently relies on natural language, which is inherently ambiguous, or on structured formats like JSON and RDF, which are precise but not human-writable. This gap necessitates extraction pipelines that translate between the two representations, introducing error at each stage. We propose TRUGS (Traceable Recursive Universal Graph Specification), a formalized language in which every valid sentence compiles to a directed graph and every graph decompiles to the same sentence---eliminating the translation step entirely.
+
+TRUGS draws its 190-word vocabulary from computation (67\%) and law (27\%)---two domains with centuries of precedent in making English words formally precise. The vocabulary is organized into 8 parts of speech governed by a BNF grammar and a composition type system of 16 validation rules. We demonstrate empirically, through 30 worked examples spanning 13 distinct patterns, that the compilation is bidirectional and lossless. Additionally, 24 ``sugar'' words may be freely inserted for human readability without affecting the compiled graph.
+
+The system is language-agnostic by design: legal concepts such as obligation (\textit{shall}/\begin{CJK}{UTF8}{gbsn}应当\end{CJK}/\textit{deber\'a}) and computational operations such as \textit{filter} and \textit{validate} exist independently across major human languages. Loading a different vocabulary definition---itself a TRUG---switches the surface language while preserving the grammar and graph structure.
+
+We release the complete specification, a reference validator with 47 unit tests, CRUD tools, a working LLM memory system, and 20 example TRUGs across 7 domains under the Apache 2.0 license.
+\end{abstract}
+
+%=============================================================================
+\section{Introduction}
+%=============================================================================
+
+When a developer instructs an LLM to ``make sure the API handles errors gracefully,'' the instruction is syntactically valid English, yet it admits an unbounded number of interpretations. No mechanism currently exists for either party to verify which interpretation the model adopted. In multi-agent settings, where LLMs coordinate through natural language exchanges, this interpretive uncertainty compounds with each step of the interaction.
+
+We argue that this is fundamentally a \textbf{language} problem, not a tooling problem. The field currently lacks a shared language that is simultaneously readable by humans, precise enough for machine execution, and formal enough for mechanical validation.
+
+Three specific manifestations of this problem drive current research:
+
+\begin{enumerate}
+    \item \textbf{Natural language is inherently ambiguous.} Human language evolved for social communication, where shared context, tone, and experience disambiguate meaning. When repurposed for machine instruction, these cues are absent. A sentence such as ``handle the data'' admits numerous valid interpretations, and no verification mechanism exists to confirm which one an LLM selected.
+
+    \item \textbf{Structured formats sacrifice readability for precision.} JSON-LD, RDF, OWL, and property graphs provide machine-processable representations, but they are not human-writable at scale. This gap motivated the field of knowledge graph construction \citep{bian2025llm}, which is dedicated to translating natural language into structured form---a process that introduces error at each stage of the pipeline.
+
+    \item \textbf{No shared semantic standard exists for LLM communication.} Protocols such as MCP \citep{mcp2025} standardize the mechanics of tool invocation (request/response patterns, tool schemas) but leave the semantics of individual terms undefined. Two LLMs using MCP can invoke the same tool without any guarantee that they share the same operational definition of ``filter'' or ``validate.''
+\end{enumerate}
+
+We observe that two established professional domains have already addressed this problem, independently and over centuries. In \textbf{computation}, English words such as \texttt{filter}, \texttt{sort}, and \texttt{return} carry deterministic meanings enforced by compilers. SQL, designed in 1974 as a ``Structured English Query Language'' \citep{chamberlin1974sequel}, demonstrated that English words with formal semantics could serve as a universal interface; it remains the most widely adopted query language today \citep{chamberlin2012early}. In \textbf{law}, English words such as \textit{shall}, \textit{may}, and \textit{notwithstanding} carry formally defined scope enforced by courts. The formal study of obligation, permission, and prohibition---deontic logic---dates to von Wright \citep{vonwright1951deontic}, and the IETF later codified computational equivalents in RFC 2119 \citep{rfc2119}, defining MUST, SHALL, MAY, and SHOULD as formal requirement levels. In both cases, ordinary English words were constrained into precise, executable vocabulary without inventing new terminology.
+
+TRUGS applies the same principle to human-LLM communication. We curated 190 words from computation and law, organized them into 8 parts of speech with a formal grammar, and defined composition rules that govern valid combinations. The resulting language compiles bidirectionally to a directed graph. The central insight is that the required vocabulary and its formal semantics already exist in established professional traditions; the contribution is their assembly into a unified, compilable language.
+
+\subsection{Contributions}
+
+\begin{enumerate}
+    \item A \textbf{graph specification} (TRUGS CORE) with 10 semantic primitive classes, 7 structural boundaries, and 16 validation rules, providing a universal foundation for structured information representation.
+
+    \item A \textbf{formalized English language} of 190 words in 8 parts of speech with a BNF grammar, composition rules, and a bidirectional compilation guarantee: sentence $\leftrightarrow$ graph, losslessly.
+
+    \item The \textbf{opening TRUG} pattern, where the language definition itself is a TRUG---enabling domain extensibility and self-description.
+
+    \item A \textbf{reference implementation} including a 16-rule validator (47 tests), CRUD tools, and a working LLM memory system, all with zero external dependencies.
+
+    \item The complete specification, tools, and examples released under Apache 2.0 at \url{https://github.com/TRUGS-LLC/TRUGS}.
+\end{enumerate}
+
+%=============================================================================
+\section{From Semantic Graphs to Executable Language}
+%=============================================================================
+
+Before presenting the formal specification, we introduce the core concepts through a concrete example.
+
+\subsection{Semantic Graphs}
+
+A semantic graph represents knowledge as typed nodes (things) connected by labeled edges (relationships). Unlike flat data formats, a semantic graph encodes not just what things exist but how they relate to one another. The nodes carry properties; the edges carry meaning. A node of type \texttt{PARTY} connected by a \texttt{GOVERNS} edge to a node of type \texttt{RESOURCE} does not merely associate two records---it asserts a specific relationship (authority) between two specific kinds of entities (an actor and an asset).
+
+Semantic graphs have a long history in knowledge representation \citep{gruber1993translation}, and standards such as RDF \citep{rdf2014} and OWL \citep{owl2012} formalize their structure. However, conventional semantic graphs are \textit{representational}: they store assertions about the world. They do not, by themselves, define a sequence of operations or enforce constraints on who may do what to whom.
+
+\subsection{Executable Graphs}
+
+An \textbf{executable graph} extends a semantic graph into a computational structure---one that defines operations, not merely assertions. Three properties distinguish an executable graph from a conventional semantic graph:
+
+\begin{enumerate}
+    \item \textbf{Nodes carry executable content.} Each node is simultaneously data (describable, queryable) and an instruction (performable by any agent that traverses the graph). Writing a node into the graph defines an instruction and makes it available for execution, with no compilation step or deployment boundary.
+
+    \item \textbf{Topology defines execution.} The topology of nodes and edges defines a sequence of computational operations. A \texttt{THEN} edge means ``execute this after that.'' An \texttt{OR} edge means ``execute this if that fails.'' Edges are structural constraints---they define the only available traversal paths. The graph does not advise a sequence; it enforces one.
+
+    \item \textbf{Constraint edges encode governance.} Edges such as \texttt{SHALL} and \texttt{MAY} encode obligations and permissions that govern which actors may perform which operations. These constraints are structural elements validated mechanically by the same rules that validate the graph's topology.
+\end{enumerate}
+
+The executable graph is \textbf{agent-agnostic}: any computational agent capable of reading nodes, following edges, and executing content can traverse it. Different agents executing the same graph may produce different results---but all results are valid with respect to the topology. The graph is the program; the agent is the execution engine.
+
+This is the foundation on which TRUGS is built.
+
+\subsection{TRUGS: A Concrete Example}
+
+A TRUG (Traceable Recursive Universal Graph) is an executable graph serialized as a JSON file with a fixed structure: 7 required node fields, 3 required edge fields, and a set of validation rules. A computational agent---whether a large language model, a rule engine, or a human reader---can traverse a TRUG, following edges to execute the operations encoded in its topology. Consider the following TRUGS Language sentence:
+
+\begin{lstlisting}[style=trugs]
+PARTY system SHALL FILTER ALL ACTIVE RECORD
+  THEN WRITE RESULT TO ENDPOINT output.
+\end{lstlisting}
+
+This sentence compiles to the following graph:
+
+\begin{lstlisting}[style=json]
+{
+  "nodes": [
+    {"id": "system", "type": "PARTY",
+     "properties": {}},
+    {"id": "op-filter", "type": "TRANSFORM",
+     "properties": {"operation": "FILTER"}},
+    {"id": "records", "type": "RECORD",
+     "properties": {"state": "ACTIVE"},
+     "scope": {"quantifier": "ALL"}},
+    {"id": "op-write", "type": "TRANSFORM",
+     "properties": {"operation": "WRITE"}},
+    {"id": "output", "type": "ENDPOINT",
+     "properties": {}}
+  ],
+  "edges": [
+    {"from_id": "system", "to_id": "op-filter",
+     "relation": "SHALL"},
+    {"from_id": "op-filter", "to_id": "records",
+     "relation": "FEEDS"},
+    {"from_id": "op-filter", "to_id": "op-write",
+     "relation": "THEN"},
+    {"from_id": "op-write", "to_id": "output",
+     "relation": "TO"}
+  ]
+}
+\end{lstlisting}
+
+And this graph decompiles back to the original sentence. Every word in the sentence maps to exactly one element in the graph. Every element in the graph maps back to exactly one word. The sentence and the graph are two renderings of the same artifact.
+
+Several features of this example are worth noting:
+
+\begin{itemize}
+    \item \texttt{PARTY system} declares a computational agent. \texttt{SHALL} assigns an obligation to that agent via a constraint edge---governance encoded as graph structure, not as prose commentary.
+    \item \texttt{FILTER} and \texttt{WRITE} are operation nodes: they are simultaneously data (describable, queryable) and executable content (a computational agent performs them during traversal).
+    \item \texttt{THEN} is a topological edge encoding execution order. A computational agent traversing this graph must execute \texttt{WRITE} after \texttt{FILTER}---not because a text instruction says so, but because the topology permits no other path.
+    \item \texttt{ALL ACTIVE RECORD} combines a selector (\texttt{ALL}), a modifier (\texttt{ACTIVE}), and an entity (\texttt{RECORD})---three distinct graph elements composed according to formal rules and validated by the composition type system.
+\end{itemize}
+
+The remainder of this paper formalizes this example: Section~3 surveys related approaches, Section~4 specifies the graph structure, Section~5 defines the language, Section~6 presents additional worked examples, and Sections~7--10 describe the compilation mechanism, evaluation, and discussion.
+
+%=============================================================================
+\section{Related Work}
+%=============================================================================
+
+The idea of making natural language more precise for machines is not new. Four research traditions have addressed aspects of this problem; TRUGS draws on all four while making different design choices.
+
+\subsection{Controlled Natural Languages}
+
+Controlled Natural Languages (CNLs) restrict natural language to a subset that can be unambiguously parsed. Kuhn's comprehensive survey \citep{kuhn2014survey} catalogues over 100 CNLs developed since 1930, forming ``a single scattered cloud filling the conceptual space between natural languages and formal languages.'' Attempto Controlled English (ACE) \citep{fuchs2008attempto} is the most prominent, translating a subset of English into first-order logic. ACE and similar systems (CPL \citep{clark2005class}, PENG \citep{schwitter2002english}) proved that constrained English \textit{can} be made unambiguous.
+
+However, existing CNLs overwhelmingly target \textbf{logic}---their compilation target is a theorem prover or knowledge base. This lineage traces to Montague's foundational work on compositional formal semantics for natural language \citep{montague1973proper}, but it inherits the limitation that logical representations are not data structures that can be directly traversed, mutated, or executed by computational agents.
+
+Notably, several CNLs already support bidirectional mapping. Sydney OWL Syntax \citep{cregan2007sydney} provides a bidirectional CNL-to-OWL mapping, and ACE can both generate and parse OWL ontologies. TRUGS builds on this tradition but makes three distinct choices: the compilation target is a \textbf{general-purpose directed graph} (not OWL ontology logic), the vocabulary is drawn from \textbf{computation and law} rather than general English, and the specification includes a \textbf{composition type system} that rejects semantically invalid combinations at parse time. These choices make TRUGS executable rather than merely representational.
+
+\subsection{Knowledge Graph Construction with LLMs}
+
+Recent surveys \citep{bian2025llm, pan2024unifying} document a paradigm shift in knowledge graph construction from rule-based pipelines to LLM-driven frameworks. The dominant approach uses LLMs to \textbf{extract} structured knowledge from unstructured text through schema-based or schema-free methods. The field exists precisely because of the representational gap between natural language and structured graphs; bridging this gap requires extraction pipelines, and each pipeline stage introduces potential information loss.
+
+TRUGS addresses this problem from a different angle: rather than improving extraction, it eliminates the need for extraction entirely. If the input language is itself a graph representation, then schema induction, entity extraction, and knowledge fusion become unnecessary---the input is structured by construction. The three persistent challenges identified by \citet{bian2025llm}---scalability, expert dependency, and pipeline fragmentation---are artifacts of the translation paradigm rather than inherent properties of the problem.
+
+\subsection{Graph Specification Formats}
+
+RDF \citep{rdf2014}, OWL \citep{owl2012}, JSON-LD \citep{jsonld2020}, and property graph models \citep{neo4j} provide well-established formal specifications for graph data. These formats offer precision, composability, and mechanical validation, but they are not designed for direct human authoring. In practice, this creates a persistent dependency on intermediate tooling that translates between human-authored input and machine-required structure.
+
+TRUGS provides comparable structural guarantees---typed nodes, labeled edges, hierarchical containment, and validation rules---in a format where the human-authored sentence and the machine-processed graph are the same artifact. No intermediate translation is required.
+
+\subsection{LLM Communication Protocols}
+
+The Model Context Protocol (MCP) \citep{mcp2025} standardizes how LLMs invoke external tools. It is an important advance---but it specifies the \textbf{mechanics} of communication (request/response patterns, tool schemas) without addressing the \textbf{semantics} (what the words mean). Two LLMs using MCP can call the same tool, but they cannot verify that they share the same definition of ``filter'' or ``validate.'' TRUGS operates at the semantic layer: every word has exactly one meaning, defined in the opening TRUG, shared by all participants in a conversation. MCP and TRUGS are complementary---MCP for mechanics, TRUGS for meaning.
+
+\subsection{LLM Structured Output}
+
+Recent work on constrained decoding \citep{willard2023efficient, tam2025slot} forces LLMs to produce syntactically valid structured output (JSON, XML) by masking invalid tokens during generation. This approach ensures \textbf{format} compliance but not \textbf{semantic} compliance. An LLM constrained to produce valid JSON will produce valid JSON---but the JSON may still contain semantically meaningless content. TRUGS addresses both: the language ensures format compliance (the grammar rejects malformed sentences) and semantic compliance (the composition rules reject meaningless combinations like ``DATA records SHALL FILTER'').
+
+%=============================================================================
+\section{TRUGS Specification}
+%=============================================================================
+
+Having introduced the executable graph concept informally, we now specify its structure precisely. A TRUG is a JSON-serialized directed graph comprising typed nodes, labeled edges encoding directional relationships, and hierarchical containment. The format is intentionally minimal: it imposes structural invariants that guarantee universal tooling compatibility and agent-agnostic traversal, while leaving property schemas, node type vocabularies, and domain semantics to extension layers.
+
+Every TRUG must satisfy 7 structural boundaries. An additional 7 compositional rules are enforced when a graph declares the \texttt{core\_v0.9.1} vocabulary capability.
+
+\subsection{Structural Foundation}
+
+Every node has exactly 7 required fields:
+
+\begin{lstlisting}[style=json]
+{
+  "id": "string",
+  "type": "string",
+  "properties": {},
+  "parent_id": "string | null",
+  "contains": ["string"],
+  "metric_level": "PREFIX_NAME",
+  "dimension": "string"
+}
+\end{lstlisting}
+
+Every edge has exactly 3 required fields:
+
+\begin{lstlisting}[style=json]
+{
+  "from_id": "string",
+  "to_id": "string",
+  "relation": "string"
+}
+\end{lstlisting}
+
+The 7 boundaries ensure universal tooling: any tool can read any TRUG.
+
+\begin{enumerate}
+    \item \textbf{Core structure is invariant} --- 7 node fields, 3 edge fields, always.
+    \item \textbf{Properties are open} --- the \texttt{properties} object accepts any JSON content.
+    \item \textbf{Dimensions are declared} --- hierarchical axes are explicit at the graph root.
+    \item \textbf{Hierarchy is explicit} --- \texttt{parent\_id} and \texttt{contains[]} are bidirectional.
+    \item \textbf{Edges are simple} --- node-to-node with named relations, separate from hierarchy.
+    \item \textbf{Metric prefixes are standard} --- 21 SI prefixes for hierarchical positioning.
+    \item \textbf{JSON structure} --- valid JSON, UTF-8, language-agnostic.
+\end{enumerate}
+
+\subsection{Semantic Primitives}
+
+CORE defines 10 classes of semantic primitives totaling approximately 131 reserved words. These are the atoms of meaning: every TRUG may use them and must interpret them identically.
+
+\begin{table}[h]
+\centering
+\caption{The 10 semantic primitive classes.}
+\label{tab:primitives}
+\begin{tabular}{llrl}
+\toprule
+\textbf{Class} & \textbf{Purpose} & \textbf{Count} & \textbf{Graph Element} \\
+\midrule
+Operation & Data transformations & 23 & \texttt{properties.operation} \\
+Relation & Named connections & 6 & Edge \texttt{relation} \\
+Entity & Typed things & 8+ & Node \texttt{type} \\
+Constraint & Obligations/permissions & 6 & Constraint edges \\
+Boundary & Hierarchy/reference & 3 & Hierarchy edges \\
+Modifier & Constraints on entities & 36 & Node \texttt{properties} \\
+Qualifier & Constraints on operations & 19 & Operation \texttt{properties} \\
+Combinator & Graph structure control & 13 & Structural edges \\
+Selector & Query scope & 10 & Node query scope \\
+Reference & Back-references & 7 & Reference edges \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The first 5 classes (Operation, Relation, Entity, Constraint, Boundary) define \textbf{what exists} in the graph. The latter 5 classes (Modifier, Qualifier, Combinator, Selector, Reference) define \textbf{how things compose}---they are the adjectives, adverbs, conjunctions, articles, and pronouns of the graph language.
+
+\subsection{Validation Rules}
+
+TRUGS enforces 16 validation rules. Rules 1--9 are structural and always enforced. Rules 10--16 are compositional and enforced when the graph declares the \texttt{core\_v0.9.1} vocabulary capability.
+
+\begin{table}[h]
+\centering
+\caption{Validation rules. Rules 10--16 form the composition type system.}
+\label{tab:rules}
+\begin{tabular}{rll}
+\toprule
+\textbf{\#} & \textbf{Rule} & \textbf{Type} \\
+\midrule
+1 & Node ID uniqueness & Structural \\
+2 & Edge reference validity & Structural \\
+3 & Hierarchy consistency (bidirectional) & Structural \\
+4 & Metric level ordering (parent $\geq$ child) & Structural \\
+5 & Dimension declaration & Structural \\
+6 & Required fields present & Structural \\
+7 & Field type correctness & Structural \\
+8 & Extension declaration & Structural \\
+9 & Metric level format (\texttt{PREFIX\_NAME}) & Structural \\
+\midrule
+10 & Subject-Operation compatibility & Compositional \\
+11 & Operation-Object compatibility & Compositional \\
+12 & Modifier-Entity compatibility & Compositional \\
+13 & Qualifier-Operation compatibility & Compositional \\
+14 & Constraint-Subject rule (modals require Actors) & Compositional \\
+15 & No double negation & Compositional \\
+16 & Reference scope (sentence-local) & Compositional \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The compositional rules function as a \textbf{type system} for the graph. Rule 10 prevents artifacts from bearing obligations (``\texttt{DATA records SHALL SORT}'' is invalid---data cannot have obligations). Rule 14 ensures that legal modals (\texttt{SHALL}, \texttt{MAY}, \texttt{SHALL\_NOT}) attach only to Actor entities. These rules are not stylistic preferences; they are structural invariants that prevent semantically meaningless graphs.
+
+%=============================================================================
+\section{TRUGS Language}
+%=============================================================================
+
+The historical precedent for domain-specific constrained English is SQL, which achieved universal adoption not through syntactic novelty but by assigning formal semantics to familiar English words---\texttt{SELECT}, \texttt{FROM}, \texttt{WHERE}, \texttt{JOIN} \citep{chamberlin1974sequel}. Developers learned SQL not as a foreign language but as a constrained dialect of the language they already spoke.
+
+The TRUGS Language follows this model. It is a constrained subset of English in which every valid sentence compiles deterministically to a TRUG graph, and every such graph decompiles to the original sentence. The majority of its vocabulary---\texttt{FILTER}, \texttt{SORT}, \texttt{VALIDATE}, \texttt{PUBLIC}, \texttt{REQUIRED}---consists of terms already in widespread use among software developers.
+
+\subsection{Vocabulary}
+
+The vocabulary consists of 190 executable words plus 24 sugar words, organized into 9 parts of speech:
+
+\begin{table}[h]
+\centering
+\caption{Vocabulary distribution by source domain.}
+\label{tab:vocab}
+\begin{tabular}{lrrrr}
+\toprule
+\textbf{Part of Speech} & \textbf{Computation} & \textbf{Law} & \textbf{Shared} & \textbf{Total} \\
+\midrule
+Nouns & 20 & 6 & --- & 26 \\
+Verbs & 42 & 19 & --- & 61 \\
+Adjectives & 26 & 10 & --- & 36 \\
+Adverbs & 12 & 7 & --- & 19 \\
+Prepositions & 14 & 4 & --- & 18 \\
+Conjunctions & 8 & 5 & --- & 13 \\
+Articles & --- & --- & 10 & 10 \\
+Pronouns & 6 & 1 & --- & 7 \\
+\midrule
+\textbf{Executable} & \textbf{128} & \textbf{52} & \textbf{10} & \textbf{190} \\
+Sugar & --- & --- & 24 & 24 \\
+\midrule
+\textbf{Total} & & & & \textbf{214} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Each word belongs to exactly one part of speech. There are no dual-class words. Where a concept has both an action form and a relationship form, they are distinct words (e.g., \texttt{ADMINISTER} is the verb; \texttt{GOVERNS} is the preposition).
+
+The vocabulary is drawn from two sources:
+
+\begin{itemize}
+    \item \textbf{Computation} (67\%): words that programmers already know---\texttt{FILTER}, \texttt{MAP}, \texttt{SORT}, \texttt{VALIDATE}, \texttt{ASYNC}, \texttt{PUBLIC}, \texttt{REQUIRED}. Operations like \texttt{map}, \texttt{filter}, and \texttt{reduce} are recognized as universal higher-order functions across functional languages \citep{hutton2016programming}. These have deterministic meanings in every programming language.
+
+    \item \textbf{Law} (27\%): words that fill gaps where computation has no equivalent---\texttt{SHALL} (obligation), \texttt{MAY} (permission), \texttt{NOTWITHSTANDING} (override), \texttt{REMEDY} (consequence of breach), \texttt{CONFIDENTIAL} (access restriction). These terms come from a formal tradition: Hohfeld's fundamental legal conceptions \citep{hohfeld1919fundamental} established the precise relationships between rights, duties, privileges, and powers that underlie modern contract language. RFC 2119 \citep{rfc2119} later adopted the same distinctions for technical specifications.
+\end{itemize}
+
+\subsection{Grammar}
+
+The grammar is defined in BNF \citep{backus1959syntax}:
+
+\begin{lstlisting}[style=trugs]
+program       := preamble* sentence+
+preamble      := WHEREAS clause "."
+sentence      := clause (CONJUNCTION clause)* "."
+              |  definition "."
+clause        := subject verb_phrase (object_phrase)*
+definition    := DEFINE value AS noun_phrase
+subject       := noun_phrase | PRONOUN
+noun_phrase   := [ARTICLE] [ADJECTIVE]* NOUN [identifier]
+noun_list     := noun_phrase (AND noun_phrase)*
+verb_phrase   := [modal] VERB adverb_phrase*
+adverb_phrase := ADVERB [value]
+object_phrase := prep_phrase (AND prep_phrase)*
+              |  noun_phrase | PRONOUN
+prep_phrase   := PREPOSITION noun_list
+modal         := SHALL | SHALL_NOT | MAY
+\end{lstlisting}
+
+The grammar enforces that every clause has a subject and a verb, that conjunctions connect complete clauses, and that pronouns resolve within the current sentence.
+
+\subsection{Composition Rules}
+
+Not every grammatically valid sentence is semantically valid. The composition rules define which parts of speech can combine with which:
+
+\begin{itemize}
+    \item \textbf{Subject-Verb}: Only Actors can be subjects of most verbs. Artifacts can only be subjects of comparison verbs (\texttt{EXISTS}, \texttt{EQUALS}, \texttt{EXCEEDS}).
+    \item \textbf{Verb-Object}: Transforms act on Artifacts. Permit/Prohibit verbs target Actors. Resolve verbs target Outcomes.
+    \item \textbf{Modal-Subject}: \texttt{SHALL}, \texttt{MAY}, \texttt{SHALL\_NOT} require Actor subjects. Data cannot bear obligations.
+    \item \textbf{Adjective-Noun}: Type adjectives (\texttt{STRING}, \texttt{INTEGER}) only modify Artifacts. State adjectives are universal.
+    \item \textbf{Adjective ordering}: Fixed stacking order: Quantity $>$ Priority $>$ State $>$ Access $>$ Type $>$ Noun. This follows the cross-linguistic pattern identified by \citet{sproat1991crosslinguistic}, where absolute properties (type, color) are closer to the noun than relative properties (quantity, size).
+    \item \textbf{Adverb-Verb}: Timing/Repetition modify any verb except Bind. Degree modifies authority verbs.
+\end{itemize}
+
+These rules map directly to validation rules 10--16 in the graph specification, establishing a formal correspondence between grammatical validity and graph validity.
+
+%=============================================================================
+\section{Worked Examples}
+%=============================================================================
+
+To illustrate the compilation process concretely, we present three examples of increasing complexity. Each follows the same pipeline: a sentence is written, parsed token-by-token against the grammar and composition rules, compiled to a JSON graph, and decompiled back to the original sentence.
+
+\subsection{Example 1: Simple Obligation}
+
+\textbf{Sentence:}
+\begin{lstlisting}[style=trugs]
+PARTY system SHALL VALIDATE ALL PENDING RECORD.
+\end{lstlisting}
+
+\textbf{Parse:}
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{llll}
+\toprule
+\textbf{Token} & \textbf{Part of Speech} & \textbf{Subcategory} & \textbf{Rule Check} \\
+\midrule
+\texttt{PARTY} & Noun & Actor & \checkmark\ subject \\
+\texttt{system} & identifier & --- & \checkmark \\
+\texttt{SHALL} & Modal & Obligate & \checkmark\ Actor subject (Rule 14) \\
+\texttt{VALIDATE} & Verb & Obligate & \checkmark \\
+\texttt{ALL} & Article & Universal & \checkmark \\
+\texttt{PENDING} & Adjective & State & \checkmark\ State on Artifact (Rule 12) \\
+\texttt{RECORD} & Noun & Artifact & \checkmark\ object of Obligate (Rule 11) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Compiled graph:}
+\begin{lstlisting}[style=json]
+{
+  "nodes": [
+    {"id": "system", "type": "PARTY", "properties": {}},
+    {"id": "op-1", "type": "TRANSFORM",
+     "properties": {"operation": "VALIDATE"}},
+    {"id": "records", "type": "RECORD",
+     "properties": {"state": "PENDING"},
+     "scope": {"quantifier": "ALL"}}
+  ],
+  "edges": [
+    {"from_id": "system", "to_id": "op-1", "relation": "SHALL"},
+    {"from_id": "op-1", "to_id": "records", "relation": "FEEDS"}
+  ]
+}
+\end{lstlisting}
+
+\textbf{Decompiled:} \texttt{PARTY system SHALL VALIDATE ALL PENDING RECORD.} --- identical to input. \checkmark
+
+\subsection{Example 2: Multi-Party with Retry and Error Handling}
+
+\textbf{Sentence:}
+\begin{lstlisting}[style=trugs]
+PARTY client SHALL REQUEST PARTY server.
+PARTY server SHALL RESPOND PROMPTLY WITHIN 30s
+  OR PARTY client MAY RETRY BOUNDED 3
+  THEN HANDLE THE ERROR.
+\end{lstlisting}
+
+\textbf{Parse (sentence 2):}
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{llll}
+\toprule
+\textbf{Token} & \textbf{Part of Speech} & \textbf{Subcategory} & \textbf{Rule Check} \\
+\midrule
+\texttt{PARTY} & Noun & Actor & \checkmark\ subject \\
+\texttt{server} & identifier & --- & \checkmark \\
+\texttt{SHALL} & Modal & Obligate & \checkmark\ Actor (Rule 14) \\
+\texttt{RESPOND} & Verb & Move & \checkmark \\
+\texttt{PROMPTLY} & Adverb & Timing & \checkmark\ Timing on Move (Rule 13) \\
+\texttt{WITHIN} & Adverb & Timing & \checkmark \\
+\texttt{30s} & value & duration & \checkmark\ WITHIN requires duration \\
+\midrule
+\multicolumn{4}{l}{\textit{OR} --- alternative conjunction} \\
+\midrule
+\texttt{PARTY} & Noun & Actor & \checkmark\ new subject \\
+\texttt{client} & identifier & --- & \checkmark \\
+\texttt{MAY} & Modal & Permit & \checkmark\ Actor (Rule 14) \\
+\texttt{RETRY} & Verb & Control & \checkmark \\
+\texttt{BOUNDED} & Adverb & Repetition & \checkmark\ Repetition on Control (Rule 13) \\
+\texttt{3} & value & integer & \checkmark\ BOUNDED requires integer \\
+\midrule
+\multicolumn{4}{l}{\textit{THEN} --- sequential conjunction} \\
+\midrule
+\texttt{HANDLE} & Verb & Resolve & \checkmark\ inherits subject (client) \\
+\texttt{THE} & Article & Specific & \checkmark \\
+\texttt{ERROR} & Noun & Outcome & \checkmark\ object of Resolve (Rule 11) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+This example demonstrates: two actors communicating, adverbs with values (\texttt{PROMPTLY}, \texttt{WITHIN 30s}, \texttt{BOUNDED 3}), three conjunction types (\texttt{OR} for fallback, \texttt{THEN} for sequence), modal permission (\texttt{MAY}) versus obligation (\texttt{SHALL}), and subject inheritance across a \texttt{THEN} chain.
+
+The compiled graph contains 4 nodes (2 actors, 2 operations) and 5 edges (SHALL, MAY, OR, THEN, FEEDS). Each adverb-value pair becomes an operation property. Each conjunction becomes a structural edge.
+
+\subsection{Example 3: Prohibition with Exception and Authentication}
+
+\textbf{Sentence:}
+\begin{lstlisting}[style=trugs]
+NO PARTY SHALL WRITE CONFIDENTIAL RESOURCE
+  EXCEPT PARTY owner MAY WRITE CONFIDENTIAL RESOURCE
+    PROVIDED_THAT PARTY owner AUTHENTICATE TO SERVICE auth.
+\end{lstlisting}
+
+\textbf{Parse:}
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{llll}
+\toprule
+\textbf{Token} & \textbf{Part of Speech} & \textbf{Subcategory} & \textbf{Rule Check} \\
+\midrule
+\texttt{NO} & Article & Negative & \checkmark\ zero instances \\
+\texttt{PARTY} & Noun & Actor & \checkmark \\
+\texttt{SHALL} & Modal & Obligate & \checkmark\ Actor (Rule 14) \\
+\texttt{WRITE} & Verb & Move & \checkmark \\
+\texttt{CONFIDENTIAL} & Adjective & Access & \checkmark\ Access on Artifact (Rule 12) \\
+\texttt{RESOURCE} & Noun & Artifact & \checkmark\ object of Move (Rule 11) \\
+\midrule
+\multicolumn{4}{l}{\textit{EXCEPT} --- carve-out (from law)} \\
+\midrule
+\texttt{PARTY} & Noun & Actor & \checkmark \\
+\texttt{owner} & identifier & --- & \checkmark \\
+\texttt{MAY} & Modal & Permit & \checkmark \\
+\texttt{WRITE} & Verb & Move & \checkmark \\
+\texttt{CONFIDENTIAL} & Adjective & Access & \checkmark \\
+\texttt{RESOURCE} & Noun & Artifact & \checkmark \\
+\midrule
+\multicolumn{4}{l}{\textit{PROVIDED\_THAT} --- prerequisite (from law)} \\
+\midrule
+\texttt{PARTY} & Noun & Actor & \checkmark \\
+\texttt{owner} & identifier & --- & \checkmark \\
+\texttt{AUTHENTICATE} & Verb & Move & \checkmark \\
+\texttt{TO} & Preposition & Flow & \checkmark \\
+\texttt{SERVICE} & Noun & Actor & \checkmark \\
+\texttt{auth} & identifier & --- & \checkmark \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+This example demonstrates the power of law-derived vocabulary. The sentence reads like a legal clause:
+
+\begin{itemize}
+    \item \texttt{NO PARTY SHALL} --- universal prohibition (computation has no equivalent)
+    \item \texttt{EXCEPT} --- carve-out from the prohibition (from contract law)
+    \item \texttt{MAY} --- permission granted to a specific party
+    \item \texttt{PROVIDED\_THAT} --- prerequisite condition (from contract law)
+\end{itemize}
+
+This is three levels of nesting: prohibition $\to$ exception $\to$ prerequisite. Each level is a complete clause connected by a law-derived conjunction. The compiled graph represents this as conditional edges: the EXCEPT edge overrides the prohibition, but only when the PROVIDED\_THAT edge's condition (authentication) is satisfied.
+
+A natural language version of this same requirement---``No one can write confidential resources except the owner, but only if they've authenticated first''---is ambiguous. Does ``first'' mean before writing or before any access? Does ``no one'' include system processes? In TRUGS, \texttt{NO PARTY} means zero Actor entities. \texttt{CONFIDENTIAL RESOURCE} means Artifact with Access modifier. \texttt{AUTHENTICATE TO SERVICE auth} means Move verb to a specific Actor. No ambiguity.
+
+\subsection{Observations}
+
+These three examples progress from a single clause to three nested clauses, demonstrating several properties of the system. First, each token maps deterministically to a single grammar element; the parse is mechanical, requiring no inference or disambiguation. Second, the composition rules (Rules 10--14) reject semantically invalid combinations at parse time---before any execution occurs. Third, the legal vocabulary (\texttt{SHALL}, \texttt{EXCEPT}, \texttt{PROVIDED\_THAT}) provides expressive power for governance patterns that computational vocabulary alone cannot capture. Finally, decompilation of the compiled graph reproduces the original sentence in each case, providing empirical evidence of the round-trip property.
+
+The complete token-by-token analysis for all 30 examples is available in the specification repository.
+
+%=============================================================================
+\section{Bidirectional Compilation}
+%=============================================================================
+
+The central claim of TRUGS is that the sentence and the graph are lossless renderings of the same artifact. We define the compilation and decompilation functions and characterize their round-trip behavior.
+
+\subsection{Sentence to Graph}
+
+Every sentence element compiles to exactly one graph element:
+
+\begin{table}[h]
+\centering
+\caption{Compilation mapping from sentence elements to graph elements.}
+\label{tab:compile}
+\begin{tabular}{ll}
+\toprule
+\textbf{Sentence Element} & \textbf{Graph Element} \\
+\midrule
+\texttt{NOUN} + identifier & Node: \texttt{\{id: identifier, type: NOUN\}} \\
+\texttt{ADJECTIVE} on noun & Node property \\
+\texttt{ARTICLE} on noun & Query scope \\
+\texttt{VERB} & Operation node \\
+Modal on verb & Constraint edge \\
+\texttt{ADVERB} on verb & Operation property \\
+\texttt{PREPOSITION} & Edge with typed relation \\
+\texttt{CONJUNCTION} & Graph structure \\
+\texttt{PRONOUN} & Back-reference edge \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Graph to Sentence}
+
+Decompilation walks the graph in topological order and emits words by reversing the compilation table. Every graph element maps to exactly one word. The word order is determined by the graph structure: subjects precede verbs, verbs precede objects, conjunctions separate clauses.
+
+\subsection{Round-Trip Property}
+
+Let $C$ denote the compilation function (sentence $\to$ graph) and $D$ denote the decompilation function (graph $\to$ sentence). We claim that for any valid TRUGS sentence $s$:
+
+$$D(C(s)) = s$$
+
+\noindent and for any TRUGS graph $g$ produced by compilation:
+
+$$C(D(g)) = g$$
+
+This property follows from the design of the mapping: each sentence element corresponds to exactly one graph element, and the BNF grammar is constructed to be unambiguous (no valid sentence admits two distinct parse trees). A sentence that fails to round-trip is, by definition, not a valid TRUGS sentence.
+
+We have verified this property empirically across 30 examples spanning 13 distinct patterns (Section~5). A mechanized formal proof---for example, in Coq or Lean---would provide a stronger guarantee and remains an important direction for future work.
+
+%=============================================================================
+\section{The Opening TRUG}
+%=============================================================================
+
+Every session between a human and a computational agent begins by loading an \textbf{opening TRUG}: a TRUG whose type is \texttt{LANGUAGE} that defines the valid vocabulary, grammar rules, and constraints for that session.
+
+\subsection{Structure}
+
+An opening TRUG contains four types of nodes:
+
+\begin{itemize}
+    \item \textbf{WORD} nodes: every valid word with its part of speech, subcategory, and exact definition.
+    \item \textbf{GRAMMAR\_RULE} nodes: composition rules defining which parts of speech combine.
+    \item \textbf{CONSTRAINT} nodes: structural limits (e.g., maximum nesting depth).
+    \item \textbf{DOMAIN} nodes: domain-specific vocabulary extensions.
+\end{itemize}
+
+\subsection{Self-Description}
+
+The TRUGS Language definition is itself a TRUG (\texttt{language.trug.json}). This recursive property---the language that describes TRUGs is a TRUG---ensures that:
+
+\begin{itemize}
+    \item The language definition validates against the same rules it defines.
+    \item Version control is built in: language v0.9.1 is a specific graph.
+    \item Domain extensibility is natural: a medical opening TRUG adds \texttt{DIAGNOSE}, \texttt{PRESCRIBE} as WORD nodes.
+    \item A computational agent can validate its own understanding by checking its behavior against the opening TRUG.
+\end{itemize}
+
+\subsection{Communication Model}
+
+The opening TRUG establishes a shared contract between all participants in a conversation:
+
+\begin{table}[h]
+\centering
+\caption{Three communication modes, one language.}
+\label{tab:comm}
+\begin{tabular}{lll}
+\toprule
+\textbf{Mode} & \textbf{Direction} & \textbf{Mechanism} \\
+\midrule
+Human $\to$ LLM & Human writes sentence & LLM compiles to graph, executes \\
+LLM $\to$ Human & LLM produces graph & Decompiles to sentence human reads \\
+LLM $\to$ LLM & LLM A emits sentence & LLM B compiles and executes \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The same 190 words mean the same thing to every participant because the opening TRUG defines them. The model does not rely on training to understand \texttt{FILTER}---it reads the definition from the graph: ``select items satisfying a predicate; formally, given collection $C$ and predicate $P$, $\texttt{FILTER}(C, P) = \{x \in C \mid P(x) = \text{true}\}$.''
+
+\subsection{Language Agnosticism}
+
+Although the reference vocabulary is English, TRUGS is language-agnostic. The grammar is universal---it defines structural relationships between parts of speech, not between English words. The vocabulary is loaded from the opening TRUG. A Chinese opening TRUG replaces English words with Chinese equivalents:
+
+\begin{table}[h]
+\centering
+\caption{Cross-language vocabulary: the same concepts exist independently in law and computation across languages.}
+\label{tab:crosslang}
+\small
+\begin{tabular}{llllll}
+\toprule
+\textbf{Concept} & \textbf{English} & \textbf{Chinese} & \textbf{Spanish} & \textbf{Class} & \textbf{Source} \\
+\midrule
+Obligation & SHALL & \begin{CJK}{UTF8}{gbsn}应当\end{CJK} (y\=ingd\=ang) & DEBER\'A & Modal & Law \\
+Prohibition & SHALL\_NOT & \begin{CJK}{UTF8}{gbsn}不得\end{CJK} (b\`ud\'e) & NO DEBER\'A & Modal & Law \\
+Permission & MAY & \begin{CJK}{UTF8}{gbsn}可以\end{CJK} (k\v{e}y\v{i}) & PODR\'A & Modal & Law \\
+Exception & EXCEPT & \begin{CJK}{UTF8}{gbsn}除非\end{CJK} (ch\'uf\=ei) & SALVO & Conjunction & Law \\
+Filter & FILTER & \begin{CJK}{UTF8}{gbsn}筛选\end{CJK} (sh\=aix\u{a}n) & FILTRAR & Verb & Computation \\
+Validate & VALIDATE & \begin{CJK}{UTF8}{gbsn}验证\end{CJK} (y\`anzh\`eng) & VALIDAR & Verb & Computation \\
+Record & RECORD & \begin{CJK}{UTF8}{gbsn}记录\end{CJK} (j\`il\`u) & REGISTRO & Noun & Computation \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+This is not translation. These are independently evolved terms with formally established meanings in their respective legal systems and programming cultures. Chinese contract law defines \begin{CJK}{UTF8}{gbsn}应当\end{CJK} (y\=ingd\=ang) as mandatory obligation---the same concept English common law assigns to \textit{shall} and RFC 2119 assigns to \texttt{MUST}. Every major legal tradition independently developed words for obligation, prohibition, and permission because these are universal governance concepts. Similarly, every programming language has a concept of filter, sort, validate, and return---because these are universal computational operations.
+
+The grammar (BNF) is invariant across languages. The composition rules (which parts of speech combine with which) are invariant. The compilation mapping (sentence element $\to$ graph element) is invariant. Only the surface vocabulary changes. This means:
+
+\begin{itemize}
+    \item A Chinese-speaking developer loads a Chinese opening TRUG and writes TRUGS in Chinese.
+    \item The compiled graph is identical to the English version---same nodes, same edges, same structure.
+    \item An English-speaking LLM can read the graph and decompile it to English.
+    \item Cross-language communication is automatic: both parties share the graph, each renders it in their language.
+\end{itemize}
+
+Additionally, TRUGS defines 24 \textbf{sugar words}---human-readability words that compile to nothing. Sugar words make sentences read like natural prose in any language without affecting the graph. For English, these include \texttt{OF}, \texttt{IS}, \texttt{THAT}, \texttt{WHICH}, \texttt{PLEASE}. A Chinese sugar set would include \begin{CJK}{UTF8}{gbsn}的\end{CJK} (de), \begin{CJK}{UTF8}{gbsn}是\end{CJK} (sh\`i), \begin{CJK}{UTF8}{gbsn}了\end{CJK} (le)---particles that make Chinese sentences flow naturally but carry no semantic weight in the graph.
+
+%=============================================================================
+\section{Evaluation}
+%=============================================================================
+
+\subsection{Grammar Validation: 30 Parsed Examples}
+
+We tested the grammar by writing 30 sentences across 13 distinct patterns (simple obligations, nested conditions, event-driven patterns, concurrent actors, batch processing, rate limiting, self-description, and a complete ETL pipeline). Each sentence was parsed token-by-token against the BNF grammar and composition rules.
+
+\begin{table}[h]
+\centering
+\caption{Grammar validation results across 30 examples.}
+\label{tab:grammar_results}
+\begin{tabular}{lr}
+\toprule
+\textbf{Metric} & \textbf{Count} \\
+\midrule
+Examples tested & 30 \\
+First-attempt passes & 8 \\
+Failures diagnosed and fixed & 22 \\
+New words discovered (gaps) & 14 \\
+Grammar additions & 5 \\
+Reclassifications & 1 \\
+Rule revisions & 2 \\
+Final: all examples pass & 30/30 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The 22 initial failures were productive: each failure pointed to a specific vocabulary gap or grammar limitation. The process of writing examples, parsing them, diagnosing failures, and patching the specification was the primary mechanism by which the language and the graph specification co-evolved. We report the failures alongside the fixes as evidence that the specification was empirically tested, not theoretically constructed.
+
+\subsection{Validator: 16 Rules, 47 Tests}
+
+The reference validator implements all 16 CORE rules in a single Python file (520 lines, zero external dependencies). We wrote 47 unit tests covering:
+
+\begin{itemize}
+    \item All 9 structural rules (pass and fail cases)
+    \item All 7 compositional rules (pass, fail, and edge cases)
+    \item Opt-in behavior (compositional rules only fire when \texttt{core\_v0.9.1} declared)
+    \item File I/O (valid JSON, invalid JSON, missing file)
+\end{itemize}
+
+The validator was run against all 21 TRUG files in the specification repository. All 21 pass with 0 errors.
+
+\subsection{Example Corpus Validation}
+
+The specification ships with 20 example TRUGs across 7 structurally distinct domains, each representing a different class of structured information:
+
+\begin{table}[h]
+\centering
+\small
+\caption{Example corpus: 7 domains demonstrating TRUGS generality.}
+\begin{tabular}{llll}
+\toprule
+\textbf{Domain} & \textbf{What it models} & \textbf{Files} & \textbf{Key structure} \\
+\midrule
+Knowledge & Ontologies, taxonomies & 3 & CLASS $\to$ ENTITY $\to$ INSTANCE \\
+Living & Real-time agent queries & 3 & QUERY $\to$ TOOL $\to$ ANSWER \\
+Memory & LLM persistent memory & 1 & MODULE $\to$ DATA + REFERENCES edges \\
+Nested & Subgraph composition & 3 & TASK $\to$ SUBGRAPH $\to$ RESULT \\
+Research & Claims and evidence & 2 & CONCEPT $\to$ CLAIM $\to$ SOURCE \\
+Web & Site structure & 4 & SITE $\to$ PAGE $\to$ SECTION \\
+Writer & Document structure & 4 & DOCUMENT $\to$ SECTION $\to$ PARAGRAPH \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+These domains span ontology modeling, agent orchestration, persistent memory, hierarchical composition, evidence-based research, web architecture, and document authoring. The same 7 boundaries, 16 validation rules, and composition type system govern all of them. No domain-specific validation code was written --- CORE is sufficient.
+
+During development, the validator discovered 231 errors across 19 of these example files --- all systematic (missing \texttt{contains:[]} on leaf nodes, inconsistent bidirectional hierarchy). These were not contrived test failures; they were structural errors in hand-authored examples that manual review missed. After automated repair, all 21 files pass validation with 0 errors.
+
+This exercise demonstrates two things: first, that the validator catches real errors in real TRUGs across diverse domains. Second, that structural validation is necessary --- even specification authors make systematic errors that only mechanical checking finds.
+
+\subsection{Working System: LLM Memory}
+
+As a practical demonstration, we built a TRUG-based memory system for LLMs with 5 operations:
+
+\begin{itemize}
+    \item \texttt{init} --- create an empty memory TRUG (declares \texttt{core\_v0.9.1})
+    \item \texttt{remember} --- add a memory node with type, tags, and source
+    \item \texttt{recall} --- query by keyword, type, recency, or retrieve all
+    \item \texttt{forget} --- remove a memory and its associated edges
+    \item \texttt{associate} --- create typed edges between memories
+\end{itemize}
+
+The memory graph validates against all 16 CORE rules. Memories are \texttt{DATA} nodes under a \texttt{MODULE} root. Associations are \texttt{REFERENCES} edges. The system requires zero external dependencies and produces valid TRUGs by construction.
+
+This corresponds to Section 6.2 (``Dynamic Knowledge Memory for Agentic Systems'') of the recent KG construction survey \citep{bian2025llm}, which identifies persistent structured memory as a key future direction. We implement it as a direct consequence of the specification.
+
+%=============================================================================
+\section{Applications}
+%=============================================================================
+
+While the preceding sections focus on the specification and its validation, we briefly illustrate four application domains where TRUGS provides immediate practical utility. Each example shows a TRUGS Language sentence expressing a real-world pattern.
+
+\subsection{LLM Persistent Memory}
+
+LLMs lack persistent memory across sessions. TRUGS provides a natural structure for it: memories are \texttt{DATA} nodes, associations are \texttt{REFERENCES} edges, and the memory graph validates against CORE. The reference implementation (Section~9.4) demonstrates this directly.
+
+\begin{lstlisting}[style=trugs]
+PARTY assistant SHALL REMEMBER DATA decision
+  THEN ASSOCIATE RESULT REFERENCES DATA context.
+PARTY assistant MAY RECALL ALL ACTIVE DATA
+  SUBJECT_TO DATA query.
+\end{lstlisting}
+
+The graph persists between sessions. Recall is a graph query, not a text search---it follows typed edges to return structurally related memories, not keyword matches.
+
+\subsection{Inter-Agent Communication}
+
+When multiple LLMs collaborate, they currently exchange natural language, inheriting all its ambiguity. With TRUGS, agents load the same opening TRUG and communicate in compiled sentences. Each agent can verify that it parsed the same graph the sender intended---because the sentence \textit{is} the graph.
+
+\begin{lstlisting}[style=trugs]
+PARTY planner SHALL SPLIT THE MESSAGE
+  TO AGENT researcher AND AGENT writer.
+EACH AGENT SHALL HANDLE INPUT PARALLEL
+  THEN MERGE RESULT TO PARTY planner.
+PARTY planner SHALL RESPOND TO PARTY user.
+\end{lstlisting}
+
+The fan-out/fan-in pattern is encoded in the topology. No agent can misinterpret ``handle in parallel''---\texttt{PARALLEL} is an adverb with a single mechanical definition, not a suggestion.
+
+\subsection{Contract and Compliance Modeling}
+
+Legal documents are governance structures: obligations, permissions, prohibitions, exceptions, and remedies. TRUGS encodes these directly because its vocabulary inherits from legal language. A compliance rule that would occupy a paragraph of prose compiles to a graph where every obligation is traceable to an actor and every exception is a typed edge.
+
+\begin{lstlisting}[style=trugs]
+NO PARTY SHALL WRITE CONFIDENTIAL RESOURCE
+  EXCEPT PARTY data-controller
+    PROVIDED_THAT PARTY data-controller
+      AUTHENTICATE TO SERVICE compliance-gateway.
+IF ANY PARTY WRITE CONFIDENTIAL RESOURCE
+  THEN THE REMEDY DEPENDS_ON PARTY data-controller.
+\end{lstlisting}
+
+This is a data protection rule: no one may write confidential data except the data controller, and only after authenticating with the compliance gateway. The compiled graph makes every element auditable---which actor, which obligation, which exception, which remedy. A compliance auditor can traverse the graph without reading prose.
+
+\subsection{Codebase Understanding}
+
+A software repository can be modeled as a TRUG: modules, functions, dependencies, and ownership as typed nodes and edges. An LLM reads the graph to understand the architecture without parsing every source file.
+
+\begin{lstlisting}[style=trugs]
+MODULE api CONTAINS FUNCTION authenticate
+  AND FUNCTION authorize AND FUNCTION handle-request.
+FUNCTION handle-request REQUIRE FUNCTION authenticate.
+FUNCTION authorize REQUIRE FUNCTION authenticate.
+PARTY security-team SHALL ADMINISTER MODULE api.
+\end{lstlisting}
+
+The graph encodes what exists (modules, functions), how they depend on each other (\texttt{REQUIRE}), who is responsible (\texttt{ADMINISTER}), and what the structure contains (\texttt{CONTAINS}). An LLM navigating a new codebase reads this graph in milliseconds---versus minutes scanning documentation that may be out of date.
+
+%=============================================================================
+\section{Discussion}
+%=============================================================================
+
+\subsection{Why Not Natural Language Alone?}
+
+A natural objection is that LLMs already process English effectively. However, processing and \textit{verification} are distinct capabilities. An LLM can respond to ``handle the data appropriately,'' but no mechanism exists for either party to verify semantic agreement on ``appropriately.'' Prompt engineering reduces this gap probabilistically through context and examples, but probabilistic alignment is not the same as structural alignment.
+
+In TRUGS, ambiguity is a compilation error. A sentence either parses against the grammar and satisfies the composition rules, or it is rejected before execution. This provides a \textit{verifiable} communication channel: if the sentence compiles, its meaning is the graph---and both parties can inspect the graph.
+
+\subsection{Why Not Structured Formats Directly?}
+
+While JSON graphs are precise, they are not practical for direct human authoring. A TRUGS sentence such as \texttt{PARTY system SHALL FILTER ALL ACTIVE RECORD} communicates the same information as a 15-line JSON node-and-edge structure, but is readable at a glance. The language serves as a human interface to the underlying graph representation; both are necessary, and neither is sufficient alone.
+
+\subsection{Lexical Unambiguity}
+
+An early design decision allowed six words to function as both verbs and prepositions depending on syntactic position (e.g., \texttt{GOVERNS} as both ``establish authority'' and as an authority edge relation). This was eliminated in favor of distinct lexemes: \texttt{ADMINISTER} (verb) and \texttt{GOVERNS} (preposition). The governing principle is that every word belongs to exactly one part of speech. Context-dependent lexical classification would reintroduce the ambiguity the language is designed to eliminate.
+
+\subsection{Adoption Considerations}
+
+Historically, domain-specific languages succeed when they draw on vocabulary their target users already know. SQL achieved widespread adoption because database developers recognized \texttt{SELECT}, \texttt{WHERE}, and \texttt{JOIN} as English words with familiar meanings \citep{chamberlin2012early}. TRUGS follows this pattern: its vocabulary overlaps substantially with terminology already used by software developers (\texttt{FILTER}, \texttt{VALIDATE}, \texttt{ASYNC}) and legal practitioners (\textit{shall}, \textit{notwithstanding}, \textit{provided that}). The 24 sugar words further reduce the perceived distance from natural English by allowing grammatical particles that the compiler strips without effect.
+
+\subsection{Limitations}
+
+\begin{itemize}
+    \item \textbf{Vocabulary coverage}: 190 words cannot express everything. Domain-specific concepts (e.g., medical diagnoses, financial instruments) require opening TRUG extensions. The base vocabulary covers computation and governance; other domains are future work.
+
+    \item \textbf{No runtime semantics}: TRUGS defines what a valid program is, not how it executes. The graph is an AST, not an interpreter. Execution semantics are intentionally outside scope---different runtime environments may execute the same graph differently.
+
+    \item \textbf{Empirical, not formal, verification}: The round-trip property is demonstrated by 30 examples, not by a formal proof. A mechanized proof (e.g., in Coq or Lean) would provide a stronger foundation.
+
+    \item \textbf{No user study}: We have not yet measured human comprehension, writing speed, or error rates when using TRUGS versus natural language or JSON. This is planned future work.
+\end{itemize}
+
+%=============================================================================
+\section{Conclusion}
+%=============================================================================
+
+We have presented TRUGS, a formalized language in which constrained human-language sentences and directed graphs are bidirectional, empirically lossless renderings of the same artifact. By drawing vocabulary from computation and law---two domains with established formal traditions---TRUGS avoids the need to invent new semantics: the precision is inherited from centuries of professional practice. The language-agnostic grammar ensures that the same compilation and validation rules apply regardless of the surface language.
+
+Several directions remain open. A mechanized proof of the round-trip property would strengthen the formal foundation. User studies measuring comprehension, writing speed, and error rates against natural language and JSON would quantify the practical benefit. Extending the vocabulary to additional domains (medicine, finance, manufacturing) through the opening TRUG mechanism would test the extensibility claim at scale.
+
+TRUGS does not aim to replace natural language for human communication or structured formats for machine storage. Rather, it addresses the gap between them: providing a representation precise enough for machine validation, readable enough for human authoring, and formal enough to compile. The specification, reference tools, and all examples are released under the Apache 2.0 license to facilitate independent evaluation and adoption.
+
+\subsection*{A Note on the Name}
+
+The word \textit{trug} is Welsh in origin, denoting a shallow woven basket used for carrying garden produce. The name was chosen before the acronym (Traceable Recursive Universal Graph) was discovered to fit---a coincidence that proved apt.
+
+A woven basket is structure in service of content. The weave determines the basket's strength, shape, and capacity, but no one values a basket for its weave. They value it for what it carries. TRUGS follows this principle: the graph structure---nodes, edges, hierarchy, validation rules---is the weave. What matters is the content it carries: the knowledge, the operations, the obligations, the meaning. The specification is meticulous about structure precisely so that users can focus on substance.
+
+The recursive property of TRUGS extends this metaphor. The language definition is a TRUG. The memory system stores TRUGs. The validator validates TRUGs against rules defined in a TRUG. The opening TRUG that defines the vocabulary is loaded from a TRUG. Each layer is a basket carrying another basket---the weave that holds the weave that carries the content. In the idiom of the project: TRUGs all the way down.
+
+\subsection*{AI Assistance Disclosure}
+
+This paper was developed with the assistance of Anthropic Claude (Claude Opus 4.6). Claude served as a development partner throughout the project: co-designing the language specification, writing and debugging the validator, stress-testing the grammar against 30 examples, and drafting sections of this paper. All scientific claims, design decisions, and architectural choices are the author's. The author takes full responsibility for the content. Claude is not listed as a co-author as it cannot take responsibility for published work.
+
+%=============================================================================
+% References
+%=============================================================================
+
+\bibliography{trugs}
+
+%=============================================================================
+% Appendix
+%=============================================================================
+
+\appendix
+
+\section{Complete ETL Pipeline Example}
+
+The following program demonstrates TRUGS Language expressing a realistic ETL (Extract, Transform, Load) pipeline with 4 actors, error handling, authentication, and authority:
+
+\begin{lstlisting}[style=trugs]
+DEFINE "raw-event" AS STRING DATA.
+DEFINE "clean-event" AS VALID OBJECT DATA.
+DEFINE "event-store" AS IMMUTABLE ENDPOINT.
+
+WHEREAS SERVICE kafka FEEDS STREAM raw-events.
+WHEREAS ENDPOINT event-store REQUIRE MODULE postgres.
+
+PARTY ingester SHALL READ EACH DATA raw-event
+  FROM STREAM raw-events WITHIN 100ms
+  OR PARTY ingester SHALL RETRY BOUNDED 5 WITHIN 30s
+  OR THROW EXCEPTION.
+
+PARTY transformer SHALL VALIDATE THE DATA raw-event
+  SUBJECT_TO INTERFACE event-schema
+  THEN MAP RESULT TO DATA clean-event
+  THEN BATCH RESULT 500.
+
+PARTY loader SHALL WRITE EACH RESULT
+  TO ENDPOINT event-store
+  OR RETRY BOUNDED 3 WITHIN 60s.
+
+IF PARTY loader THROW EXCEPTION
+  THEN PARTY loader SHALL SEND ERROR TO PARTY monitor
+  THEN PARTY monitor SHALL SEND MESSAGE TO PARTY oncall.
+
+NO PARTY SHALL WRITE ENDPOINT event-store
+  EXCEPT PARTY loader
+  PROVIDED_THAT PARTY loader AUTHENTICATE TO SERVICE auth.
+
+PARTY monitor SHALL ADMINISTER PARTY ingester
+  AND PARTY transformer AND PARTY loader.
+\end{lstlisting}
+
+This program is 11 sentences, uses 3 definitions, 2 preambles, 4 actors, retry with timeout, error handling with escalation, authentication, and authority hierarchy. Every word is from the 190-word vocabulary. Every sentence parses against the BNF grammar. The compiled graph validates against all 16 CORE rules.
+
+\section{Complete Vocabulary Glossary}
+
+This appendix is the authoritative word list. Every word is listed exactly once, alphabetized within its part of speech. The count here is the count. 190 executable words + 24 sugar words = 214 total.
+
+\subsection{Nouns (26)}
+\small
+\begin{tabular}{lllp{7cm}}
+\toprule \textbf{Word} & \textbf{Sub} & \textbf{Src} & \textbf{Definition} \\ \midrule
+AGENT & Actor & Law & Entity authorized to act on behalf of another \\
+DATA & Actor & Comp & Typed value: input, output, or intermediate state \\
+ENDPOINT & Boundary & Comp & Named, addressable point of interaction \\
+ENTRY & Boundary & Comp & Point where data enters a scope \\
+ERROR & Outcome & Comp & Named failure condition with a cause \\
+EXCEPTION & Outcome & Comp & Error that interrupts normal flow \\
+EXIT & Boundary & Comp & Point where data leaves a scope \\
+FILE & Artifact & Comp & Named, persistent byte sequence \\
+FUNCTION & Actor & Comp & Callable unit that accepts input and returns output \\
+INSTRUMENT & Artifact & Law & Formal document that creates or records rights \\
+INTERFACE & Boundary & Comp & Contract defining what operations a thing exposes \\
+JURISDICTION & Boundary & Law & Scope within which authority is valid \\
+MESSAGE & Artifact & Comp & Discrete unit of communication between actors \\
+MODULE & Container & Comp & Self-contained unit of related functionality \\
+NAMESPACE & Container & Comp & Named scope that prevents identifier collision \\
+PARTY & Actor & Law & Bound entity capable of obligations and permissions \\
+PIPELINE & Container & Comp & Container of ordered operations \\
+PRINCIPAL & Actor & Law & Entity on whose behalf an agent acts \\
+PROCESS & Actor & Comp & Executing unit of work with its own state \\
+RECORD & Artifact & Comp & Single structured data item with named fields \\
+REMEDY & Outcome & Law & Consequence when an obligation is breached \\
+RESOURCE & Artifact & Comp & Managed asset: file, service, endpoint, or data store \\
+SERVICE & Actor & Comp & Long-lived process that accepts requests \\
+STAGE & Container & Comp & Logical grouping of transforms within a pipeline \\
+STREAM & Artifact & Comp & Ordered, potentially unbounded sequence of data items \\
+TRANSFORM & Actor & Comp & Node that performs exactly one operation \\
+\bottomrule
+\end{tabular}
+\normalsize
+
+\subsection{Verbs (61)}
+\small
+\begin{tabular}{lllp{7cm}}
+\toprule \textbf{Word} & \textbf{Sub} & \textbf{Src} & \textbf{Definition} \\ \midrule
+ADMINISTER & Bind & Law & Establish and exercise authority over \\
+AGGREGATE & Transform & Comp & Reduce collection to single value \\
+ALLOW & Permit & Comp & Permit an action without mandating it \\
+APPROVE & Permit & Comp & Accept as satisfying criteria \\
+ASSERT & Obligate & Comp & Declare a condition that must be true \\
+ASSIGN & Move & Law & Transfer rights or obligations to another party \\
+AUGMENT & Bind & Comp & Add capability to an existing thing \\
+AUTHENTICATE & Move & Comp & Prove identity to another actor \\
+BATCH & Transform & Comp & Group items into fixed-size chunks \\
+BRANCH & Control & Comp & Route to one of two paths on boolean condition \\
+CATCH & Resolve & Comp & Intercept an error and enter recovery \\
+CITE & Bind & Law & Formally refer to another entity \\
+CURE & Resolve & Law & Correct a breach within allowed time \\
+DECLARE & Bind & Comp & State a fact or create a named thing \\
+DEFINE & Bind & Comp & Establish the meaning of a term \\
+DELIVER & Move & Law & Transfer possession of an artifact \\
+DENY & Prohibit & Comp & Refuse a requested action \\
+DISTINCT & Transform & Comp & Remove duplicates \\
+EQUALS & Control & Comp & True if left and right values are identical \\
+EXCEEDS & Control & Comp & True if left value is greater than right \\
+EXCLUDE & Transform & Comp & Remove items satisfying a predicate \\
+EXISTS & Control & Comp & True if the noun is present and non-null \\
+EXPIRE & Control & Comp & Transition to EXPIRED state \\
+FILTER & Transform & Comp & Select items satisfying a predicate \\
+FLATTEN & Transform & Comp & Collapse one level of nesting \\
+GRANT & Permit & Law & Confer a right or permission \\
+GROUP & Transform & Comp & Partition collection by key \\
+HANDLE & Resolve & Comp & Process an error condition \\
+IMPLEMENT & Bind & Comp & Fulfill the contract of an interface \\
+INDEMNIFY & Resolve & Law & Compensate for loss caused by breach \\
+MAP & Transform & Comp & Transform each item independently \\
+MATCH & Control & Comp & Route to one of N paths on pattern \\
+MAY & Permit & Law & Permitted but not required \\
+MERGE & Transform & Comp & Combine multiple collections into one \\
+NEST & Bind & Comp & Place one thing structurally inside another \\
+OVERRIDE & Permit & Law & Supersede a constraint for this action \\
+PRECEDES & Control & Comp & True if left value is less than right \\
+READ & Move & Comp & Input data from external source \\
+RECEIVE & Move & Comp & Accept data from another actor \\
+RECOVER & Resolve & Comp & Restore normal operation after failure \\
+REJECT & Prohibit & Comp & Refuse input that does not meet criteria \\
+RENAME & Transform & Comp & Change field names without changing values \\
+REPLACE & Bind & Comp & Entirely substitute one thing for another \\
+REQUEST & Move & Comp & Send message expecting a response \\
+REQUIRE & Obligate & Comp & Declare a hard prerequisite \\
+RESPOND & Move & Comp & Reply to a prior request \\
+RETRY & Control & Comp & Re-attempt failed operation up to bounded count \\
+RETURN & Move & Comp & Emit final output and terminate \\
+REVOKE & Prohibit & Law & Withdraw a previously granted right \\
+SEND & Move & Comp & Transmit data to another actor \\
+SHALL & Obligate & Law & Mandatory: party MUST perform action \\
+SHALL\_NOT & Prohibit & Law & Prohibited: party MUST NOT perform action \\
+SKIP & Transform & Comp & Bypass first N items \\
+SORT & Transform & Comp & Order items by comparison function \\
+SPLIT & Transform & Comp & Divide one collection into multiple \\
+STIPULATE & Bind & Law & Establish a binding agreed-upon condition \\
+TAKE & Transform & Comp & Return first N items \\
+THROW & Control & Comp & Generate an error condition \\
+TIMEOUT & Control & Comp & Bound wall-clock time for an operation \\
+VALIDATE & Obligate & Comp & Assert data satisfies condition; halt if not \\
+WRITE & Move & Comp & Output data to external destination \\
+\bottomrule
+\end{tabular}
+\normalsize
+
+\subsection{Adjectives (36)}
+\small
+\begin{tabular}{lllp{7cm}}
+\toprule \textbf{Word} & \textbf{Sub} & \textbf{Src} & \textbf{Definition} \\ \midrule
+ACTIVE & State & Comp & Currently in use or executing \\
+ARRAY & Type & Comp & Ordered collection data type \\
+BINDING & State & Law & Creates enforceable obligation \\
+BOOLEAN & Type & Comp & True/false data type \\
+CONFIDENTIAL & Access & Law & Restricted to authorized parties only \\
+CRITICAL & Priority & Comp & Failure is unrecoverable \\
+DEFAULT & Priority & Comp & Value used when none specified \\
+EMPTY & State & Comp & Present but containing nothing \\
+ENFORCEABLE & State & Law & Can be compelled by remedy \\
+EXPIRED & State & Law & Past its deadline; no longer in effect \\
+FAILED & State & Comp & Terminated with error \\
+HIGH & Priority & Comp & Elevated importance \\
+IMMUTABLE & State & Comp & Cannot be changed after creation \\
+INTEGER & Type & Comp & Whole number data type \\
+INVALID & State & Comp & Fails one or more constraints \\
+JOINT & Quantity & Law & Shared equally among multiple parties \\
+LOW & Priority & Comp & Reduced importance \\
+MATERIAL & Priority & Law & Significant enough to affect decisions \\
+MULTIPLE & Quantity & Comp & More than one instance may exist \\
+MUTABLE & State & Comp & Can be changed after creation \\
+NULL & State & Comp & Absent; no value \\
+OBJECT & Type & Comp & Key-value structure data type \\
+OPTIONAL & Quantity & Comp & May be absent \\
+PENDING & State & Comp & Created but not yet processed \\
+PRECEDENT & State & Law & Informing but not binding \\
+PRIVATE & Access & Comp & Accessible only to owning actor \\
+PROTECTED & Access & Comp & Accessible to owning actor and children \\
+PUBLIC & Access & Comp & Accessible to any actor \\
+READONLY & Access & Comp & Can be read but not written \\
+REQUIRED & Quantity & Comp & Must be present; absence is error \\
+SOLE & Quantity & Law & One and only one permitted \\
+STRING & Type & Comp & Text data type \\
+SUBORDINATE & Priority & Law & Lower in authority hierarchy \\
+UNIQUE & Quantity & Comp & Exactly one instance may exist \\
+VALID & State & Comp & Satisfies all declared constraints \\
+VOID & State & Law & Without legal effect \\
+\bottomrule
+\end{tabular}
+\normalsize
+
+\subsection{Adverbs (19), Prepositions (18), Conjunctions (13)}
+\small
+\begin{tabular}{lllp{7cm}}
+\toprule \textbf{Word} & \textbf{POS} & \textbf{Src} & \textbf{Definition} \\ \midrule
+\multicolumn{4}{l}{\textit{Adverbs (19)}} \\
+ALWAYS & Adv/Rep & Comp & Execute every time condition is met \\
+ASYNC & Adv/Tim & Comp & Execute without blocking the caller \\
+BOUNDED & Adv/Rep & Comp & Execute up to N times \\
+CONDITIONALLY & Adv/Con & Law & Only if prerequisite is met \\
+FORTHWITH & Adv/Tim & Law & Immediately and without delay \\
+IMMEDIATE & Adv/Tim & Comp & Execute with no delay \\
+LAZY & Adv/Tim & Comp & Defer until result is needed \\
+NEVER & Adv/Rep & Comp & Do not execute under any condition \\
+ONCE & Adv/Rep & Comp & Execute exactly one time \\
+PARALLEL & Adv/Tim & Comp & Execute steps simultaneously \\
+PARTIALLY & Adv/Deg & Comp & Affecting some but not all items \\
+PROMPTLY & Adv/Tim & Law & Without unnecessary delay \\
+REASONABLY & Adv/Deg & Law & As a competent party would \\
+SEQUENTIAL & Adv/Tim & Comp & Execute one after another \\
+STRICTLY & Adv/Deg & Comp & Zero tolerance for deviation \\
+SUBSTANTIALLY & Adv/Deg & Law & Minor deviations tolerated \\
+SYNC & Adv/Tim & Comp & Execute and block until complete \\
+UNCONDITIONALLY & Adv/Con & Law & Without any prerequisite \\
+WITHIN & Adv/Tim & Law & Before duration elapses \\
+\midrule
+\multicolumn{4}{l}{\textit{Prepositions (18)}} \\
+AS & Prep/Bind & Comp & Binds identifier to type or role \\
+BINDS & Prep/Dep & Comp & Schema constrains node \\
+BY & Prep/Bind & Comp & Specifies key or criterion \\
+CONTAINS & Prep/Cont & Comp & Parent structurally holds child \\
+DEPENDS\_ON & Prep/Dep & Comp & Source requires target \\
+EXTENDS & Prep/Dep & Comp & Source adds capability to target \\
+FEEDS & Prep/Flow & Comp & Unconditional data flow \\
+FROM & Prep/Flow & Comp & Data originates at source \\
+GOVERNS & Prep/Auth & Law & Source has authority over target \\
+IMPLEMENTS & Prep/Dep & Comp & Source fulfills contract of target \\
+ON\_BEHALF\_OF & Prep/Auth & Law & Delegated authority \\
+PURSUANT\_TO & Prep/Auth & Law & In accordance with \\
+REFERENCES & Prep/Ref & Comp & Non-hierarchical cross-reference \\
+RETURNS\_TO & Prep/Flow & Comp & Output flows back \\
+ROUTES & Prep/Flow & Comp & Conditional data flow \\
+SUBJECT\_TO & Prep/Dep & Law & Source constrained by target \\
+SUPERSEDES & Prep/Repl & Comp & Source replaces target \\
+TO & Prep/Flow & Comp & Data moves toward destination \\
+\midrule
+\multicolumn{4}{l}{\textit{Conjunctions (13)}} \\
+AND & Conj/Par & Comp & Both; both must succeed \\
+ELSE & Conj/Alt & Comp & When preceding condition is false \\
+EXCEPT & Conj/Exc & Law & Carve-out from broad clause \\
+FINALLY & Conj/Seq & Comp & Regardless of success or failure \\
+IF & Conj/Cau & Comp & When condition is true \\
+NOTWITHSTANDING & Conj/Exc & Law & Overrides any conflicting clause \\
+OR & Conj/Alt & Comp & Alternative if first fails \\
+PROVIDED\_THAT & Conj/Exc & Law & Only if condition is met \\
+THEN & Conj/Seq & Comp & After current completes \\
+UNLESS & Conj/Exc & Law & Does not apply if exception met \\
+WHEN & Conj/Cau & Comp & Upon event occurrence \\
+WHEREAS & Conj/Exc & Law & Factual context (preamble only) \\
+WHILE & Conj/Cau & Comp & As long as condition holds \\
+\bottomrule
+\end{tabular}
+\normalsize
+
+\subsection{Articles (10), Pronouns (7)}
+\small
+\begin{tabular}{lllp{7cm}}
+\toprule \textbf{Word} & \textbf{POS} & \textbf{Sub} & \textbf{Definition} \\ \midrule
+\multicolumn{4}{l}{\textit{Articles (10) --- shared vocabulary}} \\
+A & Art & Exist & Exactly one, unspecified which \\
+ALL & Art & Univ & Every instance without exception \\
+ANY & Art & Exist & At least one; whichever satisfies \\
+EACH & Art & Univ & Every instance, considered individually \\
+EVERY & Art & Univ & Every instance (synonym of ALL) \\
+NO & Art & Neg & Zero instances \\
+NONE & Art & Neg & Zero instances (standalone) \\
+SOME & Art & Exist & One or more, unspecified \\
+THE & Art & Spec & One specific, previously identified \\
+THIS & Art & Spec & Instance in current scope \\
+\midrule
+\multicolumn{4}{l}{\textit{Pronouns (7)}} \\
+INPUT & Pro/Src & Comp & Data received by current operation \\
+OUTPUT & Pro/Res & Comp & Data produced by a transform \\
+RESULT & Pro/Res & Comp & Output of the most recent verb \\
+SAID & Pro/Leg & Law & The previously named noun \\
+SELF & Pro/Self & Comp & The current actor or scope \\
+SOURCE & Pro/Src & Comp & Originating node of current data \\
+TARGET & Pro/Tgt & Comp & Destination of current action \\
+\bottomrule
+\end{tabular}
+\normalsize
+
+\subsection{Sugar (24)}
+\small
+\begin{tabular}{llp{8cm}}
+\toprule \textbf{Word} & \textbf{Sub} & \textbf{Compiles to nothing --- human readability only} \\ \midrule
+ALSO & Politeness & Additive emphasis (sugar for AND) \\
+ARE & Connective & Plural copula \\
+AT & Filler & Locative \\
+BE & Connective & Infinitive copula \\
+BEEN & Connective & Past participle copula \\
+FOR & Filler & Purpose/beneficiary \\
+HAS & Connective & Auxiliary verb \\
+HAVE & Connective & Plural auxiliary \\
+INTO & Filler & Directional emphasis (sugar for TO) \\
+IS & Connective & Copula \\
+OF & Connective & Possessive/partitive connector \\
+ON & Filler & Surface/temporal \\
+PLEASE & Politeness & Politeness marker \\
+SUCH & Determiner & Referential (sugar for SAID) \\
+THAT & Relative & Clause introducer \\
+THEN\_ALSO & Politeness & Sequential emphasis (sugar for THEN) \\
+THESE & Determiner & Proximal plural (sugar for THE) \\
+THOSE & Determiner & Distal plural (sugar for THE) \\
+UPON & Filler & Temporal emphasis (sugar for WHEN) \\
+WHERE & Relative & Locative relative \\
+WHICH & Relative & Non-restrictive clause introducer \\
+WHO & Relative & Actor relative \\
+WILL & Connective & Future auxiliary \\
+WITH & Filler & Accompaniment \\
+\bottomrule
+\end{tabular}
+\normalsize
+
+\subsection{Summary}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lrrrr}
+\toprule
+\textbf{Part of Speech} & \textbf{Comp} & \textbf{Law} & \textbf{Shared} & \textbf{Total} \\
+\midrule
+Nouns & 20 & 6 & --- & 26 \\
+Verbs & 42 & 19 & --- & 61 \\
+Adjectives & 26 & 10 & --- & 36 \\
+Adverbs & 12 & 7 & --- & 19 \\
+Prepositions & 14 & 4 & --- & 18 \\
+Conjunctions & 8 & 5 & --- & 13 \\
+Articles & --- & --- & 10 & 10 \\
+Pronouns & 6 & 1 & --- & 7 \\
+\midrule
+\textbf{Executable} & \textbf{128} & \textbf{52} & \textbf{10} & \textbf{190} \\
+Sugar & --- & --- & 24 & 24 \\
+\midrule
+\textbf{Grand Total} & & & & \textbf{214} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+190 executable words: 67\% computation, 27\% law, 5\% shared. 24 sugar words compile to nothing. Every word listed once. This glossary is the authoritative count.
+
+\section{Cross-Language Vocabulary}
+
+The following table demonstrates that TRUGS vocabulary concepts exist independently across major human languages. These are not translations of English words --- they are terms that independently evolved in each language's legal system, computational culture, and grammatical tradition. The universality of these concepts is what makes TRUGS language-agnostic: the grammar operates on parts of speech and composition rules, not on specific words in a specific language.
+
+We present 50 key vocabulary items across 6 languages: English, Chinese (Mandarin), Spanish, Arabic, Hindi, and French --- representing the six most-spoken languages by total speakers and four distinct legal traditions (common law, civil law, Islamic law, Hindu law).
+
+\begin{CJK}{UTF8}{gbsn}
+
+\small
+
+\subsection{Modals --- Obligation, Permission, Prohibition}
+
+These three words are the foundation of governance in every legal system.
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{lllllll}
+\toprule
+\textbf{TRUGS} & \textbf{English} & \textbf{Chinese} & \textbf{Spanish} & \textbf{Arabic} & \textbf{Hindi} & \textbf{French} \\
+\midrule
+SHALL & shall & 应当 & deber\'a & yajib & karn\=a hog\=a & devra \\
+SHALL\_NOT & shall not & 不得 & no deber\'a & l\=a yaj\=uz & nah\=\i{} karega & ne devra pas \\
+MAY & may & 可以 & podr\'a & yaj\=uz & kar sakt\=a hai & pourra \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Verbs --- Transform Operations}
+
+Universal computational operations recognized by programmers in every language.
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{lllllll}
+\toprule
+\textbf{TRUGS} & \textbf{English} & \textbf{Chinese} & \textbf{Spanish} & \textbf{Arabic} & \textbf{Hindi} & \textbf{French} \\
+\midrule
+FILTER & filter & 筛选 & filtrar & tars\.\i{}h & chh\=ann\=a & filtrer \\
+SORT & sort & 排序 & ordenar & tart\=\i{}b & kramabadhh & trier \\
+MAP & map & 映射 & mapear & rasm & pratic\-hitra & mapper \\
+MERGE & merge & 合并 & fusionar & damj & mil\=an\=a & fusionner \\
+SPLIT & split & 拆分 & dividir & taqsim & b\=a\.nt\-n\=a & diviser \\
+VALIDATE & validate & 验证 & validar & tahaqquq & m\=any karana & valider \\
+READ & read & 读取 & leer & qir\=a'a & pa\d{r}hn\=a & lire \\
+WRITE & write & 写入 & escribir & kit\=aba & likhn\=a & \'ecrire \\
+SEND & send & 发送 & enviar & irs\=al & bhejna & envoyer \\
+RETRY & retry & 重试 & reintentar & i'\=ada & punah prayaas & r\'eessayer \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Nouns --- Entities}
+
+Actors, artifacts, and outcomes that exist in every computational and legal domain.
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{lllllll}
+\toprule
+\textbf{TRUGS} & \textbf{English} & \textbf{Chinese} & \textbf{Spanish} & \textbf{Arabic} & \textbf{Hindi} & \textbf{French} \\
+\midrule
+PARTY & party & 方 & parte & taraf & paksh & partie \\
+AGENT & agent & 代理 & agente & wak\=\i{}l & abhikart\=a & agent \\
+DATA & data & 数据 & datos & bay\=an\=at & \d{d}\=a\d{t}\=a & donn\'ees \\
+RECORD & record & 记录 & registro & sijill & abhilekh & enregistrement \\
+MESSAGE & message & 消息 & mensaje & ris\=ala & sandesh & message \\
+ERROR & error & 错误 & error & khata' & tru\d{t}i & erreur \\
+RESULT & result & 结果 & resultado & nat\=\i{}ja & parin\=am & r\'esultat \\
+REMEDY & remedy & 补救 & remedio & ta'd\=ab & upach\=ar & rem\`ede \\
+SERVICE & service & 服务 & servicio & khidma & sev\=a & service \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Adjectives --- State and Access Modifiers}
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{lllllll}
+\toprule
+\textbf{TRUGS} & \textbf{English} & \textbf{Chinese} & \textbf{Spanish} & \textbf{Arabic} & \textbf{Hindi} & \textbf{French} \\
+\midrule
+VALID & valid & 有效 & v\'alido & s\.\=ahih & m\=anya & valide \\
+INVALID & invalid & 无效 & inv\'alido & b\=atil & am\=anya & invalide \\
+ACTIVE & active & 活跃 & activo & nash\.\i{}t & sakriya & actif \\
+PENDING & pending & 待处理 & pendiente & mu'allaq & lamb\=it & en attente \\
+REQUIRED & required & 必需 & requerido & matl\=ub & \=avashyak & requis \\
+OPTIONAL & optional & 可选 & opcional & ikhtiy\=ar\=\i{} & vaikalpik & optionnel \\
+PUBLIC & public & 公开 & p\'ublico & '\=amm & s\=arvajanik & public \\
+PRIVATE & private & 私有 & privado & kh\=ass & nij\=\i{} & priv\'e \\
+CONFIDENTIAL & confidential & 机密 & confidencial & sirr\=\i{} & gopan\=\i{}ya & confidentiel \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Conjunctions --- Flow Control}
+
+Computational flow and legal exceptions, present in every language.
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{lllllll}
+\toprule
+\textbf{TRUGS} & \textbf{English} & \textbf{Chinese} & \textbf{Spanish} & \textbf{Arabic} & \textbf{Hindi} & \textbf{French} \\
+\midrule
+THEN & then & 然后 & entonces & thumma & phir & ensuite \\
+AND & and & 和 & y & wa & aur & et \\
+OR & or & 或 & o & aw & y\=a & ou \\
+IF & if & 如果 & si & idh\=a & agar & si \\
+UNLESS & unless & 除非 & a menos que & ill\=a idh\=a & jab tak nah\=\i{} & sauf si \\
+EXCEPT & except & 除外 & excepto & ill\=a & sivay & sauf \\
+NOTWITH- & notwith- & 尽管 & no obstante & bi\d{s}arf & ke b\=avajud & nonobstant \\
+STANDING & standing & & & alnazar & & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Prepositions --- Relationships}
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{lllllll}
+\toprule
+\textbf{TRUGS} & \textbf{English} & \textbf{Chinese} & \textbf{Spanish} & \textbf{Arabic} & \textbf{Hindi} & \textbf{French} \\
+\midrule
+TO & to & 到 & a/hacia & il\=a & ko & \`a/vers \\
+FROM & from & 从 & de/desde & min & se & de/depuis \\
+GOVERNS & governs & 管辖 & gobierna & yahkum & sh\=asit karata & gouverne \\
+SUBJECT\_TO & subject to & 受制于 & sujeto a & kh\=adi' li & adh\=\i{}n & soumis \`a \\
+CONTAINS & contains & 包含 & contiene & yahtaw\=\i{} & sh\=amil hai & contient \\
+DEPENDS\_ON & depends on & 依赖 & depende de & ya'tamid 'al\=a & nirbhar hai & d\'epend de \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\end{CJK}
+
+\subsection{Cross-Language Patterns}
+
+Several patterns emerge from this analysis:
+
+\begin{enumerate}
+    \item \textbf{Legal modals are universal.} Every legal system distinguishes obligation (SHALL/应当/deber\'a/yajib), prohibition (SHALL\_NOT/不得/no deber\'a/l\=a yaj\=uz), and permission (MAY/可以/podr\'a/yaj\=uz). Comparative legal scholarship confirms these categories appear across common law, civil law, and Islamic law traditions \citep{nyazee2022comparison}, and deontic logic formalizes them as fundamental normative operators \citep{vonwright1951deontic}. These are not cultural conventions --- they are structural requirements of any governance system.
+
+    \item \textbf{Computational operations are universal.} FILTER, SORT, MAP, MERGE exist in every programming language under the same names or direct equivalents. Chinese programmers use 筛选 (filter) and 排序 (sort) with the same semantics as their English counterparts. The concepts are mathematical, not linguistic.
+
+    \item \textbf{State modifiers are universal.} VALID/INVALID, PUBLIC/PRIVATE, REQUIRED/OPTIONAL --- these binary distinctions exist in every language because they describe states that any system must distinguish. A system that cannot distinguish valid from invalid data cannot validate.
+
+    \item \textbf{Conjunctions map to control flow universally.} THEN (sequence), AND (parallel), OR (alternative), IF (conditional), UNLESS (exception) --- these correspond to computational control structures that exist in every programming paradigm and every legal drafting tradition.
+
+    \item \textbf{Sugar words are language-specific; executable words are not.} The sugar words (OF, IS, THAT, PLEASE) are grammatical particles unique to each language. The executable words (SHALL, FILTER, VALID) are universal concepts with direct equivalents. This validates the TRUGS design: sugar is a rendering layer; the executable vocabulary is structural.
+\end{enumerate}
+
+This analysis covers 50 vocabulary items across 6 languages. The full 190-word vocabulary can be mapped to any human language whose legal and computational traditions provide equivalent terms --- which, as this table demonstrates, is every major language.
+
+\section{Compilation and Decompilation Algorithms}
+
+The following pseudocode describes the compilation (sentence $\to$ graph) and decompilation (graph $\to$ sentence) algorithms. These algorithms are intentionally straightforward: the complexity resides in the grammar and composition rules, not in the compilation procedure itself.
+
+\subsection{Preprocessing: Sugar Stripping}
+
+Before parsing, all sugar words are removed. This is a single linear pass over the token stream.
+
+\begin{lstlisting}[style=trugs]
+function strip_sugar(tokens):
+    return [t for t in tokens if t.word not in SUGAR_SET]
+\end{lstlisting}
+
+The SUGAR\_SET contains the 24 sugar words. Because sugar words carry no semantic content, their removal cannot change the meaning or validity of a sentence. The stripped token stream is the input to the parser.
+
+\subsection{Compilation: Sentence to Graph}
+
+Compilation proceeds in three phases: tokenization, parsing, and graph emission.
+
+\begin{lstlisting}[style=trugs]
+function compile(sentence):
+    tokens  = tokenize(sentence)          # split on whitespace + punctuation
+    tokens  = strip_sugar(tokens)         # remove sugar words
+    tree    = parse(tokens, BNF_GRAMMAR)  # build parse tree
+    validate_composition(tree)            # check rules 10-16
+    graph   = emit_graph(tree)            # walk tree, emit nodes and edges
+    return graph
+
+function emit_graph(tree):
+    graph = new Graph()
+    for clause in tree.clauses:
+        subject_node = emit_subject(graph, clause.subject)
+        op_node      = emit_operation(graph, clause.verb)
+
+        if clause.modal:                  # SHALL, MAY, SHALL_NOT
+            graph.add_edge(subject_node, op_node, clause.modal)
+        else:
+            graph.add_edge(subject_node, op_node, "PERFORMS")
+
+        for adverb in clause.verb.adverbs:
+            op_node.properties[adverb.subcategory] = adverb.word
+            if adverb.value:
+                op_node.properties[adverb.word] = adverb.value
+
+        for obj_phrase in clause.objects:
+            if obj_phrase.is_preposition:
+                target = emit_noun(graph, obj_phrase.noun)
+                graph.add_edge(op_node, target, obj_phrase.preposition)
+            elif obj_phrase.is_pronoun:
+                antecedent = resolve_pronoun(graph, obj_phrase.pronoun)
+                graph.add_edge(op_node, antecedent, "REFERENCES")
+            else:
+                target = emit_noun(graph, obj_phrase.noun)
+                graph.add_edge(op_node, target, "FEEDS")
+
+    for conjunction in tree.conjunctions:
+        left  = graph.last_operation_in(conjunction.left_clause)
+        right = graph.first_operation_in(conjunction.right_clause)
+        graph.add_edge(left, right, conjunction.word)
+
+    return graph
+
+function emit_subject(graph, subject):
+    node = new Node(id=subject.identifier, type=subject.noun)
+    for adj in subject.adjectives:
+        node.properties[adj.subcategory] = adj.word
+    if subject.article:
+        node.scope = {quantifier: subject.article}
+    graph.add_node(node)
+    return node
+
+function emit_operation(graph, verb):
+    node = new Node(id=auto_id(), type="TRANSFORM")
+    node.properties["operation"] = verb.word
+    graph.add_node(node)
+    return node
+
+function emit_noun(graph, noun_phrase):
+    node = new Node(id=noun_phrase.identifier, type=noun_phrase.noun)
+    for adj in noun_phrase.adjectives:
+        node.properties[adj.subcategory] = adj.word
+    if noun_phrase.article:
+        node.scope = {quantifier: noun_phrase.article}
+    graph.add_node(node)
+    return node
+\end{lstlisting}
+
+The key property of this algorithm is that every grammar element maps to exactly one graph-emission call. No heuristics, inference, or probabilistic decisions are involved. The compilation is deterministic: the same sentence always produces the same graph.
+
+\subsection{Decompilation: Graph to Sentence}
+
+Decompilation reverses the compilation by walking the graph in topological order and emitting words.
+
+\begin{lstlisting}[style=trugs]
+function decompile(graph):
+    sentences = []
+    for root in graph.roots():          # nodes with no incoming edges
+        sentence = decompile_from(graph, root)
+        sentences.append(sentence)
+    return join(sentences, ". ") + "."
+
+function decompile_from(graph, node):
+    words = []
+
+    # Emit subject
+    words += decompile_noun(node)
+
+    # Find outgoing modal/operation edge
+    for edge in graph.outgoing(node):
+        if edge.relation in MODALS:
+            words.append(edge.relation)         # SHALL, MAY, SHALL_NOT
+            op_node = graph.node(edge.to_id)
+            words.append(op_node.properties["operation"])
+
+            # Emit adverbs
+            for key, val in op_node.properties.items():
+                if key in QUALIFIER_SET:
+                    words.append(val)
+
+            # Emit objects
+            for obj_edge in graph.outgoing(op_node):
+                if obj_edge.relation in PREPOSITION_SET:
+                    words.append(obj_edge.relation)
+                    words += decompile_noun(graph.node(obj_edge.to_id))
+                elif obj_edge.relation in COMBINATOR_SET:
+                    words.append(obj_edge.relation)
+                    words += decompile_from(graph, graph.node(obj_edge.to_id))
+
+    return join(words, " ")
+
+function decompile_noun(node):
+    words = []
+    if node.scope and node.scope.quantifier:
+        words.append(node.scope.quantifier)     # ALL, EACH, THE, NO
+    for key in [QUANTITY, PRIORITY, STATE, ACCESS, TYPE]:
+        if key in node.properties:
+            words.append(node.properties[key])  # adjectives in order
+    words.append(node.type)                     # RECORD, PARTY, DATA
+    if node.id != auto_generated:
+        words.append(node.id)                   # identifier
+    return words
+\end{lstlisting}
+
+The decompilation algorithm mirrors the compilation algorithm: every graph element maps to exactly one word, and the emission order follows the adjective stacking order (Quantity $>$ Priority $>$ State $>$ Access $>$ Type) defined by the composition rules.
+
+\subsection{Round-Trip Verification}
+
+Given these algorithms, round-trip verification is mechanical:
+
+\begin{lstlisting}[style=trugs]
+function verify_round_trip(sentence):
+    graph       = compile(sentence)
+    recovered   = decompile(graph)
+    recompiled  = compile(recovered)
+    return graph == recompiled and sentence == recovered
+\end{lstlisting}
+
+We executed this verification on all 30 examples in the test suite. All 30 produce identical output after round-trip. The reference implementation of both algorithms is available in the specification repository.
+
+\section{TRUGS in TRUGS}
+
+This appendix presents the complete TRUGS Language specification written in TRUGS Language. It serves two purposes: first, as a self-description test (a language that cannot describe itself is incomplete); second, as a machine-readable primer (a computational agent that reads this appendix acquires sufficient knowledge to parse and execute any TRUGS sentence).
+
+This appendix presents the complete specification in two passes. Part I is the specification in TRUGS Language --- sentences a human reads as English. Part II is the same specification as compiled TRUG graphs --- JSON a machine reads as structure. A human will experience them differently. A computational agent will compile both to the same internal representation. That is the point.
+
+\bigskip
+\noindent\rule{\textwidth}{0.4pt}
+\begin{center}\Large\textbf{Part I --- The Language}\end{center}
+\noindent\rule{\textwidth}{0.4pt}
+\bigskip
+
+\begin{lstlisting}[style=trugs]
+DEFINE "TRUGS" AS NAMESPACE.
+DEFINE "sentence" AS RECORD.
+DEFINE "graph" AS DATA.
+
+WHEREAS NAMESPACE TRUGS GOVERNS ALL RECORD sentence
+  AND ALL DATA graph.
+WHEREAS EACH RECORD sentence DEPENDS_ON NAMESPACE TRUGS.
+
+EACH PARTY SHALL PERFORM ALL ACTIVE RECORD sentence.
+NO DATA SHALL PERFORM RECORD sentence.
+NO ERROR SHALL PERFORM RECORD sentence.
+
+PARTY SHALL VALIDATE.
+PARTY MAY APPROVE.
+PARTY SHALL_NOT DENY.
+NO DATA SHALL REQUIRE RECORD sentence.
+NO MODULE SHALL REQUIRE RECORD sentence
+  UNLESS MODULE CONTAINS PARTY.
+
+PARTY SHALL FILTER DATA
+  THEN SORT RESULT
+  THEN WRITE RESULT TO ENDPOINT.
+PARTY SHALL READ DATA FROM STREAM
+  THEN VALIDATE RESULT.
+PARTY MAY RETRY BOUNDED 3 WITHIN 30s
+  OR THROW EXCEPTION.
+PARTY SHALL CATCH THE EXCEPTION
+  THEN HANDLE THE ERROR.
+PARTY SHALL DEFINE "term" AS DATA.
+
+REQUIRED CRITICAL VALID PUBLIC STRING DATA
+  DEPENDS_ON INTERFACE adjective-order.
+
+DATA FEEDS DATA.
+DATA ROUTES DATA.
+MODULE CONTAINS DATA.
+DATA REFERENCES DATA.
+DATA SUPERSEDES DATA.
+PARTY GOVERNS PARTY.
+DATA SUBJECT_TO INTERFACE.
+PARTY SHALL SEND DATA TO ENDPOINT.
+PARTY SHALL READ DATA FROM STREAM.
+PARTY SHALL GROUP DATA BY DATA.
+
+PARTY SHALL FILTER DATA THEN SORT RESULT.
+PARTY SHALL FILTER DATA AND SORT DATA.
+PARTY SHALL FILTER DATA OR REJECT DATA.
+IF PARTY THROW EXCEPTION
+  THEN PARTY SHALL HANDLE THE ERROR.
+PARTY SHALL FILTER DATA
+  UNLESS NO VALID DATA EXISTS.
+PARTY MAY WRITE DATA
+  NOTWITHSTANDING PARTY admin MAY OVERRIDE.
+PARTY SHALL WRITE DATA
+  PROVIDED_THAT PARTY AUTHENTICATE TO SERVICE.
+WHEREAS PARTY GOVERNS ALL DATA.
+PARTY SHALL FILTER DATA
+  WHILE ACTIVE DATA EXISTS.
+PARTY SHALL FILTER DATA
+  FINALLY SEND MESSAGE TO PARTY.
+
+THE PARTY system SHALL PLEASE VALIDATE
+  ALL OF THE ACTIVE RECORD.
+PARTY system SHALL VALIDATE ALL ACTIVE RECORD.
+
+EACH RECORD sentence SHALL COMPILE TO DATA graph.
+EACH DATA graph SHALL COMPILE TO RECORD sentence.
+THE RECORD sentence EQUALS SAID RECORD sentence.
+\end{lstlisting}
+
+That is the complete TRUGS Language specification in 45 sentences. Every part of speech, every modal, every conjunction, every relationship type, every composition rule --- expressed in the language itself. If you can read it, you speak TRUGS.
+
+\bigskip
+\noindent\rule{\textwidth}{0.4pt}
+\begin{center}\Large\textbf{Part II --- The Graph}\end{center}
+\noindent\rule{\textwidth}{0.4pt}
+\bigskip
+
+The same specification, compiled. We show four representative compilations that together demonstrate every graph element: nodes, edges, hierarchy, properties, scope, constraints, and control flow.
+
+\subsubsection*{Foundation (DEFINE + WHEREAS)}
+
+\begin{lstlisting}[style=json]
+{
+  "nodes": [
+    {"id": "TRUGS", "type": "NAMESPACE", "properties": {},
+     "parent_id": null, "contains": ["sentence", "graph"],
+     "metric_level": "KILO_NAMESPACE", "dimension": "language"},
+    {"id": "sentence", "type": "RECORD", "properties": {},
+     "parent_id": "TRUGS", "contains": [],
+     "metric_level": "BASE_RECORD", "dimension": "language"},
+    {"id": "graph", "type": "DATA", "properties": {},
+     "parent_id": "TRUGS", "contains": [],
+     "metric_level": "BASE_DATA", "dimension": "language"}
+  ],
+  "edges": [
+    {"from_id": "TRUGS", "to_id": "sentence",
+     "relation": "GOVERNS"},
+    {"from_id": "TRUGS", "to_id": "graph",
+     "relation": "GOVERNS"},
+    {"from_id": "sentence", "to_id": "TRUGS",
+     "relation": "DEPENDS_ON"}
+  ]
+}
+\end{lstlisting}
+
+Three DEFINE sentences $\to$ three nodes. WHEREAS creates GOVERNS and DEPENDS\_ON edges. NAMESPACE contains both children (bidirectional: parent\_id + contains[]).
+
+\subsubsection*{Operation Chain (SHALL + THEN + TO)}
+
+\texttt{PARTY system SHALL FILTER ALL ACTIVE RECORD THEN SORT RESULT THEN WRITE RESULT TO ENDPOINT output.}
+
+\begin{lstlisting}[style=json]
+{
+  "nodes": [
+    {"id": "system", "type": "PARTY", "properties": {},
+     "parent_id": null, "contains": [],
+     "metric_level": "BASE_ACTOR", "dimension": "d"},
+    {"id": "op-filter", "type": "TRANSFORM",
+     "properties": {"operation": "FILTER"},
+     "parent_id": null, "contains": [],
+     "metric_level": "BASE_OP", "dimension": "d"},
+    {"id": "records", "type": "RECORD",
+     "properties": {"state": "ACTIVE"},
+     "scope": {"quantifier": "ALL"},
+     "parent_id": null, "contains": [],
+     "metric_level": "BASE_RECORD", "dimension": "d"},
+    {"id": "op-sort", "type": "TRANSFORM",
+     "properties": {"operation": "SORT"},
+     "parent_id": null, "contains": [],
+     "metric_level": "BASE_OP", "dimension": "d"},
+    {"id": "op-write", "type": "TRANSFORM",
+     "properties": {"operation": "WRITE"},
+     "parent_id": null, "contains": [],
+     "metric_level": "BASE_OP", "dimension": "d"},
+    {"id": "output", "type": "ENDPOINT", "properties": {},
+     "parent_id": null, "contains": [],
+     "metric_level": "BASE_ENDPOINT", "dimension": "d"}
+  ],
+  "edges": [
+    {"from_id": "system", "to_id": "op-filter",
+     "relation": "SHALL"},
+    {"from_id": "op-filter", "to_id": "records",
+     "relation": "FEEDS"},
+    {"from_id": "op-filter", "to_id": "op-sort",
+     "relation": "THEN"},
+    {"from_id": "op-sort", "to_id": "op-write",
+     "relation": "THEN"},
+    {"from_id": "op-write", "to_id": "output",
+     "relation": "TO"}
+  ]
+}
+\end{lstlisting}
+
+SHALL $\to$ constraint edge. THEN $\to$ sequential edges. TO $\to$ directional edge. RESULT (pronoun) resolves without creating a node. ALL ACTIVE $\to$ scope + property. The topology enforces FILTER $\to$ SORT $\to$ WRITE.
+
+\subsubsection*{Exception with Authentication (EXCEPT + PROVIDED\_THAT)}
+
+\texttt{NO PARTY SHALL WRITE CONFIDENTIAL RESOURCE EXCEPT PARTY owner MAY WRITE CONFIDENTIAL RESOURCE PROVIDED\_THAT PARTY owner AUTHENTICATE TO SERVICE auth.}
+
+\begin{lstlisting}[style=json]
+{
+  "nodes": [
+    {"id": "any-party", "type": "PARTY",
+     "scope": {"quantifier": "NO"}, ...},
+    {"id": "op-write-1", "type": "TRANSFORM",
+     "properties": {"operation": "WRITE"}, ...},
+    {"id": "resource", "type": "RESOURCE",
+     "properties": {"access": "CONFIDENTIAL"}, ...},
+    {"id": "owner", "type": "PARTY",
+     "properties": {}, ...},
+    {"id": "op-write-2", "type": "TRANSFORM",
+     "properties": {"operation": "WRITE"}, ...},
+    {"id": "op-auth", "type": "TRANSFORM",
+     "properties": {"operation": "AUTHENTICATE"}, ...},
+    {"id": "auth", "type": "SERVICE",
+     "properties": {}, ...}
+  ],
+  "edges": [
+    {"from_id": "any-party", "to_id": "op-write-1",
+     "relation": "SHALL"},
+    {"from_id": "op-write-1", "to_id": "resource",
+     "relation": "FEEDS"},
+    {"from_id": "op-write-1", "to_id": "op-write-2",
+     "relation": "EXCEPT"},
+    {"from_id": "owner", "to_id": "op-write-2",
+     "relation": "MAY"},
+    {"from_id": "op-write-2", "to_id": "op-auth",
+     "relation": "PROVIDED_THAT"},
+    {"from_id": "op-auth", "to_id": "auth",
+     "relation": "TO"}
+  ]
+}
+\end{lstlisting}
+
+Three nested clauses $\to$ three layers of edges: SHALL (prohibition) $\to$ EXCEPT (carve-out) $\to$ PROVIDED\_THAT (prerequisite). The topology encodes legal logic mechanically.
+
+\subsubsection*{Sugar Equivalence}
+
+\texttt{THE PARTY system SHALL PLEASE VALIDATE ALL OF THE ACTIVE RECORD.}
+
+and
+
+\texttt{PARTY system SHALL VALIDATE ALL ACTIVE RECORD.}
+
+Both compile to:
+
+\begin{lstlisting}[style=json]
+{
+  "nodes": [
+    {"id": "system", "type": "PARTY", "properties": {}, ...},
+    {"id": "op-validate", "type": "TRANSFORM",
+     "properties": {"operation": "VALIDATE"}, ...},
+    {"id": "records", "type": "RECORD",
+     "properties": {"state": "ACTIVE"},
+     "scope": {"quantifier": "ALL"}, ...}
+  ],
+  "edges": [
+    {"from_id": "system", "to_id": "op-validate",
+     "relation": "SHALL"},
+    {"from_id": "op-validate", "to_id": "records",
+     "relation": "FEEDS"}
+  ]
+}
+\end{lstlisting}
+
+THE, PLEASE, OF stripped. Identical graph. Sugar is a human rendering layer.
+
+\subsubsection*{The Seven Node Fields}
+
+Every node in every graph above has these 7 required fields (abbreviated as \texttt{...} in some examples):
+
+\begin{lstlisting}[style=json]
+{
+  "id": "unique_identifier",
+  "type": "ENTITY_TYPE",
+  "properties": {"key": "value"},
+  "parent_id": "parent_id_or_null",
+  "contains": ["child_id_1", "child_id_2"],
+  "metric_level": "PREFIX_NAME",
+  "dimension": "declared_dimension"
+}
+\end{lstlisting}
+
+Every edge has 3 required fields:
+
+\begin{lstlisting}[style=json]
+{
+  "from_id": "source_node",
+  "to_id": "target_node",
+  "relation": "RELATION_TYPE"
+}
+\end{lstlisting}
+
+\bigskip
+\noindent\rule{\textwidth}{0.4pt}
+\bigskip
+
+Part I reads like English. Part II reads like JSON. A human experiences them as two different documents. A computational agent compiles both to the same internal representation --- the same nodes, the same edges, the same topology. That is the point of TRUGS: two formats, one artifact, zero translation.
+
+\bigskip
+
+\noindent\textit{If you have read both parts, you understand both TRUGS formats. You can write a sentence and know its graph. You can read a graph and know its sentence. The specification describes itself in itself. TRUGs all the way down.}
+
+\section{TRUGS as Code Comments}
+
+A natural consequence of a language that compiles to executable graphs is that it can serve as inline documentation that is simultaneously human-readable and machine-compilable. We propose a convention: TRUGS Language sentences embedded in source code comments, delimited by \texttt{<tr>} tags.
+
+\subsection{Block Comments as Contracts}
+
+A function-level comment specifies the contract the implementation must satisfy:
+
+\begin{lstlisting}[language=Python]
+# <tr>
+# PARTY validator SHALL VALIDATE ALL REQUIRED RECORD
+#   SUBJECT_TO INTERFACE schema.
+# IF PARTY validator THROW EXCEPTION
+#   THEN SEND ERROR TO PARTY caller.
+# NO PARTY SHALL WRITE INVALID RECORD.
+# </tr>
+def validate_records(records, schema):
+    results = []
+    for record in records:
+        if not schema.validate(record):
+            raise ValidationError(f"Invalid: {record.id}")
+        results.append(record)
+    return results
+\end{lstlisting}
+
+The \texttt{<tr>} block is not a description of what the code does. It is a \textbf{compilable specification} of what the code must do. Three sentences define three obligations: validate all required records against a schema, send errors on failure, and never write invalid records. Each sentence compiles to a graph fragment. The union of these fragments is the function's contract graph.
+
+\subsection{Inline Comments as Specifications}
+
+Individual lines of code can carry inline TRUGS annotations:
+
+\begin{lstlisting}[language=Python]
+x = filter(records, active=True)   # <tr>FILTER ALL ACTIVE RECORD</tr>
+y = sorted(x, key=priority)        # <tr>SORT RESULT</tr>
+send(y, endpoint)                   # <tr>WRITE RESULT TO ENDPOINT</tr>
+
+if not authenticate(user):          # <tr>IF NO PARTY AUTHENTICATE</tr>
+    raise PermissionDenied()        # <tr>THEN THROW EXCEPTION</tr>
+\end{lstlisting}
+
+Each inline \texttt{<tr>} compiles to a graph node or edge. Read together, the inline annotations form a pipeline: FILTER $\to$ SORT $\to$ WRITE, with a conditional branch on authentication failure. This pipeline is the same structure that would result from compiling the equivalent multi-clause TRUGS sentence:
+
+\begin{lstlisting}[style=trugs]
+PARTY system SHALL FILTER ALL ACTIVE RECORD
+  THEN SORT RESULT
+  THEN WRITE RESULT TO ENDPOINT
+  IF NO PARTY AUTHENTICATE
+    THEN THROW EXCEPTION.
+\end{lstlisting}
+
+The inline annotations and the block sentence compile to the same graph.
+
+\subsection{The Shadow Graph}
+
+When every function has a \texttt{<tr>} block comment and every significant line has an inline \texttt{<tr>} annotation, the codebase acquires a \textbf{shadow graph}: a complete, compilable, validatable TRUG built entirely from source code comments.
+
+\begin{lstlisting}[language=Python]
+# <tr>MODULE api CONTAINS FUNCTION auth
+#   AND FUNCTION handle AND FUNCTION respond.</tr>
+
+# <tr>PARTY user SHALL REQUEST PARTY api.</tr>
+def handle(request):
+    user = authenticate(request)   # <tr>AUTHENTICATE TO SERVICE auth</tr>
+    data = query(user)             # <tr>READ DATA FROM STREAM db</tr>
+    return format(data)            # <tr>WRITE RESULT TO PARTY user</tr>
+\end{lstlisting}
+
+A tool that extracts \texttt{<tr>} blocks from source files produces a TRUG graph of the entire codebase: which modules exist, which functions they contain, what each function does, what it depends on, and who is authorized to call it. This graph is:
+
+\begin{itemize}
+    \item \textbf{Human-authored} --- developers write the comments, not an AI inference engine.
+    \item \textbf{Formally specified} --- every comment compiles against the same grammar and composition rules as any other TRUGS sentence.
+    \item \textbf{Mechanically validatable} --- the validator checks that the shadow graph satisfies all 16 CORE rules.
+    \item \textbf{Always current} --- the comments live next to the code they describe, not in a separate documentation system that drifts.
+\end{itemize}
+
+\subsection{Implications}
+
+This convention inverts the traditional relationship between code and documentation. In conventional practice, documentation describes code---and the description drifts from reality because no mechanical link enforces consistency. With TRUGS comments, the documentation \textit{is} a compilable artifact that can be validated independently of the code. A mismatch between the TRUGS comment and the code behavior is a detectable inconsistency---the comment says \texttt{SHALL VALIDATE ALL REQUIRED RECORD}, but the code skips validation for records marked optional. The graph catches this because REQUIRED and OPTIONAL are formal modifiers with incompatible semantics.
+
+\subsection{Cross-Language Portability}
+
+A further consequence: if the shadow graph is the program, then the source code is merely one rendering of it---just as the TRUGS Language sentence and the JSON graph are two renderings of the same artifact. A computational agent that reads the \texttt{<tr>} comments can emit the same graph as code in any target language.
+
+The same graph in Python:
+
+\begin{lstlisting}[language=Python]
+# <tr>PARTY system SHALL FILTER ALL ACTIVE RECORD
+#   THEN SORT RESULT THEN WRITE RESULT TO ENDPOINT output.</tr>
+x = [r for r in records if r.active]
+x.sort(key=lambda r: r.priority)
+send(x, endpoint)
+\end{lstlisting}
+
+The same graph in Go:
+
+\begin{lstlisting}[language=Go]
+// <tr>PARTY system SHALL FILTER ALL ACTIVE RECORD
+//   THEN SORT RESULT THEN WRITE RESULT TO ENDPOINT output.</tr>
+filtered := Filter(records, func(r Record) bool { return r.Active })
+sort.Slice(filtered, func(i, j int) bool {
+    return filtered[i].Priority < filtered[j].Priority
+})
+Send(filtered, endpoint)
+\end{lstlisting}
+
+The same graph in Rust:
+
+\begin{lstlisting}[language=Rust]
+// <tr>PARTY system SHALL FILTER ALL ACTIVE RECORD
+//   THEN SORT RESULT THEN WRITE RESULT TO ENDPOINT output.</tr>
+let mut filtered: Vec<_> = records.iter()
+    .filter(|r| r.active).collect();
+filtered.sort_by_key(|r| r.priority);
+send(&filtered, &endpoint);
+\end{lstlisting}
+
+The \texttt{<tr>} comment is identical in all three files. The code below it differs---each language has its own syntax, idioms, and type system. But the graph is the same: FILTER $\to$ SORT $\to$ WRITE, with ACTIVE as a state modifier and ALL as a universal selector.
+
+A computational agent performing language translation does not translate Python to Rust. It reads the shadow graph from the \texttt{<tr>} comments, discards the source language implementation, and emits a new implementation in the target language---guided by the same graph that guided the original author. The graph is the source of truth. The code in any particular language is a rendering.
+
+This is code portability without transpilation. The TRUGS graph is the universal intermediate representation that every language renders differently but every computational agent reads identically.
+
+\bigskip
+
+Comments become contracts. The codebase becomes a graph. The graph transcends language. TRUGs all the way down.
+
+\end{document}

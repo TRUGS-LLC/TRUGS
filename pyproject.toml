@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "trugs"
+version = "0.9.1"
+description = "TRUGS — Traceable Recursive Universal Graph Specification"
+license = {text = "Apache-2.0"}
+requires-python = ">=3.10"
+dependencies = []
+
+[project.scripts]
+trugs-validate = "tools.validate:main"
+trugs-memory = "tools.memory:main"
+trugs-tget = "tools.tget:main"
+trugs-tupdate = "tools.tupdate:main"
+trugs-tdelete = "tools.tdelete:main"
+trugs-tunlink = "tools.tunlink:main"
+
+[tool.setuptools.packages.find]
+include = ["tools*"]

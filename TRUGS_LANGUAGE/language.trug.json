@@ -1,0 +1,443 @@
+{
+  "name": "TRUGS Language v0.1.0",
+  "version": "0.1.0",
+  "type": "LANGUAGE",
+  "description": "The opening TRUG: formalized English as an LLM-native executable language. 190 executable words + 24 sugar words = 214 total. 9 parts of speech, 12 validation rules. Load this graph to speak TRUGS Language.",
+  "dimensions": {
+    "language": {
+      "description": "Language structure: parts of speech, composition, validation",
+      "base_level": "BASE"
+    }
+  },
+  "capabilities": {
+    "extensions": ["typed"],
+    "vocabularies": ["language_v1"],
+    "profiles": []
+  },
+  "meta": {
+    "issue": 1211,
+    "word_count_executable": 190,
+    "word_count_sugar": 24,
+    "word_count_total": 214,
+    "parts_of_speech": 9,
+    "validation_rules": 12,
+    "dual_class_words": 0,
+    "source_computation_pct": 67,
+    "source_law_pct": 27,
+    "source_shared_pct": 5
+  },
+  "nodes": [
+    {
+      "id": "language",
+      "type": "NAMESPACE",
+      "parent_id": null,
+      "contains": ["nouns", "verbs", "adjectives", "adverbs", "prepositions", "conjunctions", "articles", "pronouns", "grammar", "constraints"],
+      "properties": {
+        "name": "TRUGS Language",
+        "version": "0.1.0"
+      },
+      "metric_level": "KILO_LANGUAGE",
+      "dimension": {}
+    },
+
+    {
+      "id": "nouns",
+      "type": "DATA",
+      "parent_id": "language",
+      "contains": ["noun-actor", "noun-artifact", "noun-container", "noun-boundary", "noun-outcome"],
+      "properties": { "speech": "noun", "count": 27 },
+      "metric_level": "HECTO_CATEGORY",
+      "dimension": {}
+    },
+    {
+      "id": "noun-actor",
+      "type": "DATA",
+      "parent_id": "nouns",
+      "contains": ["w-process", "w-service", "w-function", "w-transform", "w-party", "w-agent", "w-principal"],
+      "properties": { "subcategory": "actor", "count": 7, "definition": "Who performs actions" },
+      "metric_level": "DEKA_SUBCATEGORY",
+      "dimension": {}
+    },
+    {
+      "id": "w-process",
+      "type": "DATA",
+      "parent_id": "noun-actor",
+      "contains": [],
+      "properties": { "word": "PROCESS", "speech": "noun", "subcategory": "actor", "source": "computation", "definition": "An executing unit of work with its own state" },
+      "metric_level": "BASE_WORD",
+      "dimension": {}
+    },
+    {
+      "id": "w-service",
+      "type": "DATA",
+      "parent_id": "noun-actor",
+      "contains": [],
+      "properties": { "word": "SERVICE", "speech": "noun", "subcategory": "actor", "source": "computation", "definition": "A long-lived process that accepts requests" },
+      "metric_level": "BASE_WORD",
+      "dimension": {}
+    },
+    {
+      "id": "w-function",
+      "type": "DATA",
+      "parent_id": "noun-actor",
+      "contains": [],
+      "properties": { "word": "FUNCTION", "speech": "noun", "subcategory": "actor", "source": "computation", "definition": "A callable unit that accepts input and returns output" },
+      "metric_level": "BASE_WORD",
+      "dimension": {}
+    },
+    {
+      "id": "w-transform",
+      "type": "DATA",
+      "parent_id": "noun-actor",
+      "contains": [],
+      "properties": { "word": "TRANSFORM", "speech": "noun", "subcategory": "actor", "source": "computation", "definition": "A node that performs exactly one operation", "core": true },
+      "metric_level": "BASE_WORD",
+      "dimension": {}
+    },
+    {
+      "id": "w-party",
+      "type": "DATA",
+      "parent_id": "noun-actor",
+      "contains": [],
+      "properties": { "word": "PARTY", "speech": "noun", "subcategory": "actor", "source": "law", "definition": "A bound entity capable of obligations and permissions", "core": true },
+      "metric_level": "BASE_WORD",
+      "dimension": {}
+    },
+    {
+      "id": "w-agent",
+      "type": "DATA",
+      "parent_id": "noun-actor",
+      "contains": [],
+      "properties": { "word": "AGENT", "speech": "noun", "subcategory": "actor", "source": "law", "definition": "An entity authorized to act on behalf of another" },
+      "metric_level": "BASE_WORD",
+      "dimension": {}
+    },
+    {
+      "id": "w-principal",
+      "type": "DATA",
+      "parent_id": "noun-actor",
+      "contains": [],
+      "properties": { "word": "PRINCIPAL", "speech": "noun", "subcategory": "actor", "source": "law", "definition": "The entity on whose behalf an agent acts" },
+      "metric_level": "BASE_WORD",
+      "dimension": {}
+    },
+
+    {
+      "id": "noun-artifact",
+      "type": "DATA",
+      "parent_id": "nouns",
+      "contains": [],
+      "properties": { "subcategory": "artifact", "count": 8, "definition": "What is acted upon", "words": ["DATA", "FILE", "RECORD", "MESSAGE", "STREAM", "RESOURCE", "INSTRUMENT"] },
+      "metric_level": "DEKA_SUBCATEGORY",
+      "dimension": {}
+    },
+    {
+      "id": "noun-container",
+      "type": "DATA",
+      "parent_id": "nouns",
+      "contains": [],
+      "properties": { "subcategory": "container", "count": 4, "definition": "What holds other things", "words": ["PIPELINE", "STAGE", "MODULE", "NAMESPACE"] },
+      "metric_level": "DEKA_SUBCATEGORY",
+      "dimension": {}
+    },
+    {
+      "id": "noun-boundary",
+      "type": "DATA",
+      "parent_id": "nouns",
+      "contains": [],
+      "properties": { "subcategory": "boundary", "count": 5, "definition": "Where/when things apply", "words": ["ENTRY", "EXIT", "INTERFACE", "ENDPOINT", "JURISDICTION"] },
+      "metric_level": "DEKA_SUBCATEGORY",
+      "dimension": {}
+    },
+    {
+      "id": "noun-outcome",
+      "type": "DATA",
+      "parent_id": "nouns",
+      "contains": [],
+      "properties": { "subcategory": "outcome", "count": 4, "definition": "What comes out", "words": ["RESULT", "ERROR", "EXCEPTION", "REMEDY"] },
+      "metric_level": "DEKA_SUBCATEGORY",
+      "dimension": {}
+    },
+
+    {
+      "id": "verbs",
+      "type": "DATA",
+      "parent_id": "language",
+      "contains": [],
+      "properties": { "speech": "verb", "count": 62, "subcategories": ["transform", "move", "obligate", "permit", "prohibit", "control", "bind", "resolve"] },
+      "metric_level": "HECTO_CATEGORY",
+      "dimension": {}
+    },
+    {
+      "id": "adjectives",
+      "type": "DATA",
+      "parent_id": "language",
+      "contains": [],
+      "properties": { "speech": "adjective", "count": 36, "subcategories": ["type", "access", "state", "quantity", "priority"], "ordering": ["QUANTITY", "PRIORITY", "STATE", "ACCESS", "TYPE", "NOUN"] },
+      "metric_level": "HECTO_CATEGORY",
+      "dimension": {}
+    },
+    {
+      "id": "adverbs",
+      "type": "DATA",
+      "parent_id": "language",
+      "contains": [],
+      "properties": { "speech": "adverb", "count": 19, "subcategories": ["timing", "repetition", "degree", "condition"] },
+      "metric_level": "HECTO_CATEGORY",
+      "dimension": {}
+    },
+    {
+      "id": "prepositions",
+      "type": "DATA",
+      "parent_id": "language",
+      "contains": [],
+      "properties": { "speech": "preposition", "count": 19, "subcategories": ["flow", "dependency", "containment", "reference", "replacement", "authority", "binding"] },
+      "metric_level": "HECTO_CATEGORY",
+      "dimension": {}
+    },
+    {
+      "id": "conjunctions",
+      "type": "DATA",
+      "parent_id": "language",
+      "contains": [],
+      "properties": { "speech": "conjunction", "count": 13, "subcategories": ["sequence", "parallel", "alternative", "cause", "exception"] },
+      "metric_level": "HECTO_CATEGORY",
+      "dimension": {}
+    },
+    {
+      "id": "articles",
+      "type": "DATA",
+      "parent_id": "language",
+      "contains": [],
+      "properties": { "speech": "article", "count": 10, "subcategories": ["specific", "universal", "existential", "negative"] },
+      "metric_level": "HECTO_CATEGORY",
+      "dimension": {}
+    },
+    {
+      "id": "pronouns",
+      "type": "DATA",
+      "parent_id": "language",
+      "contains": [],
+      "properties": { "speech": "pronoun", "count": 7, "subcategories": ["self", "result", "source", "target"] },
+      "metric_level": "HECTO_CATEGORY",
+      "dimension": {}
+    },
+
+    {
+      "id": "grammar",
+      "type": "DATA",
+      "parent_id": "language",
+      "contains": ["rule-sentence", "rule-clause", "rule-definition", "rule-preamble", "rule-noun-phrase", "rule-verb-phrase", "rule-object-phrase"],
+      "properties": { "name": "Grammar Rules", "format": "BNF" },
+      "metric_level": "HECTO_CATEGORY",
+      "dimension": {}
+    },
+    {
+      "id": "rule-sentence",
+      "type": "DATA",
+      "parent_id": "grammar",
+      "contains": [],
+      "properties": { "name": "sentence", "pattern": "clause (CONJUNCTION clause)* \".\"" },
+      "metric_level": "BASE_RULE",
+      "dimension": {}
+    },
+    {
+      "id": "rule-clause",
+      "type": "DATA",
+      "parent_id": "grammar",
+      "contains": [],
+      "properties": { "name": "clause", "pattern": "subject verb_phrase (object_phrase)*" },
+      "metric_level": "BASE_RULE",
+      "dimension": {}
+    },
+    {
+      "id": "rule-definition",
+      "type": "DATA",
+      "parent_id": "grammar",
+      "contains": [],
+      "properties": { "name": "definition", "pattern": "DEFINE value AS noun_phrase" },
+      "metric_level": "BASE_RULE",
+      "dimension": {}
+    },
+    {
+      "id": "rule-preamble",
+      "type": "DATA",
+      "parent_id": "grammar",
+      "contains": [],
+      "properties": { "name": "preamble", "pattern": "WHEREAS clause \".\"" },
+      "metric_level": "BASE_RULE",
+      "dimension": {}
+    },
+    {
+      "id": "rule-noun-phrase",
+      "type": "DATA",
+      "parent_id": "grammar",
+      "contains": [],
+      "properties": { "name": "noun_phrase", "pattern": "[ARTICLE] [ADJECTIVE]* NOUN [identifier]" },
+      "metric_level": "BASE_RULE",
+      "dimension": {}
+    },
+    {
+      "id": "rule-verb-phrase",
+      "type": "DATA",
+      "parent_id": "grammar",
+      "contains": [],
+      "properties": { "name": "verb_phrase", "pattern": "[modal] VERB adverb_phrase*" },
+      "metric_level": "BASE_RULE",
+      "dimension": {}
+    },
+    {
+      "id": "rule-object-phrase",
+      "type": "DATA",
+      "parent_id": "grammar",
+      "contains": [],
+      "properties": { "name": "object_phrase", "pattern": "prep_phrase (AND prep_phrase)* | noun_phrase | PRONOUN" },
+      "metric_level": "BASE_RULE",
+      "dimension": {}
+    },
+
+    {
+      "id": "constraints",
+      "type": "DATA",
+      "parent_id": "language",
+      "contains": ["v-rule-1", "v-rule-2", "v-rule-3", "v-rule-4", "v-rule-5", "v-rule-6", "v-rule-7", "v-rule-8", "v-rule-9", "v-rule-10", "v-rule-11", "v-rule-12"],
+      "properties": { "name": "Validation Rules", "count": 12 },
+      "metric_level": "HECTO_CATEGORY",
+      "dimension": {}
+    },
+    {
+      "id": "v-rule-1",
+      "type": "DATA",
+      "parent_id": "constraints",
+      "contains": [],
+      "properties": { "rule": 1, "name": "node_type", "description": "Every node has a type from the noun vocabulary" },
+      "metric_level": "BASE_RULE",
+      "dimension": {}
+    },
+    {
+      "id": "v-rule-2",
+      "type": "DATA",
+      "parent_id": "constraints",
+      "contains": [],
+      "properties": { "rule": 2, "name": "edge_relation", "description": "Every edge has a relation from the preposition vocabulary" },
+      "metric_level": "BASE_RULE",
+      "dimension": {}
+    },
+    {
+      "id": "v-rule-3",
+      "type": "DATA",
+      "parent_id": "constraints",
+      "contains": [],
+      "properties": { "rule": 3, "name": "subject_verb", "description": "Subject-verb compatibility holds for every operation" },
+      "metric_level": "BASE_RULE",
+      "dimension": {}
+    },
+    {
+      "id": "v-rule-4",
+      "type": "DATA",
+      "parent_id": "constraints",
+      "contains": [],
+      "properties": { "rule": 4, "name": "verb_object", "description": "Verb-object compatibility holds for every operation-to-target edge" },
+      "metric_level": "BASE_RULE",
+      "dimension": {}
+    },
+    {
+      "id": "v-rule-5",
+      "type": "DATA",
+      "parent_id": "constraints",
+      "contains": [],
+      "properties": { "rule": 5, "name": "adjective_noun", "description": "Adjective-noun compatibility holds for every property on every node" },
+      "metric_level": "BASE_RULE",
+      "dimension": {}
+    },
+    {
+      "id": "v-rule-6",
+      "type": "DATA",
+      "parent_id": "constraints",
+      "contains": [],
+      "properties": { "rule": 6, "name": "adverb_verb", "description": "Adverb-verb compatibility holds for every property on every operation" },
+      "metric_level": "BASE_RULE",
+      "dimension": {}
+    },
+    {
+      "id": "v-rule-7",
+      "type": "DATA",
+      "parent_id": "constraints",
+      "contains": [],
+      "properties": { "rule": 7, "name": "modal_subject", "description": "Modals only on Actor subjects" },
+      "metric_level": "BASE_RULE",
+      "dimension": {}
+    },
+    {
+      "id": "v-rule-8",
+      "type": "DATA",
+      "parent_id": "constraints",
+      "contains": [],
+      "properties": { "rule": 8, "name": "pronoun_resolution", "description": "Every pronoun has exactly one antecedent in scope" },
+      "metric_level": "BASE_RULE",
+      "dimension": {}
+    },
+    {
+      "id": "v-rule-9",
+      "type": "DATA",
+      "parent_id": "constraints",
+      "contains": [],
+      "properties": { "rule": 9, "name": "type_match", "description": "SUPERSEDES/EXTENDS source and target are the same noun subcategory" },
+      "metric_level": "BASE_RULE",
+      "dimension": {}
+    },
+    {
+      "id": "v-rule-10",
+      "type": "DATA",
+      "parent_id": "constraints",
+      "contains": [],
+      "properties": { "rule": 10, "name": "no_orphans", "description": "Every node is reachable from an entry point or subject" },
+      "metric_level": "BASE_RULE",
+      "dimension": {}
+    },
+    {
+      "id": "v-rule-11",
+      "type": "DATA",
+      "parent_id": "constraints",
+      "contains": [],
+      "properties": { "rule": 11, "name": "no_double_negation", "description": "Negative article and Prohibit modal cannot modify the same clause" },
+      "metric_level": "BASE_RULE",
+      "dimension": {}
+    },
+    {
+      "id": "v-rule-12",
+      "type": "DATA",
+      "parent_id": "constraints",
+      "contains": [],
+      "properties": { "rule": 12, "name": "pronoun_scope", "description": "Pronouns resolve within current sentence only; cross-sentence uses THE/SAID + NOUN" },
+      "metric_level": "BASE_RULE",
+      "dimension": {}
+    }
+  ],
+  "edges": [
+    { "from_id": "language", "to_id": "nouns", "relation": "CONTAINS" },
+    { "from_id": "language", "to_id": "verbs", "relation": "CONTAINS" },
+    { "from_id": "language", "to_id": "adjectives", "relation": "CONTAINS" },
+    { "from_id": "language", "to_id": "adverbs", "relation": "CONTAINS" },
+    { "from_id": "language", "to_id": "prepositions", "relation": "CONTAINS" },
+    { "from_id": "language", "to_id": "conjunctions", "relation": "CONTAINS" },
+    { "from_id": "language", "to_id": "articles", "relation": "CONTAINS" },
+    { "from_id": "language", "to_id": "pronouns", "relation": "CONTAINS" },
+    { "from_id": "language", "to_id": "grammar", "relation": "CONTAINS" },
+    { "from_id": "language", "to_id": "constraints", "relation": "CONTAINS" },
+    { "from_id": "grammar", "to_id": "nouns", "relation": "GOVERNS" },
+    { "from_id": "grammar", "to_id": "verbs", "relation": "GOVERNS" },
+    { "from_id": "grammar", "to_id": "adjectives", "relation": "GOVERNS" },
+    { "from_id": "grammar", "to_id": "adverbs", "relation": "GOVERNS" },
+    { "from_id": "grammar", "to_id": "prepositions", "relation": "GOVERNS" },
+    { "from_id": "grammar", "to_id": "conjunctions", "relation": "GOVERNS" },
+    { "from_id": "grammar", "to_id": "articles", "relation": "GOVERNS" },
+    { "from_id": "grammar", "to_id": "pronouns", "relation": "GOVERNS" },
+    { "from_id": "constraints", "to_id": "grammar", "relation": "SUBJECT_TO" },
+    { "from_id": "verbs", "to_id": "nouns", "relation": "DEPENDS_ON" },
+    { "from_id": "adjectives", "to_id": "nouns", "relation": "DEPENDS_ON" },
+    { "from_id": "adverbs", "to_id": "verbs", "relation": "DEPENDS_ON" },
+    { "from_id": "prepositions", "to_id": "nouns", "relation": "DEPENDS_ON" },
+    { "from_id": "pronouns", "to_id": "nouns", "relation": "DEPENDS_ON" }
+  ]
+}

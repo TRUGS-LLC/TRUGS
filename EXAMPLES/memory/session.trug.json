@@ -1,0 +1,77 @@
+{
+  "name": "LLM Memory",
+  "version": "0.9.1",
+  "type": "MEMORY",
+  "description": "Persistent memory graph for LLM sessions. Memories are nodes, associations are edges.",
+  "dimensions": {
+    "memory": {
+      "description": "Memory hierarchy: store > topic > memory",
+      "base_level": "BASE"
+    }
+  },
+  "capabilities": {
+    "extensions": [],
+    "vocabularies": [
+      "core_v0.9.1"
+    ],
+    "profiles": []
+  },
+  "nodes": [
+    {
+      "id": "memory-root",
+      "type": "MODULE",
+      "properties": {
+        "name": "Memory Store",
+        "created": "2026-03-31T01:14:53.537409+00:00"
+      },
+      "parent_id": null,
+      "contains": [
+        "mem-016fd59d",
+        "mem-7786db0d"
+      ],
+      "metric_level": "KILO_STORE",
+      "dimension": "memory"
+    },
+    {
+      "id": "mem-016fd59d",
+      "type": "DATA",
+      "properties": {
+        "text": "User prefers terse responses with no trailing summaries",
+        "memory_type": "FEEDBACK",
+        "created": "2026-03-31T01:14:53.601015+00:00",
+        "tags": [
+          "style",
+          "preferences"
+        ]
+      },
+      "parent_id": "memory-root",
+      "contains": [],
+      "metric_level": "BASE_MEMORY",
+      "dimension": "memory"
+    },
+    {
+      "id": "mem-7786db0d",
+      "type": "DATA",
+      "properties": {
+        "text": "TRUGS_LLC is the sole truth for all specifications",
+        "memory_type": "DECISION",
+        "created": "2026-03-31T01:14:53.632269+00:00",
+        "tags": [
+          "architecture"
+        ],
+        "source": "session 2026-03-30"
+      },
+      "parent_id": "memory-root",
+      "contains": [],
+      "metric_level": "BASE_MEMORY",
+      "dimension": "memory"
+    }
+  ],
+  "edges": [
+    {
+      "from_id": "mem-7786db0d",
+      "to_id": "mem-016fd59d",
+      "relation": "REFERENCES"
+    }
+  ]
+}

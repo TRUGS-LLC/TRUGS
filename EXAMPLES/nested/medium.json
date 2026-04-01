@@ -1,0 +1,98 @@
+{
+  "name": "Nested Medium Example",
+  "version": "1.0.0",
+  "type": "NESTED",
+  "branch": "nested",
+  "description": "Medium Nested TRUG with parent, subgraphs, and a result",
+  "nodes": [
+    {
+      "id": "task_root",
+      "type": "TASK",
+      "metric_level": "KILO_TASK",
+      "parent_id": null,
+      "properties": {
+        "name": "Data Pipeline",
+        "description": "Top-level pipeline task",
+        "status": "running"
+      },
+      "contains": [
+        "subgraph_ingest",
+        "subgraph_transform",
+        "result_pipeline"
+      ]
+    },
+    {
+      "id": "subgraph_ingest",
+      "type": "SUBGRAPH",
+      "metric_level": "DEKA_SUBGRAPH",
+      "parent_id": "task_root",
+      "properties": {
+        "name": "Ingest Workflow",
+        "subgraph_ref": "ingest_workflow.trug.json",
+        "description": "External child graph: data ingestion steps"
+      },
+      "contains": []
+    },
+    {
+      "id": "subgraph_transform",
+      "type": "SUBGRAPH",
+      "metric_level": "DEKA_SUBGRAPH",
+      "parent_id": "task_root",
+      "properties": {
+        "name": "Transform Workflow",
+        "subgraph_ref": "transform_workflow.trug.json",
+        "description": "External child graph: data transformation steps"
+      },
+      "contains": []
+    },
+    {
+      "id": "result_pipeline",
+      "type": "RESULT",
+      "metric_level": "MILLI_RESULT",
+      "parent_id": "task_root",
+      "properties": {
+        "name": "Pipeline Result",
+        "status": "success",
+        "summary": "All stages completed"
+      },
+      "contains": []
+    }
+  ],
+  "edges": [
+    {
+      "from_id": "task_root",
+      "to_id": "subgraph_ingest",
+      "relation": "contains"
+    },
+    {
+      "from_id": "task_root",
+      "to_id": "subgraph_transform",
+      "relation": "contains"
+    },
+    {
+      "from_id": "task_root",
+      "to_id": "result_pipeline",
+      "relation": "contains"
+    },
+    {
+      "from_id": "subgraph_ingest",
+      "to_id": "subgraph_transform",
+      "relation": "precedes"
+    },
+    {
+      "from_id": "subgraph_transform",
+      "to_id": "result_pipeline",
+      "relation": "produces"
+    }
+  ],
+  "dimensions": [
+    {
+      "name": "execution_flow",
+      "levels": [
+        "TASK",
+        "SUBGRAPH",
+        "RESULT"
+      ]
+    }
+  ]
+}
