@@ -1,0 +1,364 @@
+{
+  "name": "TRUGS",
+  "version": "1.0.0",
+  "type": "PROJECT",
+  "description": "TRUGS specification — protocol, language, validator, 7 domain examples, academic paper",
+  "dimensions": {
+    "folder_structure": {
+      "description": "Top-level repo structure — spec, language, examples, tools, paper",
+      "base_level": "BASE"
+    }
+  },
+  "capabilities": {
+    "extensions": [],
+    "vocabularies": ["project_v1"],
+    "profiles": []
+  },
+  "nodes": [
+    {
+      "id": "root",
+      "type": "FOLDER",
+      "properties": {
+        "name": "TRUGS",
+        "purpose": "TRUGS v1.0.0 specification — protocol (7 boundaries, 16 rules), language (190 words, BNF grammar), validator, examples, paper"
+      },
+      "parent_id": null,
+      "contains": ["doc_readme", "doc_license", "folder_protocol", "folder_language", "folder_examples", "folder_tools", "folder_paper"],
+      "metric_level": "KILO_FOLDER",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "doc_readme",
+      "type": "DOCUMENT",
+      "properties": {
+        "name": "README.md",
+        "purpose": "Overview — what TRUGS is, specification index, tool reference, link to TRUGS-AGENT"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "doc_license",
+      "type": "DOCUMENT",
+      "properties": {
+        "name": "LICENSE",
+        "purpose": "Apache 2.0 — TRUGS LLC"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "folder_structure"
+    },
+
+    {
+      "id": "folder_protocol",
+      "type": "COMPONENT",
+      "properties": {
+        "name": "TRUGS_PROTOCOL",
+        "purpose": "The TRUGS specification — 7 boundaries, 10 primitive classes, 16 validation rules, domain branches, JSON schema",
+        "file_count": 5
+      },
+      "parent_id": "root",
+      "contains": ["spec_core", "spec_branches", "spec_schema", "spec_fundamentals", "spec_validation"],
+      "metric_level": "DEKA_COMPONENT",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "spec_core",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "TRUGS_PROTOCOL/CORE.md",
+        "purpose": "The universal foundation — 7 boundaries, 10 semantic primitive classes (~140 primitives), composition rules, 16 validation rules",
+        "lines": 1580
+      },
+      "parent_id": "folder_protocol",
+      "contains": [],
+      "metric_level": "BASE_SPECIFICATION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "spec_branches",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "TRUGS_PROTOCOL/BRANCHES.md",
+        "purpose": "Domain-specific vocabularies — Python, Web, Writer, Knowledge, Living, Nested, Research branches with node types and edge relations",
+        "lines": 1611
+      },
+      "parent_id": "folder_protocol",
+      "contains": [],
+      "metric_level": "BASE_SPECIFICATION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "spec_schema",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "TRUGS_PROTOCOL/SCHEMA.md",
+        "purpose": "JSON schema reference — formal field definitions, types, constraints for nodes and edges",
+        "lines": 831
+      },
+      "parent_id": "folder_protocol",
+      "contains": [],
+      "metric_level": "BASE_SPECIFICATION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "spec_fundamentals",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "TRUGS_PROTOCOL/SPEC_fundamentals.md",
+        "purpose": "Gentle introduction to CORE concepts — minimal valid TRUG, required fields, hierarchy, dimensions",
+        "lines": 859
+      },
+      "parent_id": "folder_protocol",
+      "contains": [],
+      "metric_level": "BASE_SPECIFICATION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "spec_validation",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "TRUGS_PROTOCOL/SPEC_validation.md",
+        "purpose": "All 16 validation rules with implementations — 9 structural (always), 7 compositional (core_v1.0.0)",
+        "lines": 1229
+      },
+      "parent_id": "folder_protocol",
+      "contains": [],
+      "metric_level": "BASE_SPECIFICATION",
+      "dimension": "folder_structure"
+    },
+
+    {
+      "id": "folder_language",
+      "type": "COMPONENT",
+      "properties": {
+        "name": "TRUGS_LANGUAGE",
+        "purpose": "TRL specification — 190-word vocabulary, BNF grammar, 30 parsed examples, self-defining TRUG",
+        "file_count": 5
+      },
+      "parent_id": "root",
+      "contains": ["lang_vocabulary", "lang_grammar", "lang_examples", "lang_trug", "lang_readme"],
+      "metric_level": "DEKA_COMPONENT",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "lang_vocabulary",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "TRUGS_LANGUAGE/SPEC_vocabulary.md",
+        "purpose": "190 words across 8 parts of speech — every word defined with source (computation or law) and CORE status",
+        "lines": 553
+      },
+      "parent_id": "folder_language",
+      "contains": [],
+      "metric_level": "BASE_SPECIFICATION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "lang_grammar",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "TRUGS_LANGUAGE/SPEC_grammar.md",
+        "purpose": "BNF grammar, composition rules, 12 validation rules for TRL sentences",
+        "lines": 297
+      },
+      "parent_id": "folder_language",
+      "contains": [],
+      "metric_level": "BASE_SPECIFICATION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "lang_examples",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "TRUGS_LANGUAGE/SPEC_examples.md",
+        "purpose": "30 parsed examples across 13 patterns — each sentence decomposed into subject, modal, verb, object",
+        "lines": 415
+      },
+      "parent_id": "folder_language",
+      "contains": [],
+      "metric_level": "BASE_SPECIFICATION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "lang_trug",
+      "type": "DOCUMENT",
+      "properties": {
+        "name": "TRUGS_LANGUAGE/language.trug.json",
+        "purpose": "The opening TRUG — the language defining itself as a graph"
+      },
+      "parent_id": "folder_language",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "lang_readme",
+      "type": "DOCUMENT",
+      "properties": {
+        "name": "TRUGS_LANGUAGE/README.md",
+        "purpose": "Language overview — what TRL is, how sentences compile to graphs"
+      },
+      "parent_id": "folder_language",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "folder_structure"
+    },
+
+    {
+      "id": "folder_examples",
+      "type": "COMPONENT",
+      "properties": {
+        "name": "EXAMPLES",
+        "purpose": "7 domain examples — knowledge, living, memory, nested, research, web, writer — all validate against CORE",
+        "file_count": 13
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "DEKA_COMPONENT",
+      "dimension": "folder_structure"
+    },
+
+    {
+      "id": "folder_tools",
+      "type": "COMPONENT",
+      "properties": {
+        "name": "tools",
+        "purpose": "Reference toolchain — validator (16 rules), memory (remember/recall/forget), CRUD (tget, tupdate, tdelete, tunlink)",
+        "file_count": 8
+      },
+      "parent_id": "root",
+      "contains": ["tools_validate", "tools_test", "tools_memory", "tools_tget", "tools_tupdate", "tools_tdelete", "tools_tunlink"],
+      "metric_level": "DEKA_COMPONENT",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_validate",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "tools/validate.py",
+        "purpose": "TRUGS validator — 16 CORE rules, CLI interface, batch mode",
+        "lines": 526
+      },
+      "parent_id": "folder_tools",
+      "contains": [],
+      "metric_level": "BASE_SPECIFICATION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_test",
+      "type": "TEST_SUITE",
+      "properties": {
+        "name": "tools/test_validate.py",
+        "purpose": "Validator test suite — 47 tests covering all 16 rules plus integration",
+        "test_count": 47,
+        "lines": 541
+      },
+      "parent_id": "folder_tools",
+      "contains": [],
+      "metric_level": "BASE_TEST_SUITE",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_memory",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "tools/memory.py",
+        "purpose": "LLM memory as a TRUG graph — remember, recall, forget, associate commands",
+        "lines": 371
+      },
+      "parent_id": "folder_tools",
+      "contains": [],
+      "metric_level": "BASE_SPECIFICATION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_tget",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "tools/tget.py",
+        "purpose": "Read a node by ID — JSON or formatted output, optional edge listing",
+        "lines": 109
+      },
+      "parent_id": "folder_tools",
+      "contains": [],
+      "metric_level": "BASE_SPECIFICATION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_tupdate",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "tools/tupdate.py",
+        "purpose": "Update a node's properties by ID",
+        "lines": 163
+      },
+      "parent_id": "folder_tools",
+      "contains": [],
+      "metric_level": "BASE_SPECIFICATION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_tdelete",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "tools/tdelete.py",
+        "purpose": "Delete a node and all its edges by ID",
+        "lines": 106
+      },
+      "parent_id": "folder_tools",
+      "contains": [],
+      "metric_level": "BASE_SPECIFICATION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_tunlink",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "tools/tunlink.py",
+        "purpose": "Remove an edge between two nodes",
+        "lines": 104
+      },
+      "parent_id": "folder_tools",
+      "contains": [],
+      "metric_level": "BASE_SPECIFICATION",
+      "dimension": "folder_structure"
+    },
+
+    {
+      "id": "folder_paper",
+      "type": "COMPONENT",
+      "properties": {
+        "name": "PAPER",
+        "purpose": "Academic paper — TRUGS specification, TRL compilation algorithm, graph-sentence equivalence",
+        "file_count": 5
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "DEKA_COMPONENT",
+      "dimension": "folder_structure"
+    }
+  ],
+  "edges": [
+    {"from_id": "doc_readme", "to_id": "root", "relation": "describes", "properties": {}},
+    {"from_id": "spec_core", "to_id": "folder_protocol", "relation": "governs", "properties": {"scope": "CORE defines the universal foundation all other specs build on"}},
+    {"from_id": "spec_validation", "to_id": "spec_core", "relation": "implements", "properties": {"scope": "16 rules that enforce CORE boundaries"}},
+    {"from_id": "spec_branches", "to_id": "spec_core", "relation": "implements", "properties": {"scope": "Domain vocabularies built on CORE structure"}},
+    {"from_id": "spec_fundamentals", "to_id": "spec_core", "relation": "describes", "properties": {"scope": "Gentle introduction to CORE concepts"}},
+    {"from_id": "spec_schema", "to_id": "spec_core", "relation": "implements", "properties": {"scope": "JSON schema formalizing CORE field definitions"}},
+    {"from_id": "lang_vocabulary", "to_id": "spec_core", "relation": "implements", "properties": {"scope": "190 words drawn from CORE primitives"}},
+    {"from_id": "lang_grammar", "to_id": "lang_vocabulary", "relation": "uses", "properties": {"scope": "Grammar rules compose vocabulary words"}},
+    {"from_id": "lang_examples", "to_id": "lang_grammar", "relation": "uses", "properties": {"scope": "30 examples parsed against the grammar"}},
+    {"from_id": "lang_trug", "to_id": "lang_vocabulary", "relation": "implements", "properties": {"scope": "Self-defining TRUG uses vocabulary words as nodes"}},
+    {"from_id": "folder_examples", "to_id": "spec_branches", "relation": "implements", "properties": {"scope": "7 domain examples demonstrate branch vocabularies"}},
+    {"from_id": "folder_examples", "to_id": "spec_core", "relation": "implements", "properties": {"scope": "All examples validate against CORE rules"}},
+    {"from_id": "tools_validate", "to_id": "spec_validation", "relation": "implements", "properties": {"scope": "Python implementation of all 16 validation rules"}},
+    {"from_id": "tools_test", "to_id": "tools_validate", "relation": "tests", "properties": {}},
+    {"from_id": "tools_memory", "to_id": "spec_core", "relation": "implements", "properties": {"scope": "Memory graphs validate against CORE"}},
+    {"from_id": "folder_paper", "to_id": "spec_core", "relation": "describes", "properties": {"scope": "Academic paper presenting the specification"}},
+    {"from_id": "folder_paper", "to_id": "folder_language", "relation": "describes", "properties": {"scope": "Paper presents TRL compilation algorithm"}}
+  ]
+}

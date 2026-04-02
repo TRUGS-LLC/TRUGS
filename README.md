@@ -64,9 +64,19 @@ See [TRUGS_LANGUAGE/](TRUGS_LANGUAGE/) for the complete specification.
 
 The [EXAMPLES/](EXAMPLES/) directory contains sample TRUGs for 6 domains at varying complexity levels. All 19 examples pass validation.
 
-## Glossary
+## Use It
 
-See [GLOSSARY.md](GLOSSARY.md) for terminology covering the TRUGS protocol, all branches, language primitives, and toolchain.
+**[TRUGS-AGENT](https://github.com/TRUGS-LLC/TRUGS-AGENT)** — copy one file into your project and your LLM speaks TRL, follows a 9-phase development protocol, tracks projects as graphs, and maintains persistent memory. Seven standalone components:
+
+| Component | What It Does |
+|-----------|-------------|
+| FOLDER | Machine-readable filesystem index — one JSON graph per folder |
+| AAA | 9-phase development protocol — plan before code, audit before ship |
+| EPIC | Portfolio tracker as a traversable graph |
+| MEMORY | Persistent context across sessions |
+| TRUGGING | Methodology for describing a codebase with TRUGs and TRL |
+| WEB_HUB | Curated web resource graph |
+| NDA | Complete example — all systems applied to a mutual NDA |
 
 ## Building on TRUGS
 

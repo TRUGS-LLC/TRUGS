@@ -1,9 +1,9 @@
-# Nested Branch Examples
+# Nested Branch Example
 
-Examples of NESTED TRUGs — hierarchical graph composition via subgraph references.
+`complex.json` — 12 nodes, 20 edges. Deep pipeline with nested subgraphs, training, evaluation, and deployment.
 
-| File | Nodes | Description |
-|------|-------|-------------|
-| simple.json | 3 | Minimal parent + 2 subgraph references |
-| medium.json | 4-5 | Parent with subgraphs and a result |
-| complex.json | 12 | Deep pipeline with nested subgraphs, training, evaluation, and deployment |
+## Node Types
+
+- **TASK** — A unit of work in a pipeline
+- **SUBGRAPH** — Reference to another TRUG graph
+- **RESULT** — Output of a task or subgraph execution
