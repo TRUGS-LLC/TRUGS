@@ -841,7 +841,7 @@ This document covers CORE concepts \- the universal foundation all TRUGs share.
 
 **There's more:**
 
-**Domain Species:** Specialized TRUGs adapted for specific use cases (SITE, HUB, CODE, ORCHESTRATION, KNOWLEDGE, EXECUTABLE, LIVING, NESTED). Each inherits CORE but adds domain-specific capabilities. Note: HUB is a usage pattern — a root node with a `qualifying_interest` property and weighted edges — not a structural addition to the graph model. TRUGS has two primitives: node and edge. Everything else, including HUB, is built from those two primitives.
+**Domain Species:** Specialized TRUGs adapted for specific use cases (SITE, HUB, CODE, ORCHESTRATION, KNOWLEDGE, LIVING, NESTED). Each inherits CORE but adds domain-specific capabilities. Note: HUB is a usage pattern — a root node with a `qualifying_interest` property and weighted edges — not a structural addition to the graph model. TRUGS has two primitives: node and edge. Everything else, including HUB, is built from those two primitives.
 
 **Architectural Patterns:** Three fundamental patterns that underlie all TRUGs (STRUCTURAL, PEER\_GROUPING, CROSS\_CUTTING). Understanding these reveals how TRUGs organize information at the deepest level.
 
