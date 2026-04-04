@@ -2,7 +2,7 @@
 
 > Formalized English as an LLM-native executable language.
 
-**Issue:** #1211 | **Status:** DRAFT | **Version:** 0.1.0
+**Issue:** #1211 | **Status:** DRAFT | **Version:** 1.0.1
 
 ## What This Is
 
@@ -33,8 +33,8 @@ Every word is from the 190-word vocabulary. The sentence compiles to a graph wit
 
 ## The Numbers
 
-- **214 words** total: 190 executable + 24 sugar (human readability only)
-- **9 parts of speech** — 8 executable + sugar (compiles to nothing)
+- **190 executable words** + `'word` sugar pattern (human readability only)
+- **8 parts of speech** — sugar is a pattern (`'[a-z_]+`), not a word list
 - **67% computation**, 27% law, 5% shared (executable words)
 - **12 validation rules** for compiled graphs
 - **No ambiguity** — verbs and prepositions are always distinct words

@@ -2,7 +2,7 @@
 
 > Formal composition rules: what can combine with what, and what it compiles to.
 
-**Issue:** #1211 | **Version:** 0.1.0
+**Issue:** #1211 | **Version:** 1.0.1
 
 ---
 
@@ -45,22 +45,27 @@ identifier      := lowercase_name
 
 value           := INTEGER_LITERAL | STRING_LITERAL | DURATION_LITERAL | DATE_LITERAL
 
-sugar           := OF | IS | ARE | BE | BEEN | HAS | HAVE | WILL
-                 | THAT | WHICH | WHERE | WHO
-                 | INTO | UPON | WITH | FOR | AT | ON
-                 | PLEASE | ALSO | THEN_ALSO
-                 | THESE | THOSE | SUCH
+sugar           := "'" lowercase_name
+
+lowercase_name  := [a-z_]+
 ```
 
 ### Sugar preprocessing
 
-Before parsing, the compiler strips all sugar words from the input. Sugar words may appear anywhere in a sentence. They do not affect the parse, the compiled graph, or validation. The decompiler may optionally reinsert sugar words for human-readable output.
+Before parsing, the compiler strips all sugar tokens from the input. A sugar token is any token matching `'[a-z_]+`. Sugar tokens may appear anywhere in a sentence. They do not affect the parse, the compiled graph, or validation. The decompiler may optionally reinsert sugar tokens for human-readable output.
 
 ```
-Input:   "THE PARTY system SHALL PLEASE FILTER ALL OF THE ACTIVE RECORD."
+Input:   "PARTY system SHALL 'please FILTER ALL 'of 'the ACTIVE RECORD."
 Strip:   "PARTY system SHALL FILTER ALL ACTIVE RECORD."
 Parse:   (normal BNF rules apply)
 Compile: (identical graph regardless of sugar)
+```
+
+Custom sugar works the same way:
+
+```
+Input:   "PARTY admin 'trugs_llc SHALL ADMINISTER ALL RESOURCE."
+Strip:   "PARTY admin SHALL ADMINISTER ALL RESOURCE."
 ```
 
 ### Minimum valid sentence
