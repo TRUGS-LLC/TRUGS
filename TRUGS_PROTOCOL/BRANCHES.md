@@ -769,7 +769,7 @@ assert 'compute' in capabilities.extensions if 'operation_spec' used
 
 ## Advanced Branches
 
-The following advanced branches define specialized vocabularies for **Agentic Systems** — Orchestration, Memory, World Modeling, and Graph-as-Computation — rather than just representing static content. These branches are critical for enabling capabilities like Self-Orchestration and Living Memory.
+The following advanced branches define specialized vocabularies for **Agentic Systems** — Orchestration, Memory, World Modeling, and Graph-as-Computation — rather than just representing static content. These branches are critical for enabling capabilities like Agent Coordination and Living Memory.
 
 > **Note:** Previously documented in SPEC_advanced_branches.md, now merged here as the single source of truth for all branch specifications.
 
@@ -778,7 +778,7 @@ The following advanced branches define specialized vocabularies for **Agentic Sy
 ### ORCHESTRATION Branch
 
 **Domain:** Multi-Agent Coordination
-**Purpose:** Enables systems to be *run by* a graph rather than a hard-coded loop.
+**Purpose:** Enables multi-agent systems to be *coordinated via* graph structure rather than a hard-coded loop.
 **Key Concept:** Exclusive Communication (Agents communicate only via graph edits).
 
 #### Node Vocabulary
