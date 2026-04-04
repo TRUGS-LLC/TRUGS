@@ -2,7 +2,7 @@
 
 > 30 examples parsed token-by-token against the grammar. Each example was written, parsed, and if it failed, the failure was diagnosed, the vocabulary/grammar was patched, and the sentence was rewritten.
 
-**Issue:** #1211 | **Version:** 0.1.0
+**Issue:** #1211 | **Version:** 1.0.1
 
 For full token-by-token parse tables, see the development workspace at `TRUGS_PROTOCOL/SPEC_language.md` Section 4.
 
@@ -335,7 +335,7 @@ PARTY monitor SHALL ADMINISTER PARTY ingester
 
 ## Sugar Comparison
 
-The same sentences with and without sugar words. Both compile to identical graphs.
+The same sentences with and without sugar tokens. Both compile to identical graphs. Sugar tokens use the `'word` pattern and are stripped before parsing.
 
 ### Obligation (Example 1)
 
@@ -346,7 +346,7 @@ PARTY system SHALL VALIDATE ALL PENDING RECORD.
 
 With sugar:
 ```
-THE PARTY system SHALL PLEASE VALIDATE ALL OF THE PENDING RECORD.
+PARTY system SHALL 'please VALIDATE ALL 'of 'the PENDING RECORD.
 ```
 
 ### Multi-party (Example 3)
@@ -361,10 +361,10 @@ PARTY server SHALL RESPOND PROMPTLY WITHIN 30s
 
 With sugar:
 ```
-THE PARTY client SHALL REQUEST THE PARTY server.
-THE PARTY server SHALL RESPOND PROMPTLY WITHIN 30s
-  OR THE PARTY client MAY ALSO RETRY BOUNDED 3
-  THEN ALSO HANDLE THE ERROR THAT HAS BEEN RECEIVED.
+PARTY client SHALL REQUEST PARTY server.
+PARTY server SHALL RESPOND PROMPTLY WITHIN 30s
+  OR PARTY client MAY 'also RETRY BOUNDED 3
+  THEN 'also HANDLE THE ERROR 'that 'has 'been RECEIVED.
 ```
 
 ### Prohibition (Example 9)
@@ -379,8 +379,8 @@ NO PARTY SHALL WRITE CONFIDENTIAL RESOURCE
 With sugar:
 ```
 NO PARTY SHALL WRITE CONFIDENTIAL RESOURCE
-  EXCEPT THE PARTY owner, WHO MAY WRITE SUCH CONFIDENTIAL RESOURCE
-    PROVIDED_THAT THE PARTY owner HAS BEEN AUTHENTICATED AT SERVICE auth.
+  EXCEPT PARTY owner 'who MAY WRITE 'such CONFIDENTIAL RESOURCE
+    PROVIDED_THAT PARTY owner 'has 'been AUTHENTICATED 'at SERVICE auth.
 ```
 
 ### ETL Pipeline (Example 28, excerpt)
@@ -393,9 +393,18 @@ PARTY monitor SHALL ADMINISTER PARTY ingester
 
 With sugar:
 ```
-THE PARTY monitor SHALL ADMINISTER THE PARTY ingester
-  AND ALSO THE PARTY transformer AND ALSO THE PARTY loader.
+PARTY monitor SHALL ADMINISTER PARTY ingester
+  AND 'also PARTY transformer AND 'also PARTY loader.
 ```
+
+### Custom sugar (domain annotation)
+
+```
+PARTY ingester 'kafka SHALL READ EACH DATA raw-event FROM STREAM raw-events.
+PARTY loader 'postgres SHALL WRITE EACH RESULT TO ENDPOINT event-store.
+```
+
+`'kafka` and `'postgres` compile to nothing — they annotate for human readers which system backs the actor.
 
 Sugar makes the language read like natural English. The compiler ignores it. The graph is identical. Humans get readability. Machines get precision.
 

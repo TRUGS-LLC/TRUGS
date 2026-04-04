@@ -2,7 +2,7 @@
 
 > 190 words across 8 parts of speech. Computation primary, law fills gaps.
 
-**Issue:** #1211 | **Version:** 0.1.0
+**Issue:** #1211 | **Version:** 1.0.1
 
 ---
 
@@ -459,67 +459,66 @@ A pronoun refers to a previously named noun. Must have an unambiguous antecedent
 
 ---
 
-## 9. Sugar — Human Readability Words (24)
+## 9. Sugar — Human Readability Pattern
 
-Sugar words are valid in the language but compile to nothing. They produce no node, no edge, no property. The validator ignores them. The compiler strips them. They exist only to make sentences readable by humans.
+Sugar is any token matching the pattern `'[a-z_]+` — an apostrophe followed by one or more lowercase letters or underscores. Sugar compiles to nothing. No node, no edge, no property. The validator ignores it. The compiler strips it. Sugar exists only to make sentences readable by humans.
 
 Without sugar: `PARTY system SHALL FILTER ALL ACTIVE RECORD`
-With sugar: `THE PARTY system SHALL FILTER ALL OF THE ACTIVE RECORD`
+With sugar: `PARTY system SHALL 'please FILTER ALL 'of 'the ACTIVE RECORD`
 
 Both compile to the identical graph.
 
-### Connectives (8) — Words that glue English sentences together
+### Pattern
 
-| # | Word | Definition | Example with sugar |
-|---|---|---|---|
-| 191 | OF | Possessive/partitive connector | `ALL OF THE RECORD` |
-| 192 | IS | Copula (identity statement) | `PARTY admin IS THE PRINCIPAL` |
-| 193 | ARE | Plural copula | `ALL RECORD ARE VALID` |
-| 194 | BE | Infinitive copula | `SHALL BE WRITTEN` |
-| 195 | BEEN | Past participle copula | `HAS BEEN VALIDATED` |
-| 196 | HAS | Auxiliary verb | `PARTY system HAS COMPLETED` |
-| 197 | HAVE | Plural auxiliary | `ALL PARTY HAVE AUTHENTICATED` |
-| 198 | WILL | Future auxiliary | `PARTY system WILL FILTER` |
+```
+sugar := "'" [a-z_]+
+```
 
-### Relative (4) — Words that introduce clauses
+Any token beginning with `'` followed by lowercase characters is sugar. Position-independent — sugar may appear anywhere in a sentence. The apostrophe prefix is the visual signal: lowercase after `'` means "this compiles to nothing."
 
-| # | Word | Definition | Example with sugar |
-|---|---|---|---|
-| 199 | THAT | Relative clause introducer | `THE RECORD THAT IS VALID` |
-| 200 | WHICH | Non-restrictive clause introducer | `THE RECORD, WHICH IS ACTIVE` |
-| 201 | WHERE | Locative relative | `THE ENDPOINT WHERE RESULT FEEDS` |
-| 202 | WHO | Actor relative | `THE PARTY WHO SHALL VALIDATE` |
+### Common Sugar Words
 
-### Fillers (6) — Words English expects but the grammar doesn't need
+These are the most frequently used sugar words. They correspond to English function words that improve readability.
 
-| # | Word | Definition | Example with sugar |
-|---|---|---|---|
-| 203 | INTO | Directional emphasis (sugar for TO) | `MERGE RESULT INTO STREAM` |
-| 204 | UPON | Temporal emphasis (sugar for WHEN) | `UPON COMPLETION` |
-| 205 | WITH | Accompaniment | `FILTER RECORD WITH VALID STATE` |
-| 206 | FOR | Purpose/beneficiary | `VALIDATE FOR COMPLIANCE` |
-| 207 | AT | Locative | `WRITE AT ENDPOINT output` |
-| 208 | ON | Surface/temporal | `RETRY ON FAILURE` |
+| Word | Category | Usage |
+|---|---|---|
+| `'of` | Connective | `ALL 'of 'the RECORD` |
+| `'is` | Connective | `PARTY admin 'is 'the PRINCIPAL` |
+| `'are` | Connective | `ALL RECORD 'are VALID` |
+| `'be` | Connective | `SHALL 'be WRITTEN` |
+| `'been` | Connective | `'has 'been VALIDATED` |
+| `'has` | Connective | `PARTY system 'has COMPLETED` |
+| `'have` | Connective | `ALL PARTY 'have AUTHENTICATED` |
+| `'will` | Connective | `PARTY system 'will FILTER` |
+| `'that` | Relative | `'the RECORD 'that 'is VALID` |
+| `'which` | Relative | `'the RECORD 'which 'is ACTIVE` |
+| `'where` | Relative | `'the ENDPOINT 'where RESULT FEEDS` |
+| `'who` | Relative | `'the PARTY 'who SHALL VALIDATE` |
+| `'into` | Filler | `MERGE RESULT 'into STREAM` |
+| `'upon` | Filler | `'upon COMPLETION` |
+| `'with` | Filler | `FILTER RECORD 'with VALID STATE` |
+| `'for` | Filler | `VALIDATE 'for COMPLIANCE` |
+| `'at` | Filler | `WRITE 'at ENDPOINT output` |
+| `'on` | Filler | `RETRY 'on FAILURE` |
+| `'please` | Politeness | `'please VALIDATE ALL RECORD` |
+| `'also` | Politeness | `'also SORT RESULT` |
+| `'then_also` | Politeness | `THEN 'also WRITE RESULT` |
+| `'these` | Determiner | `VALIDATE 'these RECORD` |
+| `'those` | Determiner | `FILTER 'those ACTIVE RECORD` |
+| `'such` | Determiner | `'such RECORD SHALL 'be VALIDATED` |
 
-### Politeness (3) — Words that make instructions feel collaborative
+### Custom Sugar
 
-| # | Word | Definition | Example with sugar |
-|---|---|---|---|
-| 209 | PLEASE | Politeness marker | `PLEASE VALIDATE ALL RECORD` |
-| 210 | ALSO | Additive emphasis (sugar for AND) | `ALSO SORT RESULT` |
-| 211 | THEN_ALSO | Sequential emphasis (sugar for THEN) | `THEN ALSO WRITE RESULT` |
+Any `'word` works. Custom sugar lets authors annotate sentences with domain context that the compiler ignores:
 
-### Determiners (3) — Words that add English-natural specificity
+```
+PARTY system SHALL WRITE DATA 'to 'the 'postgres ENDPOINT store.
+PARTY admin 'trugs_llc SHALL ADMINISTER ALL RESOURCE.
+```
 
-| # | Word | Definition | Example with sugar |
-|---|---|---|---|
-| 212 | THESE | Proximal plural (sugar for THE) | `VALIDATE THESE RECORD` |
-| 213 | THOSE | Distal plural (sugar for THE) | `FILTER THOSE ACTIVE RECORD` |
-| 214 | SUCH | Referential (sugar for SAID) | `SUCH RECORD SHALL BE VALIDATED` |
+`'postgres` and `'trugs_llc` are sugar — they compile to nothing but tell the human reader what system or entity is involved.
 
-**Total sugar: 24 words.** All compile to null. The parser strips them before compilation. The decompiler may optionally reinsert them for human-readable output.
-
-**Rule:** Sugar words may appear anywhere in a sentence without changing its meaning, graph compilation, or validation result. A sentence with sugar and the same sentence without sugar are semantically identical — they produce the same graph.
+**Rule:** Sugar tokens may appear anywhere in a sentence without changing its meaning, graph compilation, or validation result. A sentence with sugar and the same sentence without sugar are semantically identical — they produce the same graph.
 
 ---
 
@@ -535,10 +534,10 @@ Both compile to the identical graph.
 | Conjunctions | 8 | 5 | — | 13 | Structure |
 | Articles | — | — | 10 | 10 | Scope |
 | Pronouns | 6 | 1 | — | 7 | References |
-| Sugar | — | — | 24 | 24 | **Nothing** |
-| **Total** | **128** | **52** | **34** | **214** | |
+| Sugar | — | — | ∞ (pattern) | `'[a-z_]+` | **Nothing** |
+| **Total** | **128** | **52** | **10** | **190** | |
 
-190 executable words + 24 sugar words = 214 total. Sugar compiles to nothing. The executable vocabulary is 190 words: 71% computation, 24% law, 5% shared.
+190 executable words + `'word` sugar pattern. Sugar is not counted as vocabulary — it is a syntactic pattern (`'[a-z_]+`) that compiles to nothing. The executable vocabulary is 190 words: 71% computation, 24% law, 5% shared.
 
 ### Modals (subset of verbs)
 

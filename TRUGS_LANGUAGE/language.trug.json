@@ -1,8 +1,8 @@
 {
-  "name": "TRUGS Language v0.1.0",
-  "version": "0.1.0",
+  "name": "TRUGS Language v1.0.1",
+  "version": "1.0.1",
   "type": "LANGUAGE",
-  "description": "The opening TRUG: formalized English as an LLM-native executable language. 190 executable words + 24 sugar words = 214 total. 9 parts of speech, 12 validation rules. Load this graph to speak TRUGS Language.",
+  "description": "The opening TRUG: formalized English as an LLM-native executable language. 190 executable words + 'word sugar pattern. 8 parts of speech, 12 validation rules. Load this graph to speak TRUGS Language.",
   "dimensions": {
     "language": {
       "description": "Language structure: parts of speech, composition, validation",
@@ -17,9 +17,8 @@
   "meta": {
     "issue": 1211,
     "word_count_executable": 190,
-    "word_count_sugar": 24,
-    "word_count_total": 214,
-    "parts_of_speech": 9,
+    "sugar_pattern": "'[a-z_]+",
+    "parts_of_speech": 8,
     "validation_rules": 12,
     "dual_class_words": 0,
     "source_computation_pct": 67,
@@ -34,7 +33,7 @@
       "contains": ["nouns", "verbs", "adjectives", "adverbs", "prepositions", "conjunctions", "articles", "pronouns", "grammar", "constraints"],
       "properties": {
         "name": "TRUGS Language",
-        "version": "0.1.0"
+        "version": "1.0.1"
       },
       "metric_level": "KILO_LANGUAGE",
       "dimension": {}
