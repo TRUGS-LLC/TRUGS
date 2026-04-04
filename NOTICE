@@ -5,8 +5,7 @@ Licensed under the Apache License, Version 2.0.
 
 PATENT NOTICE
 
-Self-modification of graph structures during agent execution — where the
-executing agent modifies the graph governing its behavior — is the subject
-of U.S. patent application 19/575,491 and is not licensed under this
-Apache 2.0 license. See https://github.com/Xepayac/XEPAYAC_LLC for
+This license does not cover self-developing graph systems. Graph structures
+that modify themselves during execution are the subject of U.S. patent
+application 19/575,491. See https://github.com/Xepayac/XEPAYAC_LLC for
 AGPL 3.0 and commercial licensing.
