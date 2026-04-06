@@ -23,7 +23,7 @@
         "purpose": "TRUGS v1.0.0 specification — protocol (7 boundaries, 16 rules), language (190 words, BNF grammar), validator, examples, paper"
       },
       "parent_id": null,
-      "contains": ["doc_readme", "doc_license", "folder_protocol", "folder_language", "folder_examples", "folder_tools", "folder_paper"],
+      "contains": ["doc_readme", "doc_license", "doc_agent", "doc_notice", "folder_protocol", "folder_language", "folder_examples", "folder_tools", "folder_paper"],
       "metric_level": "KILO_FOLDER",
       "dimension": "folder_structure"
     },
@@ -45,6 +45,31 @@
       "properties": {
         "name": "LICENSE",
         "purpose": "Apache 2.0 — TRUGS LLC"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "folder_structure"
+    },
+
+    {
+      "id": "doc_agent",
+      "type": "DOCUMENT",
+      "properties": {
+        "name": "AGENT.md",
+        "purpose": "Agent instructions — TRL vocabulary primer, repo navigation, validation commands"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "doc_notice",
+      "type": "DOCUMENT",
+      "properties": {
+        "name": "NOTICE",
+        "purpose": "Apache 2.0 attribution notice — TRUGS LLC copyright and license"
       },
       "parent_id": "root",
       "contains": [],
@@ -150,7 +175,7 @@
       "properties": {
         "name": "TRUGS_LANGUAGE/SPEC_vocabulary.md",
         "purpose": "190 words across 8 parts of speech — every word defined with source (computation or law) and CORE status",
-        "lines": 553
+        "lines": 552
       },
       "parent_id": "folder_language",
       "contains": [],
@@ -163,7 +188,7 @@
       "properties": {
         "name": "TRUGS_LANGUAGE/SPEC_grammar.md",
         "purpose": "BNF grammar, composition rules, 12 validation rules for TRL sentences",
-        "lines": 297
+        "lines": 302
       },
       "parent_id": "folder_language",
       "contains": [],
@@ -176,7 +201,7 @@
       "properties": {
         "name": "TRUGS_LANGUAGE/SPEC_examples.md",
         "purpose": "30 parsed examples across 13 patterns — each sentence decomposed into subject, modal, verb, object",
-        "lines": 415
+        "lines": 424
       },
       "parent_id": "folder_language",
       "contains": [],
@@ -334,7 +359,7 @@
       "properties": {
         "name": "PAPER",
         "purpose": "Academic paper — TRUGS specification, TRL compilation algorithm, graph-sentence equivalence",
-        "file_count": 5
+        "file_count": 6
       },
       "parent_id": "root",
       "contains": [],
@@ -343,22 +368,22 @@
     }
   ],
   "edges": [
-    {"from_id": "doc_readme", "to_id": "root", "relation": "describes", "properties": {}},
-    {"from_id": "spec_core", "to_id": "folder_protocol", "relation": "governs", "properties": {"scope": "CORE defines the universal foundation all other specs build on"}},
-    {"from_id": "spec_validation", "to_id": "spec_core", "relation": "implements", "properties": {"scope": "16 rules that enforce CORE boundaries"}},
-    {"from_id": "spec_branches", "to_id": "spec_core", "relation": "implements", "properties": {"scope": "Domain vocabularies built on CORE structure"}},
-    {"from_id": "spec_fundamentals", "to_id": "spec_core", "relation": "describes", "properties": {"scope": "Gentle introduction to CORE concepts"}},
-    {"from_id": "spec_schema", "to_id": "spec_core", "relation": "implements", "properties": {"scope": "JSON schema formalizing CORE field definitions"}},
-    {"from_id": "lang_vocabulary", "to_id": "spec_core", "relation": "implements", "properties": {"scope": "190 words drawn from CORE primitives"}},
-    {"from_id": "lang_grammar", "to_id": "lang_vocabulary", "relation": "uses", "properties": {"scope": "Grammar rules compose vocabulary words"}},
-    {"from_id": "lang_examples", "to_id": "lang_grammar", "relation": "uses", "properties": {"scope": "30 examples parsed against the grammar"}},
-    {"from_id": "lang_trug", "to_id": "lang_vocabulary", "relation": "implements", "properties": {"scope": "Self-defining TRUG uses vocabulary words as nodes"}},
-    {"from_id": "folder_examples", "to_id": "spec_branches", "relation": "implements", "properties": {"scope": "7 domain examples demonstrate branch vocabularies"}},
-    {"from_id": "folder_examples", "to_id": "spec_core", "relation": "implements", "properties": {"scope": "All examples validate against CORE rules"}},
-    {"from_id": "tools_validate", "to_id": "spec_validation", "relation": "implements", "properties": {"scope": "Python implementation of all 16 validation rules"}},
-    {"from_id": "tools_test", "to_id": "tools_validate", "relation": "tests", "properties": {}},
-    {"from_id": "tools_memory", "to_id": "spec_core", "relation": "implements", "properties": {"scope": "Memory graphs validate against CORE"}},
-    {"from_id": "folder_paper", "to_id": "spec_core", "relation": "describes", "properties": {"scope": "Academic paper presenting the specification"}},
-    {"from_id": "folder_paper", "to_id": "folder_language", "relation": "describes", "properties": {"scope": "Paper presents TRL compilation algorithm"}}
+    {"from_id": "doc_readme", "to_id": "root", "relation": "REFERENCES", "properties": {}},
+    {"from_id": "spec_core", "to_id": "folder_protocol", "relation": "GOVERNS", "properties": {"scope": "CORE defines the universal foundation all other specs build on"}},
+    {"from_id": "spec_validation", "to_id": "spec_core", "relation": "IMPLEMENTS", "properties": {"scope": "16 rules that enforce CORE boundaries"}},
+    {"from_id": "spec_branches", "to_id": "spec_core", "relation": "IMPLEMENTS", "properties": {"scope": "Domain vocabularies built on CORE structure"}},
+    {"from_id": "spec_fundamentals", "to_id": "spec_core", "relation": "REFERENCES", "properties": {"scope": "Gentle introduction to CORE concepts"}},
+    {"from_id": "spec_schema", "to_id": "spec_core", "relation": "IMPLEMENTS", "properties": {"scope": "JSON schema formalizing CORE field definitions"}},
+    {"from_id": "lang_vocabulary", "to_id": "spec_core", "relation": "IMPLEMENTS", "properties": {"scope": "190 words drawn from CORE primitives"}},
+    {"from_id": "lang_grammar", "to_id": "lang_vocabulary", "relation": "DEPENDS_ON", "properties": {"scope": "Grammar rules compose vocabulary words"}},
+    {"from_id": "lang_examples", "to_id": "lang_grammar", "relation": "DEPENDS_ON", "properties": {"scope": "30 examples parsed against the grammar"}},
+    {"from_id": "lang_trug", "to_id": "lang_vocabulary", "relation": "IMPLEMENTS", "properties": {"scope": "Self-defining TRUG uses vocabulary words as nodes"}},
+    {"from_id": "folder_examples", "to_id": "spec_branches", "relation": "IMPLEMENTS", "properties": {"scope": "7 domain examples demonstrate branch vocabularies"}},
+    {"from_id": "folder_examples", "to_id": "spec_core", "relation": "IMPLEMENTS", "properties": {"scope": "All examples validate against CORE rules"}},
+    {"from_id": "tools_validate", "to_id": "spec_validation", "relation": "IMPLEMENTS", "properties": {"scope": "Python implementation of all 16 validation rules"}},
+    {"from_id": "tools_test", "to_id": "tools_validate", "relation": "IMPLEMENTS", "properties": {}},
+    {"from_id": "tools_memory", "to_id": "spec_core", "relation": "IMPLEMENTS", "properties": {"scope": "Memory graphs validate against CORE"}},
+    {"from_id": "folder_paper", "to_id": "spec_core", "relation": "REFERENCES", "properties": {"scope": "Academic paper presenting the specification"}},
+    {"from_id": "folder_paper", "to_id": "folder_language", "relation": "REFERENCES", "properties": {"scope": "Paper presents TRL compilation algorithm"}}
   ]
 }
