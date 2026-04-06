@@ -1,0 +1,1827 @@
+{
+  "trug_version": "1.0",
+  "name": "Heart Health Paper Series \u2014 Complete Graph",
+  "description": "6 papers, 403 paragraph-level nodes, 210 cross-paper edges. Blueprint for combined paper.",
+  "nodes": [
+    {
+      "id": "P1",
+      "type": "DOCUMENT",
+      "label": "The Evidence-Based Medicine Pyramid",
+      "status": "DONE",
+      "file": "PAPER_1316_evidence_based_medicine_pyramid.md",
+      "words": 5500
+    },
+    {
+      "id": "P2",
+      "type": "DOCUMENT",
+      "label": "The History of Statin Drugs",
+      "status": "DONE",
+      "file": "PAPER_1316_history_of_statin_drugs.md",
+      "words": 7500
+    },
+    {
+      "id": "P3",
+      "type": "DOCUMENT",
+      "label": "Should I Take a Statin?",
+      "status": "DONE",
+      "file": "PAPER_1316_statin_alternatives_and_criticisms.md",
+      "words": 8500
+    },
+    {
+      "id": "P4",
+      "type": "DOCUMENT",
+      "label": "The Gundry Diet: Evidence Review",
+      "status": "DONE",
+      "file": "PAPER_1316_gundry_diet_evidence_review.md",
+      "words": 7000
+    },
+    {
+      "id": "P5",
+      "type": "DOCUMENT",
+      "label": "Managing Statin Side Effects",
+      "status": "DONE",
+      "file": "PAPER_1316_statin_side_effects_and_management.md",
+      "words": 7000
+    },
+    {
+      "id": "P6",
+      "type": "DOCUMENT",
+      "label": "The Statin-Metabolic Paradox",
+      "status": "DONE",
+      "file": "PAPER_1316_statin_metabolic_paradox.md",
+      "words": 5500
+    },
+    {
+      "id": "COMBINED",
+      "type": "DOCUMENT",
+      "label": "Combined Paper",
+      "status": "TODO"
+    },
+    {
+      "id": "STUDY_CTT",
+      "type": "REFERENCE",
+      "label": "CTT Collaboration",
+      "summary": "IPD meta-analyses 2005-2024, foundational statin synthesis",
+      "papers": [
+        "P2",
+        "P3",
+        "P5",
+        "P6"
+      ]
+    },
+    {
+      "id": "STUDY_JUPITER",
+      "type": "REFERENCE",
+      "label": "JUPITER Trial",
+      "summary": "Rosuvastatin, healthy elevated-CRP, 44% reduction + diabetes signal",
+      "papers": [
+        "P2",
+        "P3",
+        "P5",
+        "P6"
+      ]
+    },
+    {
+      "id": "STUDY_PREDIMED",
+      "type": "REFERENCE",
+      "label": "PREDIMED Trial",
+      "summary": "Mediterranean diet ~30% CV reduction",
+      "papers": [
+        "P3",
+        "P4",
+        "P6"
+      ]
+    },
+    {
+      "id": "STUDY_FRAMINGHAM",
+      "type": "REFERENCE",
+      "label": "Framingham Heart Study",
+      "summary": "1948-present, established CV risk factors",
+      "papers": [
+        "P1",
+        "P2",
+        "P3"
+      ]
+    },
+    {
+      "id": "STUDY_4S",
+      "type": "REFERENCE",
+      "label": "4S Trial",
+      "summary": "First statin mortality trial, 30% reduction",
+      "papers": [
+        "P2"
+      ]
+    },
+    {
+      "id": "STUDY_DPP",
+      "type": "REFERENCE",
+      "label": "Diabetes Prevention Program",
+      "summary": "Lifestyle 58% diabetes reduction",
+      "papers": [
+        "P6"
+      ]
+    },
+    {
+      "id": "STUDY_SAMSON",
+      "type": "REFERENCE",
+      "label": "SAMSON Trial",
+      "summary": "90% nocebo ratio for statin symptoms",
+      "papers": [
+        "P2",
+        "P5"
+      ]
+    },
+    {
+      "id": "STUDY_SELECT",
+      "type": "REFERENCE",
+      "label": "SELECT Trial",
+      "summary": "Semaglutide 20% MACE in non-diabetic obese",
+      "papers": [
+        "P6"
+      ]
+    },
+    {
+      "id": "STUDY_EMPAREG",
+      "type": "REFERENCE",
+      "label": "EMPA-REG OUTCOME",
+      "summary": "Empagliflozin 38% CV death reduction",
+      "papers": [
+        "P6"
+      ]
+    },
+    {
+      "id": "STUDY_METSIM",
+      "type": "REFERENCE",
+      "label": "METSIM Cohort",
+      "summary": "Statins decrease insulin sensitivity 24%",
+      "papers": [
+        "P6"
+      ]
+    },
+    {
+      "id": "STUDY_MENDELIAN",
+      "type": "REFERENCE",
+      "label": "Mendelian Randomization",
+      "summary": "Genetic evidence for LDL causality",
+      "papers": [
+        "P3"
+      ]
+    },
+    {
+      "id": "STUDY_BLUE_ZONES",
+      "type": "REFERENCE",
+      "label": "Blue Zones Research",
+      "summary": "5 longevity regions eat lectin-rich foods",
+      "papers": [
+        "P4"
+      ]
+    },
+    {
+      "id": "STUDY_SLCO1B1",
+      "type": "REFERENCE",
+      "label": "SEARCH/SLCO1B1",
+      "summary": "4.5x-17x myopathy risk genetic variant",
+      "papers": [
+        "P5"
+      ]
+    },
+    {
+      "id": "STUDY_LANCET2025",
+      "type": "REFERENCE",
+      "label": "Lancet 2025 Label Analysis",
+      "summary": "62/66 labeled side effects unsupported",
+      "papers": [
+        "P5"
+      ]
+    },
+    {
+      "id": "STUDY_SHE2024",
+      "type": "REFERENCE",
+      "label": "She 2024 Cell Metabolism",
+      "summary": "Statins suppress GLP-1 via microbiome",
+      "papers": [
+        "P6"
+      ]
+    },
+    {
+      "id": "STUDY_CTT2024",
+      "type": "REFERENCE",
+      "label": "CTT 2024 Diabetes Analysis",
+      "summary": "36% diabetes increase, 13% retinal complications",
+      "papers": [
+        "P6"
+      ]
+    },
+    {
+      "id": "S1.1",
+      "type": "SECTION",
+      "label": "P1 Introduction",
+      "summary": "EBM origins 1979-1996, pyramid shape reflects volume",
+      "parent": "P1"
+    },
+    {
+      "id": "S1.2",
+      "type": "SECTION",
+      "label": "P1 Expert Opinion (L7)",
+      "summary": "Immediately available but bias-susceptible",
+      "parent": "P1"
+    },
+    {
+      "id": "S1.3",
+      "type": "SECTION",
+      "label": "P1 Animal/In Vitro (L6)",
+      "summary": "Hypotheses but don't translate",
+      "parent": "P1"
+    },
+    {
+      "id": "S1.4",
+      "type": "SECTION",
+      "label": "P1 Case Reports (L5)",
+      "summary": "First signals, no causation",
+      "parent": "P1"
+    },
+    {
+      "id": "S1.5",
+      "type": "SECTION",
+      "label": "P1 Case-Control (L4)",
+      "summary": "Doll/Hill smoking, odds ratios",
+      "parent": "P1"
+    },
+    {
+      "id": "S1.6",
+      "type": "SECTION",
+      "label": "P1 Cohort (L3)",
+      "summary": "Framingham, Nurses Health, British Doctors",
+      "parent": "P1"
+    },
+    {
+      "id": "S1.7",
+      "type": "SECTION",
+      "label": "P1 RCTs (L2)",
+      "summary": "Gold standard, MRC Streptomycin, WHI",
+      "parent": "P1"
+    },
+    {
+      "id": "S1.8",
+      "type": "SECTION",
+      "label": "P1 Systematic Reviews (L1)",
+      "summary": "Lau streptokinase, 80/day by 2019",
+      "parent": "P1"
+    },
+    {
+      "id": "S1.9",
+      "type": "SECTION",
+      "label": "P1 Guidelines (Apex)",
+      "summary": "Translate evidence into recommendations",
+      "parent": "P1"
+    },
+    {
+      "id": "S1.10",
+      "type": "SECTION",
+      "label": "P1 Organizations",
+      "summary": "Cochrane, NICE, WHO, AHRQ, USPSTF, GRADE",
+      "parent": "P1"
+    },
+    {
+      "id": "S1.11",
+      "type": "SECTION",
+      "label": "P1 Modern Revisions",
+      "summary": "Murad wavy lines, 6S, GRADE framework",
+      "parent": "P1"
+    },
+    {
+      "id": "S1.12",
+      "type": "SECTION",
+      "label": "P1 Pyramid in Numbers",
+      "summary": "Volume at each level, evidence epidemic",
+      "parent": "P1"
+    },
+    {
+      "id": "S1.13",
+      "type": "SECTION",
+      "label": "P1 Criticisms",
+      "summary": "Design over quality, internal vs external validity",
+      "parent": "P1"
+    },
+    {
+      "id": "S1.14",
+      "type": "SECTION",
+      "label": "P1 Conclusion",
+      "summary": "Teaching tool not dogma",
+      "parent": "P1"
+    },
+    {
+      "id": "S2.1",
+      "type": "SECTION",
+      "label": "P2 Cholesterol Hypothesis",
+      "summary": "Pre-statin era: Anitschkow, Keys, bile sequestrants, niacin, fibrates",
+      "parent": "P2"
+    },
+    {
+      "id": "S2.2",
+      "type": "SECTION",
+      "label": "P2 Discovery",
+      "summary": "Endo 6000 broths, compactin 1973, lovastatin 1987",
+      "parent": "P2"
+    },
+    {
+      "id": "S2.3",
+      "type": "SECTION",
+      "label": "P2 Case Reports",
+      "summary": "Yamamoto 1980, Mabuchi, early observations",
+      "parent": "P2"
+    },
+    {
+      "id": "S2.4",
+      "type": "SECTION",
+      "label": "P2 Observational",
+      "summary": "Framingham, MRFIT, Seven Countries",
+      "parent": "P2"
+    },
+    {
+      "id": "S2.5",
+      "type": "SECTION",
+      "label": "P2 RCTs",
+      "summary": "11 trials: 4S through HOPE-3",
+      "parent": "P2"
+    },
+    {
+      "id": "S2.6",
+      "type": "SECTION",
+      "label": "P2 CTT Meta-Analyses",
+      "summary": "20% per mmol/L across all subgroups",
+      "parent": "P2"
+    },
+    {
+      "id": "S2.7",
+      "type": "SECTION",
+      "label": "P2 Guidelines",
+      "summary": "ATP I-III, 2013/2018 ACC/AHA, ESC/EAS",
+      "parent": "P2"
+    },
+    {
+      "id": "S2.8",
+      "type": "SECTION",
+      "label": "P2 Controversies",
+      "summary": "Nocebo, diabetes, cognitive, Statin Wars",
+      "parent": "P2"
+    },
+    {
+      "id": "S2.9",
+      "type": "SECTION",
+      "label": "P2 Scale",
+      "summary": "200M users, Lipitor $125B",
+      "parent": "P2"
+    },
+    {
+      "id": "S2.10",
+      "type": "SECTION",
+      "label": "P2 Beyond Statins",
+      "summary": "PCSK9i, inclisiran, bempedoic acid",
+      "parent": "P2"
+    },
+    {
+      "id": "S2.11",
+      "type": "SECTION",
+      "label": "P2 Conclusion",
+      "summary": "Every pyramid level contributed",
+      "parent": "P2"
+    },
+    {
+      "id": "S3.1",
+      "type": "SECTION",
+      "label": "P3 Wrong Cholesterol?",
+      "summary": "Particle size, LDL-P, ApoB, Lp(a), oxLDL, TG/HDL, skeptics",
+      "parent": "P3"
+    },
+    {
+      "id": "S3.2",
+      "type": "SECTION",
+      "label": "P3 Wrong Measurements?",
+      "summary": "RRR vs ARR, all-cause mortality, CTT transparency",
+      "parent": "P3"
+    },
+    {
+      "id": "S3.3",
+      "type": "SECTION",
+      "label": "P3 Alternatives",
+      "summary": "14 interventions from Mediterranean diet to keto",
+      "parent": "P3"
+    },
+    {
+      "id": "S3.4",
+      "type": "SECTION",
+      "label": "P3 Synthesis",
+      "summary": "6 valid criticisms, 3 refuted, comparison table, patient questions",
+      "parent": "P3"
+    },
+    {
+      "id": "S4.1",
+      "type": "SECTION",
+      "label": "P4 The Man",
+      "summary": "Credentials, business, conflict, weak research",
+      "parent": "P4"
+    },
+    {
+      "id": "S4.2",
+      "type": "SECTION",
+      "label": "P4 Lectin Hypothesis",
+      "summary": "What lectins are, claims, cooking 90-99%, gut permeability",
+      "parent": "P4"
+    },
+    {
+      "id": "S4.3",
+      "type": "SECTION",
+      "label": "P4 Population Paradox",
+      "summary": "Blue Zones, Adventists, PREDIMED, GBD",
+      "parent": "P4"
+    },
+    {
+      "id": "S4.4",
+      "type": "SECTION",
+      "label": "P4 Three-Tier Eval",
+      "summary": "Well-supported, plausible, likely wrong",
+      "parent": "P4"
+    },
+    {
+      "id": "S4.5",
+      "type": "SECTION",
+      "label": "P4 Selective Citations",
+      "summary": "In vitro w/o dose, Fasano beyond scope",
+      "parent": "P4"
+    },
+    {
+      "id": "S4.6",
+      "type": "SECTION",
+      "label": "P4 Ahead of Curve",
+      "summary": "Microbiome, sweeteners, UPF, PPIs",
+      "parent": "P4"
+    },
+    {
+      "id": "S4.7",
+      "type": "SECTION",
+      "label": "P4 Practical Tables",
+      "summary": "Keep, consider, question",
+      "parent": "P4"
+    },
+    {
+      "id": "S4.8",
+      "type": "SECTION",
+      "label": "P4 Supplements",
+      "summary": "Lectin Shield, business model",
+      "parent": "P4"
+    },
+    {
+      "id": "S4.9",
+      "type": "SECTION",
+      "label": "P4 Medical System",
+      "summary": "Nutrition training, reactive healthcare",
+      "parent": "P4"
+    },
+    {
+      "id": "S4.10",
+      "type": "SECTION",
+      "label": "P4 Reader Questions",
+      "summary": "Reintroduction, cost-benefit",
+      "parent": "P4"
+    },
+    {
+      "id": "S4.11",
+      "type": "SECTION",
+      "label": "P4 Conclusion",
+      "summary": "Pyramid applied to Gundry \u2014 Level 6 hypothesis",
+      "parent": "P4"
+    },
+    {
+      "id": "S5.1",
+      "type": "SECTION",
+      "label": "P5 What Is Real",
+      "summary": "Lancet 2025: 62/66 unsupported",
+      "parent": "P5"
+    },
+    {
+      "id": "S5.2",
+      "type": "SECTION",
+      "label": "P5 Nocebo",
+      "summary": "SAMSON 90%, StatinWISE, CTT >90%",
+      "parent": "P5"
+    },
+    {
+      "id": "S5.3",
+      "type": "SECTION",
+      "label": "P5 Muscle Spectrum",
+      "summary": "Myalgia 1-5%, myopathy 1/10K, rhabdo 0.2/10K",
+      "parent": "P5"
+    },
+    {
+      "id": "S5.4",
+      "type": "SECTION",
+      "label": "P5 CoQ10",
+      "summary": "Equivocal meta-analyses, 200-400mg trial",
+      "parent": "P5"
+    },
+    {
+      "id": "S5.5",
+      "type": "SECTION",
+      "label": "P5 Vitamin D",
+      "summary": "89% tolerance after supplementation",
+      "parent": "P5"
+    },
+    {
+      "id": "S5.6",
+      "type": "SECTION",
+      "label": "P5 Exercise",
+      "summary": "STOMP: 2x myalgia but no strength loss",
+      "parent": "P5"
+    },
+    {
+      "id": "S5.7",
+      "type": "SECTION",
+      "label": "P5 Diet",
+      "summary": "Mediterranean, omega-3, magnesium",
+      "parent": "P5"
+    },
+    {
+      "id": "S5.8",
+      "type": "SECTION",
+      "label": "P5 Drug Interactions",
+      "summary": "CYP3A4, grapefruit, fibrates",
+      "parent": "P5"
+    },
+    {
+      "id": "S5.9",
+      "type": "SECTION",
+      "label": "P5 Diabetes",
+      "summary": "JUPITER 25%, concentrated in pre-diabetic",
+      "parent": "P5"
+    },
+    {
+      "id": "S5.10",
+      "type": "SECTION",
+      "label": "P5 Liver",
+      "summary": "0.5-2% transient, FDA removed monitoring",
+      "parent": "P5"
+    },
+    {
+      "id": "S5.11",
+      "type": "SECTION",
+      "label": "P5 Genetics",
+      "summary": "SLCO1B1 4.5x-17x, CPIC 2022",
+      "parent": "P5"
+    },
+    {
+      "id": "S5.12",
+      "type": "SECTION",
+      "label": "P5 Switching",
+      "summary": "Hydrophilic, alternate-day, dose reduction",
+      "parent": "P5"
+    },
+    {
+      "id": "S5.13",
+      "type": "SECTION",
+      "label": "P5 Aspirin",
+      "summary": "Synergy, MAFLD caution",
+      "parent": "P5"
+    },
+    {
+      "id": "S5.14",
+      "type": "SECTION",
+      "label": "P5 Fatigue",
+      "summary": "UCSD Golomb 2012",
+      "parent": "P5"
+    },
+    {
+      "id": "S5.15",
+      "type": "SECTION",
+      "label": "P5 When to Stop",
+      "summary": "Red flags, rechallenge protocol",
+      "parent": "P5"
+    },
+    {
+      "id": "S5.16",
+      "type": "SECTION",
+      "label": "P5 Other Effects",
+      "summary": "Cognitive, neuropathy, tendon, cataracts, sleep",
+      "parent": "P5"
+    },
+    {
+      "id": "S5.17",
+      "type": "SECTION",
+      "label": "P5 Decision Framework",
+      "summary": "8-step sequence",
+      "parent": "P5"
+    },
+    {
+      "id": "S6.1",
+      "type": "SECTION",
+      "label": "P6 One Disease",
+      "summary": "Reaven 1988 Syndrome X",
+      "parent": "P6"
+    },
+    {
+      "id": "S6.2",
+      "type": "SECTION",
+      "label": "P6 Metabolic Harm",
+      "summary": "CTT 2024, METSIM, 5 mechanisms",
+      "parent": "P6"
+    },
+    {
+      "id": "S6.3",
+      "type": "SECTION",
+      "label": "P6 Feedback Loop",
+      "summary": "7 steps, Crandall attenuates lifestyle",
+      "parent": "P6"
+    },
+    {
+      "id": "S6.4",
+      "type": "SECTION",
+      "label": "P6 Same Disease?",
+      "summary": "Nielsen 2014, CTT 2024 retinal",
+      "parent": "P6"
+    },
+    {
+      "id": "S6.5",
+      "type": "SECTION",
+      "label": "P6 Shared Root",
+      "summary": "Type 3 diabetes, brain insulin resistance",
+      "parent": "P6"
+    },
+    {
+      "id": "S6.6",
+      "type": "SECTION",
+      "label": "P6 Alternatives",
+      "summary": "DPP, PREDIMED, metformin, SGLT2, SELECT",
+      "parent": "P6"
+    },
+    {
+      "id": "S6.7",
+      "type": "SECTION",
+      "label": "P6 Guidelines Gap",
+      "summary": "No guideline addresses feedback loop",
+      "parent": "P6"
+    },
+    {
+      "id": "S6.8",
+      "type": "SECTION",
+      "label": "P6 What Should Change",
+      "summary": "5-step protocol",
+      "parent": "P6"
+    },
+    {
+      "id": "S6.9",
+      "type": "SECTION",
+      "label": "P6 Patient Questions",
+      "summary": "HOMA-IR, HbA1c, lifestyle trial",
+      "parent": "P6"
+    },
+    {
+      "id": "S6.10",
+      "type": "SECTION",
+      "label": "P6 Conclusion",
+      "summary": "Reaven was right",
+      "parent": "P6"
+    }
+  ],
+  "edges": [
+    {
+      "from_id": "S1.6",
+      "to_id": "S2.4",
+      "relation": "REFERENCES",
+      "label": "Framingham cited in cohort level and statin observational evidence"
+    },
+    {
+      "from_id": "S1.6",
+      "to_id": "S3.1",
+      "relation": "REFERENCES",
+      "label": "Framingham cited in cohort level and LDL-P discordance"
+    },
+    {
+      "from_id": "S1.8",
+      "to_id": "S2.6",
+      "relation": "REFERENCES",
+      "label": "Systematic review level and CTT meta-analyses"
+    },
+    {
+      "from_id": "S1.8",
+      "to_id": "S3.2",
+      "relation": "REFERENCES",
+      "label": "Systematic review level and CTT transparency"
+    },
+    {
+      "from_id": "S1.10",
+      "to_id": "S2.7",
+      "relation": "REFERENCES",
+      "label": "NICE/WHO/GRADE organizations and statin guidelines"
+    },
+    {
+      "from_id": "S1.10",
+      "to_id": "S5.1",
+      "relation": "REFERENCES",
+      "label": "NICE cited in organizations and Lancet 2025"
+    },
+    {
+      "from_id": "S1.5",
+      "to_id": "S2.4",
+      "relation": "REFERENCES",
+      "label": "Doll/Hill and observational study context"
+    },
+    {
+      "from_id": "S1.9",
+      "to_id": "S2.7",
+      "relation": "REFERENCES",
+      "label": "Guidelines apex and statin guideline evolution"
+    },
+    {
+      "from_id": "S2.1",
+      "to_id": "S3.3",
+      "relation": "REFERENCES",
+      "label": "Pre-statin niacin and niacin cautionary tale"
+    },
+    {
+      "from_id": "S2.1",
+      "to_id": "S5.8",
+      "relation": "REFERENCES",
+      "label": "Pre-statin fibrates and fibrate drug interactions"
+    },
+    {
+      "from_id": "S2.2",
+      "to_id": "S3.3",
+      "relation": "REFERENCES",
+      "label": "Lovastatin discovery and red yeast rice"
+    },
+    {
+      "from_id": "S2.5",
+      "to_id": "S3.2",
+      "relation": "REFERENCES",
+      "label": "Statin RCTs and RRR vs ARR critique"
+    },
+    {
+      "from_id": "S2.5",
+      "to_id": "S5.9",
+      "relation": "REFERENCES",
+      "label": "JUPITER trial and JUPITER diabetes signal"
+    },
+    {
+      "from_id": "S2.5",
+      "to_id": "S6.2",
+      "relation": "REFERENCES",
+      "label": "JUPITER trial and metabolic effects"
+    },
+    {
+      "from_id": "S2.6",
+      "to_id": "S3.2",
+      "relation": "REFERENCES",
+      "label": "CTT findings and CTT transparency"
+    },
+    {
+      "from_id": "S2.6",
+      "to_id": "S5.2",
+      "relation": "REFERENCES",
+      "label": "CTT and CTT side-effect meta-analysis"
+    },
+    {
+      "from_id": "S2.6",
+      "to_id": "S6.2",
+      "relation": "REFERENCES",
+      "label": "CTT 2005-2015 and CTT 2024"
+    },
+    {
+      "from_id": "S2.7",
+      "to_id": "S3.1",
+      "relation": "REFERENCES",
+      "label": "ESC/EAS guidelines and ApoB targets"
+    },
+    {
+      "from_id": "S2.8",
+      "to_id": "S5.2",
+      "relation": "REFERENCES",
+      "label": "Nocebo controversy and SAMSON/StatinWISE"
+    },
+    {
+      "from_id": "S2.8",
+      "to_id": "S5.9",
+      "relation": "REFERENCES",
+      "label": "Diabetes controversy and JUPITER diabetes"
+    },
+    {
+      "from_id": "S2.8",
+      "to_id": "S5.16",
+      "relation": "REFERENCES",
+      "label": "Cognitive controversy and cognitive effects detail"
+    },
+    {
+      "from_id": "S2.10",
+      "to_id": "S3.1",
+      "relation": "REFERENCES",
+      "label": "PCSK9i pipeline and Lp(a) therapies"
+    },
+    {
+      "from_id": "S3.1",
+      "to_id": "S6.1",
+      "relation": "REFERENCES",
+      "label": "TG/HDL insulin resistance and Reaven Syndrome X"
+    },
+    {
+      "from_id": "S3.3",
+      "to_id": "S4.3",
+      "relation": "REFERENCES",
+      "label": "PREDIMED in alternatives and population paradox"
+    },
+    {
+      "from_id": "S3.3",
+      "to_id": "S5.4",
+      "relation": "REFERENCES",
+      "label": "CoQ10 as adjunct and CoQ10 meta-analyses"
+    },
+    {
+      "from_id": "S3.3",
+      "to_id": "S5.6",
+      "relation": "REFERENCES",
+      "label": "Exercise CV effect and STOMP"
+    },
+    {
+      "from_id": "S3.3",
+      "to_id": "S6.6",
+      "relation": "REFERENCES",
+      "label": "PREDIMED dietary and PREDIMED insulin-neutral"
+    },
+    {
+      "from_id": "S3.3",
+      "to_id": "S6.6",
+      "relation": "REFERENCES",
+      "label": "Exercise CV and DPP lifestyle"
+    },
+    {
+      "from_id": "S3.4",
+      "to_id": "S5.1",
+      "relation": "REFERENCES",
+      "label": "Validated criticisms and Lancet 2025"
+    },
+    {
+      "from_id": "S4.3",
+      "to_id": "S3.3",
+      "relation": "REFERENCES",
+      "label": "PREDIMED in Blue Zones and dietary alternatives"
+    },
+    {
+      "from_id": "S4.3",
+      "to_id": "S6.6",
+      "relation": "REFERENCES",
+      "label": "PREDIMED lectin contradiction and insulin-neutral"
+    },
+    {
+      "from_id": "S4.4",
+      "to_id": "S3.3",
+      "relation": "REFERENCES",
+      "label": "Resistant starch and fiber evidence"
+    },
+    {
+      "from_id": "S4.1",
+      "to_id": "S1.4",
+      "relation": "REFERENCES",
+      "label": "Gundry poster abstracts and case report level"
+    },
+    {
+      "from_id": "S4.11",
+      "to_id": "S1.1",
+      "relation": "REFERENCES",
+      "label": "Pyramid applied to Gundry and EBM framework"
+    },
+    {
+      "from_id": "S5.2",
+      "to_id": "S2.8",
+      "relation": "REFERENCES",
+      "label": "SAMSON nocebo and statin controversies"
+    },
+    {
+      "from_id": "S5.2",
+      "to_id": "S2.6",
+      "relation": "REFERENCES",
+      "label": "CTT 2022 side effects and CTT collaboration"
+    },
+    {
+      "from_id": "S5.2",
+      "to_id": "S3.2",
+      "relation": "REFERENCES",
+      "label": "CTT 2022 safety and CTT transparency"
+    },
+    {
+      "from_id": "S5.4",
+      "to_id": "S3.3",
+      "relation": "REFERENCES",
+      "label": "CoQ10 detail and CoQ10 adjunct mention"
+    },
+    {
+      "from_id": "S5.7",
+      "to_id": "S3.3",
+      "relation": "REFERENCES",
+      "label": "Mediterranean for tolerance and PREDIMED"
+    },
+    {
+      "from_id": "S5.7",
+      "to_id": "S3.3",
+      "relation": "REFERENCES",
+      "label": "Omega-3 management and omega-3 trials"
+    },
+    {
+      "from_id": "S5.8",
+      "to_id": "S2.2",
+      "relation": "REFERENCES",
+      "label": "CYP3A4 and statin pharmacology"
+    },
+    {
+      "from_id": "S5.9",
+      "to_id": "S2.5",
+      "relation": "REFERENCES",
+      "label": "JUPITER diabetes and JUPITER trial"
+    },
+    {
+      "from_id": "S5.9",
+      "to_id": "S2.6",
+      "relation": "REFERENCES",
+      "label": "Sattar meta-analysis and CTT framework"
+    },
+    {
+      "from_id": "S5.9",
+      "to_id": "S3.2",
+      "relation": "REFERENCES",
+      "label": "5:1 trade-off and NNT framework"
+    },
+    {
+      "from_id": "S5.12",
+      "to_id": "S2.2",
+      "relation": "REFERENCES",
+      "label": "Statin switching and statin properties"
+    },
+    {
+      "from_id": "S6.1",
+      "to_id": "S3.1",
+      "relation": "REFERENCES",
+      "label": "Reaven Syndrome X and TG/HDL ratio"
+    },
+    {
+      "from_id": "S6.2",
+      "to_id": "S2.6",
+      "relation": "REFERENCES",
+      "label": "CTT 2024 and CTT collaboration"
+    },
+    {
+      "from_id": "S6.2",
+      "to_id": "S5.9",
+      "relation": "REFERENCES",
+      "label": "CTT 2024 diabetes and Sattar/JUPITER data"
+    },
+    {
+      "from_id": "S6.2",
+      "to_id": "S5.4",
+      "relation": "REFERENCES",
+      "label": "CoQ10 beta-cell damage and CoQ10 muscle mechanism"
+    },
+    {
+      "from_id": "S6.2",
+      "to_id": "S3.3",
+      "relation": "REFERENCES",
+      "label": "CoQ10 depletion and CoQ10 supplementation"
+    },
+    {
+      "from_id": "S6.6",
+      "to_id": "S3.3",
+      "relation": "REFERENCES",
+      "label": "DPP lifestyle and exercise CV evidence"
+    },
+    {
+      "from_id": "S6.6",
+      "to_id": "S3.3",
+      "relation": "REFERENCES",
+      "label": "PREDIMED insulin-neutral and dietary comparison"
+    },
+    {
+      "from_id": "S6.6",
+      "to_id": "S4.3",
+      "relation": "REFERENCES",
+      "label": "PREDIMED insulin-neutral and Gundry epidemiology"
+    },
+    {
+      "from_id": "S6.6",
+      "to_id": "S5.9",
+      "relation": "REFERENCES",
+      "label": "Metformin/ATOMIC and statin diabetes management"
+    },
+    {
+      "from_id": "S6.6",
+      "to_id": "S5.9",
+      "relation": "REFERENCES",
+      "label": "SELECT and JUPITER diabetes population"
+    },
+    {
+      "from_id": "S6.7",
+      "to_id": "S2.7",
+      "relation": "REFERENCES",
+      "label": "Guidelines gap and ACC/AHA framework"
+    },
+    {
+      "from_id": "S6.5",
+      "to_id": "S5.9",
+      "relation": "REFERENCES",
+      "label": "Type 3 diabetes and statin-diabetes connection"
+    },
+    {
+      "from_id": "S2.3",
+      "to_id": "S1.4",
+      "relation": "DEPENDS_ON",
+      "label": "Case reports require understanding case report evidence level"
+    },
+    {
+      "from_id": "S2.4",
+      "to_id": "S1.6",
+      "relation": "DEPENDS_ON",
+      "label": "Framingham data requires cohort methodology"
+    },
+    {
+      "from_id": "S2.5",
+      "to_id": "S1.7",
+      "relation": "DEPENDS_ON",
+      "label": "Statin RCTs require RCT evidence level"
+    },
+    {
+      "from_id": "S2.6",
+      "to_id": "S1.8",
+      "relation": "DEPENDS_ON",
+      "label": "CTT requires systematic review methodology"
+    },
+    {
+      "from_id": "S2.7",
+      "to_id": "S1.9",
+      "relation": "DEPENDS_ON",
+      "label": "Guidelines require guideline methodology"
+    },
+    {
+      "from_id": "S2.7",
+      "to_id": "S1.11",
+      "relation": "DEPENDS_ON",
+      "label": "GRADE-rated guidelines require GRADE framework"
+    },
+    {
+      "from_id": "S2.8",
+      "to_id": "S5.2",
+      "relation": "DEPENDS_ON",
+      "label": "Nocebo controversy requires SAMSON/StatinWISE evidence"
+    },
+    {
+      "from_id": "S2.8",
+      "to_id": "S5.9",
+      "relation": "DEPENDS_ON",
+      "label": "Diabetes controversy requires detailed findings"
+    },
+    {
+      "from_id": "S2.8",
+      "to_id": "S6.2",
+      "relation": "DEPENDS_ON",
+      "label": "Diabetes controversy requires metabolic mechanisms"
+    },
+    {
+      "from_id": "S2.10",
+      "to_id": "S3.1",
+      "relation": "DEPENDS_ON",
+      "label": "PCSK9i pipeline needs Lp(a) blind spot context"
+    },
+    {
+      "from_id": "S3.2",
+      "to_id": "S2.5",
+      "relation": "DEPENDS_ON",
+      "label": "RRR vs ARR critique requires knowing which RCTs"
+    },
+    {
+      "from_id": "S3.2",
+      "to_id": "S1.7",
+      "relation": "DEPENDS_ON",
+      "label": "NNT framing requires knowing what an RCT is"
+    },
+    {
+      "from_id": "S3.2",
+      "to_id": "S1.8",
+      "relation": "DEPENDS_ON",
+      "label": "CTT transparency requires understanding meta-analysis"
+    },
+    {
+      "from_id": "S3.2",
+      "to_id": "S2.6",
+      "relation": "DEPENDS_ON",
+      "label": "CTT transparency requires knowing CTT findings"
+    },
+    {
+      "from_id": "S3.1",
+      "to_id": "S2.1",
+      "relation": "DEPENDS_ON",
+      "label": "Cholesterol skeptics require cholesterol hypothesis"
+    },
+    {
+      "from_id": "S3.1",
+      "to_id": "S1.6",
+      "relation": "DEPENDS_ON",
+      "label": "Mendelian randomization requires understanding cohort limitations"
+    },
+    {
+      "from_id": "S3.3",
+      "to_id": "S1.7",
+      "relation": "DEPENDS_ON",
+      "label": "Evaluating PREDIMED requires RCT methodology"
+    },
+    {
+      "from_id": "S3.3",
+      "to_id": "S2.2",
+      "relation": "DEPENDS_ON",
+      "label": "Red yeast rice requires lovastatin history"
+    },
+    {
+      "from_id": "S3.3",
+      "to_id": "S2.1",
+      "relation": "DEPENDS_ON",
+      "label": "Niacin tale requires pre-statin niacin context"
+    },
+    {
+      "from_id": "S3.3",
+      "to_id": "S5.4",
+      "relation": "DEPENDS_ON",
+      "label": "CoQ10 adjunct requires CoQ10 mechanism"
+    },
+    {
+      "from_id": "S3.3",
+      "to_id": "S6.1",
+      "relation": "DEPENDS_ON",
+      "label": "Keto/metabolic syndrome requires Reaven framework"
+    },
+    {
+      "from_id": "S3.4",
+      "to_id": "S1.1",
+      "relation": "DEPENDS_ON",
+      "label": "Validated criticisms require pyramid framework"
+    },
+    {
+      "from_id": "S3.1",
+      "to_id": "S2.7",
+      "relation": "DEPENDS_ON",
+      "label": "ApoB targets require guideline context"
+    },
+    {
+      "from_id": "S3.1",
+      "to_id": "S2.10",
+      "relation": "DEPENDS_ON",
+      "label": "Lp(a) therapies require PCSK9i context"
+    },
+    {
+      "from_id": "S3.1",
+      "to_id": "S6.1",
+      "relation": "DEPENDS_ON",
+      "label": "TG/HDL ratio requires insulin resistance root cause"
+    },
+    {
+      "from_id": "S4.11",
+      "to_id": "S1.1",
+      "relation": "DEPENDS_ON",
+      "label": "Gundry pyramid evaluation requires EBM pyramid"
+    },
+    {
+      "from_id": "S4.1",
+      "to_id": "S1.4",
+      "relation": "DEPENDS_ON",
+      "label": "Classifying poster abstracts requires case report level"
+    },
+    {
+      "from_id": "S4.5",
+      "to_id": "S1.13",
+      "relation": "DEPENDS_ON",
+      "label": "Selective citation requires EBM criticism understanding"
+    },
+    {
+      "from_id": "S4.3",
+      "to_id": "S1.7",
+      "relation": "DEPENDS_ON",
+      "label": "PREDIMED as counter-evidence requires RCT methodology"
+    },
+    {
+      "from_id": "S4.3",
+      "to_id": "S1.6",
+      "relation": "DEPENDS_ON",
+      "label": "Blue Zones requires cohort study level"
+    },
+    {
+      "from_id": "S4.2",
+      "to_id": "S1.3",
+      "relation": "DEPENDS_ON",
+      "label": "Freed's 'no human evidence' requires animal/in-vitro limitations"
+    },
+    {
+      "from_id": "S5.2",
+      "to_id": "S1.7",
+      "relation": "DEPENDS_ON",
+      "label": "SAMSON design requires RCT methodology"
+    },
+    {
+      "from_id": "S5.2",
+      "to_id": "S1.8",
+      "relation": "DEPENDS_ON",
+      "label": "CTT side-effect meta-analysis requires SR methodology"
+    },
+    {
+      "from_id": "S5.1",
+      "to_id": "S1.8",
+      "relation": "DEPENDS_ON",
+      "label": "Lancet 2025 requires meta-analytic methods"
+    },
+    {
+      "from_id": "S5.9",
+      "to_id": "S2.5",
+      "relation": "DEPENDS_ON",
+      "label": "JUPITER diabetes requires knowing what JUPITER tested"
+    },
+    {
+      "from_id": "S5.8",
+      "to_id": "S2.2",
+      "relation": "DEPENDS_ON",
+      "label": "Drug interactions require statin pharmacology"
+    },
+    {
+      "from_id": "S5.9",
+      "to_id": "S3.2",
+      "relation": "DEPENDS_ON",
+      "label": "5:1 trade-off requires RRR/ARR/NNT understanding"
+    },
+    {
+      "from_id": "S5.4",
+      "to_id": "S3.3",
+      "relation": "DEPENDS_ON",
+      "label": "CoQ10 for side effects requires CoQ10 mechanism from P3"
+    },
+    {
+      "from_id": "S5.7",
+      "to_id": "S3.3",
+      "relation": "DEPENDS_ON",
+      "label": "Mediterranean for tolerance requires dietary evidence from P3"
+    },
+    {
+      "from_id": "S5.12",
+      "to_id": "S2.2",
+      "relation": "DEPENDS_ON",
+      "label": "Statin switching requires statin properties"
+    },
+    {
+      "from_id": "S6.1",
+      "to_id": "S3.1",
+      "relation": "DEPENDS_ON",
+      "label": "Metabolic paradox requires TG/HDL as IR marker"
+    },
+    {
+      "from_id": "S6.1",
+      "to_id": "S2.7",
+      "relation": "DEPENDS_ON",
+      "label": "Critique of fragmented guidelines requires knowing guidelines"
+    },
+    {
+      "from_id": "S6.2",
+      "to_id": "S2.6",
+      "relation": "DEPENDS_ON",
+      "label": "CTT 2024 requires CTT methodology"
+    },
+    {
+      "from_id": "S6.2",
+      "to_id": "S5.9",
+      "relation": "DEPENDS_ON",
+      "label": "High-intensity diabetes requires prior statin-diabetes knowledge"
+    },
+    {
+      "from_id": "S6.2",
+      "to_id": "S5.4",
+      "relation": "DEPENDS_ON",
+      "label": "CoQ10 beta-cell damage requires CoQ10 depletion from P5"
+    },
+    {
+      "from_id": "S6.3",
+      "to_id": "S5.9",
+      "relation": "DEPENDS_ON",
+      "label": "Feedback loop requires JUPITER diabetes from P5"
+    },
+    {
+      "from_id": "S6.3",
+      "to_id": "S3.1",
+      "relation": "DEPENDS_ON",
+      "label": "Feedback loop requires TG/HDL marker"
+    },
+    {
+      "from_id": "S6.5",
+      "to_id": "S5.9",
+      "relation": "DEPENDS_ON",
+      "label": "Type 3 diabetes requires statin-diabetes base case"
+    },
+    {
+      "from_id": "S6.6",
+      "to_id": "S3.3",
+      "relation": "DEPENDS_ON",
+      "label": "PREDIMED insulin-neutral requires CV evidence first"
+    },
+    {
+      "from_id": "S6.6",
+      "to_id": "S5.9",
+      "relation": "DEPENDS_ON",
+      "label": "SELECT countering diabetes requires understanding the problem"
+    },
+    {
+      "from_id": "S6.7",
+      "to_id": "S2.7",
+      "relation": "DEPENDS_ON",
+      "label": "Guidelines gap requires knowing current guidelines"
+    },
+    {
+      "from_id": "S6.8",
+      "to_id": "S1.9",
+      "relation": "DEPENDS_ON",
+      "label": "Protocol changes require understanding guideline construction"
+    },
+    {
+      "from_id": "S3.1",
+      "to_id": "S2.4",
+      "relation": "SUPERSEDES",
+      "label": "LDL-P discordance supersedes Framingham simple cholesterol framing"
+    },
+    {
+      "from_id": "S3.1",
+      "to_id": "S2.7",
+      "relation": "SUPERSEDES",
+      "label": "ApoB as better marker supersedes LDL-C guideline targets"
+    },
+    {
+      "from_id": "S3.2",
+      "to_id": "S2.5",
+      "relation": "SUPERSEDES",
+      "label": "ARR/NNT reanalysis supersedes headline RRR results"
+    },
+    {
+      "from_id": "S3.2",
+      "to_id": "S2.6",
+      "relation": "SUPERSEDES",
+      "label": "CTT transparency critique supersedes uncritical CTT presentation"
+    },
+    {
+      "from_id": "S3.1",
+      "to_id": "S2.4",
+      "relation": "SUPERSEDES",
+      "label": "Mendelian randomization supersedes observational correlation limitations"
+    },
+    {
+      "from_id": "S5.2",
+      "to_id": "S2.8",
+      "relation": "SUPERSEDES",
+      "label": "SAMSON/StatinWISE supersedes vague nocebo controversy framing"
+    },
+    {
+      "from_id": "S5.9",
+      "to_id": "S2.8",
+      "relation": "SUPERSEDES",
+      "label": "Detailed diabetes data supersedes controversy-level mention"
+    },
+    {
+      "from_id": "S5.4",
+      "to_id": "S3.3",
+      "relation": "SUPERSEDES",
+      "label": "Detailed CoQ10 meta-analyses supersede brief adjunct mention"
+    },
+    {
+      "from_id": "S5.11",
+      "to_id": "S2.8",
+      "relation": "SUPERSEDES",
+      "label": "SLCO1B1 pharmacogenomics supersedes Statin Wars framing"
+    },
+    {
+      "from_id": "S5.1",
+      "to_id": "S2.8",
+      "relation": "SUPERSEDES",
+      "label": "Lancet 2025 62/66 supersedes vague controversy framing"
+    },
+    {
+      "from_id": "S6.2",
+      "to_id": "S5.9",
+      "relation": "SUPERSEDES",
+      "label": "CTT 2024 123K supersedes Sattar/Preiss meta-analyses"
+    },
+    {
+      "from_id": "S6.2",
+      "to_id": "S5.9",
+      "relation": "SUPERSEDES",
+      "label": "METSIM mechanisms supersede JUPITER observation-only signal"
+    },
+    {
+      "from_id": "S6.2",
+      "to_id": "S5.9",
+      "relation": "SUPERSEDES",
+      "label": "5 mechanisms supersede unexplained diabetes association"
+    },
+    {
+      "from_id": "S6.2",
+      "to_id": "S5.9",
+      "relation": "SUPERSEDES",
+      "label": "She 2024 GLP-1 supersedes earlier mechanistic explanations"
+    },
+    {
+      "from_id": "S6.3",
+      "to_id": "S5.9",
+      "relation": "SUPERSEDES",
+      "label": "7-step feedback loop supersedes simple 0.5% absolute risk framing"
+    },
+    {
+      "from_id": "S6.4",
+      "to_id": "S5.9",
+      "relation": "SUPERSEDES",
+      "label": "CTT 2024 retinal supersedes reassuring pre-diabetic framing"
+    },
+    {
+      "from_id": "S6.5",
+      "to_id": "S5.16",
+      "relation": "SUPERSEDES",
+      "label": "Type 3 diabetes supersedes generic cognitive effects claim"
+    },
+    {
+      "from_id": "S6.6",
+      "to_id": "S3.3",
+      "relation": "SUPERSEDES",
+      "label": "SELECT 20% MACE supersedes exercise-only as pharmacological alternative"
+    },
+    {
+      "from_id": "S6.6",
+      "to_id": "S2.10",
+      "relation": "SUPERSEDES",
+      "label": "SGLT2i outcomes supersede beyond-statins as established not emerging"
+    },
+    {
+      "from_id": "S6.6",
+      "to_id": "S3.3",
+      "relation": "SUPERSEDES",
+      "label": "PREDIMED metabolic context supersedes standalone dietary comparison"
+    },
+    {
+      "from_id": "S6.8",
+      "to_id": "S3.4",
+      "relation": "SUPERSEDES",
+      "label": "5-step protocol supersedes P3 bottom line with metabolic pathway"
+    },
+    {
+      "from_id": "S6.1",
+      "to_id": "S3.1",
+      "relation": "SUPERSEDES",
+      "label": "Full Reaven framework supersedes TG/HDL ratio as proxy mention"
+    },
+    {
+      "from_id": "S4.3",
+      "to_id": "S3.3",
+      "relation": "SUPERSEDES",
+      "label": "Blue Zones population data supersedes single-trial PREDIMED"
+    },
+    {
+      "from_id": "S5.2",
+      "to_id": "S3.2",
+      "relation": "SUPERSEDES",
+      "label": "CTT 2022 safety data partially supersedes transparency complaint"
+    },
+    {
+      "from_id": "S1.1",
+      "to_id": "S2.1",
+      "relation": "FEEDS",
+      "label": "Not all evidence equal raises: how strong is statin evidence?"
+    },
+    {
+      "from_id": "S1.13",
+      "to_id": "S3.2",
+      "relation": "FEEDS",
+      "label": "Design-over-quality criticism leads to RRR vs ARR examination"
+    },
+    {
+      "from_id": "S1.13",
+      "to_id": "S3.1",
+      "relation": "FEEDS",
+      "label": "Internal vs external validity leads to cholesterol skeptics"
+    },
+    {
+      "from_id": "S1.8",
+      "to_id": "S3.2",
+      "relation": "FEEDS",
+      "label": "Meta-analysis limitations leads to CTT transparency"
+    },
+    {
+      "from_id": "S1.14",
+      "to_id": "S2.1",
+      "relation": "FEEDS",
+      "label": "Use the hierarchy leads to applying it to cholesterol"
+    },
+    {
+      "from_id": "S1.11",
+      "to_id": "S3.4",
+      "relation": "FEEDS",
+      "label": "GRADE separating certainty/strength leads to comparison table"
+    },
+    {
+      "from_id": "S2.5",
+      "to_id": "S3.2",
+      "relation": "FEEDS",
+      "label": "Eleven RCTs leads to: what is the absolute benefit?"
+    },
+    {
+      "from_id": "S2.6",
+      "to_id": "S3.2",
+      "relation": "FEEDS",
+      "label": "CTT conclusions leads to questioning data access"
+    },
+    {
+      "from_id": "S2.8",
+      "to_id": "S5.1",
+      "relation": "FEEDS",
+      "label": "Nocebo controversy leads to Lancet 2025 systematic evaluation"
+    },
+    {
+      "from_id": "S2.8",
+      "to_id": "S6.1",
+      "relation": "FEEDS",
+      "label": "Diabetes controversy leads to metabolic root question"
+    },
+    {
+      "from_id": "S2.8",
+      "to_id": "S3.1",
+      "relation": "FEEDS",
+      "label": "Statin Wars leads to examining skeptics and evidence"
+    },
+    {
+      "from_id": "S2.9",
+      "to_id": "S3.4",
+      "relation": "FEEDS",
+      "label": "200M users leads to: should I be one of them?"
+    },
+    {
+      "from_id": "S2.10",
+      "to_id": "S3.1",
+      "relation": "FEEDS",
+      "label": "Beyond-statins leads to Lp(a) therapies as unmet need"
+    },
+    {
+      "from_id": "S2.11",
+      "to_id": "S3.1",
+      "relation": "FEEDS",
+      "label": "Statin history conclusion leads to: is LDL-C the right target?"
+    },
+    {
+      "from_id": "S2.1",
+      "to_id": "S3.1",
+      "relation": "FEEDS",
+      "label": "Cholesterol hypothesis origin leads to those who challenge it"
+    },
+    {
+      "from_id": "S2.4",
+      "to_id": "S3.1",
+      "relation": "FEEDS",
+      "label": "Correlation limitation leads to Mendelian randomization"
+    },
+    {
+      "from_id": "S2.5",
+      "to_id": "S5.9",
+      "relation": "FEEDS",
+      "label": "JUPITER results lead to examining diabetes signal"
+    },
+    {
+      "from_id": "S3.1",
+      "to_id": "S6.5",
+      "relation": "FEEDS",
+      "label": "Particle size problem leads to shared root hypothesis"
+    },
+    {
+      "from_id": "S3.1",
+      "to_id": "S5.11",
+      "relation": "FEEDS",
+      "label": "Lp(a) genetic blind spot leads to pharmacogenomic testing"
+    },
+    {
+      "from_id": "S3.1",
+      "to_id": "S6.1",
+      "relation": "FEEDS",
+      "label": "TG/HDL as IR marker leads to Reaven framework"
+    },
+    {
+      "from_id": "S3.1",
+      "to_id": "S4.5",
+      "relation": "FEEDS",
+      "label": "Cholesterol skeptic citation leads to Gundry citation pattern"
+    },
+    {
+      "from_id": "S3.2",
+      "to_id": "S4.11",
+      "relation": "FEEDS",
+      "label": "NNT framing leads to applying same pyramid to Gundry"
+    },
+    {
+      "from_id": "S3.2",
+      "to_id": "S6.2",
+      "relation": "FEEDS",
+      "label": "All-cause mortality uncertainty leads to metabolic effects"
+    },
+    {
+      "from_id": "S3.3",
+      "to_id": "S4.3",
+      "relation": "FEEDS",
+      "label": "Mediterranean diet leads to population paradox"
+    },
+    {
+      "from_id": "S3.3",
+      "to_id": "S6.6",
+      "relation": "FEEDS",
+      "label": "PREDIMED dietary leads to PREDIMED metabolic"
+    },
+    {
+      "from_id": "S3.3",
+      "to_id": "S5.4",
+      "relation": "FEEDS",
+      "label": "CoQ10 adjunct leads to detailed evaluation"
+    },
+    {
+      "from_id": "S3.3",
+      "to_id": "S6.1",
+      "relation": "FEEDS",
+      "label": "Keto raises LDL but improves MetS leads to paradox"
+    },
+    {
+      "from_id": "S3.3",
+      "to_id": "S6.6",
+      "relation": "FEEDS",
+      "label": "Exercise 30% CV leads to DPP 58% lifestyle"
+    },
+    {
+      "from_id": "S3.4",
+      "to_id": "S5.1",
+      "relation": "FEEDS",
+      "label": "Validated criticisms leads to systematic side-effect evaluation"
+    },
+    {
+      "from_id": "S3.4",
+      "to_id": "S5.17",
+      "relation": "FEEDS",
+      "label": "Six doctor questions leads to 8-step framework"
+    },
+    {
+      "from_id": "S3.4",
+      "to_id": "S6.8",
+      "relation": "FEEDS",
+      "label": "Bottom line leads to metabolic 5-step protocol"
+    },
+    {
+      "from_id": "S4.1",
+      "to_id": "S1.2",
+      "relation": "FEEDS",
+      "label": "Expert-opinion-level evidence leads to why it ranks lowest"
+    },
+    {
+      "from_id": "S4.2",
+      "to_id": "S3.1",
+      "relation": "FEEDS",
+      "label": "Absence of human lectin evidence feeds skeptic methodology"
+    },
+    {
+      "from_id": "S4.3",
+      "to_id": "S3.3",
+      "relation": "FEEDS",
+      "label": "PREDIMED contradicting lectins feeds dietary evidence"
+    },
+    {
+      "from_id": "S4.6",
+      "to_id": "S6.2",
+      "relation": "FEEDS",
+      "label": "Gundry ahead on microbiome feeds She 2024 statin-microbiome"
+    },
+    {
+      "from_id": "S4.9",
+      "to_id": "S6.1",
+      "relation": "FEEDS",
+      "label": "Medical system critique feeds metabolic paradox fragmented treatment"
+    },
+    {
+      "from_id": "S4.8",
+      "to_id": "S3.3",
+      "relation": "FEEDS",
+      "label": "Supplement business feeds red yeast rice = lovastatin irony"
+    },
+    {
+      "from_id": "S5.2",
+      "to_id": "S3.4",
+      "relation": "FEEDS",
+      "label": "90% nocebo feeds validated criticism: overattributed side effects"
+    },
+    {
+      "from_id": "S5.4",
+      "to_id": "S6.2",
+      "relation": "FEEDS",
+      "label": "CoQ10 muscle depletion feeds CoQ10 beta-cell damage"
+    },
+    {
+      "from_id": "S5.9",
+      "to_id": "S6.1",
+      "relation": "FEEDS",
+      "label": "JUPITER diabetes signal feeds metabolic paradox opening"
+    },
+    {
+      "from_id": "S5.9",
+      "to_id": "S6.3",
+      "relation": "FEEDS",
+      "label": "0.5% absolute risk feeds 7-step loop showing understated problem"
+    },
+    {
+      "from_id": "S5.9",
+      "to_id": "S6.3",
+      "relation": "FEEDS",
+      "label": "Concentrated in pre-diabetic feeds Crandall attenuating lifestyle"
+    },
+    {
+      "from_id": "S5.9",
+      "to_id": "S6.4",
+      "relation": "FEEDS",
+      "label": "5:1 trade-off feeds 20-year trajectory unstudied"
+    },
+    {
+      "from_id": "S5.9",
+      "to_id": "S6.8",
+      "relation": "FEEDS",
+      "label": "Monitor/don't stop feeds 5-step protocol for real monitoring"
+    },
+    {
+      "from_id": "S5.16",
+      "to_id": "S6.5",
+      "relation": "FEEDS",
+      "label": "Claimed cognitive effects feed Type 3 diabetes mechanism"
+    },
+    {
+      "from_id": "S5.3",
+      "to_id": "S6.2",
+      "relation": "FEEDS",
+      "label": "CoQ10 myopathy risk feeds CoQ10 diabetes mechanism"
+    },
+    {
+      "from_id": "S6.1",
+      "to_id": "S3.1",
+      "relation": "FEEDS",
+      "label": "Reaven Syndrome X feeds back to TG/HDL as practical marker"
+    },
+    {
+      "from_id": "S6.3",
+      "to_id": "S3.4",
+      "relation": "FEEDS",
+      "label": "Feedback loop feeds validated criticism: primary prevention overstated"
+    },
+    {
+      "from_id": "S6.6",
+      "to_id": "S4.3",
+      "relation": "FEEDS",
+      "label": "PREDIMED insulin-neutral feeds Gundry correct Mediterranean embrace"
+    },
+    {
+      "from_id": "S6.10",
+      "to_id": "S3.4",
+      "relation": "FEEDS",
+      "label": "Metabolic paradox conclusion feeds back to P3 decision framework"
+    },
+    {
+      "from_id": "P1",
+      "to_id": "P2",
+      "relation": "FEEDS",
+      "label": "P1 provides framework P2 applies to statins"
+    },
+    {
+      "from_id": "P2",
+      "to_id": "P3",
+      "relation": "FEEDS",
+      "label": "P2 builds case, P3 examines counter-arguments"
+    },
+    {
+      "from_id": "P3",
+      "to_id": "P4",
+      "relation": "FEEDS",
+      "label": "P3 surveys alternatives, P4 deep-dives Gundry"
+    },
+    {
+      "from_id": "P2",
+      "to_id": "P5",
+      "relation": "FEEDS",
+      "label": "P2 establishes evidence, P5 addresses side effects"
+    },
+    {
+      "from_id": "P5",
+      "to_id": "P6",
+      "relation": "FEEDS",
+      "label": "P5 identifies diabetes risk, P6 explores systemic implications"
+    },
+    {
+      "from_id": "P3",
+      "to_id": "P6",
+      "relation": "FEEDS",
+      "label": "P3 raises measurement questions, P6 asks if target itself is wrong"
+    },
+    {
+      "from_id": "P1",
+      "to_id": "P4",
+      "relation": "FEEDS",
+      "label": "P1 provides framework P4 uses to evaluate Gundry"
+    }
+  ]
+}
