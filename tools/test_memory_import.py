@@ -350,3 +350,128 @@ def test_import_report_new_ids_match_count(sample_dir):
         # All IDs start with mem- (actual remember() format).
         for mid in report.new_ids:
             assert mid.startswith("mem-")
+
+
+# ─── Audit round 2 regression tests ──────────────────────────────────────────
+
+
+def test_parse_strip_yaml_double_quotes():
+    """Audit #19 — `name: "Format: subtitle"` strips the quotes."""
+    from memory_import import _strip_yaml_quotes
+    assert _strip_yaml_quotes('"Hello"') == "Hello"
+    assert _strip_yaml_quotes("'Hello'") == "Hello"
+    assert _strip_yaml_quotes('"multi: word"') == "multi: word"
+    assert _strip_yaml_quotes("plain") == "plain"
+    assert _strip_yaml_quotes('"mismatched') == '"mismatched'
+    assert _strip_yaml_quotes('') == ''
+
+
+def test_parse_frontmatter_with_quoted_colon():
+    """Audit #19 — a quoted value containing a colon keeps the colon but loses the quotes."""
+    content = '---\nname: "Format: subtitle"\ndescription: "A: B: C"\ntype: user\n---\nBody'
+    parsed = parse_markdown_with_frontmatter(content)
+    assert parsed.name == "Format: subtitle"
+    assert parsed.description == "A: B: C"
+    assert parsed.type == "user"
+
+
+def test_import_preserves_files_with_same_body_but_different_metadata(tmp_path):
+    """Audit #7 (MED) — idempotency keyed on (text, rule, rationale, type).
+
+    Before the fix, two files with identical prose bodies but different
+    `name:` frontmatter would silently lose the second. Now both import.
+    """
+    (tmp_path / "a.md").write_text(
+        "---\nname: Rule A\ndescription: First version\ntype: feedback\n---\nSame body text",
+        encoding="utf-8",
+    )
+    (tmp_path / "b.md").write_text(
+        "---\nname: Rule B\ndescription: Different phrasing\ntype: feedback\n---\nSame body text",
+        encoding="utf-8",
+    )
+    with tempfile.TemporaryDirectory() as out_dir:
+        out = Path(out_dir) / "memory.trug.json"
+        report = import_flat_directory(tmp_path, out)
+    assert report.imported == 2, f"Both files should import despite same body, got {report}"
+    assert report.skipped_duplicate == 0
+
+
+def test_import_still_dedupes_true_duplicates(tmp_path):
+    """Audit #7 — two files with identical frontmatter AND body are still 1."""
+    for name in ("a.md", "b.md"):
+        (tmp_path / name).write_text(
+            "---\nname: Same\ndescription: Same\ntype: feedback\n---\nSame body",
+            encoding="utf-8",
+        )
+    with tempfile.TemporaryDirectory() as out_dir:
+        out = Path(out_dir) / "memory.trug.json"
+        report = import_flat_directory(tmp_path, out)
+    assert report.imported == 1
+    assert report.skipped_duplicate == 1
+
+
+def test_import_skips_symlinks_escaping_src_dir(tmp_path):
+    """Audit #16 (LOW) — symlinks pointing outside src_dir are skipped."""
+    import os
+    # Create a target OUTSIDE src_dir.
+    outside_file = tmp_path / "outside.md"
+    outside_file.write_text("outside content", encoding="utf-8")
+
+    # src_dir contains one real file and one symlink to outside.
+    src_dir = tmp_path / "src"
+    src_dir.mkdir()
+    (src_dir / "real.md").write_text("real content", encoding="utf-8")
+    try:
+        os.symlink(str(outside_file), str(src_dir / "sneaky.md"))
+    except (OSError, NotImplementedError):
+        pytest.skip("Filesystem does not support symlinks")
+
+    with tempfile.TemporaryDirectory() as out_dir:
+        out = Path(out_dir) / "memory.trug.json"
+        report = import_flat_directory(src_dir, out)
+        assert report.imported == 1
+        assert report.skipped_outside == 1
+        # The imported memory is the real one, not the symlinked outside file.
+        graph = load_graph(out)
+        texts = [n["properties"]["text"] for n in graph["nodes"] if n.get("id") != "memory-root"]
+        assert texts == ["real content"]
+
+
+def test_import_checkpoints_partial_progress(tmp_path):
+    """Audit #9 (MED) — checkpoint_every flushes progress mid-walk.
+
+    We simulate a crash by raising from remember() after N imports and
+    check that the already-imported memories are persisted to disk.
+    """
+    for i in range(10):
+        (tmp_path / f"f{i:02d}.md").write_text(
+            f"---\nname: Rule {i}\ntype: feedback\n---\nBody {i}",
+            encoding="utf-8",
+        )
+
+    with tempfile.TemporaryDirectory() as out_dir:
+        out = Path(out_dir) / "memory.trug.json"
+        # Wrap remember to raise on the 7th call.
+        import memory_import
+        real_remember = memory_import.remember
+        counter = [0]
+
+        def flaky_remember(*args, **kwargs):
+            counter[0] += 1
+            if counter[0] == 7:
+                raise RuntimeError("simulated crash")
+            return real_remember(*args, **kwargs)
+
+        memory_import.remember = flaky_remember
+        try:
+            with pytest.raises(RuntimeError):
+                import_flat_directory(tmp_path, out, checkpoint_every=3)
+        finally:
+            memory_import.remember = real_remember
+
+        # The file should exist with at least the first 6 imports (two
+        # full checkpoint batches of 3 each) flushed.
+        assert out.exists()
+        g = load_graph(out)
+        persisted = [n for n in g["nodes"] if n.get("id") != "memory-root"]
+        assert len(persisted) >= 6, f"Expected ≥6 persisted, got {len(persisted)}"

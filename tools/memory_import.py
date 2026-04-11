@@ -82,6 +82,24 @@ class ParsedFile:
         return self.frontmatter.get("type")
 
 
+def _strip_yaml_quotes(value: str) -> str:
+    """Remove a single enclosing pair of YAML quotes from a value.
+
+    YAML authors commonly wrap values containing colons or other special
+    chars: `name: "Format: subtitle"`. The minimal hand-rolled parser
+    used to leave the literal quotes in the value, which would then flow
+    into `rule` / `rationale` and show up in the rendered MEMORY.md.
+    This helper strips matching `"..."` or `'...'` pairs. Nested or
+    escaped quotes are NOT expanded — that would require a real YAML
+    parser, which is explicitly out of scope (zero runtime deps).
+    (Audit #19.)
+    """
+    if len(value) >= 2:
+        if (value[0] == '"' and value[-1] == '"') or (value[0] == "'" and value[-1] == "'"):
+            return value[1:-1]
+    return value
+
+
 def parse_markdown_with_frontmatter(content: str) -> ParsedFile:
     """Parse a markdown file's YAML frontmatter and body.
 
@@ -118,7 +136,7 @@ def parse_markdown_with_frontmatter(content: str) -> ParsedFile:
         if ":" not in line:
             continue
         key, _, value = line.partition(":")
-        frontmatter[key.strip()] = value.strip()
+        frontmatter[key.strip()] = _strip_yaml_quotes(value.strip())
 
     body = "\n".join(body_lines).strip()
     return ParsedFile(frontmatter=frontmatter, body=body)
@@ -160,12 +178,26 @@ class ImportReport:
     imported: int = 0
     skipped_duplicate: int = 0
     skipped_malformed: int = 0
+    skipped_outside: int = 0  # audit #16 — symlink escaping src_dir
     files_scanned: int = 0
     new_ids: List[str] = None  # type: ignore[assignment]
 
     def __post_init__(self) -> None:
         if self.new_ids is None:
             self.new_ids = []
+
+
+def _idempotency_key(text: str, rule: Optional[str], rationale: Optional[str], memory_type: str) -> str:
+    """Stable key used to detect duplicates across imports.
+
+    Earlier versions keyed only on `text`, which silently dropped files
+    with identical prose bodies but different frontmatter (audit #7).
+    The key now folds in `rule`, `rationale`, and `memory_type` so two
+    files with the same body but different metadata are preserved as
+    distinct memories.
+    """
+    parts = [text or "", rule or "", rationale or "", (memory_type or "").lower()]
+    return "\x1f".join(parts)  # unit separator, unlikely in real content
 
 
 def import_flat_directory(
@@ -176,11 +208,14 @@ def import_flat_directory(
     tags: Optional[List[str]] = None,
     source_prefix: Optional[str] = None,
     dry_run: bool = False,
+    checkpoint_every: int = 50,
 ) -> ImportReport:
     """Import every `*.md` file under `src_dir` as a memory in `out_path`.
 
     Args:
-        src_dir: directory to walk (recursive).
+        src_dir: directory to walk (recursive). Symlinks that resolve
+            outside `src_dir` are skipped for safety (audit #16) and
+            counted in `ImportReport.skipped_outside`.
         out_path: memory TRUG output path. Created via `init_memory_graph`
             if it doesn't already exist.
         type_from_filename: when True, derive `memory_type` from the
@@ -192,6 +227,11 @@ def import_flat_directory(
         dry_run: if True, scan and report without writing. Still returns
             an accurate count and a list of IDs that WOULD be created
             (synthesized, not actual graph IDs).
+        checkpoint_every: save the graph to disk every N successful
+            imports, so a Ctrl-C mid-walk preserves partial progress
+            (audit #9). `save_graph` is atomic so interruption of the
+            checkpoint itself is also safe. Default 50. Ignored for
+            dry_run.
 
     Returns:
         ImportReport with counts and the list of new memory IDs.
@@ -202,6 +242,8 @@ def import_flat_directory(
     if not src_dir.exists() or not src_dir.is_dir():
         raise FileNotFoundError(f"Source directory not found: {src_dir}")
 
+    src_dir_resolved = src_dir.resolve()
+
     if out_path.exists():
         graph = load_graph(out_path)
     else:
@@ -211,11 +253,21 @@ def import_flat_directory(
         else:
             graph = init_memory_graph(out_path)
 
-    existing_texts = _collect_existing_texts(graph)
+    existing_keys = _collect_existing_keys(graph)
 
     report = ImportReport()
+    since_checkpoint = 0
     for path in sorted(src_dir.rglob("*.md")):
         report.files_scanned += 1
+
+        # audit #16 — reject symlinks escaping src_dir BEFORE reading.
+        try:
+            resolved = path.resolve()
+            resolved.relative_to(src_dir_resolved)
+        except (ValueError, OSError):
+            report.skipped_outside += 1
+            continue
+
         try:
             content = path.read_text(encoding="utf-8")
         except (OSError, UnicodeDecodeError):
@@ -231,13 +283,16 @@ def import_flat_directory(
             report.skipped_malformed += 1
             continue
 
-        if text in existing_texts:
-            report.skipped_duplicate += 1
-            continue
-
         memory_type = derive_memory_type(parsed, path.name, type_from_filename=type_from_filename)
         rule = parsed.name
         rationale = parsed.description
+
+        # Dedup key folds metadata in — two files with identical body but
+        # different rule/rationale/type are preserved (audit #7).
+        key = _idempotency_key(text, rule, rationale, memory_type)
+        if key in existing_keys:
+            report.skipped_duplicate += 1
+            continue
 
         # source = relative path from src_dir, optionally prefixed.
         rel = path.relative_to(src_dir).as_posix()
@@ -246,7 +301,7 @@ def import_flat_directory(
         if dry_run:
             report.imported += 1
             report.new_ids.append(f"dry-{report.imported:04d}-{path.name}")
-            existing_texts.add(text)
+            existing_keys.add(key)
             continue
 
         new_id = remember(
@@ -260,30 +315,41 @@ def import_flat_directory(
         )
         report.imported += 1
         report.new_ids.append(new_id)
-        existing_texts.add(text)
+        existing_keys.add(key)
 
-    if not dry_run and report.imported > 0:
+        # Periodic checkpoint — flushes partial progress to disk so a
+        # Ctrl-C mid-walk doesn't lose everything (audit #9). save_graph
+        # is atomic, so interruption of the checkpoint itself is safe.
+        since_checkpoint += 1
+        if not dry_run and checkpoint_every > 0 and since_checkpoint >= checkpoint_every:
+            save_graph(out_path, graph)
+            since_checkpoint = 0
+
+    if not dry_run and report.imported > 0 and since_checkpoint > 0:
         save_graph(out_path, graph)
 
     return report
 
 
-def _collect_existing_texts(graph: Dict[str, Any]) -> set:
-    """Return the set of `text` values already present in the graph.
-
-    Used for idempotency — re-running the import against the same
-    directory picks up new files only.
-    """
-    texts = set()
+def _collect_existing_keys(graph: Dict[str, Any]) -> set:
+    """Return the set of idempotency keys already present in the graph (audit #7)."""
+    keys = set()
     for n in graph.get("nodes", []):
         if n.get("id") == "memory-root":
             continue
         if n.get("parent_id") != "memory-root":
             continue
-        t = n.get("properties", {}).get("text")
-        if t:
-            texts.add(t)
-    return texts
+        props = n.get("properties", {})
+        text = props.get("text", "")
+        if not text:
+            continue
+        keys.add(_idempotency_key(
+            text=text,
+            rule=props.get("rule"),
+            rationale=props.get("rationale"),
+            memory_type=props.get("memory_type", ""),
+        ))
+    return keys
 
 
 def _make_ephemeral_graph() -> Dict[str, Any]:
