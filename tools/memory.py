@@ -818,7 +818,8 @@ def _cmd_import_flat(args: argparse.Namespace) -> int:
         f"{prefix}Scanned {report.files_scanned} files. "
         f"Imported {report.imported}. "
         f"Skipped {report.skipped_duplicate} duplicate, "
-        f"{report.skipped_malformed} malformed."
+        f"{report.skipped_malformed} malformed, "
+        f"{report.skipped_outside} symlink-escape."
     )
     if args.dry_run:
         print(f"(No changes written to {args.out_file})")

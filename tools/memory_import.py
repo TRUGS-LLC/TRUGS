@@ -233,6 +233,14 @@ def import_flat_directory(
             checkpoint itself is also safe. Default 50. Ignored for
             dry_run.
 
+            Interrupt contract (audit round 3 R3-6): if this function
+            raises BaseException (including KeyboardInterrupt) mid-walk,
+            the in-memory `graph` dict contains partial state newer than
+            the last on-disk checkpoint. Callers MUST reload from
+            `out_path` after catching — do NOT re-save the in-memory
+            copy or you will clobber the last checkpoint with
+            inconsistent state.
+
     Returns:
         ImportReport with counts and the list of new memory IDs.
     """
