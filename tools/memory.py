@@ -3,14 +3,19 @@
 Memories are nodes. Associations are edges. The graph validates against CORE.
 
 Usage:
-    python tools/memory.py remember <file> "memory text" [--type TYPE] [--tags tag1,tag2]
-    python tools/memory.py recall <file> [--query KEYWORD] [--type TYPE] [--recent N] [--all]
-    python tools/memory.py forget <file> <memory_id>
-    python tools/memory.py associate <file> <from_id> <to_id> [--relation RELATION]
-    python tools/memory.py render <in.trug.json> <out.md> [--budget N] [--include-rationale]
-    python tools/memory.py init <file>
+    trugs-memory init <file>
+    trugs-memory remember <file> "memory text" [flags]
+    trugs-memory recall <file> [flags]
+    trugs-memory forget <file> <memory_id>
+    trugs-memory associate <file> <from_id> <to_id> [--relation RELATION]
+    trugs-memory render <in.trug.json> <out.md> [flags]
+
+Run `trugs-memory <command> --help` for per-command help.
 """
 
+from __future__ import annotations
+
+import argparse
 import json
 import sys
 import uuid
@@ -78,28 +83,70 @@ def remember(
     memory_type: str = "FACT",
     tags: Optional[List[str]] = None,
     source: Optional[str] = None,
+    *,
+    rule: Optional[str] = None,
+    rationale: Optional[str] = None,
+    valid_to: Optional[str] = None,
+    session_id: Optional[str] = None,
+    supersede: Optional[str] = None,
 ) -> str:
-    """Add a memory node to the graph. Returns the new memory ID."""
+    """Add a memory node to the graph. Returns the new memory ID.
+
+    Args:
+        graph: the memory TRUG (mutated in place).
+        text: full-prose memory content. Always stored.
+        memory_type: canonical type. Common values: `user`, `feedback`,
+            `project`, `reference`. Unknown values are accepted.
+        tags: list of free-form tags for retrieval.
+        source: optional URL or path citation.
+
+    Keyword-only args (added in trugs 1.1.0):
+        rule: terse executable form of the memory. If set, renderers
+            prefer this over `text`. Keep under ~140 chars.
+        rationale: explanatory prose — the "why" behind a rule. Not
+            rendered to MEMORY.md by default (agents don't need it in
+            their session context).
+        valid_to: ISO-8601 timestamp at which this memory stops being
+            active. Renderers filter out expired memories. `None` means
+            still active.
+        session_id: identifier of the session that wrote this memory.
+            Enables session-scoped recall and temporal reasoning.
+        supersede: id of an older memory that this one replaces. When
+            set, the old memory gets `valid_to = now()` and
+            `superseded_by = <new id>`, AND a `SUPERSEDES` edge is
+            added from the new memory to the old one. This is the
+            Graphiti-style bi-temporal pattern: nothing is deleted,
+            stale facts are closed.
+    """
     memory_id = f"mem-{uuid.uuid4().hex[:8]}"
     now = datetime.now(timezone.utc).isoformat()
+
+    props: Dict[str, Any] = {
+        "text": text,
+        "memory_type": memory_type,
+        "created": now,
+        "tags": tags or [],
+    }
+    if source is not None:
+        props["source"] = source
+    if rule is not None:
+        props["rule"] = rule
+    if rationale is not None:
+        props["rationale"] = rationale
+    if valid_to is not None:
+        props["valid_to"] = valid_to
+    if session_id is not None:
+        props["session_id"] = session_id
 
     node = {
         "id": memory_id,
         "type": "DATA",
-        "properties": {
-            "text": text,
-            "memory_type": memory_type,
-            "created": now,
-            "tags": tags or [],
-        },
+        "properties": props,
         "parent_id": "memory-root",
         "contains": [],
         "metric_level": "BASE_MEMORY",
         "dimension": "memory",
     }
-
-    if source:
-        node["properties"]["source"] = source
 
     graph["nodes"].append(node)
 
@@ -108,7 +155,38 @@ def remember(
     if root and memory_id not in root.get("contains", []):
         root["contains"].append(memory_id)
 
+    # Handle supersession — close the old memory, link the new one.
+    if supersede is not None:
+        _apply_supersede(graph, new_id=memory_id, old_id=supersede, now=now)
+
     return memory_id
+
+
+def _apply_supersede(
+    graph: Dict[str, Any],
+    *,
+    new_id: str,
+    old_id: str,
+    now: str,
+) -> bool:
+    """Close an old memory and link the new one. Returns True on success.
+
+    Sets `valid_to=now` and `superseded_by=new_id` on the old node, and
+    adds a `SUPERSEDES` edge from `new_id` to `old_id`. If the old node
+    doesn't exist, returns False without raising.
+    """
+    old = _find_node(graph, old_id)
+    if old is None:
+        return False
+    props = old.setdefault("properties", {})
+    # Don't overwrite an explicitly-set valid_to.
+    if "valid_to" not in props or props["valid_to"] is None:
+        props["valid_to"] = now
+    props["superseded_by"] = new_id
+
+    # Add the SUPERSEDES edge if not already present.
+    associate(graph, new_id, old_id, relation="SUPERSEDES")
+    return True
 
 
 # ─── Recall ────────────────────────────────────────────────────────────────────
@@ -119,12 +197,32 @@ def recall(
     memory_type: Optional[str] = None,
     recent: Optional[int] = None,
     all_memories: bool = False,
+    *,
+    active_only: bool = False,
+    now: Optional[datetime] = None,
 ) -> List[Dict[str, Any]]:
-    """Query memories. Returns matching memory nodes."""
+    """Query memories. Returns matching memory nodes.
+
+    Args:
+        graph: the memory TRUG.
+        query: case-insensitive substring match against text, tags, or type.
+        memory_type: exact match on `memory_type` (case-insensitive).
+        recent: limit to N most recent results.
+        all_memories: if True, skip the query/type filters but still respect
+            `active_only` and `recent`.
+
+    Keyword-only args (added in trugs 1.1.0):
+        active_only: if True, exclude memories whose `valid_to` is in the past.
+        now: reference timestamp for `active_only` filtering. Defaults to UTC now.
+    """
     memories = [
         n for n in graph.get("nodes", [])
         if n.get("id") != "memory-root" and n.get("parent_id") == "memory-root"
     ]
+
+    if active_only:
+        ref = now or datetime.now(timezone.utc)
+        memories = [m for m in memories if not _is_expired(m, ref)]
 
     if not all_memories:
         if query:
@@ -132,6 +230,7 @@ def recall(
             memories = [
                 m for m in memories
                 if q in m.get("properties", {}).get("text", "").lower()
+                or q in m.get("properties", {}).get("rule", "").lower()
                 or q in str(m.get("properties", {}).get("tags", [])).lower()
                 or q in m.get("properties", {}).get("memory_type", "").lower()
             ]
@@ -152,6 +251,20 @@ def recall(
         memories = memories[:recent]
 
     return memories
+
+
+def _is_expired(memory: Dict[str, Any], now: datetime) -> bool:
+    """Return True if the memory's `valid_to` is strictly before `now`."""
+    valid_to = memory.get("properties", {}).get("valid_to")
+    if not valid_to:
+        return False
+    try:
+        parsed = datetime.fromisoformat(valid_to)
+    except (TypeError, ValueError):
+        return False  # Fail-open: malformed timestamps are treated as active.
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed < now
 
 
 # ─── Forget ────────────────────────────────────────────────────────────────────
@@ -218,16 +331,22 @@ def _find_node(graph: Dict[str, Any], node_id: str) -> Optional[Dict[str, Any]]:
 
 
 def _format_memory(mem: Dict[str, Any], edges: List[Dict[str, Any]]) -> str:
+    """Format a memory for CLI display. Prefers `rule` over `text` if present."""
     props = mem.get("properties", {})
+    body = props.get("rule") or props.get("text") or ""
     lines = [
         f"  [{mem['id']}] {props.get('memory_type', '?')}",
-        f"    {props.get('text', '')}",
+        f"    {body}",
     ]
     if props.get("tags"):
         lines.append(f"    tags: {', '.join(props['tags'])}")
     if props.get("source"):
         lines.append(f"    source: {props['source']}")
     lines.append(f"    created: {props.get('created', '?')}")
+    if props.get("valid_to"):
+        lines.append(f"    valid_to: {props['valid_to']}")
+    if props.get("superseded_by"):
+        lines.append(f"    superseded_by: {props['superseded_by']}")
 
     # Show associations
     related = [e for e in edges if e.get("from_id") == mem["id"] or e.get("to_id") == mem["id"]]
@@ -240,142 +359,197 @@ def _format_memory(mem: Dict[str, Any], edges: List[Dict[str, Any]]) -> str:
     return "\n".join(lines)
 
 
-# ─── CLI ───────────────────────────────────────────────────────────────────────
+# ─── CLI (argparse) ────────────────────────────────────────────────────────────
 
-def main():
-    if len(sys.argv) < 2:
-        print(__doc__)
-        sys.exit(1)
+def _build_parser() -> argparse.ArgumentParser:
+    """Construct the argparse parser with all subcommands."""
+    parser = argparse.ArgumentParser(
+        prog="trugs-memory",
+        description=(
+            "TRUGS Memory — LLM-native persistent memory as a TRUG graph. "
+            "Memories are nodes, associations are edges, the graph validates against CORE."
+        ),
+    )
+    sub = parser.add_subparsers(dest="command", metavar="command")
+    sub.required = False  # Printed in main() if missing, so we can show the helpful message.
 
-    command = sys.argv[1]
+    # init
+    p_init = sub.add_parser("init", help="Create an empty memory graph.")
+    p_init.add_argument("file", help="Path to the new memory graph file.")
 
-    if command == "init":
-        if len(sys.argv) < 3:
-            print("Usage: memory.py init <file>")
-            sys.exit(1)
-        path = Path(sys.argv[2])
-        if path.exists():
-            print(f"Error: {path} already exists", file=sys.stderr)
-            sys.exit(1)
-        init_memory_graph(path)
-        print(f"Created memory graph: {path}")
-        sys.exit(0)
+    # remember
+    p_rem = sub.add_parser("remember", help="Add a memory to the graph.")
+    p_rem.add_argument("file", help="Path to an existing memory graph.")
+    p_rem.add_argument("text", help="The memory content as prose.")
+    p_rem.add_argument("--type", dest="memory_type", default="FACT",
+                       help="Memory type (e.g. user, feedback, project, reference). Default: FACT")
+    p_rem.add_argument("--tags", default="", help="Comma-separated tags.")
+    p_rem.add_argument("--source", default=None, help="Optional source URL or citation.")
+    p_rem.add_argument("--rule", default=None,
+                       help="Terse executable form of the memory. Renderers prefer this over `text`.")
+    p_rem.add_argument("--rationale", default=None,
+                       help="Explanatory prose. Not rendered to MEMORY.md by default.")
+    p_rem.add_argument("--valid-to", default=None,
+                       help="ISO-8601 timestamp when this memory stops being active.")
+    p_rem.add_argument("--session-id", default=None,
+                       help="Identifier of the session that wrote this memory.")
+    p_rem.add_argument("--supersede", default=None,
+                       help="ID of an older memory this one replaces. Closes the old memory "
+                            "(valid_to=now, superseded_by=<new>) and adds a SUPERSEDES edge.")
 
-    if command == "remember":
-        if len(sys.argv) < 4:
-            print("Usage: memory.py remember <file> \"memory text\" [--type TYPE] [--tags t1,t2] [--source SRC]")
-            sys.exit(1)
-        path = Path(sys.argv[2])
-        text = sys.argv[3]
-        mem_type = "FACT"
-        tags = []
-        source = None
-        i = 4
-        while i < len(sys.argv):
-            if sys.argv[i] == "--type" and i + 1 < len(sys.argv):
-                mem_type = sys.argv[i + 1]
-                i += 2
-            elif sys.argv[i] == "--tags" and i + 1 < len(sys.argv):
-                tags = [t.strip() for t in sys.argv[i + 1].split(",")]
-                i += 2
-            elif sys.argv[i] == "--source" and i + 1 < len(sys.argv):
-                source = sys.argv[i + 1]
-                i += 2
-            else:
-                i += 1
+    # recall
+    p_rec = sub.add_parser("recall", help="Query memories.")
+    p_rec.add_argument("file", help="Path to the memory graph.")
+    p_rec.add_argument("--query", default=None,
+                       help="Case-insensitive substring match across text, rule, tags, type.")
+    p_rec.add_argument("--type", dest="memory_type", default=None,
+                       help="Filter by memory type (exact match, case-insensitive).")
+    p_rec.add_argument("--recent", type=int, default=None,
+                       help="Limit to N most recent results.")
+    p_rec.add_argument("--all", dest="all_memories", action="store_true",
+                       help="Skip query/type filters; still respects --active-only and --recent.")
+    p_rec.add_argument("--active-only", action="store_true",
+                       help="Exclude memories whose valid_to is in the past.")
 
-        graph = load_graph(path)
-        mid = remember(graph, text, mem_type, tags, source)
+    # forget
+    p_for = sub.add_parser("forget", help="Remove a memory and all its edges.")
+    p_for.add_argument("file", help="Path to the memory graph.")
+    p_for.add_argument("memory_id", help="ID of the memory to remove.")
+
+    # associate
+    p_asc = sub.add_parser("associate", help="Create an edge between two memories.")
+    p_asc.add_argument("file", help="Path to the memory graph.")
+    p_asc.add_argument("from_id", help="Source memory ID.")
+    p_asc.add_argument("to_id", help="Target memory ID.")
+    p_asc.add_argument("--relation", default="REFERENCES",
+                       help="TRL preposition (e.g. REFERENCES, SUPERSEDES, GOVERNS, "
+                            "DEPENDS_ON, CONTAINS). Default: REFERENCES")
+
+    # render (delegates to memory_render)
+    p_ren = sub.add_parser("render", help="Render the memory graph to a markdown file.")
+    p_ren.add_argument("in_file", metavar="in.trug.json", help="Path to the memory graph.")
+    p_ren.add_argument("out_file", metavar="out.md", help="Path to the rendered markdown output.")
+    p_ren.add_argument("--budget", type=int, default=8000,
+                       help="Soft token budget for the rendered output. Default: 8000")
+    p_ren.add_argument("--include-rationale", action="store_true",
+                       help="Include rationale text in the rendered output.")
+
+    return parser
+
+
+def _cmd_init(args: argparse.Namespace) -> int:
+    path = Path(args.file)
+    if path.exists():
+        print(f"Error: {path} already exists", file=sys.stderr)
+        return 1
+    init_memory_graph(path)
+    print(f"Created memory graph: {path}")
+    return 0
+
+
+def _cmd_remember(args: argparse.Namespace) -> int:
+    path = Path(args.file)
+    tags = [t.strip() for t in args.tags.split(",") if t.strip()] if args.tags else []
+    graph = load_graph(path)
+    mid = remember(
+        graph,
+        args.text,
+        memory_type=args.memory_type,
+        tags=tags,
+        source=args.source,
+        rule=args.rule,
+        rationale=args.rationale,
+        valid_to=args.valid_to,
+        session_id=args.session_id,
+        supersede=args.supersede,
+    )
+    save_graph(path, graph)
+    print(f"Remembered: {mid}")
+    if args.supersede:
+        print(f"Superseded: {args.supersede}")
+    return 0
+
+
+def _cmd_recall(args: argparse.Namespace) -> int:
+    path = Path(args.file)
+    graph = load_graph(path)
+    results = recall(
+        graph,
+        query=args.query,
+        memory_type=args.memory_type,
+        recent=args.recent,
+        all_memories=args.all_memories,
+        active_only=args.active_only,
+    )
+    edges = graph.get("edges", [])
+    if not results:
+        print("No memories found.")
+    else:
+        print(f"{len(results)} memories:")
+        for m in results:
+            print(_format_memory(m, edges))
+    return 0
+
+
+def _cmd_forget(args: argparse.Namespace) -> int:
+    path = Path(args.file)
+    graph = load_graph(path)
+    if forget(graph, args.memory_id):
         save_graph(path, graph)
-        print(f"Remembered: {mid}")
-        sys.exit(0)
+        print(f"Forgot: {args.memory_id}")
+        return 0
+    print(f"Error: memory '{args.memory_id}' not found", file=sys.stderr)
+    return 1
 
-    if command == "recall":
-        if len(sys.argv) < 3:
-            print("Usage: memory.py recall <file> [--query KW] [--type TYPE] [--recent N] [--all]")
-            sys.exit(1)
-        path = Path(sys.argv[2])
-        query = None
-        mem_type = None
-        recent = None
-        all_mem = False
-        i = 3
-        while i < len(sys.argv):
-            if sys.argv[i] == "--query" and i + 1 < len(sys.argv):
-                query = sys.argv[i + 1]
-                i += 2
-            elif sys.argv[i] == "--type" and i + 1 < len(sys.argv):
-                mem_type = sys.argv[i + 1]
-                i += 2
-            elif sys.argv[i] == "--recent" and i + 1 < len(sys.argv):
-                recent = int(sys.argv[i + 1])
-                i += 2
-            elif sys.argv[i] == "--all":
-                all_mem = True
-                i += 1
-            else:
-                i += 1
 
-        graph = load_graph(path)
-        results = recall(graph, query, mem_type, recent, all_mem)
-        edges = graph.get("edges", [])
+def _cmd_associate(args: argparse.Namespace) -> int:
+    path = Path(args.file)
+    graph = load_graph(path)
+    if associate(graph, args.from_id, args.to_id, args.relation):
+        save_graph(path, graph)
+        print(f"Associated: {args.from_id} --[{args.relation}]--> {args.to_id}")
+        return 0
+    print("Error: one or both nodes not found", file=sys.stderr)
+    return 1
 
-        if not results:
-            print("No memories found.")
-        else:
-            print(f"{len(results)} memories:")
-            for m in results:
-                print(_format_memory(m, edges))
-        sys.exit(0)
 
-    if command == "forget":
-        if len(sys.argv) < 4:
-            print("Usage: memory.py forget <file> <memory_id>")
-            sys.exit(1)
-        path = Path(sys.argv[2])
-        memory_id = sys.argv[3]
-        graph = load_graph(path)
-        if forget(graph, memory_id):
-            save_graph(path, graph)
-            print(f"Forgot: {memory_id}")
-        else:
-            print(f"Error: memory '{memory_id}' not found", file=sys.stderr)
-            sys.exit(1)
-        sys.exit(0)
+def _cmd_render(args: argparse.Namespace) -> int:
+    try:
+        from memory_render import render_to_file  # test/dev cwd=tools/
+    except ImportError:
+        from tools.memory_render import render_to_file  # installed package
+    with open(args.in_file, "r", encoding="utf-8") as f:
+        graph = json.load(f)
+    n = render_to_file(
+        graph,
+        Path(args.out_file),
+        token_budget=args.budget,
+        include_rationale=args.include_rationale,
+    )
+    print(f"Rendered {n} bytes to {args.out_file}")
+    return 0
 
-    if command == "render":
-        # Delegate to memory_render.main() — pass the remaining argv through.
-        try:
-            from memory_render import main as render_main  # test/dev cwd=tools/
-        except ImportError:
-            from tools.memory_render import main as render_main  # installed package
-        sys.argv = [sys.argv[0]] + sys.argv[2:]
-        render_main()
-        return
 
-    if command == "associate":
-        if len(sys.argv) < 5:
-            print("Usage: memory.py associate <file> <from_id> <to_id> [--relation REL]")
-            sys.exit(1)
-        path = Path(sys.argv[2])
-        from_id = sys.argv[3]
-        to_id = sys.argv[4]
-        relation = "REFERENCES"
-        if len(sys.argv) > 5 and sys.argv[5] == "--relation" and len(sys.argv) > 6:
-            relation = sys.argv[6]
+_COMMANDS = {
+    "init": _cmd_init,
+    "remember": _cmd_remember,
+    "recall": _cmd_recall,
+    "forget": _cmd_forget,
+    "associate": _cmd_associate,
+    "render": _cmd_render,
+}
 
-        graph = load_graph(path)
-        if associate(graph, from_id, to_id, relation):
-            save_graph(path, graph)
-            print(f"Associated: {from_id} --[{relation}]--> {to_id}")
-        else:
-            print("Error: one or both nodes not found", file=sys.stderr)
-            sys.exit(1)
-        sys.exit(0)
 
-    print(f"Unknown command: {command}")
-    print(__doc__)
-    sys.exit(1)
+def main() -> None:
+    parser = _build_parser()
+    args = parser.parse_args()
+    if not args.command:
+        parser.print_help()
+        sys.exit(1)
+    handler = _COMMANDS.get(args.command)
+    if handler is None:
+        parser.error(f"Unknown command: {args.command}")
+    sys.exit(handler(args))
 
 
 if __name__ == "__main__":
