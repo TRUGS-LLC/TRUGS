@@ -262,7 +262,13 @@ def _approx_tokens(text: str) -> int:
 
 
 def _estimate_memory_tokens(memory: Dict[str, Any], include_rationale: bool) -> int:
-    """Rough per-memory token contribution. Used by the incremental budget loop."""
+    """Rough per-memory token contribution. Used by the incremental budget loop.
+
+    When rationale is included, the renderer prefixes every line with `  > `
+    (4 chars). Naive `_approx_tokens(rationale)` undercounts by roughly one
+    token per rationale line. Add a line-count correction so the pre-check
+    for "protected overflow" is accurate (audit round 3 R3-5).
+    """
     props = memory.get("properties", {})
     body = props.get("rule") or props.get("text") or ""
     total = _approx_tokens(body) + 4  # + bullet, newlines, tag line
@@ -270,7 +276,11 @@ def _estimate_memory_tokens(memory: Dict[str, Any], include_rationale: bool) -> 
     if tags:
         total += _approx_tokens(", ".join(tags)) + 2
     if include_rationale:
-        total += _approx_tokens(props.get("rationale") or "")
+        rationale = props.get("rationale") or ""
+        total += _approx_tokens(rationale)
+        if rationale:
+            # `  > ` prefix per line (~1 token/line).
+            total += rationale.count("\n") + 1
     return total
 
 
