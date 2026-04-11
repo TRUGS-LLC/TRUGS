@@ -13,11 +13,14 @@ from pathlib import Path
 import pytest
 
 from memory import (
+    SupersedeError,
     _apply_supersede,
     _build_parser,
     _find_node,
     _format_memory,
     _is_expired,
+    _parse_iso_utc,
+    _resolve_supersede_tail,
     associate,
     forget,
     init_memory_graph,
@@ -425,3 +428,237 @@ def test_parser_remember_minimal():
     assert args.text == "some text"
     assert args.memory_type == "FACT"
     assert args.rule is None
+
+
+# ─── Audit round 2 regression tests ──────────────────────────────────────────
+
+
+def test_save_graph_is_atomic_on_crash_simulation(tmp_path):
+    """Audit #1 (HIGH) — a crash mid-save must leave the old file intact.
+
+    We simulate a crash by patching json.dump to raise. With the atomic
+    write (tempfile + os.replace), the target file must still contain
+    the PREVIOUS content, not a half-written garbage mix.
+    """
+    path = tmp_path / "mem.trug.json"
+    init_memory_graph(path)
+    original_bytes = path.read_bytes()
+
+    # Add a memory to the loaded graph.
+    g = load_graph(path)
+    remember(g, "new memory", memory_type="feedback")
+
+    # Sabotage json.dump to simulate a crash mid-write.
+    import memory as memory_module
+    real_dump = memory_module.json.dump
+
+    class Boom(RuntimeError):
+        pass
+
+    def broken(*args, **kwargs):
+        # Write a partial byte then raise — worst case for non-atomic writers.
+        args[1].write("{not-valid-json")
+        raise Boom("simulated crash")
+
+    memory_module.json.dump = broken
+    try:
+        with pytest.raises(Boom):
+            save_graph(path, g)
+    finally:
+        memory_module.json.dump = real_dump
+
+    # Target file must be untouched.
+    assert path.read_bytes() == original_bytes
+    # No .tmp file left behind.
+    leftover = list(tmp_path.glob(".*.tmp"))
+    assert leftover == [], f"Leftover tmp files: {leftover}"
+
+
+def test_save_graph_creates_parent_dirs(tmp_path):
+    """Audit #1 — atomic save should create parent dirs (matches old behavior)."""
+    nested = tmp_path / "a" / "b" / "c" / "mem.trug.json"
+    g = init_memory_graph(tmp_path / "seed.trug.json")
+    save_graph(nested, g)
+    assert nested.exists()
+
+
+def test_supersede_rejects_self(empty_graph):
+    """Audit #2 — cannot supersede own ID."""
+    g = deepcopy(empty_graph)
+    mid = remember(g, "rule")
+    with pytest.raises(SupersedeError):
+        _apply_supersede(g, new_id=mid, old_id=mid, now="2026-04-10T00:00:00+00:00")
+
+
+def test_supersede_chain_closes_tail_not_original(empty_graph):
+    """Audit #2 (HIGH) — supersede on an already-superseded memory links to the chain tail.
+
+    Before the fix, supersede(A) twice would silently overwrite A's
+    superseded_by pointer, orphaning the middle memory (B). Now the
+    second supersede(A) closes the TAIL of A's chain instead, so the
+    chain stays linear.
+    """
+    g = deepcopy(empty_graph)
+    a = remember(g, "A", memory_type="feedback", rule="A")
+    b = remember(g, "B", memory_type="feedback", rule="B", supersede=a)
+    # Second supersede of A — should actually close B (the tail).
+    c = remember(g, "C", memory_type="feedback", rule="C", supersede=a)
+
+    node_a = _find_node(g, a)
+    node_b = _find_node(g, b)
+    node_c = _find_node(g, c)
+
+    # A is still superseded by B (unchanged from the first supersede).
+    assert node_a["properties"]["superseded_by"] == b
+    # B is now superseded by C (the second supersede closed the tail).
+    assert node_b["properties"]["superseded_by"] == c
+    # C is still active.
+    assert "superseded_by" not in node_c["properties"]
+    assert "valid_to" not in node_c["properties"]
+
+    # SUPERSEDES edges: A←B and B←C.
+    sup_edges = [(e["from_id"], e["to_id"]) for e in g["edges"] if e["relation"] == "SUPERSEDES"]
+    assert (b, a) in sup_edges
+    assert (c, b) in sup_edges
+
+
+def test_supersede_rejects_cycle_in_chain(empty_graph):
+    """Audit #2 — a pre-existing cycle in the chain is refused, not made worse."""
+    g = deepcopy(empty_graph)
+    a = remember(g, "A")
+    b = remember(g, "B")
+    # Forge a cycle: A → B and B → A.
+    _find_node(g, a)["properties"]["superseded_by"] = b
+    _find_node(g, b)["properties"]["superseded_by"] = a
+    with pytest.raises(SupersedeError):
+        remember(g, "C", supersede=a)
+
+
+def test_supersede_on_missing_old_id_does_not_mutate(empty_graph):
+    """Audit #2 / #13 — supersede with a nonexistent old_id returns False
+    from _apply_supersede and leaves the new memory clean.
+    """
+    g = deepcopy(empty_graph)
+    before_nodes = len(g["nodes"])
+    mid = remember(g, "new rule", supersede="nonexistent")
+    # New memory was added.
+    assert len(g["nodes"]) == before_nodes + 1
+    # But no SUPERSEDES edge was created.
+    sup = [e for e in g["edges"] if e["relation"] == "SUPERSEDES"]
+    assert sup == []
+
+
+def test_parse_iso_utc_none_and_garbage():
+    """Audit #14 (DRY) — shared helper handles every fail-open case."""
+    assert _parse_iso_utc(None) is None
+    assert _parse_iso_utc("") is None
+    assert _parse_iso_utc("not a date") is None
+    assert _parse_iso_utc(123) is None  # non-string
+    # Valid ISO with timezone round-trips.
+    dt = _parse_iso_utc("2026-04-10T00:00:00+00:00")
+    assert dt is not None
+    assert dt.tzinfo is not None
+    # Naive string assumed UTC.
+    dt_naive = _parse_iso_utc("2026-04-10T00:00:00")
+    assert dt_naive is not None
+    assert dt_naive.tzinfo == timezone.utc
+
+
+def test_is_expired_uses_shared_parser(empty_graph):
+    """Audit #14 — _is_expired is wired through _parse_iso_utc."""
+    g = deepcopy(empty_graph)
+    mid = remember(g, "memory", valid_to="banana")  # garbage
+    node = _find_node(g, mid)
+    # Fail-open: garbage timestamp → not expired.
+    assert _is_expired(node, datetime(2099, 1, 1, tzinfo=timezone.utc)) is False
+
+
+def _run_cli_u2(*args):
+    """Invoke tools/memory.py as a subprocess."""
+    script = Path(__file__).parent / "memory.py"
+    result = subprocess.run(
+        [sys.executable, str(script), *args],
+        capture_output=True,
+        text=True,
+        cwd=str(script.parent),
+    )
+    return result.returncode, result.stdout, result.stderr
+
+
+def test_cli_remember_rejects_garbage_valid_to(tmp_path):
+    """Audit #8 (MED) — --valid-to must parse; garbage fails loud."""
+    path = tmp_path / "mem.trug.json"
+    _run_cli_u2("init", str(path))
+    rc, _, err = _run_cli_u2(
+        "remember", str(path), "rule", "--valid-to", "banana"
+    )
+    assert rc == 2
+    assert "ISO-8601" in err
+
+
+def test_cli_remember_accepts_valid_iso_valid_to(tmp_path):
+    """Audit #8 — valid ISO-8601 is accepted."""
+    path = tmp_path / "mem.trug.json"
+    _run_cli_u2("init", str(path))
+    rc, out, _ = _run_cli_u2(
+        "remember", str(path), "rule", "--valid-to", "2027-01-01T00:00:00+00:00"
+    )
+    assert rc == 0
+    assert "Remembered:" in out
+
+
+def test_cli_remember_tag_can_contain_comma(tmp_path):
+    """Audit #10 (MED) — --tag (repeatable) accepts commas inside a single tag."""
+    path = tmp_path / "mem.trug.json"
+    _run_cli_u2("init", str(path))
+    rc, _, _ = _run_cli_u2(
+        "remember", str(path), "rule",
+        "--tag", "2026, reviewed",
+        "--tag", "session-2026-04-10",
+    )
+    assert rc == 0
+    g = load_graph(path)
+    memories = [n for n in g["nodes"] if n.get("id") != "memory-root"]
+    assert len(memories) == 1
+    tags = memories[0]["properties"]["tags"]
+    assert "2026, reviewed" in tags
+    assert "session-2026-04-10" in tags
+
+
+def test_cli_remember_tags_legacy_comma_form_still_works(tmp_path):
+    """Audit #10 — backwards compatibility: --tags "a,b,c" still splits."""
+    path = tmp_path / "mem.trug.json"
+    _run_cli_u2("init", str(path))
+    _run_cli_u2("remember", str(path), "rule", "--tags", "a,b,c")
+    g = load_graph(path)
+    tags = [n for n in g["nodes"] if n.get("id") != "memory-root"][0]["properties"]["tags"]
+    assert set(tags) == {"a", "b", "c"}
+
+
+def test_cli_remember_text_starting_with_dash(tmp_path):
+    """Audit #11 (MED) — text beginning with `--` works when `--` separator used."""
+    path = tmp_path / "mem.trug.json"
+    _run_cli_u2("init", str(path))
+    rc, out, err = _run_cli_u2(
+        "remember", str(path), "--type", "feedback",
+        "--", "--foo is a rule beginning with a flag",
+    )
+    assert rc == 0, f"stderr={err}"
+    g = load_graph(path)
+    memories = [n for n in g["nodes"] if n.get("id") != "memory-root"]
+    assert len(memories) == 1
+    assert memories[0]["properties"]["text"].startswith("--foo")
+
+
+def test_remember_supersede_validation_leaves_graph_clean_on_error(empty_graph):
+    """Audit #2 — a SupersedeError during remember() must not leave an orphan."""
+    g = deepcopy(empty_graph)
+    a = remember(g, "A")
+    # Poison the chain with a cycle.
+    _find_node(g, a)["properties"]["superseded_by"] = a  # self-loop
+    before_count = len([n for n in g["nodes"] if n.get("id") != "memory-root"])
+    with pytest.raises(SupersedeError):
+        remember(g, "B", supersede=a)
+    after_count = len([n for n in g["nodes"] if n.get("id") != "memory-root"])
+    # B was never added.
+    assert after_count == before_count

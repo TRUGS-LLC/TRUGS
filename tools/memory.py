@@ -17,7 +17,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
+import tempfile
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
@@ -32,9 +34,36 @@ def load_graph(path: Path) -> Dict[str, Any]:
 
 
 def save_graph(path: Path, graph: Dict[str, Any]) -> None:
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(graph, f, indent=2)
-        f.write("\n")
+    """Atomically write `graph` to `path`.
+
+    Writes to a sibling temp file, fsyncs, then `os.replace`s. On most
+    POSIX filesystems this is atomic — the target file either contains
+    the old content or the new content, never a truncated mix. Protects
+    against Ctrl-C / kill -9 / power loss mid-write, which the naive
+    truncate-then-stream pattern does NOT.
+    """
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    # tempfile in the same directory so os.replace is atomic on the same FS.
+    fd, tmp_path = tempfile.mkstemp(
+        prefix=f".{path.name}.",
+        suffix=".tmp",
+        dir=str(path.parent),
+    )
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            json.dump(graph, f, indent=2)
+            f.write("\n")
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(tmp_path, path)
+    except BaseException:
+        # On any failure, clean up the temp file so we don't leave junk.
+        try:
+            os.unlink(tmp_path)
+        except OSError:
+            pass
+        raise
 
 
 def init_memory_graph(path: Path) -> Dict[str, Any]:
@@ -121,6 +150,26 @@ def remember(
     memory_id = f"mem-{uuid.uuid4().hex[:8]}"
     now = datetime.now(timezone.utc).isoformat()
 
+    # Validate supersede BEFORE mutating the graph, so a raise leaves the
+    # store clean. If the chain has a cycle or the old node is missing we
+    # fail fast without creating an orphan new memory.
+    supersede_tail: Optional[Dict[str, Any]] = None
+    if supersede is not None:
+        if supersede == memory_id:  # defensive; new_id is freshly generated
+            raise SupersedeError(f"cannot supersede a memory with itself: {supersede}")
+        old = _find_node(graph, supersede)
+        if old is not None:
+            supersede_tail = _resolve_supersede_tail(graph, supersede)
+            if supersede_tail is None:
+                raise SupersedeError(
+                    f"supersede chain starting at {supersede} contains a cycle"
+                )
+            if supersede_tail["id"] == memory_id:
+                # Impossible in practice (new_id is fresh) but cheap to assert.
+                raise SupersedeError(
+                    f"supersede chain starting at {supersede} already terminates at {memory_id}"
+                )
+
     props: Dict[str, Any] = {
         "text": text,
         "memory_type": memory_type,
@@ -155,11 +204,45 @@ def remember(
     if root and memory_id not in root.get("contains", []):
         root["contains"].append(memory_id)
 
-    # Handle supersession — close the old memory, link the new one.
-    if supersede is not None:
-        _apply_supersede(graph, new_id=memory_id, old_id=supersede, now=now)
+    # Handle supersession — close the TAIL of the chain (not necessarily the
+    # node the caller named) and link the new memory. Validation already ran.
+    if supersede is not None and supersede_tail is not None:
+        tail_props = supersede_tail.setdefault("properties", {})
+        if "valid_to" not in tail_props or tail_props["valid_to"] is None:
+            tail_props["valid_to"] = now
+        tail_props["superseded_by"] = memory_id
+        associate(graph, memory_id, supersede_tail["id"], relation="SUPERSEDES")
 
     return memory_id
+
+
+class SupersedeError(ValueError):
+    """Raised when a supersede call violates the bi-temporal invariant."""
+
+
+def _resolve_supersede_tail(graph: Dict[str, Any], start_id: str) -> Optional[Dict[str, Any]]:
+    """Walk `superseded_by` links from `start_id` until we hit a node that
+    is not yet superseded, a cycle, or a missing link.
+
+    Returns the tail node (the one currently active in the chain), or None
+    if the start doesn't exist. Cycles return None rather than looping.
+    """
+    visited = set()
+    current = _find_node(graph, start_id)
+    while current is not None:
+        cid = current.get("id")
+        if cid in visited:
+            return None  # cycle guard
+        visited.add(cid)
+        props = current.get("properties", {})
+        successor_id = props.get("superseded_by")
+        if not successor_id:
+            return current
+        successor = _find_node(graph, successor_id)
+        if successor is None:
+            return current  # dangling successor pointer — treat as tail
+        current = successor
+    return None
 
 
 def _apply_supersede(
@@ -171,21 +254,51 @@ def _apply_supersede(
 ) -> bool:
     """Close an old memory and link the new one. Returns True on success.
 
-    Sets `valid_to=now` and `superseded_by=new_id` on the old node, and
-    adds a `SUPERSEDES` edge from `new_id` to `old_id`. If the old node
-    doesn't exist, returns False without raising.
+    Sets `valid_to=now` (if not already set) and `superseded_by=new_id`
+    on the old node, and adds a `SUPERSEDES` edge from `new_id` → `old_id`.
+
+    Raises `SupersedeError` when:
+      - `new_id == old_id` (self-supersede)
+      - the chain from `old_id` already terminates at `new_id` (cycle)
+
+    When `old_id` is ALREADY superseded by some other node (chain exists),
+    the new memory is linked to the TAIL of the chain — i.e. supersede
+    `old_id` behaves as supersede the currently-active-replacement of
+    `old_id`. This preserves chain-of-custody instead of silently
+    orphaning middle nodes.
+
+    Returns False if the old node doesn't exist (no raise, for CLI
+    convenience).
     """
+    if new_id == old_id:
+        raise SupersedeError(f"cannot supersede a memory with itself: {old_id}")
+
     old = _find_node(graph, old_id)
     if old is None:
         return False
-    props = old.setdefault("properties", {})
+
+    # Walk the chain to the current tail. If the chain is already terminal
+    # (old_id has no superseded_by), tail == old, and we close old directly.
+    # If a chain exists, we close the TAIL instead, preserving the chain.
+    tail = _resolve_supersede_tail(graph, old_id)
+    if tail is None:
+        # Cycle in the existing chain — refuse rather than make it worse.
+        raise SupersedeError(f"supersede chain starting at {old_id} contains a cycle")
+
+    tail_id = tail["id"]
+    if tail_id == new_id:
+        raise SupersedeError(
+            f"supersede chain starting at {old_id} already terminates at {new_id}"
+        )
+
+    props = tail.setdefault("properties", {})
     # Don't overwrite an explicitly-set valid_to.
     if "valid_to" not in props or props["valid_to"] is None:
         props["valid_to"] = now
     props["superseded_by"] = new_id
 
-    # Add the SUPERSEDES edge if not already present.
-    associate(graph, new_id, old_id, relation="SUPERSEDES")
+    # Add the SUPERSEDES edge from new → TAIL (the node actually being closed).
+    associate(graph, new_id, tail_id, relation="SUPERSEDES")
     return True
 
 
@@ -253,17 +366,32 @@ def recall(
     return memories
 
 
-def _is_expired(memory: Dict[str, Any], now: datetime) -> bool:
-    """Return True if the memory's `valid_to` is strictly before `now`."""
-    valid_to = memory.get("properties", {}).get("valid_to")
-    if not valid_to:
-        return False
+def _parse_iso_utc(value: Any) -> Optional[datetime]:
+    """Parse an ISO-8601 timestamp with fail-open semantics.
+
+    - None, empty string, or non-string → None
+    - Malformed string → None
+    - Naive (tz-less) timestamps → assumed UTC
+
+    Shared between `_is_expired` here and `_is_past` in memory_render.py
+    to prevent the two from drifting.
+    """
+    if not value or not isinstance(value, str):
+        return None
     try:
-        parsed = datetime.fromisoformat(valid_to)
+        parsed = datetime.fromisoformat(value)
     except (TypeError, ValueError):
-        return False  # Fail-open: malformed timestamps are treated as active.
+        return None
     if parsed.tzinfo is None:
         parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed
+
+
+def _is_expired(memory: Dict[str, Any], now: datetime) -> bool:
+    """Return True if the memory's `valid_to` is strictly before `now`."""
+    parsed = _parse_iso_utc(memory.get("properties", {}).get("valid_to"))
+    if parsed is None:
+        return False  # Fail-open: malformed timestamps are treated as active.
     return parsed < now
 
 
@@ -378,24 +506,38 @@ def _build_parser() -> argparse.ArgumentParser:
     p_init.add_argument("file", help="Path to the new memory graph file.")
 
     # remember
-    p_rem = sub.add_parser("remember", help="Add a memory to the graph.")
+    p_rem = sub.add_parser(
+        "remember",
+        help="Add a memory to the graph.",
+        epilog=(
+            "If the memory text begins with `-`, pass `--` first: "
+            "`trugs-memory remember mem.json -- '--foo is a rule'`."
+        ),
+    )
     p_rem.add_argument("file", help="Path to an existing memory graph.")
     p_rem.add_argument("text", help="The memory content as prose.")
     p_rem.add_argument("--type", dest="memory_type", default="FACT",
                        help="Memory type (e.g. user, feedback, project, reference). Default: FACT")
-    p_rem.add_argument("--tags", default="", help="Comma-separated tags.")
+    p_rem.add_argument("--tag", dest="tag_list", action="append", default=[],
+                       help="Tag to attach to this memory. May be given multiple times. "
+                            "Tags can contain commas when set via --tag (preferred).")
+    p_rem.add_argument("--tags", default="",
+                       help="Comma-separated tags (legacy form; use --tag for commas inside a tag).")
     p_rem.add_argument("--source", default=None, help="Optional source URL or citation.")
     p_rem.add_argument("--rule", default=None,
                        help="Terse executable form of the memory. Renderers prefer this over `text`.")
     p_rem.add_argument("--rationale", default=None,
                        help="Explanatory prose. Not rendered to MEMORY.md by default.")
     p_rem.add_argument("--valid-to", default=None,
-                       help="ISO-8601 timestamp when this memory stops being active.")
+                       help="ISO-8601 timestamp when this memory stops being active. "
+                            "Must parse via datetime.fromisoformat — garbage is rejected.")
     p_rem.add_argument("--session-id", default=None,
                        help="Identifier of the session that wrote this memory.")
     p_rem.add_argument("--supersede", default=None,
                        help="ID of an older memory this one replaces. Closes the old memory "
-                            "(valid_to=now, superseded_by=<new>) and adds a SUPERSEDES edge.")
+                            "(valid_to=now, superseded_by=<new>) and adds a SUPERSEDES edge. "
+                            "If the old memory is already superseded, the new memory is linked "
+                            "to the tail of the existing chain, not the original.")
 
     # recall
     p_rec = sub.add_parser("recall", help="Query memories.")
@@ -449,20 +591,42 @@ def _cmd_init(args: argparse.Namespace) -> int:
 
 def _cmd_remember(args: argparse.Namespace) -> int:
     path = Path(args.file)
-    tags = [t.strip() for t in args.tags.split(",") if t.strip()] if args.tags else []
+
+    # Merge --tag (repeatable) and --tags (legacy comma form).
+    tags: List[str] = list(getattr(args, "tag_list", []))
+    if args.tags:
+        tags.extend(t.strip() for t in args.tags.split(",") if t.strip())
+
+    # Validate --valid-to as ISO-8601 before writing. Fail-loud at the CLI
+    # boundary so a fat-finger doesn't silently store a garbage timestamp
+    # that fail-open filtering will later treat as active.
+    if args.valid_to is not None:
+        if _parse_iso_utc(args.valid_to) is None:
+            print(
+                f"Error: --valid-to must be ISO-8601 (got {args.valid_to!r}). "
+                f"Example: 2026-12-31T00:00:00+00:00",
+                file=sys.stderr,
+            )
+            return 2
+
     graph = load_graph(path)
-    mid = remember(
-        graph,
-        args.text,
-        memory_type=args.memory_type,
-        tags=tags,
-        source=args.source,
-        rule=args.rule,
-        rationale=args.rationale,
-        valid_to=args.valid_to,
-        session_id=args.session_id,
-        supersede=args.supersede,
-    )
+    try:
+        mid = remember(
+            graph,
+            args.text,
+            memory_type=args.memory_type,
+            tags=tags,
+            source=args.source,
+            rule=args.rule,
+            rationale=args.rationale,
+            valid_to=args.valid_to,
+            session_id=args.session_id,
+            supersede=args.supersede,
+        )
+    except SupersedeError as e:
+        print(f"Error: {e}", file=sys.stderr)
+        return 2
+
     save_graph(path, graph)
     print(f"Remembered: {mid}")
     if args.supersede:
