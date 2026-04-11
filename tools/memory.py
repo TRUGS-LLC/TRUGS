@@ -650,6 +650,19 @@ def _build_parser() -> argparse.ArgumentParser:
     p_ren.add_argument("--include-rationale", action="store_true",
                        help="Include rationale text in the rendered output.")
 
+    # import-flat (delegates to memory_import)
+    p_imp = sub.add_parser("import-flat", help="Bulk import flat markdown files into a memory graph.")
+    p_imp.add_argument("src_dir", help="Directory of markdown files to walk (recursive).")
+    p_imp.add_argument("out_file", metavar="out.trug.json", help="Target memory graph (created if missing).")
+    p_imp.add_argument("--type-from-filename", action="store_true",
+                       help="Derive memory_type from filename prefix when frontmatter lacks a type field.")
+    p_imp.add_argument("--tag", dest="tags", action="append", default=[],
+                       help="Tag to apply to every imported memory. May be given multiple times.")
+    p_imp.add_argument("--source-prefix", default=None,
+                       help="String prepended to each memory's source property.")
+    p_imp.add_argument("--dry-run", action="store_true",
+                       help="Scan and report without writing.")
+
     return parser
 
 
@@ -783,6 +796,35 @@ def _cmd_render(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_import_flat(args: argparse.Namespace) -> int:
+    try:
+        from memory_import import import_flat_directory  # test/dev cwd=tools/
+    except ImportError:
+        from tools.memory_import import import_flat_directory  # installed package
+    try:
+        report = import_flat_directory(
+            Path(args.src_dir),
+            Path(args.out_file),
+            type_from_filename=args.type_from_filename,
+            tags=args.tags,
+            source_prefix=args.source_prefix,
+            dry_run=args.dry_run,
+        )
+    except FileNotFoundError as e:
+        print(f"Error: {e}", file=sys.stderr)
+        return 1
+    prefix = "[DRY RUN] " if args.dry_run else ""
+    print(
+        f"{prefix}Scanned {report.files_scanned} files. "
+        f"Imported {report.imported}. "
+        f"Skipped {report.skipped_duplicate} duplicate, "
+        f"{report.skipped_malformed} malformed."
+    )
+    if args.dry_run:
+        print(f"(No changes written to {args.out_file})")
+    return 0
+
+
 _COMMANDS = {
     "init": _cmd_init,
     "remember": _cmd_remember,
@@ -790,6 +832,7 @@ _COMMANDS = {
     "forget": _cmd_forget,
     "associate": _cmd_associate,
     "render": _cmd_render,
+    "import-flat": _cmd_import_flat,
 }
 
 
