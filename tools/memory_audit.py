@@ -285,7 +285,16 @@ def _parse_duration_days(spec: str) -> int:
 
     # Longest suffix first — `mo` must be checked before `m`-anything.
     if spec.endswith("mo"):
-        n = int(spec[:-2])
+        prefix = spec[:-2]
+        if not prefix:
+            raise ValueError(
+                f"missing numeric prefix for month duration {spec!r} "
+                f"— write `<N>mo` (e.g. `6mo`)"
+            )
+        try:
+            n = int(prefix)
+        except ValueError:
+            raise ValueError(f"invalid duration {spec!r} — expected `<N>mo`")
         days = n * 30
     elif spec[-1] == "m":
         raise ValueError(
@@ -352,7 +361,7 @@ def _main_audit(argv: List[str]) -> int:
     if dead_spec is not None:
         try:
             threshold_days = _parse_duration_days(dead_spec)
-        except (ValueError, KeyError):
+        except ValueError:
             print(f"Error: invalid duration '{dead_spec}'", file=sys.stderr)
             return 2
 
