@@ -127,14 +127,19 @@ def _active_memories(
     return memories
 
 
-def _is_past(iso_timestamp: str, *, now: datetime) -> bool:
-    """Return True if the given ISO-8601 timestamp is strictly before `now`."""
+def _is_past(iso_timestamp: Any, *, now: datetime) -> bool:
+    """Return True if the given ISO-8601 timestamp is strictly before `now`.
+
+    Delegates to `memory._parse_iso_utc` so this function and `memory._is_expired`
+    share a single source of timestamp-parsing truth (audit round 2 #14).
+    """
     try:
-        parsed = datetime.fromisoformat(iso_timestamp)
-    except (TypeError, ValueError):
+        from memory import _parse_iso_utc  # test/dev cwd=tools/
+    except ImportError:
+        from tools.memory import _parse_iso_utc  # installed package
+    parsed = _parse_iso_utc(iso_timestamp)
+    if parsed is None:
         return False
-    if parsed.tzinfo is None:
-        parsed = parsed.replace(tzinfo=timezone.utc)
     return parsed < now
 
 
@@ -368,52 +373,22 @@ def _apply_budget(
 
 
 def main() -> None:
-    """CLI entry: `trugs-memory-render <in.trug.json> <out.md> [flags]`."""
-    argv = sys.argv[1:]
-    if not argv or argv[0] in ("-h", "--help"):
-        print(__doc__)
-        sys.exit(0)
+    """CLI entry: `trugs-memory-render <in.trug.json> <out.md> [flags]`.
 
-    if len(argv) < 2:
-        print("Usage: memory_render.py <in.trug.json> <out.md> [--budget N] [--include-rationale]", file=sys.stderr)
-        sys.exit(2)
+    Delegates to `memory._cmd_render` via the shared argparse parser in
+    `memory._build_parser()` so the two entry points (`trugs-memory render`
+    and `trugs-memory-render`) can't drift out of sync (audit round 2 #20).
+    """
+    try:
+        from memory import _build_parser, _cmd_render  # test/dev cwd=tools/
+    except ImportError:
+        from tools.memory import _build_parser, _cmd_render  # installed package
 
-    in_path = Path(argv[0])
-    out_path = Path(argv[1])
-    token_budget = DEFAULT_BUDGET_TOKENS
-    include_rationale = False
-
-    i = 2
-    while i < len(argv):
-        if argv[i] == "--budget" and i + 1 < len(argv):
-            try:
-                token_budget = int(argv[i + 1])
-            except ValueError:
-                print(f"Error: --budget requires an integer, got '{argv[i + 1]}'", file=sys.stderr)
-                sys.exit(2)
-            i += 2
-        elif argv[i] == "--include-rationale":
-            include_rationale = True
-            i += 1
-        else:
-            print(f"Error: unknown argument '{argv[i]}'", file=sys.stderr)
-            sys.exit(2)
-
-    if not in_path.exists():
-        print(f"Error: input file not found: {in_path}", file=sys.stderr)
-        sys.exit(1)
-
-    with open(in_path, "r", encoding="utf-8") as f:
-        graph = json.load(f)
-
-    bytes_written = render_to_file(
-        graph,
-        out_path,
-        token_budget=token_budget,
-        include_rationale=include_rationale,
-    )
-    print(f"Rendered {bytes_written} bytes to {out_path}")
-    sys.exit(0)
+    parser = _build_parser()
+    # Prepend the "render" subcommand so users running `trugs-memory-render`
+    # don't have to type it — this entry point is for direct render use.
+    args = parser.parse_args(["render"] + sys.argv[1:])
+    sys.exit(_cmd_render(args))
 
 
 if __name__ == "__main__":
