@@ -99,9 +99,15 @@ def test_dead_rules_finds_old_unconsulted_feedback(graph_with_old_feedback, fixe
 
 
 def test_dead_rules_skips_recent_memories(empty_graph, fixed_now):
+    """Audit #15 — use controlled created timestamps instead of relying on
+    wall-clock `datetime.now()`. Before the fix, this test only passed by
+    accident of the system clock being past `fixed_now`.
+    """
     g = deepcopy(empty_graph)
     mid = remember(g, "Just-written rule", memory_type="feedback")
-    # created is ~now by default — not dead yet.
+    # Force created = fixed_now - 3 days. Clearly within the 30d threshold,
+    # independent of the wall clock.
+    _find_node(g, mid)["properties"]["created"] = (fixed_now - timedelta(days=3)).isoformat()
     dead = dead_rules(g, older_than_days=30, now=fixed_now)
     assert mid not in [d.memory_id for d in dead]
 
@@ -345,3 +351,80 @@ def test_cli_unknown_subcommand():
     rc, _, err = _run_cli("garble")
     assert rc == 2
     assert "Unknown command" in err
+
+
+# ─── Audit round 2 regression tests ──────────────────────────────────────────
+
+
+def test_parse_duration_rejects_negative():
+    """Audit #4 (HIGH) — `-30d` must raise, not produce a future threshold."""
+    with pytest.raises(ValueError):
+        _parse_duration_days("-30d")
+    with pytest.raises(ValueError):
+        _parse_duration_days("-1")
+    with pytest.raises(ValueError):
+        _parse_duration_days("0d")
+    with pytest.raises(ValueError):
+        _parse_duration_days("0")
+
+
+def test_parse_duration_positive_still_works():
+    """Audit #4 — positive durations continue to parse."""
+    assert _parse_duration_days("30d") == 30
+    assert _parse_duration_days("1") == 1
+
+
+def test_cli_audit_rejects_negative_duration(tmp_path):
+    """Audit #4 — CLI fails loud on a negative duration."""
+    path = tmp_path / "mem.trug.json"
+    init_memory_graph(path)
+    rc, _, err = _run_cli("audit", str(path), "--dead-rules", "-30d")
+    assert rc == 2
+    assert "invalid duration" in err.lower() or "must be positive" in err.lower()
+
+
+def test_reconcile_length_blocking_skips_mismatched_sizes(empty_graph):
+    """Audit #6 (MED) — length-ratio pre-check avoids Jaccard when impossible.
+
+    Two token sets of size 1 and size 100 have Jaccard upper bound 1/100 = 0.01;
+    at threshold 0.7 we should skip without computing the full intersection.
+    The test verifies correctness (no candidate surfaced at 0.7), and a
+    companion test at threshold 0.005 verifies that the optimization doesn't
+    hide a legitimate low-similarity match.
+    """
+    g = deepcopy(empty_graph)
+    remember(g, "one", memory_type="feedback")  # 1 token
+    remember(g, " ".join(f"word{i}" for i in range(100)), memory_type="feedback")  # 100 tokens
+    remember(g, " ".join(f"word{i}" for i in range(100)), memory_type="feedback")  # another 100
+    # At threshold 0.7, the 1-vs-100 pair is pruned; the 100-vs-100 pair matches.
+    candidates = reconcile_candidates(g, threshold=0.7)
+    assert len(candidates) == 1
+    # At threshold 0.005, the length-ratio filter admits the mismatched pair
+    # for real Jaccard computation, which returns 0 (disjoint) → still no match.
+    candidates_loose = reconcile_candidates(g, threshold=0.005)
+    # Mismatched pair passes the length ratio (0.01 ≥ 0.005) but actual Jaccard is 0.
+    # So we only see the 100-vs-100 match again.
+    assert len(candidates_loose) == 1
+
+
+def test_dead_rules_strips_whitespace_from_memory_type(empty_graph, fixed_now):
+    """Audit #17 (LOW) — ' feedback ' should still match the feedback filter."""
+    g = deepcopy(empty_graph)
+    mid = remember(g, "Old rule", memory_type="feedback")
+    # Inject whitespace directly (simulating data that drifted).
+    _find_node(g, mid)["properties"]["memory_type"] = "  feedback  "
+    _find_node(g, mid)["properties"]["created"] = "2026-01-01T00:00:00+00:00"
+    dead = dead_rules(g, older_than_days=10, now=fixed_now)
+    assert len(dead) == 1
+    assert dead[0].memory_id == mid
+
+
+def test_dead_rules_uses_shared_iso_parser(empty_graph, fixed_now):
+    """Audit #14 — _parse_iso in this module should route through the shared
+    memory._parse_iso_utc helper, same as memory._is_expired.
+    """
+    from memory_audit import _parse_iso
+    from memory import _parse_iso_utc
+    # Same inputs → same outputs.
+    for sample in (None, "", "not a date", "2026-04-10T00:00:00+00:00", "2026-04-10T00:00:00"):
+        assert _parse_iso(sample) == _parse_iso_utc(sample)

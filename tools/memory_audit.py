@@ -106,7 +106,8 @@ def dead_rules(
         if n.get("parent_id") != "memory-root":
             continue
         props = n.get("properties", {})
-        if props.get("memory_type", "").lower() != "feedback":
+        # audit #17 — strip whitespace before comparing memory_type.
+        if (props.get("memory_type", "") or "").strip().lower() != "feedback":
             continue
         if int(props.get("hit_count", 0)) > 0:
             continue
@@ -130,16 +131,14 @@ def dead_rules(
 
 
 def _parse_iso(value: Optional[str]) -> Optional[datetime]:
-    """Parse an ISO-8601 timestamp. Naive → UTC. Invalid → None."""
-    if not value:
-        return None
+    """Parse an ISO-8601 timestamp. Delegates to memory._parse_iso_utc
+    so this function and `memory._is_expired` stay in lockstep
+    (audit #14)."""
     try:
-        dt = datetime.fromisoformat(value)
-    except (TypeError, ValueError):
-        return None
-    if dt.tzinfo is None:
-        dt = dt.replace(tzinfo=timezone.utc)
-    return dt
+        from memory import _parse_iso_utc  # test/dev cwd=tools/
+    except ImportError:
+        from tools.memory import _parse_iso_utc  # installed package
+    return _parse_iso_utc(value)
 
 
 # ─── Reconcile candidate detection ────────────────────────────────────────────
@@ -197,14 +196,24 @@ def reconcile_candidates(
         text = _best_text(m)
         tokenized.append((m["id"], text, _tokenize(text)))
 
+    # Length-ratio blocking cheap-skip: Jaccard ≤ min(|A|, |B|) / max(|A|, |B|).
+    # If that upper bound < threshold, no need to compute the intersection.
+    # Saves the bulk of the O(n²) comparisons when the token-set sizes differ
+    # widely — common in a real memory store where a short `rule` field
+    # coexists with verbose prose bodies (audit #6).
     candidates: List[ReconcileCandidate] = []
     for i in range(len(tokenized)):
         aid, atext, atokens = tokenized[i]
         if not atokens:
             continue
+        a_len = len(atokens)
         for j in range(i + 1, len(tokenized)):
             bid, btext, btokens = tokenized[j]
             if not btokens:
+                continue
+            b_len = len(btokens)
+            # Upper bound on Jaccard for these two sets.
+            if min(a_len, b_len) / max(a_len, b_len) < threshold:
                 continue
             sim = _jaccard(atokens, btokens)
             if sim >= threshold:
@@ -255,6 +264,10 @@ def _parse_duration_days(spec: str) -> int:
 
     Simple: suffix 'd' → days, 'w' → weeks×7, 'm' → months×30, 'y' → years×365.
     A bare integer is interpreted as days.
+
+    Rejects negative or zero durations (audit #4) — a `-30d` threshold would
+    land in the FUTURE and flag every feedback memory as dead, which is
+    worse than an error.
     """
     spec = spec.strip().lower()
     if not spec:
@@ -262,8 +275,12 @@ def _parse_duration_days(spec: str) -> int:
     if spec[-1] in ("d", "w", "m", "y"):
         n = int(spec[:-1])
         unit = spec[-1]
-        return {"d": n, "w": n * 7, "m": n * 30, "y": n * 365}[unit]
-    return int(spec)
+        days = {"d": n, "w": n * 7, "m": n * 30, "y": n * 365}[unit]
+    else:
+        days = int(spec)
+    if days <= 0:
+        raise ValueError(f"duration must be positive (got {spec})")
+    return days
 
 
 def _main_audit(argv: List[str]) -> int:
