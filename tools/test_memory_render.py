@@ -64,6 +64,24 @@ def test_render_is_byte_deterministic(small_graph, fixed_now):
     assert a.endswith("\n")
 
 
+def test_render_is_byte_deterministic_under_real_wall_clock(small_graph):
+    """Round-5 audit C-H4 regression guard.
+
+    The previous implementation embedded `datetime.utcnow()` in the
+    header, so two renders against the same graph at different wall-clock
+    instants produced different bytes. This test calls `render()` WITHOUT
+    passing `now`, then sleeps long enough to advance the wall clock past
+    the second-precision boundary, and asserts the two renders are
+    bit-identical. It will fail loudly if any future change reintroduces
+    a wall-clock dependency in the header or body.
+    """
+    import time
+    a = render(small_graph)
+    time.sleep(1.05)  # cross at least one full-second boundary
+    b = render(small_graph)
+    assert a == b, "render() must be a pure function of the graph"
+
+
 def test_render_stable_under_reordered_insertion(empty_graph, fixed_now):
     # Build two graphs with the same memories but different creation timestamps.
     # A fixed `now` alone isn't enough — the `created` field is set by `remember`

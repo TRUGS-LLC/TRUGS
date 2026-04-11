@@ -191,20 +191,60 @@ def _created_epoch(memory: Dict[str, Any]) -> float:
     return dt.timestamp()
 
 
+def _graph_high_water_mark(graph: Dict[str, Any]) -> Optional[str]:
+    """Return the latest ISO timestamp found in any memory node's `created` or
+    `valid_to` property, or None if the graph has no temporal data.
+
+    Used as the deterministic stand-in for "when was this rendered" — the
+    header timestamp must be a function of the graph alone, not wall-clock,
+    or two runs against the same graph produce different bytes (round-5
+    audit finding C-H4).
+    """
+    latest: Optional[str] = None
+    for n in graph.get("nodes", []):
+        if n.get("parent_id") != "memory-root":
+            continue
+        props = n.get("properties", {})
+        for key in ("created", "valid_to"):
+            ts = props.get(key)
+            if not ts or not isinstance(ts, str):
+                continue
+            if latest is None or ts > latest:
+                latest = ts
+    return latest
+
+
 def _render_header(
     graph: Dict[str, Any],
     grouped: Dict[str, List[Dict[str, Any]]],
     *,
-    now: datetime,
+    now: datetime,  # kept for API compatibility; no longer rendered
 ) -> List[str]:
-    """Render the top-of-file metadata block as a list of lines."""
+    """Render the top-of-file metadata block as a list of lines.
+
+    The header is byte-deterministic: it depends only on the graph
+    contents, not on wall-clock time. The "rendered at" anchor is the
+    high-water mark of `created` / `valid_to` across all memory nodes
+    (i.e. the most recent write to the graph), which changes only when
+    the graph itself changes.
+    """
+    del now  # unused — kept in signature for callers that pass it
     total = sum(len(v) for v in grouped.values())
     counts = ", ".join(f"{t}={len(v)}" for t, v in grouped.items() if v)
+    high_water = _graph_high_water_mark(graph)
+    if high_water:
+        anchor_line = (
+            f"> Rendered from `{graph.get('name', 'memory graph')}`. "
+            f"Latest write at {high_water}."
+        )
+    else:
+        anchor_line = (
+            f"> Rendered from `{graph.get('name', 'memory graph')}`."
+        )
     return [
         f"# MEMORY",
         "",
-        f"> Rendered from `{graph.get('name', 'memory graph')}` "
-        f"at {now.replace(microsecond=0).isoformat()}.",
+        anchor_line,
         f"> {total} active memories — {counts if counts else '(none)'}.",
         f"> **Do not edit.** This file is produced by `trugs-memory render`.",
     ]
