@@ -534,18 +534,33 @@ def test_supersede_rejects_cycle_in_chain(empty_graph):
         remember(g, "C", supersede=a)
 
 
-def test_supersede_on_missing_old_id_does_not_mutate(empty_graph):
-    """Audit #2 / #13 — supersede with a nonexistent old_id returns False
-    from _apply_supersede and leaves the new memory clean.
+def test_supersede_on_missing_old_id_raises(empty_graph):
+    """Audit round 3 R3-1 — `remember(supersede=missing)` must RAISE, not
+    silently add an orphan memory. Round-2 behavior was to return cleanly
+    with no supersede side-effects, which let the CLI print
+    `Superseded: <id>` for a non-existent target (lying contract).
     """
     g = deepcopy(empty_graph)
     before_nodes = len(g["nodes"])
-    mid = remember(g, "new rule", supersede="nonexistent")
-    # New memory was added.
-    assert len(g["nodes"]) == before_nodes + 1
-    # But no SUPERSEDES edge was created.
+    with pytest.raises(SupersedeError):
+        remember(g, "new rule", supersede="nonexistent")
+    # Graph unchanged — new memory never appended.
+    assert len(g["nodes"]) == before_nodes
     sup = [e for e in g["edges"] if e["relation"] == "SUPERSEDES"]
     assert sup == []
+
+
+def test_apply_supersede_helper_still_returns_false_on_missing(empty_graph):
+    """Audit round 3 R3-4 — `_apply_supersede` (the lower-level helper)
+    preserves its legacy False-return contract even though `remember()`
+    now layers a raise on top. Direct test callers and library consumers
+    that don't want to catch exceptions can still use it.
+    """
+    g = deepcopy(empty_graph)
+    assert _apply_supersede(
+        g, new_id="mem-fake", old_id="nonexistent",
+        now="2026-04-10T00:00:00+00:00",
+    ) is False
 
 
 def test_parse_iso_utc_none_and_garbage():
@@ -662,3 +677,128 @@ def test_remember_supersede_validation_leaves_graph_clean_on_error(empty_graph):
     after_count = len([n for n in g["nodes"] if n.get("id") != "memory-root"])
     # B was never added.
     assert after_count == before_count
+
+
+# ─── Audit round 3 regression tests ───────────────────────────────────────────
+
+
+def test_supersede_error_is_not_a_value_error():
+    """Audit round 3 R3-12 — SupersedeError subclasses Exception, not ValueError.
+
+    This prevents a caller that catches ValueError for unrelated input
+    validation from accidentally swallowing a supersede-contract violation.
+    """
+    assert issubclass(SupersedeError, Exception)
+    assert not issubclass(SupersedeError, ValueError)
+
+
+def test_save_graph_preserves_existing_mode(tmp_path):
+    """Audit round 3 R3-3 — save_graph must not tighten 0o644 → 0o600."""
+    import os
+    path = tmp_path / "mem.trug.json"
+    init_memory_graph(path)
+    # Set mode to 0o644 (group/other readable) so we can verify preservation.
+    os.chmod(path, 0o644)
+    g = load_graph(path)
+    remember(g, "rule", memory_type="feedback")
+    save_graph(path, g)
+    mode = path.stat().st_mode & 0o777
+    assert mode == 0o644, f"save_graph clobbered mode: expected 0o644, got 0o{mode:o}"
+
+
+def test_save_graph_fsyncs_parent_directory(tmp_path, monkeypatch):
+    """Audit round 3 R3-2 — save_graph must fsync the parent dir after replace.
+
+    We can't easily test that the POSIX semantics produce durable rename
+    metadata, but we CAN verify that `os.fsync` is called on a directory
+    fd after `os.replace`. Monkeypatch `os.fsync` to record calls.
+    """
+    import os
+    import memory as memory_module
+    path = tmp_path / "mem.trug.json"
+    init_memory_graph(path)
+
+    fsync_fds: list = []
+    real_fsync = os.fsync
+
+    def tracking_fsync(fd):
+        fsync_fds.append(fd)
+        return real_fsync(fd)
+
+    monkeypatch.setattr(memory_module.os, "fsync", tracking_fsync)
+    g = load_graph(path)
+    remember(g, "new memory")
+    save_graph(path, g)
+
+    # At least 2 fsyncs: the tempfile content, and the parent directory.
+    assert len(fsync_fds) >= 2, f"Expected ≥2 fsyncs (file + dir), got {len(fsync_fds)}"
+
+
+def test_cmd_render_uses_load_graph(tmp_path, monkeypatch):
+    """Audit round 3 R3-10 — _cmd_render routes through load_graph."""
+    import memory as memory_module
+    path = tmp_path / "mem.trug.json"
+    init_memory_graph(path)
+    g = load_graph(path)
+    remember(g, "rule", memory_type="feedback")
+    save_graph(path, g)
+
+    call_count = [0]
+    real_load = memory_module.load_graph
+
+    def tracking_load(p):
+        call_count[0] += 1
+        return real_load(p)
+
+    monkeypatch.setattr(memory_module, "load_graph", tracking_load)
+
+    from argparse import Namespace
+    args = Namespace(
+        in_file=str(path),
+        out_file=str(tmp_path / "MEMORY.md"),
+        budget=8000,
+        include_rationale=False,
+    )
+    rc = memory_module._cmd_render(args)
+    assert rc == 0
+    assert call_count[0] == 1, "Expected _cmd_render to call load_graph exactly once"
+
+
+def test_cli_remember_supersede_reports_chain_tail(tmp_path):
+    """Audit round 3 R3-1 corollary — the CLI must report the memory that
+    actually got closed, not necessarily the one the user named (which may
+    be mid-chain).
+    """
+    path = tmp_path / "mem.trug.json"
+    _run_cli_u2("init", str(path))
+
+    rc, out_a, _ = _run_cli_u2("remember", str(path), "A", "--rule", "A")
+    a_id = out_a.split("Remembered: ")[1].strip()
+
+    rc, out_b, _ = _run_cli_u2("remember", str(path), "B", "--rule", "B", "--supersede", a_id)
+    assert "Superseded:" in out_b
+    b_id = out_b.split("Remembered: ")[1].split()[0]
+
+    # Supersede A again (chain is A→B, so tail is B now).
+    rc, out_c, err = _run_cli_u2("remember", str(path), "C", "--rule", "C", "--supersede", a_id)
+    assert rc == 0, err
+    assert "tail of" in out_c, f"Expected chain-tail annotation in: {out_c}"
+    # The annotation says "tail of <a_id>" and the closed id is b_id.
+    assert b_id in out_c
+    assert a_id in out_c
+
+
+def test_cli_remember_supersede_missing_target_fails_loud(tmp_path):
+    """Audit round 3 R3-1 — unknown supersede target must return non-zero.
+
+    Before the fix, `trugs-memory remember mem.json x --supersede nonexistent`
+    returned 0 and even printed "Superseded: nonexistent" for a memory
+    that did not exist.
+    """
+    path = tmp_path / "mem.trug.json"
+    _run_cli_u2("init", str(path))
+    rc, _, err = _run_cli_u2(
+        "remember", str(path), "rule", "--supersede", "nonexistent"
+    )
+    assert rc == 2
+    assert "not found" in err.lower()

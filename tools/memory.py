@@ -34,16 +34,33 @@ def load_graph(path: Path) -> Dict[str, Any]:
 
 
 def save_graph(path: Path, graph: Dict[str, Any]) -> None:
-    """Atomically write `graph` to `path`.
+    """Atomically and durably write `graph` to `path`.
 
-    Writes to a sibling temp file, fsyncs, then `os.replace`s. On most
-    POSIX filesystems this is atomic — the target file either contains
-    the old content or the new content, never a truncated mix. Protects
-    against Ctrl-C / kill -9 / power loss mid-write, which the naive
-    truncate-then-stream pattern does NOT.
+    Durability chain:
+      1. Write to a sibling temp file (same directory → same filesystem).
+      2. `f.flush()` + `os.fsync(f.fileno())` — content reaches stable storage.
+      3. `os.replace(tmp, path)` — atomic rename on POSIX.
+      4. `os.fsync(dir_fd)` on the parent directory — durably commits the
+         rename metadata. Without this, on ext4/xfs a power loss immediately
+         after `os.replace` can lose the rename and the file reverts to the
+         old inode (audit round 3 R3-2).
+
+    Mode preservation: if `path` already exists, the target mode is copied
+    onto the tempfile so a save doesn't silently tighten permissions from
+    0o644 → 0o600 (the mkstemp default). Audit round 3 R3-3.
+
+    Cleans up the tempfile on any exception (including KeyboardInterrupt).
     """
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
+
+    # Capture existing mode (if any) so we can preserve it after replace.
+    existing_mode: Optional[int] = None
+    try:
+        existing_mode = path.stat().st_mode & 0o777
+    except FileNotFoundError:
+        existing_mode = None
+
     # tempfile in the same directory so os.replace is atomic on the same FS.
     fd, tmp_path = tempfile.mkstemp(
         prefix=f".{path.name}.",
@@ -56,9 +73,35 @@ def save_graph(path: Path, graph: Dict[str, Any]) -> None:
             f.write("\n")
             f.flush()
             os.fsync(f.fileno())
+
+        if existing_mode is not None:
+            # Restore mode BEFORE os.replace so readers don't race on a
+            # transient 0o600 file.
+            os.chmod(tmp_path, existing_mode)
+        else:
+            # Honor umask for a brand-new file.
+            try:
+                umask = os.umask(0)
+                os.umask(umask)
+                os.chmod(tmp_path, 0o666 & ~umask)
+            except OSError:
+                pass
+
         os.replace(tmp_path, path)
+
+        # Directory fsync — durably commits the rename metadata.
+        # Not supported on Windows; skip with a best-effort guard.
+        try:
+            dir_fd = os.open(str(path.parent), os.O_DIRECTORY)
+            try:
+                os.fsync(dir_fd)
+            finally:
+                os.close(dir_fd)
+        except (OSError, AttributeError):
+            # Non-POSIX filesystems (Windows) or unusual mounts — fall through.
+            pass
     except BaseException:
-        # On any failure, clean up the temp file so we don't leave junk.
+        # On any failure (including KeyboardInterrupt), clean up the temp file.
         try:
             os.unlink(tmp_path)
         except OSError:
@@ -140,35 +183,40 @@ def remember(
             still active.
         session_id: identifier of the session that wrote this memory.
             Enables session-scoped recall and temporal reasoning.
-        supersede: id of an older memory that this one replaces. When
-            set, the old memory gets `valid_to = now()` and
-            `superseded_by = <new id>`, AND a `SUPERSEDES` edge is
-            added from the new memory to the old one. This is the
-            Graphiti-style bi-temporal pattern: nothing is deleted,
-            stale facts are closed.
+        supersede: id of an older memory that this one replaces. If the
+            old memory's chain is already several steps deep, this new
+            memory is linked to the TAIL of the chain (preserving the
+            full history). `SUPERSEDES` edge + `valid_to` are applied
+            to the tail; the new memory itself is never closed.
+
+    Raises:
+        SupersedeError: if `supersede` is set but the target is missing,
+            points at self, or the chain contains a cycle. The graph is
+            left unchanged in every failure path (no orphan new memory).
     """
     memory_id = f"mem-{uuid.uuid4().hex[:8]}"
     now = datetime.now(timezone.utc).isoformat()
 
-    # Validate supersede BEFORE mutating the graph, so a raise leaves the
-    # store clean. If the chain has a cycle or the old node is missing we
-    # fail fast without creating an orphan new memory.
+    # Validate supersede BEFORE mutating the graph (audit round 3 R3-1):
+    # raising on a missing target previously let the CLI silently claim
+    # supersede success. Now we fail loud at the library layer.
     supersede_tail: Optional[Dict[str, Any]] = None
     if supersede is not None:
         if supersede == memory_id:  # defensive; new_id is freshly generated
             raise SupersedeError(f"cannot supersede a memory with itself: {supersede}")
         old = _find_node(graph, supersede)
-        if old is not None:
-            supersede_tail = _resolve_supersede_tail(graph, supersede)
-            if supersede_tail is None:
-                raise SupersedeError(
-                    f"supersede chain starting at {supersede} contains a cycle"
-                )
-            if supersede_tail["id"] == memory_id:
-                # Impossible in practice (new_id is fresh) but cheap to assert.
-                raise SupersedeError(
-                    f"supersede chain starting at {supersede} already terminates at {memory_id}"
-                )
+        if old is None:
+            raise SupersedeError(f"supersede target not found: {supersede}")
+        supersede_tail = _resolve_supersede_tail(graph, supersede)
+        if supersede_tail is None:
+            raise SupersedeError(
+                f"supersede chain starting at {supersede} contains a cycle"
+            )
+        if supersede_tail["id"] == memory_id:
+            # Impossible in practice (new_id is fresh) but cheap to assert.
+            raise SupersedeError(
+                f"supersede chain starting at {supersede} already terminates at {memory_id}"
+            )
 
     props: Dict[str, Any] = {
         "text": text,
@@ -204,20 +252,21 @@ def remember(
     if root and memory_id not in root.get("contains", []):
         root["contains"].append(memory_id)
 
-    # Handle supersession — close the TAIL of the chain (not necessarily the
-    # node the caller named) and link the new memory. Validation already ran.
-    if supersede is not None and supersede_tail is not None:
-        tail_props = supersede_tail.setdefault("properties", {})
-        if "valid_to" not in tail_props or tail_props["valid_to"] is None:
-            tail_props["valid_to"] = now
-        tail_props["superseded_by"] = memory_id
-        associate(graph, memory_id, supersede_tail["id"], relation="SUPERSEDES")
+    # Apply supersede via the shared helper (audit round 3 R3-4 — eliminates
+    # the duplicate inline implementation that used to live here).
+    if supersede is not None:
+        _apply_supersede_to_tail(graph, new_id=memory_id, tail=supersede_tail, now=now)
 
     return memory_id
 
 
-class SupersedeError(ValueError):
-    """Raised when a supersede call violates the bi-temporal invariant."""
+class SupersedeError(Exception):
+    """Raised when a supersede call violates the bi-temporal invariant.
+
+    Subclasses `Exception` (not `ValueError`) so callers that catch
+    `ValueError` for unrelated input validation don't accidentally
+    swallow supersede violations (audit round 3 R3-12).
+    """
 
 
 def _resolve_supersede_tail(graph: Dict[str, Any], start_id: str) -> Optional[Dict[str, Any]]:
@@ -245,6 +294,28 @@ def _resolve_supersede_tail(graph: Dict[str, Any], start_id: str) -> Optional[Di
     return None
 
 
+def _apply_supersede_to_tail(
+    graph: Dict[str, Any],
+    *,
+    new_id: str,
+    tail: Dict[str, Any],
+    now: str,
+) -> None:
+    """Mutating step of the supersede workflow.
+
+    Writes `valid_to`/`superseded_by` on the TAIL node and adds a
+    `SUPERSEDES` edge from `new_id` → tail. Validation must happen
+    BEFORE calling this (see `remember()` and `_apply_supersede()`),
+    because this function does not raise on missing tails.
+    """
+    tail_id = tail["id"]
+    props = tail.setdefault("properties", {})
+    if "valid_to" not in props or props["valid_to"] is None:
+        props["valid_to"] = now
+    props["superseded_by"] = new_id
+    associate(graph, new_id, tail_id, relation="SUPERSEDES")
+
+
 def _apply_supersede(
     graph: Dict[str, Any],
     *,
@@ -254,12 +325,10 @@ def _apply_supersede(
 ) -> bool:
     """Close an old memory and link the new one. Returns True on success.
 
-    Sets `valid_to=now` (if not already set) and `superseded_by=new_id`
-    on the old node, and adds a `SUPERSEDES` edge from `new_id` → `old_id`.
-
     Raises `SupersedeError` when:
       - `new_id == old_id` (self-supersede)
-      - the chain from `old_id` already terminates at `new_id` (cycle)
+      - the chain from `old_id` contains a cycle
+      - the chain from `old_id` already terminates at `new_id`
 
     When `old_id` is ALREADY superseded by some other node (chain exists),
     the new memory is linked to the TAIL of the chain — i.e. supersede
@@ -267,8 +336,10 @@ def _apply_supersede(
     `old_id`. This preserves chain-of-custody instead of silently
     orphaning middle nodes.
 
-    Returns False if the old node doesn't exist (no raise, for CLI
-    convenience).
+    Returns False if the old node doesn't exist (no raise, for direct
+    test callers that want to assert non-existence without catching).
+    Note: `remember(supersede=missing)` DOES raise — only this lower-
+    level helper preserves the legacy False-return contract.
     """
     if new_id == old_id:
         raise SupersedeError(f"cannot supersede a memory with itself: {old_id}")
@@ -279,26 +350,17 @@ def _apply_supersede(
 
     # Walk the chain to the current tail. If the chain is already terminal
     # (old_id has no superseded_by), tail == old, and we close old directly.
-    # If a chain exists, we close the TAIL instead, preserving the chain.
     tail = _resolve_supersede_tail(graph, old_id)
     if tail is None:
         # Cycle in the existing chain — refuse rather than make it worse.
         raise SupersedeError(f"supersede chain starting at {old_id} contains a cycle")
 
-    tail_id = tail["id"]
-    if tail_id == new_id:
+    if tail["id"] == new_id:
         raise SupersedeError(
             f"supersede chain starting at {old_id} already terminates at {new_id}"
         )
 
-    props = tail.setdefault("properties", {})
-    # Don't overwrite an explicitly-set valid_to.
-    if "valid_to" not in props or props["valid_to"] is None:
-        props["valid_to"] = now
-    props["superseded_by"] = new_id
-
-    # Add the SUPERSEDES edge from new → TAIL (the node actually being closed).
-    associate(graph, new_id, tail_id, relation="SUPERSEDES")
+    _apply_supersede_to_tail(graph, new_id=new_id, tail=tail, now=now)
     return True
 
 
@@ -630,7 +692,20 @@ def _cmd_remember(args: argparse.Namespace) -> int:
     save_graph(path, graph)
     print(f"Remembered: {mid}")
     if args.supersede:
-        print(f"Superseded: {args.supersede}")
+        # Report the actual node that got closed — it may differ from
+        # args.supersede when the chain was walked to its tail
+        # (audit round 3 R3-1 corollary: stop lying about which node
+        # was touched).
+        sup_edge = next(
+            (e for e in graph.get("edges", [])
+             if e.get("from_id") == mid and e.get("relation") == "SUPERSEDES"),
+            None,
+        )
+        closed = sup_edge["to_id"] if sup_edge else args.supersede
+        if closed == args.supersede:
+            print(f"Superseded: {closed}")
+        else:
+            print(f"Superseded: {closed} (tail of {args.supersede})")
     return 0
 
 
@@ -682,8 +757,10 @@ def _cmd_render(args: argparse.Namespace) -> int:
         from memory_render import render_to_file  # test/dev cwd=tools/
     except ImportError:
         from tools.memory_render import render_to_file  # installed package
-    with open(args.in_file, "r", encoding="utf-8") as f:
-        graph = json.load(f)
+    # Use load_graph (not raw json.load) for consistency with every other
+    # _cmd_* handler — any future behavior change in load_graph (schema
+    # upgrade, validation) applies uniformly (audit round 3 R3-10).
+    graph = load_graph(Path(args.in_file))
     n = render_to_file(
         graph,
         Path(args.out_file),
