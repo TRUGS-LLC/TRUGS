@@ -7,6 +7,7 @@ Usage:
     python tools/memory.py recall <file> [--query KEYWORD] [--type TYPE] [--recent N] [--all]
     python tools/memory.py forget <file> <memory_id>
     python tools/memory.py associate <file> <from_id> <to_id> [--relation RELATION]
+    python tools/memory.py render <in.trug.json> <out.md> [--budget N] [--include-rationale]
     python tools/memory.py init <file>
 """
 
@@ -341,6 +342,16 @@ def main():
             print(f"Error: memory '{memory_id}' not found", file=sys.stderr)
             sys.exit(1)
         sys.exit(0)
+
+    if command == "render":
+        # Delegate to memory_render.main() — pass the remaining argv through.
+        try:
+            from memory_render import main as render_main  # test/dev cwd=tools/
+        except ImportError:
+            from tools.memory_render import main as render_main  # installed package
+        sys.argv = [sys.argv[0]] + sys.argv[2:]
+        render_main()
+        return
 
     if command == "associate":
         if len(sys.argv) < 5:

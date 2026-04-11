@@ -13,6 +13,7 @@ dependencies = []
 [project.scripts]
 trugs-validate = "tools.validate:main"
 trugs-memory = "tools.memory:main"
+trugs-memory-render = "tools.memory_render:main"
 trugs-tget = "tools.tget:main"
 trugs-tupdate = "tools.tupdate:main"
 trugs-tdelete = "tools.tdelete:main"
