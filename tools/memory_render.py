@@ -251,8 +251,27 @@ def _render_memory(
 
 
 def _approx_tokens(text: str) -> int:
-    """Approximate token count. 1 token ≈ 4 chars (English rule of thumb)."""
-    return max(1, (len(text) + 3) // 4)
+    """Approximate token count. 1 token ≈ 4 chars (English rule of thumb).
+
+    Empty input returns 0 (not 1) — fixes an off-by-one that inflated budgets
+    by a token per empty render.
+    """
+    if not text:
+        return 0
+    return (len(text) + 3) // 4
+
+
+def _estimate_memory_tokens(memory: Dict[str, Any], include_rationale: bool) -> int:
+    """Rough per-memory token contribution. Used by the incremental budget loop."""
+    props = memory.get("properties", {})
+    body = props.get("rule") or props.get("text") or ""
+    total = _approx_tokens(body) + 4  # + bullet, newlines, tag line
+    tags = props.get("tags") or []
+    if tags:
+        total += _approx_tokens(", ".join(tags)) + 2
+    if include_rationale:
+        total += _approx_tokens(props.get("rationale") or "")
+    return total
 
 
 def _apply_budget(
@@ -267,34 +286,65 @@ def _apply_budget(
 
     `user` and `feedback` are never demoted. Demoted entries are dropped from
     the output; they remain on disk in the source TRUG.
+
+    Uses an incremental token estimate so the loop is O(n), not O(n²). If the
+    protected sections (`user` + `feedback`) are already over budget on their
+    own, demoting `project`/`reference` cannot help — in that case the function
+    emits the full body with a warning header instead of looping uselessly.
     """
     header = "\n".join(header_lines)
+    header_tokens = _approx_tokens(header) + 1  # +1 for the blank line
+    budget_for_body = token_budget - header_tokens
 
-    def over_budget(b: str) -> bool:
-        return _approx_tokens(header + "\n\n" + b) > token_budget
+    if token_budget <= 0:
+        # Non-positive budget — emit a warning note but render everything.
+        return (
+            body.rstrip()
+            + "\n\n_Warning: token_budget ≤ 0; ignored._\n"
+        )
 
-    if not over_budget(body):
+    if _approx_tokens(body) <= budget_for_body:
         return body
 
-    # Build a mutable working copy we can trim from.
+    # Pre-check: if the protected sections alone bust the budget, demotion is
+    # pointless. Emit the full body with a warning so the caller sees why the
+    # render is over.
+    protected_tokens = 0
+    for t, bucket in grouped.items():
+        if t in DEMOTION_ORDER:
+            continue
+        for m in bucket:
+            protected_tokens += _estimate_memory_tokens(m, include_rationale)
+
+    if protected_tokens > budget_for_body:
+        note = (
+            "\n_Warning: protected sections (user+feedback) already exceed the "
+            f"token budget ({protected_tokens} > {budget_for_body}); no demotion applied._\n"
+        )
+        return body.rstrip() + "\n" + note
+
+    # Incremental demotion: compute initial body tokens, subtract per-pop
+    # estimates. O(n) in the number of pops instead of O(n²) re-renders.
     working: Dict[str, List[Dict[str, Any]]] = {
         t: list(lst) for t, lst in grouped.items()
     }
+    running_tokens = _approx_tokens(body)
 
     demoted_count = 0
     for t in DEMOTION_ORDER:
         bucket = working.get(t)
         if not bucket:
             continue
-        # Drop oldest entries first; bucket is newest-first, so pop from end.
-        while bucket and over_budget(_render_body(working, include_rationale=include_rationale)):
-            bucket.pop()
+        # Pop oldest entries first (bucket is newest-first, so pop from end).
+        while bucket and running_tokens > budget_for_body:
+            popped = bucket.pop()
+            running_tokens -= _estimate_memory_tokens(popped, include_rationale)
             demoted_count += 1
-        if bucket:
-            working[t] = bucket
-        else:
-            # Remove empty bucket entirely to avoid orphan section header.
+        if not bucket:
+            # Remove empty bucket entirely to avoid an orphan section header.
             del working[t]
+        if running_tokens <= budget_for_body:
+            break
 
     new_body = _render_body(working, include_rationale=include_rationale)
 

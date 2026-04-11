@@ -259,11 +259,79 @@ def test_demotion_order_constant_excludes_user_feedback():
     assert "feedback" not in DEMOTION_ORDER
 
 
+def test_approx_tokens_empty_is_zero():
+    """Audit round 2 #18 — empty string should cost 0 tokens, not 1."""
+    assert _approx_tokens("") == 0
+
+
 def test_approx_tokens_is_4_char_ratio():
-    assert _approx_tokens("") == 1  # minimum 1
     assert _approx_tokens("abcd") == 1
     assert _approx_tokens("abcdefgh") == 2
     assert _approx_tokens("a" * 400) == 100
+
+
+def test_render_protected_overflow_warns_instead_of_pointless_demotion(empty_graph, fixed_now):
+    """Audit round 2 #3 — user/feedback alone over budget → no pointless demotion of project/reference.
+
+    Before the fix, the budget loop would pop every `project` and `reference`
+    entry one-by-one even though the protected sections were already bigger
+    than the budget. That silently nuked context with no warning.
+    """
+    g = deepcopy(empty_graph)
+    # 1 huge feedback rule (already over any reasonable budget on its own)
+    big = "HUGE_FEEDBACK_MARKER " + ("lorem ipsum " * 500)  # >2k approx tokens
+    remember(g, big, memory_type="feedback")
+    # + a bunch of project entries that WOULD be demoted in the old code
+    for i in range(20):
+        remember(g, f"Project_entry_{i:02d}_marker", memory_type="project")
+
+    out = render(g, token_budget=500, now=fixed_now)
+    # The big feedback rule must survive (user/feedback are never demoted).
+    assert "HUGE_FEEDBACK_MARKER" in out
+    # Project entries should also survive — demoting them can't fix the overflow.
+    assert "Project_entry_00_marker" in out
+    assert "Project_entry_19_marker" in out
+    # And we should see the warning.
+    assert "protected sections" in out.lower()
+    assert "no demotion applied" in out.lower()
+
+
+def test_render_zero_budget_emits_warning_but_renders(empty_graph, fixed_now):
+    """Audit round 2 #3 — token_budget=0 should not infinite-loop or return nothing."""
+    g = deepcopy(empty_graph)
+    remember(g, "A", memory_type="feedback")
+    remember(g, "B", memory_type="project")
+    out = render(g, token_budget=0, now=fixed_now)
+    assert "# MEMORY" in out
+    assert "A" in out
+    assert "B" in out
+    assert "token_budget" in out.lower()
+
+
+def test_render_incremental_demotion_matches_old_behavior(empty_graph, fixed_now):
+    """Audit round 2 #5 — the O(n²) → O(n) rewrite must produce the same final set.
+
+    We verify that when demotion is legitimately needed (user/feedback fit but
+    project overflows), exactly the oldest project entries get dropped and the
+    demoted count is accurate.
+    """
+    g = deepcopy(empty_graph)
+    remember(g, "Critical rule", memory_type="feedback")
+    for i in range(100):
+        remember(g, f"Project decision number {i:03d} with some body text", memory_type="project")
+
+    out = render(g, token_budget=150, now=fixed_now)
+
+    # Newest projects survive; oldest are demoted.
+    assert "Project decision number 099" in out
+    # At least some demotion happened.
+    assert "demoted for budget" in out
+    # Parse the demotion count — should be >0 and < 100.
+    import re
+    m = re.search(r"_(\d+) memories demoted", out)
+    assert m is not None
+    n = int(m.group(1))
+    assert 0 < n < 100
 
 
 # ─── Sorting ───────────────────────────────────────────────────────────────────
