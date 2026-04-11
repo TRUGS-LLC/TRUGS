@@ -614,18 +614,18 @@ def _build_parser() -> argparse.ArgumentParser:
                             "to the tail of the existing chain, not the original.")
 
     # recall
-    p_rec = sub.add_parser("recall", help="Query memories.")
-    p_rec.add_argument("file", help="Path to the memory graph.")
-    p_rec.add_argument("--query", default=None,
-                       help="Case-insensitive substring match across text, rule, tags, type.")
-    p_rec.add_argument("--type", dest="memory_type", default=None,
-                       help="Filter by memory type (exact match, case-insensitive).")
-    p_rec.add_argument("--recent", type=int, default=None,
-                       help="Limit to N most recent results.")
-    p_rec.add_argument("--all", dest="all_memories", action="store_true",
-                       help="Skip query/type filters; still respects --active-only and --recent.")
-    p_rec.add_argument("--active-only", action="store_true",
-                       help="Exclude memories whose valid_to is in the past.")
+    p_recall = sub.add_parser("recall", help="Query memories.")
+    p_recall.add_argument("file", help="Path to the memory graph.")
+    p_recall.add_argument("--query", default=None,
+                          help="Case-insensitive substring match across text, rule, tags, type.")
+    p_recall.add_argument("--type", dest="memory_type", default=None,
+                          help="Filter by memory type (exact match, case-insensitive).")
+    p_recall.add_argument("--recent", type=int, default=None,
+                          help="Limit to N most recent results.")
+    p_recall.add_argument("--all", dest="all_memories", action="store_true",
+                          help="Skip query/type filters; still respects --active-only and --recent.")
+    p_recall.add_argument("--active-only", action="store_true",
+                          help="Exclude memories whose valid_to is in the past.")
 
     # forget
     p_for = sub.add_parser("forget", help="Remove a memory and all its edges.")
@@ -662,6 +662,22 @@ def _build_parser() -> argparse.ArgumentParser:
                        help="String prepended to each memory's source property.")
     p_imp.add_argument("--dry-run", action="store_true",
                        help="Scan and report without writing.")
+
+    # audit (delegates to memory_audit)
+    p_aud = sub.add_parser("audit", help="Dead-rule report and hit-count instrumentation.")
+    p_aud.add_argument("file", help="Path to the memory graph.")
+    p_aud.add_argument("--dead-rules", dest="dead_rules_spec", default=None,
+                       help="Duration threshold (e.g. 30d, 2w, 1m, 1y).")
+    p_aud.add_argument("--bump", dest="bump_id", default=None,
+                       help="Increment hit_count and update last_hit for the given memory ID.")
+
+    # reconcile (delegates to memory_audit)
+    p_reconcile = sub.add_parser("reconcile", help="Detect duplicate-candidate memory pairs.")
+    p_reconcile.add_argument("file", help="Path to the memory graph.")
+    p_reconcile.add_argument("--threshold", type=float, default=0.7,
+                             help="Jaccard similarity cutoff in [0.0, 1.0]. Default: 0.7")
+    p_reconcile.add_argument("--type", dest="memory_type", default=None,
+                             help="Only compare memories of this type.")
 
     return parser
 
@@ -826,6 +842,30 @@ def _cmd_import_flat(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_audit(args: argparse.Namespace) -> int:
+    try:
+        from memory_audit import _main_audit  # test/dev cwd=tools/
+    except ImportError:
+        from tools.memory_audit import _main_audit  # installed package
+    forwarded: List[str] = [args.file]
+    if args.dead_rules_spec is not None:
+        forwarded += ["--dead-rules", args.dead_rules_spec]
+    if args.bump_id is not None:
+        forwarded += ["--bump", args.bump_id]
+    return _main_audit(forwarded)
+
+
+def _cmd_reconcile(args: argparse.Namespace) -> int:
+    try:
+        from memory_audit import _main_reconcile  # test/dev cwd=tools/
+    except ImportError:
+        from tools.memory_audit import _main_reconcile  # installed package
+    forwarded: List[str] = [args.file, "--threshold", str(args.threshold)]
+    if args.memory_type is not None:
+        forwarded += ["--type", args.memory_type]
+    return _main_reconcile(forwarded)
+
+
 _COMMANDS = {
     "init": _cmd_init,
     "remember": _cmd_remember,
@@ -834,6 +874,8 @@ _COMMANDS = {
     "associate": _cmd_associate,
     "render": _cmd_render,
     "import-flat": _cmd_import_flat,
+    "audit": _cmd_audit,
+    "reconcile": _cmd_reconcile,
 }
 
 
