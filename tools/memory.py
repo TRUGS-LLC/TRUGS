@@ -614,18 +614,18 @@ def _build_parser() -> argparse.ArgumentParser:
                             "to the tail of the existing chain, not the original.")
 
     # recall
-    p_rec = sub.add_parser("recall", help="Query memories.")
-    p_rec.add_argument("file", help="Path to the memory graph.")
-    p_rec.add_argument("--query", default=None,
-                       help="Case-insensitive substring match across text, rule, tags, type.")
-    p_rec.add_argument("--type", dest="memory_type", default=None,
-                       help="Filter by memory type (exact match, case-insensitive).")
-    p_rec.add_argument("--recent", type=int, default=None,
-                       help="Limit to N most recent results.")
-    p_rec.add_argument("--all", dest="all_memories", action="store_true",
-                       help="Skip query/type filters; still respects --active-only and --recent.")
-    p_rec.add_argument("--active-only", action="store_true",
-                       help="Exclude memories whose valid_to is in the past.")
+    p_recall = sub.add_parser("recall", help="Query memories.")
+    p_recall.add_argument("file", help="Path to the memory graph.")
+    p_recall.add_argument("--query", default=None,
+                          help="Case-insensitive substring match across text, rule, tags, type.")
+    p_recall.add_argument("--type", dest="memory_type", default=None,
+                          help="Filter by memory type (exact match, case-insensitive).")
+    p_recall.add_argument("--recent", type=int, default=None,
+                          help="Limit to N most recent results.")
+    p_recall.add_argument("--all", dest="all_memories", action="store_true",
+                          help="Skip query/type filters; still respects --active-only and --recent.")
+    p_recall.add_argument("--active-only", action="store_true",
+                          help="Exclude memories whose valid_to is in the past.")
 
     # forget
     p_for = sub.add_parser("forget", help="Remove a memory and all its edges.")
@@ -672,12 +672,12 @@ def _build_parser() -> argparse.ArgumentParser:
                        help="Increment hit_count and update last_hit for the given memory ID.")
 
     # reconcile (delegates to memory_audit)
-    p_rec = sub.add_parser("reconcile", help="Detect duplicate-candidate memory pairs.")
-    p_rec.add_argument("file", help="Path to the memory graph.")
-    p_rec.add_argument("--threshold", type=float, default=0.7,
-                       help="Jaccard similarity cutoff in [0.0, 1.0]. Default: 0.7")
-    p_rec.add_argument("--type", dest="memory_type", default=None,
-                       help="Only compare memories of this type.")
+    p_reconcile = sub.add_parser("reconcile", help="Detect duplicate-candidate memory pairs.")
+    p_reconcile.add_argument("file", help="Path to the memory graph.")
+    p_reconcile.add_argument("--threshold", type=float, default=0.7,
+                             help="Jaccard similarity cutoff in [0.0, 1.0]. Default: 0.7")
+    p_reconcile.add_argument("--type", dest="memory_type", default=None,
+                             help="Only compare memories of this type.")
 
     return parser
 

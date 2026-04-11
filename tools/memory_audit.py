@@ -23,7 +23,6 @@ Usage:
 
 from __future__ import annotations
 
-import json
 import re
 import sys
 from dataclasses import dataclass
@@ -260,24 +259,46 @@ def _jaccard(a: set, b: set) -> float:
 
 
 def _parse_duration_days(spec: str) -> int:
-    """Parse a duration string like '30d', '2w', '6m' into days.
+    """Parse a duration string like '30d', '2w', '6mo' into days.
 
-    Simple: suffix 'd' → days, 'w' → weeks×7, 'm' → months×30, 'y' → years×365.
+    Suffixes (case-insensitive):
+      d   → days
+      w   → weeks × 7
+      mo  → months × 30  (audit round 3 R3-8: we require 'mo' for months,
+                          not 'm', to avoid the 'minute' ambiguity from
+                          systemd/timeout conventions)
+      y   → years × 365
+
     A bare integer is interpreted as days.
 
-    Rejects negative or zero durations (audit #4) — a `-30d` threshold would
-    land in the FUTURE and flag every feedback memory as dead, which is
-    worse than an error.
+    Rejects negative or zero durations (audit round 2 #4) — a `-30d`
+    threshold would land in the future and flag every feedback memory as
+    dead, which is worse than an error.
+
+    Rejects a bare `m` suffix explicitly: users are likely thinking
+    "minutes" (systemd style); we force them to type `mo` for months
+    so the intent is unambiguous.
     """
     spec = spec.strip().lower()
     if not spec:
-        raise ValueError("Empty duration")
-    if spec[-1] in ("d", "w", "m", "y"):
+        raise ValueError("empty duration")
+
+    # Longest suffix first — `mo` must be checked before `m`-anything.
+    if spec.endswith("mo"):
+        n = int(spec[:-2])
+        days = n * 30
+    elif spec[-1] == "m":
+        raise ValueError(
+            f"ambiguous duration {spec!r} — use `Nmo` for months (e.g. `6mo`) "
+            f"or `Nd` for days; bare `m` is reserved for future clarity"
+        )
+    elif spec[-1] in ("d", "w", "y"):
         n = int(spec[:-1])
         unit = spec[-1]
-        days = {"d": n, "w": n * 7, "m": n * 30, "y": n * 365}[unit]
+        days = {"d": n, "w": n * 7, "y": n * 365}[unit]
     else:
         days = int(spec)
+
     if days <= 0:
         raise ValueError(f"duration must be positive (got {spec})")
     return days

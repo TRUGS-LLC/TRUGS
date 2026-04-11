@@ -253,9 +253,16 @@ def test_jaccard_basic():
 def test_parse_duration_days_shortforms():
     assert _parse_duration_days("30d") == 30
     assert _parse_duration_days("2w") == 14
-    assert _parse_duration_days("1m") == 30
+    assert _parse_duration_days("1mo") == 30  # Round 3 R3-8: 'mo' for months
     assert _parse_duration_days("1y") == 365
     assert _parse_duration_days("60") == 60
+
+
+def test_parse_duration_days_rejects_bare_m():
+    """Audit round 3 R3-8 — bare `1m` is ambiguous (minutes vs months) and rejected."""
+    with pytest.raises(ValueError) as exc:
+        _parse_duration_days("1m")
+    assert "ambiguous" in str(exc.value).lower()
 
 
 def test_parse_duration_days_rejects_empty():
