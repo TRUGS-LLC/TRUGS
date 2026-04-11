@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "trugs"
-version = "1.0.0"
+version = "1.2.0"
 description = "TRUGS — Traceable Recursive Universal Graph Specification"
 license = {text = "Apache-2.0"}
 requires-python = ">=3.10"
