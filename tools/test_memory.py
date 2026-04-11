@@ -706,6 +706,10 @@ def test_save_graph_preserves_existing_mode(tmp_path):
     assert mode == 0o644, f"save_graph clobbered mode: expected 0o644, got 0o{mode:o}"
 
 
+@pytest.mark.skipif(
+    not hasattr(__import__("os"), "O_DIRECTORY"),
+    reason="Directory fsync requires POSIX O_DIRECTORY (audit round 4 platform gate)",
+)
 def test_save_graph_fsyncs_parent_directory(tmp_path, monkeypatch):
     """Audit round 3 R3-2 — save_graph must fsync the parent dir after replace.
 

@@ -55,9 +55,13 @@ def save_graph(path: Path, graph: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
 
     # Capture existing mode (if any) so we can preserve it after replace.
+    # Use 0o7777 (not 0o777) to preserve setgid/setuid/sticky bits — some
+    # team setups use a setgid directory so created files inherit group
+    # ownership, and stripping the bit every save would break that
+    # (audit round 4 LOW).
     existing_mode: Optional[int] = None
     try:
-        existing_mode = path.stat().st_mode & 0o777
+        existing_mode = path.stat().st_mode & 0o7777
     except FileNotFoundError:
         existing_mode = None
 
@@ -307,6 +311,14 @@ def _apply_supersede_to_tail(
     `SUPERSEDES` edge from `new_id` → tail. Validation must happen
     BEFORE calling this (see `remember()` and `_apply_supersede()`),
     because this function does not raise on missing tails.
+
+    NOTE (audit round 4 INFO): `remember()` looks up `tail` BEFORE the new
+    node is appended to `graph["nodes"]` and passes the dict reference
+    through here. This works because `_find_node` returns the dict by
+    identity, not by index, so the reference remains valid even after
+    a subsequent append. If anyone ever rewrites `_find_node` to return
+    a copy, this code path will silently stop mutating the real node.
+    Contract: `_find_node` returns the stored dict, period.
     """
     tail_id = tail["id"]
     props = tail.setdefault("properties", {})
