@@ -279,6 +279,9 @@ def _render_memory(
     props = memory.get("properties", {})
     body = props.get("rule") or props.get("text") or ""
     body = body.strip()
+    # I1: collapse multi-line body to single line — memories are one-line
+    # summaries in the rendered index; multi-line content belongs in rationale.
+    body = body.replace("\n", " ").replace("\r", "")
 
     lines = [f"- {body}" if body else "- _(empty memory)_"]
 

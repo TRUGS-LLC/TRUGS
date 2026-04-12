@@ -435,3 +435,33 @@ def test_dead_rules_uses_shared_iso_parser(empty_graph, fixed_now):
     # Same inputs → same outputs.
     for sample in (None, "", "not a date", "2026-04-10T00:00:00+00:00", "2026-04-10T00:00:00"):
         assert _parse_iso(sample) == _parse_iso_utc(sample)
+
+
+def test_parse_duration_days_overflow_capped():
+    """M2 — 99999999y must raise ValueError, not OverflowError."""
+    from memory_audit import _parse_duration_days
+    with pytest.raises(ValueError, match="too large"):
+        _parse_duration_days("99999999y")
+    # 999y is just under the cap and should still work
+    assert _parse_duration_days("999y") == 999 * 365
+
+
+def test_parse_duration_days_rejects_none():
+    """L2 — None must raise ValueError, not AttributeError."""
+    from memory_audit import _parse_duration_days
+    with pytest.raises(ValueError, match="string"):
+        _parse_duration_days(None)
+
+
+def test_parse_duration_days_rejects_int():
+    """L2 — integer input must raise ValueError."""
+    from memory_audit import _parse_duration_days
+    with pytest.raises(ValueError, match="string"):
+        _parse_duration_days(123)
+
+
+def test_parse_duration_days_rejects_internal_whitespace():
+    """L2 — '30 d' with internal whitespace must raise ValueError."""
+    from memory_audit import _parse_duration_days
+    with pytest.raises(ValueError, match="whitespace"):
+        _parse_duration_days("30 d")

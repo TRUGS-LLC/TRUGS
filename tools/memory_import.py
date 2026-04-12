@@ -34,6 +34,7 @@ Usage:
 
 from __future__ import annotations
 
+import hashlib
 import json
 import sys
 from dataclasses import dataclass
@@ -197,7 +198,8 @@ def _idempotency_key(text: str, rule: Optional[str], rationale: Optional[str], m
     distinct memories.
     """
     parts = [text or "", rule or "", rationale or "", (memory_type or "").lower()]
-    return "\x1f".join(parts)  # unit separator, unlikely in real content
+    # L3: SHA-256 hash prevents collisions when fields contain \x1f
+    return hashlib.sha256("\x1f".join(parts).encode("utf-8")).hexdigest()
 
 
 def import_flat_directory(
@@ -269,6 +271,8 @@ def import_flat_directory(
         report.files_scanned += 1
 
         # audit #16 — reject symlinks escaping src_dir BEFORE reading.
+        # I2: resolve once, then read from the resolved path to close
+        # the TOCTOU window between the security check and the read.
         try:
             resolved = path.resolve()
             resolved.relative_to(src_dir_resolved)
@@ -277,7 +281,7 @@ def import_flat_directory(
             continue
 
         try:
-            content = path.read_text(encoding="utf-8")
+            content = resolved.read_text(encoding="utf-8")
         except (OSError, UnicodeDecodeError):
             report.skipped_malformed += 1
             continue

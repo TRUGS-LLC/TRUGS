@@ -279,7 +279,14 @@ def _parse_duration_days(spec: str) -> int:
     "minutes" (systemd style); we force them to type `mo` for months
     so the intent is unambiguous.
     """
-    spec = spec.strip().lower()
+    # L2: reject non-string inputs that would raise AttributeError
+    if not isinstance(spec, str):
+        raise ValueError(f"Duration must be a string, got {type(spec).__name__}")
+    # L2: reject internal whitespace (e.g. "30 d" typo)
+    stripped = spec.strip()
+    if " " in stripped or "\t" in stripped:
+        raise ValueError(f"Duration must not contain whitespace: {spec!r}")
+    spec = stripped.lower()
     if not spec:
         raise ValueError("empty duration")
 
@@ -310,6 +317,9 @@ def _parse_duration_days(spec: str) -> int:
 
     if days <= 0:
         raise ValueError(f"duration must be positive (got {spec})")
+    # M2: cap at ~1000 years to prevent OverflowError in timedelta
+    if days > 365_000:
+        raise ValueError(f"Duration too large: {days} days (max ~1000 years)")
     return days
 
 

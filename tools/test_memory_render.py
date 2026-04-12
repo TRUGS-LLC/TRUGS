@@ -396,3 +396,20 @@ def test_rendered_source_graph_still_validates(small_graph):
     # Sanity — the graph we rendered from is still a valid CORE TRUG.
     result = validate(small_graph)
     assert result.valid, f"Render fixture graph is invalid: {result.errors}"
+
+
+def test_render_memory_collapses_multiline_body(empty_graph, fixed_now):
+    """I1 — a memory body with newlines and markdown syntax must render as
+    a single line, not inject headings into MEMORY.md."""
+    from memory import remember
+    from memory_render import render
+
+    g = empty_graph
+    remember(g, "line1\n# Heading\nline3", memory_type="feedback")
+    md = render(g, now=fixed_now)
+    # The body should appear as a single bullet line, not a heading
+    assert "- line1 # Heading line3" in md
+    # Must NOT contain a real markdown heading from the injected content
+    lines = md.splitlines()
+    injected_headings = [l for l in lines if l.strip() == "# Heading"]
+    assert len(injected_headings) == 0, "Multi-line body injected a heading"
