@@ -168,6 +168,7 @@ def remember(
     valid_to: Optional[str] = None,
     session_id: Optional[str] = None,
     supersede: Optional[str] = None,
+    ref: Optional[List[str]] = None,
 ) -> str:
     """Add a memory node to the graph. Returns the new memory ID.
 
@@ -195,6 +196,11 @@ def remember(
             memory is linked to the TAIL of the chain (preserving the
             full history). `SUPERSEDES` edge + `valid_to` are applied
             to the tail; the new memory itself is never closed.
+        ref: list of memory IDs that this new memory references. Creates
+            a ``REFERENCES`` edge from the new memory to each target.
+            Missing targets are silently skipped (warn on stderr from CLI).
+            Phase 2: organic edge creation at write time — memories
+            accumulate structural edges gradually instead of in batch.
 
     Raises:
         SupersedeError: if `supersede` is set but the target is missing,
@@ -263,6 +269,16 @@ def remember(
     # the duplicate inline implementation that used to live here).
     if supersede is not None:
         _apply_supersede_to_tail(graph, new_id=memory_id, tail=supersede_tail, now=now)
+
+    # Phase 2: organic REFERENCES edges via --ref.
+    if ref:
+        for ref_id in ref:
+            if _find_node(graph, ref_id) is not None:
+                graph.setdefault("edges", []).append({
+                    "from_id": memory_id,
+                    "to_id": ref_id,
+                    "relation": "REFERENCES",
+                })
 
     return memory_id
 
@@ -615,6 +631,9 @@ def _build_parser() -> argparse.ArgumentParser:
                             "(valid_to=now, superseded_by=<new>) and adds a SUPERSEDES edge. "
                             "If the old memory is already superseded, the new memory is linked "
                             "to the tail of the existing chain, not the original.")
+    p_rem.add_argument("--ref", dest="ref_ids", action="append", default=[],
+                       help="ID of a memory this one references. Creates a REFERENCES edge. "
+                            "May be given multiple times. Missing targets are silently skipped.")
 
     # recall
     p_recall = sub.add_parser("recall", help="Query memories.")
@@ -716,6 +735,8 @@ def _cmd_remember(args: argparse.Namespace) -> int:
             return 2
 
     graph = load_graph(path)
+    ref_ids = getattr(args, "ref_ids", []) or []
+
     try:
         mid = remember(
             graph,
@@ -728,6 +749,7 @@ def _cmd_remember(args: argparse.Namespace) -> int:
             valid_to=args.valid_to,
             session_id=args.session_id,
             supersede=args.supersede,
+            ref=ref_ids if ref_ids else None,
         )
     except SupersedeError as e:
         print(f"Error: {e}", file=sys.stderr)
@@ -750,6 +772,17 @@ def _cmd_remember(args: argparse.Namespace) -> int:
             print(f"Superseded: {closed}")
         else:
             print(f"Superseded: {closed} (tail of {args.supersede})")
+    # Report REFERENCES edges created by --ref.
+    if ref_ids:
+        ref_edges = [
+            e for e in graph.get("edges", [])
+            if e.get("from_id") == mid and e.get("relation") == "REFERENCES"
+        ]
+        for re_ in ref_edges:
+            print(f"References: {re_['to_id']}")
+        skipped = len(ref_ids) - len(ref_edges)
+        if skipped > 0:
+            print(f"  ({skipped} ref target(s) not found — skipped)", file=sys.stderr)
     return 0
 
 

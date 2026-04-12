@@ -842,3 +842,69 @@ def test_init_memory_graph_version_is_1_2_0(tmp_path):
     g = init_memory_graph(path)
     assert g["version"] == "1.2.0"
     assert MEMORY_GRAPH_VERSION == "1.2.0"
+
+
+# ─── Phase 2: remember --ref (organic REFERENCES edges) ─────────────────────
+
+
+def test_remember_ref_creates_references_edge(tmp_path):
+    """--ref should create a REFERENCES edge from new memory to target."""
+    from memory import init_memory_graph, remember
+
+    g = init_memory_graph(tmp_path / "mem.trug.json")
+    mid_a = remember(g, "Rule A", memory_type="feedback")
+    mid_b = remember(g, "Rule B relates to A", memory_type="feedback", ref=[mid_a])
+
+    ref_edges = [
+        e for e in g.get("edges", [])
+        if e.get("from_id") == mid_b
+        and e.get("to_id") == mid_a
+        and e.get("relation") == "REFERENCES"
+    ]
+    assert len(ref_edges) == 1
+
+
+def test_remember_ref_multiple_targets(tmp_path):
+    """Multiple --ref flags should create one REFERENCES edge each."""
+    from memory import init_memory_graph, remember
+
+    g = init_memory_graph(tmp_path / "mem.trug.json")
+    mid_a = remember(g, "A", memory_type="feedback")
+    mid_b = remember(g, "B", memory_type="feedback")
+    mid_c = remember(g, "C refs A and B", memory_type="feedback", ref=[mid_a, mid_b])
+
+    ref_edges = [
+        e for e in g.get("edges", [])
+        if e.get("from_id") == mid_c and e.get("relation") == "REFERENCES"
+    ]
+    assert len(ref_edges) == 2
+    targets = {e["to_id"] for e in ref_edges}
+    assert targets == {mid_a, mid_b}
+
+
+def test_remember_ref_missing_target_skipped(tmp_path):
+    """--ref with a non-existent ID should be silently skipped."""
+    from memory import init_memory_graph, remember
+
+    g = init_memory_graph(tmp_path / "mem.trug.json")
+    mid = remember(g, "Rule", memory_type="feedback", ref=["nonexistent-id"])
+
+    ref_edges = [
+        e for e in g.get("edges", [])
+        if e.get("from_id") == mid and e.get("relation") == "REFERENCES"
+    ]
+    assert len(ref_edges) == 0
+
+
+def test_remember_ref_none_creates_no_edges(tmp_path):
+    """ref=None should create no REFERENCES edges (backwards compat)."""
+    from memory import init_memory_graph, remember
+
+    g = init_memory_graph(tmp_path / "mem.trug.json")
+    mid = remember(g, "No refs", memory_type="feedback")
+
+    ref_edges = [
+        e for e in g.get("edges", [])
+        if e.get("from_id") == mid and e.get("relation") == "REFERENCES"
+    ]
+    assert len(ref_edges) == 0

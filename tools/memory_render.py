@@ -107,12 +107,38 @@ def render_to_file(
 # ─── Internals ─────────────────────────────────────────────────────────────────
 
 
+_PROJECT_DECAY_DAYS: int = 7
+"""Project memories older than this with zero non-CONTAINS edges are
+excluded from rendering. They remain on disk for ``recall --query``.
+The edge count acts as a graduation mechanism: a project memory that
+earns a REFERENCES or DEPENDS_ON edge survives past the decay window."""
+
+
+def _edge_count(graph: Dict[str, Any], node_id: str) -> int:
+    """Count non-CONTAINS edges touching ``node_id``."""
+    count = 0
+    for e in graph.get("edges", []):
+        if e.get("relation") == "CONTAINS":
+            continue
+        if e.get("from_id") == node_id or e.get("to_id") == node_id:
+            count += 1
+    return count
+
+
 def _active_memories(
     graph: Dict[str, Any],
     *,
     now: datetime,
 ) -> List[Dict[str, Any]]:
-    """Return memory nodes under `memory-root` whose `valid_to` is null or future."""
+    """Return memory nodes under `memory-root` that should be rendered.
+
+    Filters:
+      - ``valid_to`` in the past → excluded (expired).
+      - ``memory_type == "project"`` AND older than ``_PROJECT_DECAY_DAYS``
+        AND zero non-CONTAINS edges → excluded (ephemeral, decayed).
+    """
+    from datetime import timedelta
+
     memories: List[Dict[str, Any]] = []
     for n in graph.get("nodes", []):
         if n.get("id") == "memory-root":
@@ -123,6 +149,18 @@ def _active_memories(
         valid_to = props.get("valid_to")
         if valid_to and _is_past(valid_to, now=now):
             continue
+        # Phase 2: decay project memories older than _PROJECT_DECAY_DAYS
+        # unless they have structural edges (someone depends on them).
+        mtype = (props.get("memory_type") or "").lower()
+        if mtype == "project":
+            created_epoch = _created_epoch(n)
+            if created_epoch > 0:
+                from datetime import timezone as _tz
+                created_dt = datetime.fromtimestamp(created_epoch, tz=_tz.utc)
+                age = now - created_dt
+                if age > timedelta(days=_PROJECT_DECAY_DAYS):
+                    if _edge_count(graph, n.get("id", "")) == 0:
+                        continue  # ephemeral, decayed — skip render
         memories.append(n)
     return memories
 
@@ -255,19 +293,53 @@ def _render_body(
     *,
     include_rationale: bool,
 ) -> str:
-    """Render grouped memories as markdown body (type sections + entries)."""
+    """Render grouped memories as markdown body (type sections + entries).
+
+    Feedback memories are sub-grouped by their first tag (Phase 2 change 2).
+    This clusters 100+ flat feedback rules into scannable sections without
+    restructuring the underlying graph.
+    """
     chunks: List[str] = []
     for t, memories in grouped.items():
         if not memories:
             continue
         chunks.append(f"## {t}")
         chunks.append("")
-        for m in memories:
-            chunks.append(_render_memory(m, include_rationale=include_rationale))
-            chunks.append("")
+        if t == "feedback" and len(memories) > 5:
+            # Sub-group by first tag for scannability.
+            chunks.extend(_render_feedback_grouped(memories, include_rationale=include_rationale))
+        else:
+            for m in memories:
+                chunks.append(_render_memory(m, include_rationale=include_rationale))
+                chunks.append("")
     if not chunks:
         return "_(no active memories)_\n"
     return "\n".join(chunks).rstrip() + "\n"
+
+
+def _render_feedback_grouped(
+    memories: List[Dict[str, Any]],
+    *,
+    include_rationale: bool,
+) -> List[str]:
+    """Sub-group feedback memories by first tag, rendering each group
+    under a ``### tag (N)`` heading. Memories with no tags go under
+    ``### general``. Deterministic: groups sorted alphabetically."""
+    groups: Dict[str, List[Dict[str, Any]]] = {}
+    for m in memories:
+        tags = m.get("properties", {}).get("tags") or []
+        key = tags[0] if tags else "general"
+        groups.setdefault(key, []).append(m)
+
+    chunks: List[str] = []
+    for group_name in sorted(groups):
+        group = groups[group_name]
+        chunks.append(f"### {group_name} ({len(group)})")
+        chunks.append("")
+        for m in group:
+            chunks.append(_render_memory(m, include_rationale=include_rationale))
+            chunks.append("")
+    return chunks
 
 
 def _render_memory(
