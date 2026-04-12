@@ -475,3 +475,19 @@ def test_import_checkpoints_partial_progress(tmp_path):
         g = load_graph(out)
         persisted = [n for n in g["nodes"] if n.get("id") != "memory-root"]
         assert len(persisted) >= 6, f"Expected ≥6 persisted, got {len(persisted)}"
+
+
+def test_idempotency_key_no_collision_on_separator_in_content():
+    """L3 — two files with colliding raw join but different field boundaries
+    must produce different idempotency keys after SHA-256 hashing."""
+    from memory_import import _idempotency_key
+
+    # File A: text contains \x1f (the old separator)
+    key_a = _idempotency_key(
+        text="foo\x1fbar", rule="", rationale="", memory_type="feedback"
+    )
+    # File B: \x1f is at a field boundary instead
+    key_b = _idempotency_key(
+        text="foo", rule="bar", rationale="", memory_type="feedback"
+    )
+    assert key_a != key_b, "Keys should differ when \\x1f appears in content vs at boundary"

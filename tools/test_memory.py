@@ -806,3 +806,39 @@ def test_cli_remember_supersede_missing_target_fails_loud(tmp_path):
     )
     assert rc == 2
     assert "not found" in err.lower()
+
+
+def test_save_graph_resolves_symlinks(tmp_path):
+    """M1 — save_graph through a symlink must preserve the symlink and write
+    to the real target, not replace the symlink with a regular file."""
+    import os
+    from memory import init_memory_graph, load_graph, save_graph
+
+    real = tmp_path / "real.json"
+    link = tmp_path / "link.json"
+    real.write_text("{}", encoding="utf-8")
+    os.symlink(real, link)
+
+    g = init_memory_graph(real)
+    # Now write through the symlink
+    g["name"] = "Updated via symlink"
+    save_graph(link, g)
+
+    # (a) symlink still exists and IS a symlink
+    assert link.is_symlink()
+    # (b) real file has the new content
+    loaded_from_real = load_graph(real)
+    assert loaded_from_real["name"] == "Updated via symlink"
+    # (c) reading through symlink gives same content
+    loaded_from_link = load_graph(link)
+    assert loaded_from_link["name"] == "Updated via symlink"
+
+
+def test_init_memory_graph_version_is_1_2_0(tmp_path):
+    """L1 — init_memory_graph must stamp version 1.2.0, not 1.0.0."""
+    from memory import MEMORY_GRAPH_VERSION, init_memory_graph
+
+    path = tmp_path / "mem.trug.json"
+    g = init_memory_graph(path)
+    assert g["version"] == "1.2.0"
+    assert MEMORY_GRAPH_VERSION == "1.2.0"

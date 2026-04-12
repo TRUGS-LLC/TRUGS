@@ -51,7 +51,7 @@ def save_graph(path: Path, graph: Dict[str, Any]) -> None:
 
     Cleans up the tempfile on any exception (including KeyboardInterrupt).
     """
-    path = Path(path)
+    path = Path(os.path.realpath(path))  # M1: resolve symlinks before atomic write
     path.parent.mkdir(parents=True, exist_ok=True)
 
     # Capture existing mode (if any) so we can preserve it after replace.
@@ -113,11 +113,14 @@ def save_graph(path: Path, graph: Dict[str, Any]) -> None:
         raise
 
 
+MEMORY_GRAPH_VERSION = "1.2.0"
+
+
 def init_memory_graph(path: Path) -> Dict[str, Any]:
     """Create a new empty memory TRUG."""
     graph = {
         "name": "LLM Memory",
-        "version": "1.0.0",
+        "version": MEMORY_GRAPH_VERSION,
         "type": "MEMORY",
         "description": "Persistent memory graph for LLM sessions. Memories are nodes, associations are edges.",
         "dimensions": {
