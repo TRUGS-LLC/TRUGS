@@ -413,3 +413,97 @@ def test_render_memory_collapses_multiline_body(empty_graph, fixed_now):
     lines = md.splitlines()
     injected_headings = [l for l in lines if l.strip() == "# Heading"]
     assert len(injected_headings) == 0, "Multi-line body injected a heading"
+
+
+# ─── Phase 2: Project decay ──────────────────────────────────────────────────
+
+
+def test_project_decay_old_no_edges_excluded(empty_graph):
+    """Project memories older than 7 days with no edges should NOT render."""
+    g = deepcopy(empty_graph)
+    mid = remember(g, "Session summary April 1", memory_type="project")
+    g["nodes"][-1]["properties"]["created"] = "2026-04-01T00:00:00+00:00"
+
+    now = datetime(2026, 4, 11, tzinfo=timezone.utc)  # 10 days later
+    out = render(g, now=now)
+    assert "Session summary April 1" not in out
+
+
+def test_project_decay_old_with_edge_survives(empty_graph):
+    """Project memories older than 7 days WITH edges should survive."""
+    g = deepcopy(empty_graph)
+    mid_proj = remember(g, "Important decision", memory_type="project")
+    g["nodes"][-1]["properties"]["created"] = "2026-04-01T00:00:00+00:00"
+    mid_fb = remember(g, "Rule about the decision", memory_type="feedback")
+    # Create a REFERENCES edge from feedback → project
+    g.setdefault("edges", []).append({
+        "from_id": mid_fb, "to_id": mid_proj, "relation": "REFERENCES"
+    })
+
+    now = datetime(2026, 4, 11, tzinfo=timezone.utc)
+    out = render(g, now=now)
+    assert "Important decision" in out
+
+
+def test_project_decay_recent_no_edges_survives(empty_graph):
+    """Project memories within 7 days survive even without edges."""
+    g = deepcopy(empty_graph)
+    remember(g, "Yesterday summary", memory_type="project")
+    g["nodes"][-1]["properties"]["created"] = "2026-04-10T00:00:00+00:00"
+
+    now = datetime(2026, 4, 11, tzinfo=timezone.utc)  # 1 day later
+    out = render(g, now=now)
+    assert "Yesterday summary" in out
+
+
+def test_feedback_never_decays(empty_graph):
+    """Feedback memories survive regardless of age, even with 0 edges."""
+    g = deepcopy(empty_graph)
+    remember(g, "Ancient feedback rule", memory_type="feedback")
+    g["nodes"][-1]["properties"]["created"] = "2025-01-01T00:00:00+00:00"
+
+    now = datetime(2026, 4, 11, tzinfo=timezone.utc)  # 15+ months later
+    out = render(g, now=now)
+    assert "Ancient feedback rule" in out
+
+
+# ─── Phase 2: Feedback tag grouping ──────────────────────────────────────────
+
+
+def test_feedback_tag_grouping_renders_subheadings(empty_graph, fixed_now):
+    """When >5 feedback memories exist, they group by first tag."""
+    g = deepcopy(empty_graph)
+    for i in range(3):
+        remember(g, f"Audit rule {i}", memory_type="feedback", tags=["audit"])
+    for i in range(3):
+        remember(g, f"Naming rule {i}", memory_type="feedback", tags=["naming"])
+
+    out = render(g, now=fixed_now)
+    assert "### audit (3)" in out
+    assert "### naming (3)" in out
+    assert "Audit rule 0" in out
+    assert "Naming rule 0" in out
+
+
+def test_feedback_no_grouping_when_few(empty_graph, fixed_now):
+    """When ≤5 feedback memories, no sub-grouping (flat list)."""
+    g = deepcopy(empty_graph)
+    for i in range(3):
+        remember(g, f"Rule {i}", memory_type="feedback", tags=["misc"])
+
+    out = render(g, now=fixed_now)
+    assert "### misc" not in out  # no subheading
+    assert "Rule 0" in out
+
+
+def test_feedback_untagged_goes_to_general(empty_graph, fixed_now):
+    """Untagged feedback memories land under '### general'."""
+    g = deepcopy(empty_graph)
+    for i in range(4):
+        remember(g, f"Tagged {i}", memory_type="feedback", tags=["audit"])
+    for i in range(3):
+        remember(g, f"Untagged {i}", memory_type="feedback")  # no tags
+
+    out = render(g, now=fixed_now)
+    assert "### general" in out
+    assert "### audit" in out
