@@ -290,6 +290,66 @@ def test_preposition_with_conjunction_combination() -> None:
     assert to_edges[0]["from_id"] == "op-1"
 
 
+# ─── v0.1e — Pronouns ─────────────────────────────────────────────────
+
+def test_parse_pronoun_object() -> None:
+    s = trl.parse("PARTY api SHALL FILTER RECORD THEN SORT RESULT.")[0]
+    c2 = s.clauses[1]
+    assert c2.object is not None
+    assert c2.object.pronoun == "RESULT"
+    assert c2.object.noun == ""
+
+
+def test_compile_result_points_to_previous_op() -> None:
+    g = trl.compile("PARTY api SHALL FILTER RECORD THEN SORT RESULT.")
+    # op-2 (SORT) should ACTS_ON op-1 (FILTER), with pronoun=RESULT
+    result_edges = [e for e in g["edges"]
+                    if e.get("relation") == "ACTS_ON" and e["from_id"] == "op-2"]
+    assert len(result_edges) == 1
+    assert result_edges[0]["to_id"] == "op-1"
+    assert result_edges[0]["properties"]["pronoun"] == "RESULT"
+
+
+def test_compile_self_points_to_subject() -> None:
+    g = trl.compile("PARTY admin SHALL ADMINISTER RESOURCE REFERENCES SELF.")
+    refs = [e for e in g["edges"] if e.get("relation") == "REFERENCES"]
+    assert len(refs) == 1
+    assert refs[0]["to_id"] == "admin"
+    assert refs[0]["properties"]["pronoun"] == "SELF"
+
+
+def test_result_in_prep_target() -> None:
+    src = "PARTY system SHALL FILTER DATA THEN WRITE RESULT TO ENDPOINT destination."
+    g = trl.compile(src)
+    assert trl.decompile(g) == src
+
+
+def test_pronoun_without_antecedent_errors() -> None:
+    # RESULT in the first clause has no prior op to reference
+    try:
+        trl.compile("PARTY system SHALL FILTER RESULT.")
+    except trl.TRLGrammarError:
+        return
+    assert False, "expected TRLGrammarError — RESULT has no antecedent"
+
+
+def test_pronoun_cannot_be_subject_in_v01e() -> None:
+    # Subjects require identifiers; pronoun-as-subject is deferred.
+    try:
+        trl.compile("SELF SHALL VALIDATE.")
+    except trl.TRLError:
+        return
+    assert False, "expected TRLError — subject pronoun not in v0.1e scope"
+
+
+def test_spec_example_2_verbatim() -> None:
+    """SPEC_examples.md §1 Example 2 round-trips."""
+    g = trl.compile(SPEC_EXAMPLE_2)
+    back = trl.decompile(g)
+    assert back == SPEC_EXAMPLE_2
+    assert trl.compile(back) == g
+
+
 # ─── Decompile ───────────────────────────────────────────────────────
 
 def test_decompile_minimum_graph() -> None:
@@ -350,9 +410,16 @@ ROUND_TRIP_FIXTURES = [
     "PARTY system SHALL VALIDATE RECORD SUBJECT_TO INTERFACE schema.",
     # v0.1d — preposition + conjunction combined
     "PARTY system SHALL FILTER DATA TO ENDPOINT output THEN VALIDATE RECORD.",
+    # v0.1e — pronouns
+    "PARTY api SHALL FILTER ALL ACTIVE RECORD THEN SORT RESULT.",
+    "PARTY system SHALL MAP RECORD TO DATA THEN MERGE RESULT TO STREAM output.",
+    "PARTY admin SHALL ADMINISTER RESOURCE REFERENCES SELF.",
+    "PARTY a SHALL FILTER DATA THEN VALIDATE OUTPUT.",
+    "PARTY system SHALL FILTER DATA THEN WRITE RESULT TO ENDPOINT destination.",
 ]
 
 SPEC_EXAMPLE_1 = "PARTY system SHALL VALIDATE ALL PENDING RECORD."
+SPEC_EXAMPLE_2 = "PARTY api SHALL FILTER ALL ACTIVE RECORD THEN SORT RESULT UNLESS NO VALID RECORD REQUIRE SELF."
 
 
 def test_round_trip_trl_to_trug_to_trl() -> None:
