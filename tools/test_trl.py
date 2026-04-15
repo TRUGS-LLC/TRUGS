@@ -544,6 +544,40 @@ def test_input_pronoun_resolves_to_current_op() -> None:
     assert self_edge["to_id"] == op["id"]
 
 
+# ─── v0.2.2 — Stative clauses ─────────────────────────────────────────
+
+def test_stative_clause_emits_direct_edge() -> None:
+    g = trl.compile("THE REMEDY DEPENDS_ON PARTY owner.")
+    # No op nodes — only the subject, target, and the direct edge between them
+    op_count = sum(1 for n in g["nodes"] if n.get("type") == "TRANSFORM")
+    assert op_count == 0
+    edge = next(e for e in g["edges"] if e.get("relation") == "DEPENDS_ON")
+    assert edge["from_id"] == "remedy-1"
+    assert edge["to_id"] == "owner"
+
+
+def test_stative_clause_round_trip_verbatim() -> None:
+    src = "THE REMEDY DEPENDS_ON PARTY owner."
+    assert trl.decompile(trl.compile(src)) == src
+
+
+def test_stative_in_whereas_preamble() -> None:
+    src = "WHEREAS SERVICE kafka FEEDS STREAM raw-events."
+    g = trl.compile(src)
+    back = trl.decompile(g)
+    assert back == src
+    edge = next(e for e in g["edges"] if e.get("relation") == "FEEDS")
+    assert (edge.get("properties") or {}).get("preamble") is True
+
+
+def test_stative_after_then_in_compound_sentence() -> None:
+    """Example 9 pattern: IF ... THEN <stative-clause>."""
+    src = "IF ANY PARTY WRITE CONFIDENTIAL RESOURCE THEN THE REMEDY DEPENDS_ON PARTY owner."
+    g = trl.compile(src)
+    back = trl.decompile(g)
+    assert back == src
+
+
 # ─── v0.1h — Sweep all SPEC_examples.md examples ─────────────────────
 
 import re
@@ -552,10 +586,10 @@ from pathlib import Path
 SPEC_EXAMPLES_PATH = Path(__file__).resolve().parent.parent / "TRUGS_LANGUAGE" / "SPEC_examples.md"
 
 # Examples this compiler version cannot round-trip yet — each tracked for follow-on:
-#   7, 24 — DEADLINE / PRECEDENT not in 190-word vocabulary (TRUGS-DEV#1542)
-#   9, 28 — stative clause: subject + PREPOSITION + object (no verb)
-#   14   — SAID pronoun used as article-like ("SAID RECORD")
-KNOWN_DEFERRED = {7, 9, 14, 24, 28}
+#   7   — DEADLINE not in 190-word vocabulary (TRUGS-DEV#1542)
+#   14  — SAID pronoun used as article-like ("SAID RECORD")
+#   28  — Complete ETL — multi-line stative WHEREAS interleaved with operative
+KNOWN_DEFERRED = {7, 14, 28}
 
 
 def _extract_examples():
@@ -601,7 +635,7 @@ def test_spec_examples_coverage_summary() -> None:
                 passed += 1
         except trl.TRLError:
             pass
-    assert passed >= 23, f"only {passed} examples round-trip; expected ≥ 23"
+    assert passed >= 25, f"only {passed} examples round-trip; expected ≥ 25"
 
 
 # ─── Decompile ───────────────────────────────────────────────────────
