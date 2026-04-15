@@ -252,7 +252,14 @@ INHERITING_CONJUNCTIONS = {"THEN", "FINALLY", "ELSE"}
 PRONOUNS_PRIOR_OP = {"RESULT", "OUTPUT"}
 PRONOUNS_CURRENT_OP = {"INPUT", "SOURCE", "TARGET"}
 PRONOUNS_SUBJECT_ANTECEDENT = {"SELF"}
-PRONOUNS = PRONOUNS_PRIOR_OP | PRONOUNS_CURRENT_OP | PRONOUNS_SUBJECT_ANTECEDENT
+# SAID is a "legal_reference" pronoun used article-like before a noun
+# (`SAID RECORD` = "the previously-named record"). Handled in
+# `_parse_noun_phrase` as a quasi-article.
+PRONOUNS_LEGAL_REFERENCE = {"SAID"}
+PRONOUNS = (
+    PRONOUNS_PRIOR_OP | PRONOUNS_CURRENT_OP
+    | PRONOUNS_SUBJECT_ANTECEDENT | PRONOUNS_LEGAL_REFERENCE
+)
 
 
 # ─── Errors ───────────────────────────────────────────────────────────
@@ -296,11 +303,39 @@ def parse(src: str, lang: Optional[dict] = None) -> list[Sentence]:
 def _parse_noun_phrase(tokens: list[Token], pos: int, lang: dict,
                         require_identifier: bool = False,
                         allow_pronoun: bool = True) -> tuple[NounPhrase, int]:
-    """Parse [article] [adjective]* NOUN [identifier], OR a bare pronoun."""
-    # Pronoun shortcut (object / prep-target position). Subjects set
-    # allow_pronoun=False — cross-sentence / back-reference pronouns as
-    # subjects are deferred past v0.1.
+    """Parse [article] [adjective]* NOUN [identifier], OR a bare pronoun.
+
+    Special case: `SAID NOUN` — SAID is classified as a pronoun in the
+    vocabulary but the spec uses it article-like (`SAID RECORD` = "the
+    previously-named record"). When SAID is followed by a noun token,
+    parse as `article=SAID + noun`.
+    """
+    # Pronoun shortcut (object / prep-target position).
     if tokens[pos].kind == "WORD" and tokens[pos].value in PRONOUNS:
+        # SAID-as-article-like check
+        if tokens[pos].value == "SAID" and pos + 1 < len(tokens):
+            nxt = tokens[pos + 1]
+            if nxt.kind == "WORD":
+                e = lang.get(nxt.value)
+                if e and e["speech"] == "noun":
+                    # Treat SAID as an article quantifier; fall through to normal
+                    # noun_phrase parsing below.
+                    article_override = "SAID"
+                    pos += 1
+                    article: Optional[str] = article_override
+                    adjectives: list[str] = []
+                    # Required noun
+                    noun_tok = tokens[pos]
+                    noun = noun_tok.value
+                    pos += 1
+                    # Optional identifier
+                    identifier: Optional[str] = None
+                    if pos < len(tokens) and tokens[pos].kind == "IDENTIFIER":
+                        identifier = tokens[pos].value
+                        pos += 1
+                    return NounPhrase(noun=noun, identifier=identifier,
+                                      article=article, adjectives=adjectives), pos
+
         if not allow_pronoun:
             raise TRLGrammarError(
                 f"{tokens[pos].value!r} is a pronoun and cannot appear here — subjects require a noun phrase"
@@ -614,51 +649,54 @@ def compile(src_or_sentences, lang: Optional[dict] = None) -> dict:
     op_counter = 0
     anon_counters: dict[str, int] = {}
 
-    def _ensure_noun_node(np: NounPhrase) -> str:
-        """Emit a node for a noun_phrase, return its id. Idempotent by id."""
-        if np.identifier:
-            node_id = np.identifier
-        else:
-            anon_counters[np.noun] = anon_counters.get(np.noun, 0) + 1
-            node_id = f"{np.noun.lower()}-{anon_counters[np.noun]}"
-
-        # Build properties from article + adjectives
-        props: dict = {}
+    def _np_shape(np: NounPhrase) -> dict:
+        """Per-mention attributes (article + adjectives) grouped by subcategory."""
+        shape: dict = {}
         if np.article:
-            props["scope"] = {"quantifier": np.article}
+            shape["article"] = np.article
         if np.adjectives:
-            # Group adjectives by their subcategory (state/type/priority/...) per §3
             adj_groups: dict[str, list[str]] = {}
             for adj in np.adjectives:
                 sub = classify(adj, lang)["subcategory"]
                 adj_groups.setdefault(sub, []).append(adj)
             for sub, vals in adj_groups.items():
-                props[sub] = vals[0] if len(vals) == 1 else vals
+                shape[sub] = vals[0] if len(vals) == 1 else vals
+        return shape
 
-        # Find existing node; if present and identified, merge compatibly
-        existing = next((n for n in nodes if n["id"] == node_id), None)
-        if existing is None:
-            node: dict = {"id": node_id, "type": np.noun}
-            if props:
-                node["properties"] = props
-            nodes.append(node)
-        elif props:
-            # Only merge properties if node is identified (re-used subject)
-            existing.setdefault("properties", {}).update(props)
+    def _ensure_noun_node(np: NounPhrase) -> str:
+        """Emit (or reuse) a node for a noun_phrase, return its id.
+
+        The node carries only `id` and `type`. Per-mention attributes
+        (article, adjectives) live on the EDGE that references the node,
+        so different mentions can have different shapes (e.g. one
+        sentence references `RECORD ledger` and another `THE RECORD ledger`).
+        """
+        if np.identifier:
+            node_id = np.identifier
+        else:
+            anon_counters[np.noun] = anon_counters.get(np.noun, 0) + 1
+            node_id = f"{np.noun.lower()}-{anon_counters[np.noun]}"
+        if not any(n["id"] == node_id for n in nodes):
+            nodes.append({"id": node_id, "type": np.noun})
         return node_id
 
     inherited_verb_phrase: Optional[VerbPhrase] = None
     for sentence in sentences:
-        # DEFINE sentence: emit a DEFINED_TERM node, no ops/edges
+        # DEFINE sentence: emit a DEFINED_TERM node, no ops/edges.
+        # DEFINE-site attributes (article + adjectives) live under
+        # `properties.defined_attributes` so they only render at the
+        # DEFINE site and don't leak into later references to the term.
         if sentence.definition is not None:
             d = sentence.definition
-            # Build property dict from the noun_phrase (adjectives, article)
             def_props: dict = {"defined": True, "name": d.name}
+            attrs: dict = {}
             if d.noun_phrase.article:
-                def_props["scope"] = {"quantifier": d.noun_phrase.article}
+                attrs["article"] = d.noun_phrase.article
             for adj in d.noun_phrase.adjectives:
                 sub = classify(adj, lang)["subcategory"]
-                def_props.setdefault(sub, adj)
+                attrs.setdefault(sub, adj)
+            if attrs:
+                def_props["defined_attributes"] = attrs
             nodes.append({
                 "id": d.name,
                 "type": d.noun_phrase.noun,
@@ -696,11 +734,22 @@ def compile(src_or_sentences, lang: Optional[dict] = None) -> dict:
 
             # Stative clause: no op, just direct edges subject → target via PREP.
             if clause.stative:
-                for pp in clause.prep_phrases:
+                # Subject's shape goes on the FIRST stative edge (subjects don't
+                # have their own edge in stative form).
+                subj_shape = _np_shape(subject_np)
+                for i, pp in enumerate(clause.prep_phrases):
                     target_id = _ensure_noun_node(pp.target)
-                    edge: dict = {"from_id": subj_id, "to_id": target_id, "relation": pp.preposition}
+                    e_props: dict = {}
                     if sentence.preamble:
-                        edge["properties"] = {"preamble": True}
+                        e_props["preamble"] = True
+                    if i == 0 and subj_shape:
+                        e_props["subject_np_shape"] = subj_shape
+                    target_shape = _np_shape(pp.target)
+                    if target_shape:
+                        e_props["np_shape"] = target_shape
+                    edge: dict = {"from_id": subj_id, "to_id": target_id, "relation": pp.preposition}
+                    if e_props:
+                        edge["properties"] = e_props
                     edges.append(edge)
                 # Use the stative subject id as the "op id slot" so any
                 # following conjunction edge has a target. The conjunction
@@ -750,7 +799,11 @@ def compile(src_or_sentences, lang: Optional[dict] = None) -> dict:
             nodes.append({"id": op_id, "type": "TRANSFORM", "properties": op_props})
 
             relation = effective_vp.modal if effective_vp.modal else "EXECUTES"
-            edges.append({"from_id": subj_id, "to_id": op_id, "relation": relation})
+            subj_edge: dict = {"from_id": subj_id, "to_id": op_id, "relation": relation}
+            subj_shape = _np_shape(subject_np)
+            if subj_shape:
+                subj_edge["properties"] = {"np_shape": subj_shape}
+            edges.append(subj_edge)
 
             chain_counter = 0
 
@@ -761,6 +814,9 @@ def compile(src_or_sentences, lang: Optional[dict] = None) -> dict:
                     edge_props["pronoun"] = np.pronoun
                 else:
                     target_id = _ensure_noun_node(np)
+                    shape = _np_shape(np)
+                    if shape:
+                        edge_props["np_shape"] = shape
                 if chain_id is not None:
                     edge_props["chain_id"] = chain_id
                 edge: dict = {"from_id": op_id, "to_id": target_id, "relation": relation}
@@ -807,19 +863,22 @@ def _is_anonymous_id(node: dict) -> bool:
     return re.fullmatch(rf"{re.escape(node['type'].lower())}-\d+", node["id"]) is not None
 
 
-def _render_noun_phrase(node: dict, lang: dict) -> str:
-    """Render a noun node back to its TRL form: [article] [adj]* NOUN [id]."""
+def _render_noun_phrase(node: dict, lang: dict, shape: Optional[dict] = None) -> str:
+    """Render a noun node back to its TRL form: [article] [adj]* NOUN [id].
+
+    `shape` is per-mention attributes (article + adjectives) carried on the
+    edge that references the node. If None, the noun is rendered bare.
+    """
     parts: list[str] = []
-    props = node.get("properties") or {}
-    scope = props.get("scope") or {}
-    article = scope.get("quantifier")
+    shape = shape or {}
+    article = shape.get("article")
     if article:
         parts.append(article)
 
     # Adjectives: reconstruct in §2.5 fixed order
     adj_order = ["quantity", "priority", "state", "access", "type"]
     for sub in adj_order:
-        vals = props.get(sub)
+        vals = shape.get(sub)
         if vals is None:
             continue
         if sub == "type" and isinstance(vals, str) and vals.isupper() and not lang.get(vals, {}).get("speech") == "adjective":
@@ -849,7 +908,8 @@ def _render_clause(op_id: str, op_nodes: dict, edges: list[dict], nodes_by_id: d
 
     parts: list[str] = []
     if include_subject:
-        parts.append(_render_noun_phrase(subj_node, lang=lang))
+        subj_shape = (subj_edge.get("properties") or {}).get("np_shape")
+        parts.append(_render_noun_phrase(subj_node, lang=lang, shape=subj_shape))
     elided = op["properties"].get("verb_elided")
     if modal in MODALS and not elided:
         parts.append(modal)
@@ -872,7 +932,10 @@ def _render_clause(op_id: str, op_nodes: dict, edges: list[dict], nodes_by_id: d
         if pronoun:
             return pronoun
         node = nodes_by_id.get(e["to_id"])
-        return _render_noun_phrase(node, lang=lang) if node else ""
+        if node is None:
+            return ""
+        shape = (e.get("properties") or {}).get("np_shape")
+        return _render_noun_phrase(node, lang=lang, shape=shape)
 
     # 1. Direct object(s) — possibly AND-chained via chain_id
     obj_edges = [e for e in edges
@@ -926,13 +989,14 @@ def _render_clause(op_id: str, op_nodes: dict, edges: list[dict], nodes_by_id: d
 def _render_define(node: dict, lang: dict) -> str:
     """Render a DEFINED_TERM node back to its `DEFINE "name" AS np .` form."""
     props = node.get("properties") or {}
+    attrs = props.get("defined_attributes") or {}
     name = props.get("name", node["id"])
     parts = [f'DEFINE "{name}" AS']
-    scope = (props.get("scope") or {}).get("quantifier")
-    if scope:
-        parts.append(scope)
+    article = attrs.get("article")
+    if article:
+        parts.append(article)
     for sub in ["quantity", "priority", "state", "access", "type"]:
-        val = props.get(sub)
+        val = attrs.get(sub)
         if val is None:
             continue
         if sub == "type" and isinstance(val, str) and val.isupper() \
@@ -988,12 +1052,15 @@ def decompile(graph: dict, lang: Optional[dict] = None) -> str:
         tgt = nodes_by_id.get(e["to_id"])
         if subj is None or tgt is None:
             return ""
-        prefix = "WHEREAS " if (e.get("properties") or {}).get("preamble") else ""
+        props = e.get("properties") or {}
+        prefix = "WHEREAS " if props.get("preamble") else ""
+        subj_shape = props.get("subject_np_shape")
+        tgt_shape = props.get("np_shape")
         return (
             prefix
-            + _render_noun_phrase(subj, lang=lang)
+            + _render_noun_phrase(subj, lang=lang, shape=subj_shape)
             + " " + e["relation"] + " "
-            + _render_noun_phrase(tgt, lang=lang)
+            + _render_noun_phrase(tgt, lang=lang, shape=tgt_shape)
             + "."
         )
 
@@ -1042,8 +1109,17 @@ def decompile(graph: dict, lang: Optional[dict] = None) -> str:
             if nxt not in op_nodes:
                 parts.append(conj)
                 stative_subj = nodes_by_id.get(nxt)
+                # Use subject_np_shape from the FIRST stative edge from this subject
+                first_stative = next(
+                    (e for e in stative_edges if e["from_id"] == nxt), None
+                )
+                subj_shape_for_stative = (
+                    (first_stative.get("properties") or {}).get("subject_np_shape")
+                    if first_stative else None
+                )
                 if stative_subj is not None:
-                    parts.append(_render_noun_phrase(stative_subj, lang=lang))
+                    parts.append(_render_noun_phrase(stative_subj, lang=lang,
+                                                       shape=subj_shape_for_stative))
                 # Find the preposition edge(s) from this stative subject and
                 # mark them rendered so we don't emit them as standalone sentences.
                 for i, e in enumerate(stative_edges):
@@ -1052,7 +1128,8 @@ def decompile(graph: dict, lang: Optional[dict] = None) -> str:
                         target = nodes_by_id.get(e["to_id"])
                         parts.append(e["relation"])
                         if target is not None:
-                            parts.append(_render_noun_phrase(target, lang=lang))
+                            shape = (e.get("properties") or {}).get("np_shape")
+                            parts.append(_render_noun_phrase(target, lang=lang, shape=shape))
                 break  # stative ends a chain in v0.2.2
             nxt_subject_id = next(e["from_id"] for e in edges
                                    if e["to_id"] == nxt and e.get("relation") in MODALS | {"EXECUTES"})

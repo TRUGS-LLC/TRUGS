@@ -164,8 +164,12 @@ def test_compile_anonymous_object_gets_auto_id() -> None:
     g = trl.compile("PARTY system SHALL VALIDATE ALL PENDING RECORD.")
     record = next(n for n in g["nodes"] if n["type"] == "RECORD")
     assert record["id"] == "record-1"  # auto-generated for anonymous noun
-    assert record["properties"]["scope"]["quantifier"] == "ALL"
-    assert record["properties"]["state"] == "PENDING"
+    # Per-mention attributes live on the ACTS_ON edge, not on the node
+    obj_edge = next(e for e in g["edges"]
+                    if e["to_id"] == "record-1" and e.get("relation") == "ACTS_ON")
+    shape = (obj_edge.get("properties") or {}).get("np_shape", {})
+    assert shape.get("article") == "ALL"
+    assert shape.get("state") == "PENDING"
 
 
 def test_compile_spec_example_1_verbatim() -> None:
@@ -219,10 +223,16 @@ def test_compile_three_way_then_chain() -> None:
 def test_unless_with_anonymous_subject() -> None:
     src = "PARTY api SHALL FILTER RECORD UNLESS NO RECORD EXISTS."
     g = trl.compile(src)
-    # The UNLESS clause's subject is an anonymous NO RECORD node
+    # The UNLESS clause's subject (record-2) is an anonymous NO RECORD.
+    # The NO article lives on the subject edge from record-2 → its op.
     record_nodes = [n for n in g["nodes"] if n["type"] == "RECORD"]
-    no_record = next(n for n in record_nodes if n.get("properties", {}).get("scope", {}).get("quantifier") == "NO")
-    assert no_record["id"] == "record-2"
+    assert any(n["id"] == "record-2" for n in record_nodes)
+    no_subj_edge = next(
+        e for e in g["edges"]
+        if e["from_id"] == "record-2" and e.get("relation") in {"EXECUTES"} | trl.MODALS
+    )
+    shape = (no_subj_edge.get("properties") or {}).get("np_shape", {})
+    assert shape.get("article") == "NO"
 
 
 def test_decompile_omits_inherited_subject() -> None:
@@ -578,6 +588,50 @@ def test_stative_after_then_in_compound_sentence() -> None:
     assert back == src
 
 
+# ─── v0.2.3 — SAID pronoun + per-mention noun_phrase attributes ──────
+
+def test_said_as_quasi_article() -> None:
+    """SAID NOUN parses as `article=SAID + noun`."""
+    s = trl.parse("PARTY a SHALL READ SAID DATA.")[0]
+    obj = s.clauses[0].object
+    assert obj is not None
+    assert obj.article == "SAID"
+    assert obj.noun == "DATA"
+
+
+def test_per_mention_attributes_dont_leak_between_references() -> None:
+    """A node referenced as `RECORD ledger` then `THE RECORD ledger` keeps
+    each mention's article on its own edge — neither leaks into the other."""
+    src = (
+        'DEFINE "ledger" AS IMMUTABLE RECORD.\n'
+        'PARTY system SHALL WRITE EACH VALID DATA TO RECORD ledger.\n'
+        'PARTY system SHALL REPLACE THE RECORD ledger FROM SAID RECORD.'
+    )
+    g = trl.compile(src)
+    back = trl.decompile(g)
+    assert back == src
+    # The ledger node itself should carry only DEFINE attributes
+    ledger = next(n for n in g["nodes"] if n["id"] == "ledger")
+    assert ledger.get("properties", {}).get("defined") is True
+    # Reference shapes are on edges, not on the node
+    assert "scope" not in ledger.get("properties", {})
+
+
+def test_spec_example_14_verbatim() -> None:
+    """SPEC Example 14 — DEFINE + reuse of `ledger` with different mentions
+    + SAID pronoun. Round-trips when per-mention shapes are isolated."""
+    src = (
+        'DEFINE "ledger" AS IMMUTABLE RECORD.\n'
+        'PARTY system SHALL WRITE EACH VALID DATA TO RECORD ledger.\n'
+        'NO PARTY MAY WRITE RECORD ledger EXCEPT PARTY system.\n'
+        'PARTY system SHALL REPLACE THE RECORD ledger FROM SAID RECORD.'
+    )
+    g = trl.compile(src)
+    back = trl.decompile(g)
+    assert back == src
+    assert trl.compile(back) == g
+
+
 # ─── v0.1h — Sweep all SPEC_examples.md examples ─────────────────────
 
 import re
@@ -589,7 +643,7 @@ SPEC_EXAMPLES_PATH = Path(__file__).resolve().parent.parent / "TRUGS_LANGUAGE" /
 #   7   — DEADLINE not in 190-word vocabulary (TRUGS-DEV#1542)
 #   14  — SAID pronoun used as article-like ("SAID RECORD")
 #   28  — Complete ETL — multi-line stative WHEREAS interleaved with operative
-KNOWN_DEFERRED = {7, 14, 28}
+KNOWN_DEFERRED = {7, 28}
 
 
 def _extract_examples():
@@ -635,7 +689,7 @@ def test_spec_examples_coverage_summary() -> None:
                 passed += 1
         except trl.TRLError:
             pass
-    assert passed >= 25, f"only {passed} examples round-trip; expected ≥ 25"
+    assert passed >= 26, f"only {passed} examples round-trip; expected ≥ 26"
 
 
 # ─── Decompile ───────────────────────────────────────────────────────
