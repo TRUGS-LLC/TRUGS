@@ -1397,7 +1397,19 @@ def decompile(graph: dict, lang: Optional[dict] = None) -> str:
                 sentence_text += f"\n{indent}{conj} {resolved}"
         sentences_out.append(_maybe_blank_prefix(node) + sentence_text + ".")
 
-    return "\n".join(sentences_out)
+    output = "\n".join(sentences_out)
+    # Sentinel safety: the `\x00TAIL_BREAK\x00` marker is in-band during
+    # _render_clause and replaced during sentence assembly. If any survives,
+    # an upstream node label or string literal contained `\x00` and broke
+    # our placeholder. Refuse to emit ambiguous output.
+    if "\x00" in output:
+        raise TRLGrammarError(
+            "decompile produced output containing a NUL byte; the graph likely "
+            "contains a node id or property string with `\\x00`, which collides "
+            "with an internal formatting sentinel. Reject the input graph or "
+            "sanitize string properties before decompiling."
+        )
+    return output
 
 
 # ─── Validate ─────────────────────────────────────────────────────────

@@ -22,14 +22,6 @@ if __package__ in (None, ""):
 from tools import trl  # noqa: E402  (path-fix above must precede import)
 
 
-def _canonical(s: str) -> str:
-    """Canonicalize whitespace for comparison: collapse `\\n\\s+` (any
-    multi-line indented continuation decompile emits) back to ` `.
-    Round-trip equality is canonical-equality, not byte-identical."""
-    import re as _re
-    return _re.sub(r"\n\s+", " ", s)
-
-
 # ─── Tokenizer ───────────────────────────────────────────────────────
 
 def test_tokenize_simple_sentence() -> None:
@@ -191,7 +183,7 @@ def test_compile_spec_example_1_verbatim() -> None:
     """The very first example in SPEC_examples.md round-trips exactly."""
     g = trl.compile(SPEC_EXAMPLE_1)
     back = trl.decompile(g)
-    assert _canonical(back) == _canonical(SPEC_EXAMPLE_1)
+    assert back == SPEC_EXAMPLE_1
     g2 = trl.compile(back)
     assert g == g2
 
@@ -236,7 +228,7 @@ def test_compile_three_way_then_chain() -> None:
 
 
 def test_unless_with_anonymous_subject() -> None:
-    src = "PARTY api SHALL FILTER RECORD UNLESS NO RECORD EXISTS."
+    src = 'PARTY api SHALL FILTER RECORD\n  UNLESS NO RECORD EXISTS.'
     g = trl.compile(src)
     # The UNLESS clause's subject (record-2) is an anonymous NO RECORD.
     # The NO article lives on the subject edge from record-2 → its op.
@@ -252,10 +244,10 @@ def test_unless_with_anonymous_subject() -> None:
 
 def test_decompile_omits_inherited_subject() -> None:
     """Canonical form drops subject when it matches the prior clause."""
-    src = "PARTY a SHALL FILTER DATA THEN SORT DATA."
+    src = 'PARTY a SHALL FILTER DATA\n  THEN SORT DATA.'
     back = trl.decompile(trl.compile(src))
     # Second clause should NOT include "PARTY a"
-    assert _canonical(back) == _canonical(src)
+    assert back == src
     assert " PARTY a SORT " not in back  # sanity: subject is omitted after THEN
 
 
@@ -299,16 +291,16 @@ def test_compile_preserves_preposition_order() -> None:
 
 
 def test_contains_preposition_roundtrip() -> None:
-    src = "PARTY admin SHALL ADMINISTER RESOURCE CONTAINS NAMESPACE production."
+    src = 'PARTY admin SHALL ADMINISTER RESOURCE\n  CONTAINS NAMESPACE production.'
     g = trl.compile(src)
-    assert _canonical(trl.decompile(g)) == _canonical(src)
+    assert trl.decompile(g) == src
 
 
 def test_preposition_with_conjunction_combination() -> None:
-    src = "PARTY system SHALL FILTER DATA TO ENDPOINT output THEN VALIDATE RECORD."
+    src = 'PARTY system SHALL FILTER DATA TO ENDPOINT output\n  THEN VALIDATE RECORD.'
     g = trl.compile(src)
     back = trl.decompile(g)
-    assert _canonical(back) == _canonical(src)
+    assert back == src
     # Verify the TO edge is attached to op-1 (the FILTER op), not op-2
     to_edges = [e for e in g["edges"] if e.get("relation") == "TO"]
     assert len(to_edges) == 1
@@ -344,9 +336,9 @@ def test_compile_self_points_to_subject() -> None:
 
 
 def test_result_in_prep_target() -> None:
-    src = "PARTY system SHALL FILTER DATA THEN WRITE RESULT TO ENDPOINT destination."
+    src = 'PARTY system SHALL FILTER DATA\n  THEN WRITE RESULT TO ENDPOINT destination.'
     g = trl.compile(src)
-    assert _canonical(trl.decompile(g)) == _canonical(src)
+    assert trl.decompile(g) == src
 
 
 def test_pronoun_without_antecedent_errors() -> None:
@@ -371,7 +363,7 @@ def test_spec_example_2_verbatim() -> None:
     """SPEC_examples.md §1 Example 2 round-trips."""
     g = trl.compile(SPEC_EXAMPLE_2)
     back = trl.decompile(g)
-    assert _canonical(back) == _canonical(SPEC_EXAMPLE_2)
+    assert back == SPEC_EXAMPLE_2
     assert trl.compile(back) == g
 
 
@@ -436,7 +428,7 @@ def test_spec_example_3_verbatim() -> None:
     adverbs, value literals, OR, THEN, and THE <noun> back-reference."""
     g = trl.compile(SPEC_EXAMPLE_3)
     back = trl.decompile(g)
-    assert _canonical(back) == _canonical(SPEC_EXAMPLE_3)
+    assert back == SPEC_EXAMPLE_3
     assert trl.compile(back) == g
 
 
@@ -492,7 +484,7 @@ def test_spec_example_10_verbatim() -> None:
     """SPEC_examples.md §3 Example 10 — DEFINE + AND parallel."""
     g = trl.compile(SPEC_EXAMPLE_10)
     back = trl.decompile(g)
-    assert _canonical(back) == _canonical(SPEC_EXAMPLE_10)
+    assert back == SPEC_EXAMPLE_10
     assert trl.compile(back) == g
 
 
@@ -500,7 +492,7 @@ def test_spec_example_18_verbatim() -> None:
     """SPEC_examples.md §4 Example 18 — WHEREAS preambles + operative."""
     g = trl.compile(SPEC_EXAMPLE_18)
     back = trl.decompile(g)
-    assert _canonical(back) == _canonical(SPEC_EXAMPLE_18)
+    assert back == SPEC_EXAMPLE_18
     assert trl.compile(back) == g
 
 
@@ -520,7 +512,7 @@ def test_object_and_chain_three_items_with_prep() -> None:
     src = "PARTY system SHALL NEST MODULE auth AND MODULE data AND MODULE search TO NAMESPACE api-system."
     g = trl.compile(src)
     back = trl.decompile(g)
-    assert _canonical(back) == _canonical(src)
+    assert back == src
     assert trl.compile(back) == g
 
 
@@ -528,26 +520,26 @@ def test_prep_noun_list_and_chain() -> None:
     src = "PARTY a SHALL SPLIT THE MESSAGE TO AGENT worker-a AND AGENT worker-b."
     g = trl.compile(src)
     back = trl.decompile(g)
-    assert _canonical(back) == _canonical(src)
+    assert back == src
     to_edges = [e for e in g["edges"] if e.get("relation") == "TO"]
     assert len(to_edges) == 2
 
 
 def test_clause_level_and_still_works() -> None:
     """Smarter peek must not break clause-level AND."""
-    src = "PARTY system SHALL FILTER DATA AND PARTY system SHALL VALIDATE RECORD."
+    src = 'PARTY system SHALL FILTER DATA\n  AND PARTY system SHALL VALIDATE RECORD.'
     g = trl.compile(src)
     back = trl.decompile(g)
-    assert _canonical(back) == _canonical(src)
+    assert back == src
 
 
 # ─── v0.2.1 — Verb elision and current-op pronouns ───────────────────
 
 def test_verb_elision_in_except_clause() -> None:
-    src = "NO PARTY MAY WRITE RECORD ledger EXCEPT PARTY system."
+    src = 'NO PARTY MAY WRITE RECORD ledger\n  EXCEPT PARTY system.'
     g = trl.compile(src)
     back = trl.decompile(g)
-    assert _canonical(back) == _canonical(src)
+    assert back == src
     # The EXCEPT clause's op should carry verb_elided so canonical form drops verb+modal
     op2 = next(n for n in g["nodes"] if n["id"] == "op-2")
     assert op2["properties"]["verb_elided"] is True
@@ -559,7 +551,7 @@ def test_input_pronoun_resolves_to_current_op() -> None:
     src = "EACH AGENT SHALL HANDLE INPUT PARALLEL."
     g = trl.compile(src)
     back = trl.decompile(g)
-    assert _canonical(back) == _canonical(src)
+    assert back == src
     # The INPUT pronoun creates an ACTS_ON edge from op back to itself
     op = next(n for n in g["nodes"] if n.get("type") == "TRANSFORM")
     self_edge = next(e for e in g["edges"]
@@ -583,24 +575,24 @@ def test_stative_clause_emits_direct_edge() -> None:
 
 def test_stative_clause_round_trip_verbatim() -> None:
     src = "THE REMEDY DEPENDS_ON PARTY owner."
-    assert _canonical(trl.decompile(trl.compile(src))) == _canonical(src)
+    assert trl.decompile(trl.compile(src)) == src
 
 
 def test_stative_in_whereas_preamble() -> None:
     src = "WHEREAS SERVICE kafka FEEDS STREAM raw-events."
     g = trl.compile(src)
     back = trl.decompile(g)
-    assert _canonical(back) == _canonical(src)
+    assert back == src
     edge = next(e for e in g["edges"] if e.get("relation") == "FEEDS")
     assert (edge.get("properties") or {}).get("preamble") is True
 
 
 def test_stative_after_then_in_compound_sentence() -> None:
     """Example 9 pattern: IF ... THEN <stative-clause>."""
-    src = "IF ANY PARTY WRITE CONFIDENTIAL RESOURCE THEN THE REMEDY DEPENDS_ON PARTY owner."
+    src = 'IF ANY PARTY WRITE CONFIDENTIAL RESOURCE\n  THEN THE REMEDY DEPENDS_ON PARTY owner.'
     g = trl.compile(src)
     back = trl.decompile(g)
-    assert _canonical(back) == _canonical(src)
+    assert back == src
 
 
 # ─── v0.2.3 — SAID pronoun + per-mention noun_phrase attributes ──────
@@ -624,7 +616,7 @@ def test_per_mention_attributes_dont_leak_between_references() -> None:
     )
     g = trl.compile(src)
     back = trl.decompile(g)
-    assert _canonical(back) == _canonical(src)
+    assert back == src
     # The ledger node itself should carry only DEFINE attributes
     ledger = next(n for n in g["nodes"] if n["id"] == "ledger")
     assert ledger.get("properties", {}).get("defined") is True
@@ -645,7 +637,7 @@ def test_cross_sentence_pronoun_antecedent() -> None:
     src = "PARTY a SHALL FILTER DATA.\nPARTY loader SHALL WRITE EACH RESULT TO ENDPOINT store."
     g = trl.compile(src)
     back = trl.decompile(g)
-    assert _canonical(back) == _canonical(src)
+    assert back == src
     # Verify the EACH article on the RESULT pronoun survived
     result_edge = next(e for e in g["edges"]
                        if (e.get("properties") or {}).get("pronoun") == "RESULT")
@@ -656,11 +648,11 @@ def test_subject_only_with_following_conjunction() -> None:
     """v0.2.4 — `EXCEPT PARTY loader PROVIDED_THAT ...` — subject-only EXCEPT
     clause followed by another conjunction-led clause."""
     src = (
-        "NO PARTY SHALL WRITE ENDPOINT event-store "
-        "EXCEPT PARTY loader "
-        "PROVIDED_THAT PARTY loader AUTHENTICATE TO SERVICE auth."
+        "NO PARTY SHALL WRITE ENDPOINT event-store\n"
+        "  EXCEPT PARTY loader\n"
+        "    PROVIDED_THAT PARTY loader AUTHENTICATE TO SERVICE auth."
     )
-    assert _canonical(trl.decompile(trl.compile(src))) == _canonical(src)
+    assert trl.decompile(trl.compile(src)) == src
 
 
 def test_spec_example_14_verbatim() -> None:
@@ -669,12 +661,13 @@ def test_spec_example_14_verbatim() -> None:
     src = (
         'DEFINE "ledger" AS IMMUTABLE RECORD.\n'
         'PARTY system SHALL WRITE EACH VALID DATA TO RECORD ledger.\n'
-        'NO PARTY MAY WRITE RECORD ledger EXCEPT PARTY system.\n'
+        'NO PARTY MAY WRITE RECORD ledger\n'
+        '  EXCEPT PARTY system.\n'
         'PARTY system SHALL REPLACE THE RECORD ledger FROM SAID RECORD.'
     )
     g = trl.compile(src)
     back = trl.decompile(g)
-    assert _canonical(back) == _canonical(src)
+    assert back == src
     assert trl.compile(back) == g
 
 
@@ -741,6 +734,30 @@ def test_spec_examples_coverage_summary() -> None:
     assert passed == len(examples), f"only {passed}/{len(examples)} examples round-trip; expected all"
 
 
+def test_spec_examples_byte_identical_round_trip() -> None:
+    """v0.3 — every published SPEC_examples.md example round-trips
+    BYTE-IDENTICAL via `decompile(compile(body)) == body`. Locks in
+    the v0.3 (28/28) headline guarantee. If a future change reintroduces
+    whitespace drift between the canonical decompile and the SPEC source,
+    this test catches it immediately."""
+    examples = _extract_examples()
+    assert examples, "failed to extract examples from SPEC_examples.md"
+    failures: list[str] = []
+    for n, title, body in examples:
+        try:
+            g = trl.compile(body)
+            back = trl.decompile(g)
+        except trl.TRLError as e:
+            failures.append(f"#{n} {title}: {type(e).__name__}: {e}")
+            continue
+        if back != body:
+            failures.append(f"#{n} {title}: byte-identical round-trip failed")
+    assert not failures, (
+        f"{len(failures)}/{len(examples)} SPEC examples not byte-identical:\n"
+        + "\n".join(failures)
+    )
+
+
 # ─── Decompile ───────────────────────────────────────────────────────
 
 def test_decompile_minimum_graph() -> None:
@@ -759,65 +776,65 @@ def test_decompile_minimum_graph() -> None:
 
 ROUND_TRIP_FIXTURES = [
     # v0.1a — minimum form
-    "PARTY system VALIDATE.",
-    "PARTY api FILTER.",
-    "PARTY user AUTHENTICATE.",
-    "AGENT worker FILTER.",
-    "SERVICE gateway VALIDATE.",
+    'PARTY system VALIDATE.',
+    'PARTY api FILTER.',
+    'PARTY user AUTHENTICATE.',
+    'AGENT worker FILTER.',
+    'SERVICE gateway VALIDATE.',
     # v0.1b — modals
-    "PARTY system SHALL VALIDATE.",
-    "AGENT worker MAY FILTER.",
-    "PARTY system SHALL_NOT WRITE.",
+    'PARTY system SHALL VALIDATE.',
+    'AGENT worker MAY FILTER.',
+    'PARTY system SHALL_NOT WRITE.',
     # v0.1b — single object
-    "PARTY client SHALL REQUEST PARTY server.",
-    "PARTY system SHALL VALIDATE DATA.",
+    'PARTY client SHALL REQUEST PARTY server.',
+    'PARTY system SHALL VALIDATE DATA.',
     # v0.1b — articles + adjectives on anonymous objects
     "PARTY system SHALL VALIDATE ALL PENDING RECORD.",  # Example 1 verbatim
-    "PARTY api SHALL FILTER ALL ACTIVE DATA.",
-    "AGENT worker MAY READ ANY CRITICAL FILE.",
-    "PARTY system SHALL_NOT WRITE ANY READONLY RESOURCE.",
+    'PARTY api SHALL FILTER ALL ACTIVE DATA.',
+    'AGENT worker MAY READ ANY CRITICAL FILE.',
+    'PARTY system SHALL_NOT WRITE ANY READONLY RESOURCE.',
     # v0.1c — conjunctions, subject carryover
-    "PARTY a SHALL FILTER DATA THEN SORT DATA.",
-    "PARTY system SHALL FILTER RECORD THEN VALIDATE RECORD.",
-    "PARTY api SHALL FILTER ALL ACTIVE RECORD THEN SORT ALL RECORD.",
+    'PARTY a SHALL FILTER DATA\n  THEN SORT DATA.',
+    'PARTY system SHALL FILTER RECORD\n  THEN VALIDATE RECORD.',
+    'PARTY api SHALL FILTER ALL ACTIVE RECORD\n  THEN SORT ALL RECORD.',
     # v0.1c — AND parallel (canonical form repeats subject after AND)
-    "PARTY system SHALL FILTER DATA AND PARTY system SHALL VALIDATE RECORD.",
+    'PARTY system SHALL FILTER DATA\n  AND PARTY system SHALL VALIDATE RECORD.',
     # v0.1c — OR alternative, new subject
-    "PARTY server SHALL RESPOND OR PARTY client MAY RETRY.",
+    'PARTY server SHALL RESPOND\n  OR PARTY client MAY RETRY.',
     # v0.1c — UNLESS with anonymous subject
-    "PARTY api SHALL FILTER RECORD UNLESS NO RECORD EXISTS.",
-    "PARTY api SHALL FILTER ALL ACTIVE RECORD UNLESS NO VALID RECORD EXISTS.",
+    'PARTY api SHALL FILTER RECORD\n  UNLESS NO RECORD EXISTS.',
+    'PARTY api SHALL FILTER ALL ACTIVE RECORD\n  UNLESS NO VALID RECORD EXISTS.',
     # v0.1c — IF/PROVIDED_THAT/FINALLY (IF repeats subject; FINALLY inherits)
-    "PARTY admin MAY APPROVE RECORD IF PARTY admin AUTHENTICATE.",
-    "PARTY system SHALL VALIDATE RECORD PROVIDED_THAT PARTY admin APPROVE.",
-    "PARTY system SHALL FILTER RECORD THEN VALIDATE RECORD FINALLY WRITE RECORD.",
+    'PARTY admin MAY APPROVE RECORD\n  IF PARTY admin AUTHENTICATE.',
+    'PARTY system SHALL VALIDATE RECORD\n  PROVIDED_THAT PARTY admin APPROVE.',
+    'PARTY system SHALL FILTER RECORD\n  THEN VALIDATE RECORD\n  FINALLY WRITE RECORD.',
     # v0.1d — prepositions
-    "PARTY user SHALL AUTHENTICATE TO SERVICE gateway.",
-    "PARTY system SHALL WRITE DATA TO ENDPOINT output.",
-    "PARTY agent SHALL RESPOND ON_BEHALF_OF PARTY user.",
-    "PARTY system SHALL FILTER DATA FROM ENDPOINT input TO ENDPOINT output.",
-    "PARTY admin SHALL ADMINISTER RESOURCE CONTAINS NAMESPACE production.",
-    "PARTY a SHALL READ DATA REFERENCES RESOURCE store.",
-    "PARTY system SHALL VALIDATE RECORD SUBJECT_TO INTERFACE schema.",
+    'PARTY user SHALL AUTHENTICATE TO SERVICE gateway.',
+    'PARTY system SHALL WRITE DATA TO ENDPOINT output.',
+    'PARTY agent SHALL RESPOND ON_BEHALF_OF PARTY user.',
+    'PARTY system SHALL FILTER DATA FROM ENDPOINT input TO ENDPOINT output.',
+    'PARTY admin SHALL ADMINISTER RESOURCE\n  CONTAINS NAMESPACE production.',
+    'PARTY a SHALL READ DATA REFERENCES RESOURCE store.',
+    'PARTY system SHALL VALIDATE RECORD\n  SUBJECT_TO INTERFACE schema.',
     # v0.1d — preposition + conjunction combined
-    "PARTY system SHALL FILTER DATA TO ENDPOINT output THEN VALIDATE RECORD.",
+    'PARTY system SHALL FILTER DATA TO ENDPOINT output\n  THEN VALIDATE RECORD.',
     # v0.1e — pronouns
-    "PARTY api SHALL FILTER ALL ACTIVE RECORD THEN SORT RESULT.",
-    "PARTY system SHALL MAP RECORD TO DATA THEN MERGE RESULT TO STREAM output.",
-    "PARTY admin SHALL ADMINISTER RESOURCE REFERENCES SELF.",
-    "PARTY a SHALL FILTER DATA THEN VALIDATE OUTPUT.",
-    "PARTY system SHALL FILTER DATA THEN WRITE RESULT TO ENDPOINT destination.",
+    'PARTY api SHALL FILTER ALL ACTIVE RECORD\n  THEN SORT RESULT.',
+    'PARTY system SHALL MAP RECORD TO DATA\n  THEN MERGE RESULT TO STREAM output.',
+    'PARTY admin SHALL ADMINISTER RESOURCE REFERENCES SELF.',
+    'PARTY a SHALL FILTER DATA\n  THEN VALIDATE OUTPUT.',
+    'PARTY system SHALL FILTER DATA\n  THEN WRITE RESULT TO ENDPOINT destination.',
     # v0.1f — adverbs and value literals
-    "PARTY server SHALL RESPOND PROMPTLY.",
-    "PARTY server SHALL RESPOND WITHIN 30s.",
-    "PARTY client MAY RETRY BOUNDED 3.",
-    "PARTY server SHALL RESPOND PROMPTLY WITHIN 30s.",
-    "PARTY server SHALL RESPOND PROMPTLY WITHIN 30s OR PARTY client MAY RETRY BOUNDED 3.",
+    'PARTY server SHALL RESPOND PROMPTLY.',
+    'PARTY server SHALL RESPOND WITHIN 30s.',
+    'PARTY client MAY RETRY BOUNDED 3.',
+    'PARTY server SHALL RESPOND PROMPTLY WITHIN 30s.',
+    'PARTY server SHALL RESPOND PROMPTLY WITHIN 30s\n  OR PARTY client MAY RETRY BOUNDED 3.',
     # v0.1g — DEFINE / WHEREAS / STRING literals
     'DEFINE "curator" AS PARTY.',
     'DEFINE "ledger" AS IMMUTABLE RECORD.',
-    "WHEREAS PARTY system ADMINISTER ALL RESOURCE.",
-    "WHEREAS ALL RECORD REQUIRE MODULE storage.",
+    'WHEREAS PARTY system ADMINISTER ALL RESOURCE.',
+    'WHEREAS ALL RECORD REQUIRE MODULE storage.',
 ]
 
 SPEC_EXAMPLE_1 = "PARTY system SHALL VALIDATE ALL PENDING RECORD."
@@ -851,7 +868,7 @@ def test_round_trip_trl_to_trug_to_trl() -> None:
         sentence_out = trl.decompile(g1)
         g2 = trl.compile(sentence_out)
         assert g1 == g2, f"round-trip diverged for {sentence!r}: {g1} != {g2}"
-        assert _canonical(sentence_out) == _canonical(sentence), f"decompile diverged for {sentence!r}: {sentence_out!r}"
+        assert sentence_out == sentence, f"decompile diverged for {sentence!r}: {sentence_out!r}"
 
 
 def test_round_trip_trug_to_trl_to_trug() -> None:
@@ -985,7 +1002,7 @@ def test_cli_friendly_error_on_missing_file() -> None:
 
 def test_decompile_multiline_format_for_multi_clause() -> None:
     """v0.2.5 — decompile re-breaks at conjunctions with 2-space indent."""
-    src = "PARTY api SHALL FILTER ALL ACTIVE RECORD THEN SORT RESULT UNLESS NO VALID RECORD REQUIRE SELF."
+    src = 'PARTY api SHALL FILTER ALL ACTIVE RECORD\n  THEN SORT RESULT\n  UNLESS NO VALID RECORD REQUIRE SELF.'
     back = trl.decompile(trl.compile(src))
     # Should have line breaks before THEN and UNLESS
     assert "\n  THEN " in back
@@ -1007,7 +1024,7 @@ def test_per_mention_noun_type_preserved() -> None:
 def test_anonymous_subject_inherited_without_recounter() -> None:
     """Cat C bug 1 — `EACH AGENT SHALL ... THEN MERGE ...`. The THEN clause
     inherits the same subject node, no anon-counter re-increment."""
-    src = "EACH AGENT SHALL HANDLE INPUT PARALLEL THEN MERGE RESULT TO PARTY orchestrator."
+    src = 'EACH AGENT SHALL HANDLE INPUT PARALLEL\n  THEN MERGE RESULT TO PARTY orchestrator.'
     g = trl.compile(src)
     agent_nodes = [n for n in g["nodes"] if n["type"] == "AGENT"]
     assert len(agent_nodes) == 1, f"expected 1 AGENT node, got {len(agent_nodes)}: {agent_nodes!r}"
@@ -1040,7 +1057,7 @@ def test_or_inherits_same_subject() -> None:
 def test_adverbs_after_preps_in_decompile() -> None:
     """Cat F — adverbs come after preposition phrases in canonical form.
     PR-B refinement: when prep + adverb both present, adverb breaks to own line."""
-    src = "PARTY ingester SHALL READ EACH DATA raw-event FROM STREAM raw-events WITHIN 100ms."
+    src = 'PARTY ingester SHALL READ EACH DATA raw-event FROM STREAM raw-events\n  WITHIN 100ms.'
     back = trl.decompile(trl.compile(src))
     # FROM is inline; WITHIN breaks to own line under prep+adverb refinement
     assert "FROM STREAM raw-events" in back
@@ -1096,6 +1113,28 @@ def test_modal_bearing_clause_repeats_subject_after_inherit() -> None:
     back = trl.decompile(trl.compile(src))
     # Both modal-bearing OR/THEN clauses keep their explicit subject
     assert "OR PARTY processor SHALL SEND" in back, f"got: {back!r}"
+
+
+# ─── v0.3 polish — audit follow-ups ──────────────────────────────────
+
+def test_decompile_rejects_nul_byte_in_graph() -> None:
+    """v0.3 polish — the decompile uses `\\x00TAIL_BREAK\\x00` as an
+    in-band sentinel. If a hand-built graph has `\\x00` in a node id or
+    label, we'd silently swallow it. The guard refuses ambiguous output."""
+    g = {
+        "nodes": [
+            {"id": "x\x00leak", "type": "PARTY"},
+            {"id": "op-1", "type": "TRANSFORM",
+             "properties": {"operation": "VALIDATE", "verb_subcategory": "obligate"}},
+        ],
+        "edges": [{"from_id": "x\x00leak", "to_id": "op-1", "relation": "EXECUTES"}],
+    }
+    try:
+        trl.decompile(g)
+    except trl.TRLGrammarError as e:
+        assert "NUL byte" in str(e), f"unexpected error message: {e}"
+        return
+    raise AssertionError("expected TRLGrammarError on graph containing \\x00")
 
 
 def _run_all_tests() -> int:
