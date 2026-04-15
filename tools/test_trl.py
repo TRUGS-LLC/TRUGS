@@ -991,6 +991,58 @@ def test_decompile_multiline_format_for_multi_clause() -> None:
     assert "\n  UNLESS " in back
 
 
+# ─── v0.3 PR-A — semantic fixes for byte-identical SPEC round-trip ────
+
+def test_per_mention_noun_type_preserved() -> None:
+    """Cat D — same identifier with different noun types per mention."""
+    src = (
+        "PARTY user SHALL AUTHENTICATE TO SERVICE gateway.\n"
+        "PARTY gateway MAY GRANT AGENT worker ON_BEHALF_OF PARTY user."
+    )
+    back = trl.decompile(trl.compile(src))
+    assert back == src, f"got: {back!r}"
+
+
+def test_anonymous_subject_inherited_without_recounter() -> None:
+    """Cat C bug 1 — `EACH AGENT SHALL ... THEN MERGE ...`. The THEN clause
+    inherits the same subject node, no anon-counter re-increment."""
+    src = "EACH AGENT SHALL HANDLE INPUT PARALLEL THEN MERGE RESULT TO PARTY orchestrator."
+    g = trl.compile(src)
+    agent_nodes = [n for n in g["nodes"] if n["type"] == "AGENT"]
+    assert len(agent_nodes) == 1, f"expected 1 AGENT node, got {len(agent_nodes)}: {agent_nodes!r}"
+
+
+def test_subject_repeats_after_leading_if() -> None:
+    """Cat E — first coordinated clause after IF/WHEN repeats the subject."""
+    src = (
+        "PARTY processor SHALL VALIDATE EACH REQUIRED RECORD.\n"
+        "IF PARTY processor THROW EXCEPTION\n"
+        "  THEN PARTY processor SHALL CATCH THE EXCEPTION\n"
+        "  THEN HANDLE THE ERROR."
+    )
+    back = trl.decompile(trl.compile(src))
+    assert "THEN PARTY processor SHALL CATCH" in back, f"got: {back!r}"
+
+
+def test_or_inherits_same_subject() -> None:
+    """Cat E — OR with same subject as prior elides per SPEC #17."""
+    src = (
+        "WHEN PARTY client SEND MESSAGE TO SERVICE queue\n"
+        "  THEN SERVICE queue SHALL VALIDATE THE MESSAGE\n"
+        "  THEN SEND RESULT TO PARTY handler\n"
+        "  OR REJECT THE MESSAGE."
+    )
+    back = trl.decompile(trl.compile(src))
+    assert back == src, f"got: {back!r}"
+
+
+def test_adverbs_after_preps_in_decompile() -> None:
+    """Cat F — adverbs come after preposition phrases in canonical form."""
+    src = "PARTY ingester SHALL READ EACH DATA raw-event FROM STREAM raw-events WITHIN 100ms."
+    back = trl.decompile(trl.compile(src))
+    assert "FROM STREAM raw-events WITHIN 100ms" in back, f"got: {back!r}"
+
+
 def _run_all_tests() -> int:
     """Discover and run every test_* callable in this module. Print counts.
     Exit code: 0 = all passed, 1 = at least one failed.
