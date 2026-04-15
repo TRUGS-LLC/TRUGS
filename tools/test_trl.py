@@ -617,6 +617,37 @@ def test_per_mention_attributes_dont_leak_between_references() -> None:
     assert "scope" not in ledger.get("properties", {})
 
 
+def test_duration_with_two_letter_unit() -> None:
+    """v0.2.4 — 100ms tokenizes as one DURATION, not 100m + s."""
+    tokens = trl.tokenize("WITHIN 100ms.")
+    durations = [t for t in tokens if t.kind == "DURATION"]
+    assert len(durations) == 1
+    assert durations[0].value == "100ms"
+
+
+def test_cross_sentence_pronoun_antecedent() -> None:
+    """v0.2.4 — RESULT in a later sentence references the prior sentence's op."""
+    src = "PARTY a SHALL FILTER DATA.\nPARTY loader SHALL WRITE EACH RESULT TO ENDPOINT store."
+    g = trl.compile(src)
+    back = trl.decompile(g)
+    assert back == src
+    # Verify the EACH article on the RESULT pronoun survived
+    result_edge = next(e for e in g["edges"]
+                       if (e.get("properties") or {}).get("pronoun") == "RESULT")
+    assert result_edge["properties"]["pronoun_article"] == "EACH"
+
+
+def test_subject_only_with_following_conjunction() -> None:
+    """v0.2.4 — `EXCEPT PARTY loader PROVIDED_THAT ...` — subject-only EXCEPT
+    clause followed by another conjunction-led clause."""
+    src = (
+        "NO PARTY SHALL WRITE ENDPOINT event-store "
+        "EXCEPT PARTY loader "
+        "PROVIDED_THAT PARTY loader AUTHENTICATE TO SERVICE auth."
+    )
+    assert trl.decompile(trl.compile(src)) == src
+
+
 def test_spec_example_14_verbatim() -> None:
     """SPEC Example 14 — DEFINE + reuse of `ledger` with different mentions
     + SAID pronoun. Round-trips when per-mention shapes are isolated."""
@@ -643,7 +674,9 @@ SPEC_EXAMPLES_PATH = Path(__file__).resolve().parent.parent / "TRUGS_LANGUAGE" /
 #   7   — DEADLINE not in 190-word vocabulary (TRUGS-DEV#1542)
 #   14  — SAID pronoun used as article-like ("SAID RECORD")
 #   28  — Complete ETL — multi-line stative WHEREAS interleaved with operative
-KNOWN_DEFERRED = {7, 28}
+# Only #7 remains — uses DEADLINE which isn't in the 190-word vocabulary
+# (TRUGS-DEVELOPMENT#1542 tracks the spec-clarification decision)
+KNOWN_DEFERRED = {7}
 
 
 def _extract_examples():
@@ -689,7 +722,7 @@ def test_spec_examples_coverage_summary() -> None:
                 passed += 1
         except trl.TRLError:
             pass
-    assert passed >= 26, f"only {passed} examples round-trip; expected ≥ 26"
+    assert passed >= 27, f"only {passed} examples round-trip; expected ≥ 27"
 
 
 # ─── Decompile ───────────────────────────────────────────────────────
