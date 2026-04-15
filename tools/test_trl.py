@@ -674,9 +674,10 @@ SPEC_EXAMPLES_PATH = Path(__file__).resolve().parent.parent / "TRUGS_LANGUAGE" /
 #   7   — DEADLINE not in 190-word vocabulary (TRUGS-DEV#1542)
 #   14  — SAID pronoun used as article-like ("SAID RECORD")
 #   28  — Complete ETL — multi-line stative WHEREAS interleaved with operative
-# Only #7 remains — uses DEADLINE which isn't in the 190-word vocabulary
-# (TRUGS-DEVELOPMENT#1542 tracks the spec-clarification decision)
-KNOWN_DEFERRED = {7}
+# All 28 SPEC_examples now round-trip. (TRUGS-DEVELOPMENT#1542 resolved by
+# updating Example 7 to use INSTRUMENT instead of DEADLINE, keeping the
+# closed 190-word vocabulary intact.)
+KNOWN_DEFERRED: set[int] = set()
 
 
 def _extract_examples():
@@ -722,7 +723,7 @@ def test_spec_examples_coverage_summary() -> None:
                 passed += 1
         except trl.TRLError:
             pass
-    assert passed >= 27, f"only {passed} examples round-trip; expected ≥ 27"
+    assert passed == len(examples), f"only {passed}/{len(examples)} examples round-trip; expected all"
 
 
 # ─── Decompile ───────────────────────────────────────────────────────

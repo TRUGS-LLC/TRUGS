@@ -65,12 +65,15 @@ Four sentences. ON_BEHALF_OF delegation. ADMINISTER establishes authority chain.
 
 ### 7. Scheduled operation with deadline
 ```
+DEFINE "deadline" AS INSTRUMENT.
 PARTY scheduler SHALL AGGREGATE ALL ACTIVE RECORD
   ONCE WITHIN 24h
   THEN WRITE RESULT TO ENDPOINT report
-  SUBJECT_TO DEADLINE "2026-04-01".
+  SUBJECT_TO INSTRUMENT deadline.
 ```
-Multiple adverb-value pairs (ONCE, WITHIN 24h). DEADLINE as temporal constraint.
+Multiple adverb-value pairs (ONCE, WITHIN 24h). The temporal constraint is
+modelled as an INSTRUMENT (formal document) defined upfront — keeps the
+example inside the closed 190-word vocabulary.
 
 ---
 
