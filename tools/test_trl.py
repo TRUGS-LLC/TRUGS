@@ -88,9 +88,11 @@ def test_parse_minimum_sentence() -> None:
     sentences = trl.parse("PARTY system VALIDATE.")
     assert len(sentences) == 1
     s = sentences[0]
-    assert s.subject.noun == "PARTY"
-    assert s.subject.identifier == "system"
-    assert s.verb_phrase.verb == "VALIDATE"
+    assert len(s.clauses) == 1
+    c = s.clauses[0]
+    assert c.subject.noun == "PARTY"
+    assert c.subject.identifier == "system"
+    assert c.verb_phrase.verb == "VALIDATE"
 
 
 def test_parse_rejects_verb_as_subject() -> None:
@@ -182,6 +184,56 @@ def test_compile_reuses_existing_identified_object() -> None:
     assert len(servers) == 1
 
 
+# ─── v0.1c — Conjunctions ─────────────────────────────────────────────
+
+def test_parse_conjunction_creates_two_clauses() -> None:
+    s = trl.parse("PARTY a SHALL FILTER DATA THEN SORT DATA.")[0]
+    assert len(s.clauses) == 2
+    assert s.conjunctions == ["THEN"]
+    # Second clause inherits subject (no explicit subject in AST)
+    assert s.clauses[1].subject is None
+
+
+def test_parse_conjunction_preserves_explicit_subject() -> None:
+    s = trl.parse("PARTY server SHALL RESPOND OR PARTY client MAY RETRY.")[0]
+    assert s.conjunctions == ["OR"]
+    assert s.clauses[0].subject.identifier == "server"
+    assert s.clauses[1].subject is not None
+    assert s.clauses[1].subject.identifier == "client"
+
+
+def test_compile_conjunction_edge() -> None:
+    g = trl.compile("PARTY a SHALL FILTER DATA THEN SORT DATA.")
+    conj_edges = [e for e in g["edges"] if e.get("relation") == "THEN"]
+    assert len(conj_edges) == 1
+    assert conj_edges[0]["from_id"] == "op-1"
+    assert conj_edges[0]["to_id"] == "op-2"
+
+
+def test_compile_three_way_then_chain() -> None:
+    g = trl.compile("PARTY a SHALL FILTER DATA THEN SORT DATA THEN WRITE DATA.")
+    then_edges = [e for e in g["edges"] if e.get("relation") == "THEN"]
+    assert len(then_edges) == 2
+
+
+def test_unless_with_anonymous_subject() -> None:
+    src = "PARTY api SHALL FILTER RECORD UNLESS NO RECORD EXISTS."
+    g = trl.compile(src)
+    # The UNLESS clause's subject is an anonymous NO RECORD node
+    record_nodes = [n for n in g["nodes"] if n["type"] == "RECORD"]
+    no_record = next(n for n in record_nodes if n.get("properties", {}).get("scope", {}).get("quantifier") == "NO")
+    assert no_record["id"] == "record-2"
+
+
+def test_decompile_omits_inherited_subject() -> None:
+    """Canonical form drops subject when it matches the prior clause."""
+    src = "PARTY a SHALL FILTER DATA THEN SORT DATA."
+    back = trl.decompile(trl.compile(src))
+    # Second clause should NOT include "PARTY a"
+    assert back == src
+    assert " PARTY a SORT " not in back  # sanity: subject is omitted after THEN
+
+
 # ─── Decompile ───────────────────────────────────────────────────────
 
 def test_decompile_minimum_graph() -> None:
@@ -217,6 +269,21 @@ ROUND_TRIP_FIXTURES = [
     "PARTY api SHALL FILTER ALL ACTIVE DATA.",
     "AGENT worker MAY READ ANY CRITICAL FILE.",
     "PARTY system SHALL_NOT WRITE ANY READONLY RESOURCE.",
+    # v0.1c — conjunctions, subject carryover
+    "PARTY a SHALL FILTER DATA THEN SORT DATA.",
+    "PARTY system SHALL FILTER RECORD THEN VALIDATE RECORD.",
+    "PARTY api SHALL FILTER ALL ACTIVE RECORD THEN SORT ALL RECORD.",
+    # v0.1c — AND parallel
+    "PARTY system SHALL FILTER DATA AND VALIDATE RECORD.",
+    # v0.1c — OR alternative, new subject
+    "PARTY server SHALL RESPOND OR PARTY client MAY RETRY.",
+    # v0.1c — UNLESS with anonymous subject
+    "PARTY api SHALL FILTER RECORD UNLESS NO RECORD EXISTS.",
+    "PARTY api SHALL FILTER ALL ACTIVE RECORD UNLESS NO VALID RECORD EXISTS.",
+    # v0.1c — IF/PROVIDED_THAT/FINALLY
+    "PARTY admin MAY APPROVE RECORD IF AUTHENTICATE.",
+    "PARTY system SHALL VALIDATE RECORD PROVIDED_THAT PARTY admin APPROVE.",
+    "PARTY system SHALL FILTER RECORD THEN VALIDATE RECORD FINALLY WRITE RECORD.",
 ]
 
 SPEC_EXAMPLE_1 = "PARTY system SHALL VALIDATE ALL PENDING RECORD."
