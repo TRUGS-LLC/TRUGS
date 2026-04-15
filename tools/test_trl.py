@@ -142,12 +142,12 @@ def test_compile_reuses_existing_subject_node() -> None:
     assert len(g["edges"]) == 2
 
 
-def test_compile_requires_identifier_on_subject() -> None:
-    try:
-        trl.compile("PARTY VALIDATE.")  # no identifier on subject
-    except trl.TRLGrammarError:
-        return
-    assert False, "expected TRLGrammarError for bare noun subject"
+def test_anonymous_subject_now_allowed() -> None:
+    """v0.1g allows anonymous subjects so WHEREAS preambles and NO PARTY clauses work."""
+    g = trl.compile("PARTY VALIDATE.")
+    party_nodes = [n for n in g["nodes"] if n["type"] == "PARTY"]
+    assert len(party_nodes) == 1
+    assert party_nodes[0]["id"] == "party-1"  # auto-generated
 
 
 def test_compile_modal_on_edge() -> None:
@@ -415,6 +415,70 @@ def test_spec_example_3_verbatim() -> None:
     assert trl.compile(back) == g
 
 
+# ─── v0.1g — DEFINE / WHEREAS / STRING literals ──────────────────────
+
+def test_tokenize_string_literal() -> None:
+    tokens = trl.tokenize('DEFINE "curator" AS PARTY.')
+    kinds = [t.kind for t in tokens if t.kind != "EOF"]
+    assert kinds == ["WORD", "STRING", "WORD", "WORD", "PUNCT"]
+    assert tokens[1].value == "curator"
+
+
+def test_tokenize_string_with_spaces() -> None:
+    tokens = trl.tokenize('DEFINE "policy name" AS PARTY.')
+    assert tokens[1].value == "policy name"
+
+
+def test_parse_define() -> None:
+    s = trl.parse('DEFINE "curator" AS PARTY.')[0]
+    assert s.definition is not None
+    assert s.definition.name == "curator"
+    assert s.definition.noun_phrase.noun == "PARTY"
+
+
+def test_parse_define_with_adjective() -> None:
+    s = trl.parse('DEFINE "ledger" AS IMMUTABLE RECORD.')[0]
+    d = s.definition
+    assert d.name == "ledger"
+    assert d.noun_phrase.noun == "RECORD"
+    assert d.noun_phrase.adjectives == ["IMMUTABLE"]
+
+
+def test_compile_define_emits_defined_term() -> None:
+    g = trl.compile('DEFINE "curator" AS PARTY.')
+    curator = next(n for n in g["nodes"] if n["id"] == "curator")
+    assert curator["type"] == "PARTY"
+    assert curator["properties"]["defined"] is True
+    assert curator["properties"]["name"] == "curator"
+
+
+def test_parse_whereas_preamble() -> None:
+    s = trl.parse("WHEREAS PARTY system ADMINISTER ALL RESOURCE.")[0]
+    assert s.preamble is True
+
+
+def test_compile_whereas_marks_preamble_on_op() -> None:
+    g = trl.compile("WHEREAS PARTY system ADMINISTER ALL RESOURCE.")
+    op = next(n for n in g["nodes"] if n.get("type") == "TRANSFORM")
+    assert op["properties"]["preamble"] is True
+
+
+def test_spec_example_10_verbatim() -> None:
+    """SPEC_examples.md §3 Example 10 — DEFINE + AND parallel."""
+    g = trl.compile(SPEC_EXAMPLE_10)
+    back = trl.decompile(g)
+    assert back == SPEC_EXAMPLE_10
+    assert trl.compile(back) == g
+
+
+def test_spec_example_18_verbatim() -> None:
+    """SPEC_examples.md §4 Example 18 — WHEREAS preambles + operative."""
+    g = trl.compile(SPEC_EXAMPLE_18)
+    back = trl.decompile(g)
+    assert back == SPEC_EXAMPLE_18
+    assert trl.compile(back) == g
+
+
 # ─── Decompile ───────────────────────────────────────────────────────
 
 def test_decompile_minimum_graph() -> None:
@@ -454,15 +518,15 @@ ROUND_TRIP_FIXTURES = [
     "PARTY a SHALL FILTER DATA THEN SORT DATA.",
     "PARTY system SHALL FILTER RECORD THEN VALIDATE RECORD.",
     "PARTY api SHALL FILTER ALL ACTIVE RECORD THEN SORT ALL RECORD.",
-    # v0.1c — AND parallel
-    "PARTY system SHALL FILTER DATA AND VALIDATE RECORD.",
+    # v0.1c — AND parallel (canonical form repeats subject after AND)
+    "PARTY system SHALL FILTER DATA AND PARTY system SHALL VALIDATE RECORD.",
     # v0.1c — OR alternative, new subject
     "PARTY server SHALL RESPOND OR PARTY client MAY RETRY.",
     # v0.1c — UNLESS with anonymous subject
     "PARTY api SHALL FILTER RECORD UNLESS NO RECORD EXISTS.",
     "PARTY api SHALL FILTER ALL ACTIVE RECORD UNLESS NO VALID RECORD EXISTS.",
-    # v0.1c — IF/PROVIDED_THAT/FINALLY
-    "PARTY admin MAY APPROVE RECORD IF AUTHENTICATE.",
+    # v0.1c — IF/PROVIDED_THAT/FINALLY (IF repeats subject; FINALLY inherits)
+    "PARTY admin MAY APPROVE RECORD IF PARTY admin AUTHENTICATE.",
     "PARTY system SHALL VALIDATE RECORD PROVIDED_THAT PARTY admin APPROVE.",
     "PARTY system SHALL FILTER RECORD THEN VALIDATE RECORD FINALLY WRITE RECORD.",
     # v0.1d — prepositions
@@ -487,6 +551,11 @@ ROUND_TRIP_FIXTURES = [
     "PARTY client MAY RETRY BOUNDED 3.",
     "PARTY server SHALL RESPOND PROMPTLY WITHIN 30s.",
     "PARTY server SHALL RESPOND PROMPTLY WITHIN 30s OR PARTY client MAY RETRY BOUNDED 3.",
+    # v0.1g — DEFINE / WHEREAS / STRING literals
+    'DEFINE "curator" AS PARTY.',
+    'DEFINE "ledger" AS IMMUTABLE RECORD.',
+    "WHEREAS PARTY system ADMINISTER ALL RESOURCE.",
+    "WHEREAS ALL RECORD REQUIRE MODULE storage.",
 ]
 
 SPEC_EXAMPLE_1 = "PARTY system SHALL VALIDATE ALL PENDING RECORD."
@@ -496,6 +565,17 @@ SPEC_EXAMPLE_3 = (
     "PARTY server SHALL RESPOND PROMPTLY WITHIN 30s "
     "OR PARTY client MAY RETRY BOUNDED 3 "
     "THEN HANDLE THE ERROR."
+)
+SPEC_EXAMPLE_10 = (
+    'DEFINE "curator" AS PARTY.\n'
+    "PARTY curator SHALL VALIDATE ALL RECORD "
+    "AND PARTY curator SHALL_NOT WRITE INVALID RECORD."
+)
+SPEC_EXAMPLE_18 = (
+    "WHEREAS PARTY system ADMINISTER ALL RESOURCE.\n"
+    "WHEREAS ALL RECORD REQUIRE MODULE storage.\n"
+    "PARTY system SHALL VALIDATE EACH RECORD ONCE "
+    "THEN WRITE RESULT TO ENDPOINT output."
 )
 
 
