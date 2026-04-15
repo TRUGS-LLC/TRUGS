@@ -259,6 +259,7 @@ class Clause:
     prep_phrases: list["PrepPhrase"] = field(default_factory=list)
     value_arg: Optional[str] = None    # trailing INTEGER argument (e.g. "10" in TAKE RESULT 10)
     stative: bool = False              # True for `subject PREP target` clauses (no verb, no op)
+    depth: int = 0                     # 0 = top-level; +1 per SUBORDINATING_CONJUNCTION nesting
 
 
 @dataclass
@@ -274,6 +275,7 @@ class Sentence:
     preamble: bool = False          # True for WHEREAS preambles
     leading_conjunction: Optional[str] = None  # "IF" | "WHEN" — sentence-starting conditional
     definition: Optional[Definition] = None   # set iff this sentence is a DEFINE
+    preceded_by_blank_line: bool = False  # True if source had 2+ newlines before this sentence
 
 
 MODALS = {"SHALL", "MAY", "SHALL_NOT"}
@@ -282,12 +284,32 @@ CONJUNCTIONS = {
     "UNLESS", "EXCEPT", "NOTWITHSTANDING", "PROVIDED_THAT", "WHEREAS",
 }
 # Conjunctions where canonical form omits the subject when it matches
-# the prior clause. Others (AND/UNLESS/IF/WHEN/WHILE/EXCEPT/...) always
-# repeat the subject for clarity — they introduce scope or parallelism.
-# OR inherits same-subject (SPEC #17 `OR REJECT THE MESSAGE`) but still
-# requires explicit subject when the alternative actor differs (SPEC #3
-# `OR PARTY client MAY RETRY ...`).
+# the prior clause. Others always repeat the subject for clarity —
+# they introduce scope or parallelism. OR inherits same-subject (SPEC
+# #17 `OR REJECT THE MESSAGE`) but still requires explicit subject when
+# the alternative actor differs (SPEC #3 `OR PARTY client MAY RETRY`).
 INHERITING_CONJUNCTIONS = {"THEN", "FINALLY", "ELSE", "OR"}
+
+# Subordinating conjunctions introduce a NESTED clause — depth+1 in
+# canonical decompile rendering (per SPEC §2.8 + §1 examples 9, 11, 16, 25).
+SUBORDINATING_CONJUNCTIONS = {
+    "UNLESS", "EXCEPT", "NOTWITHSTANDING", "PROVIDED_THAT",
+    "IF", "WHEN", "WHILE", "ELSE",
+}
+# All other CONJUNCTIONS are coordinating (same depth as parent):
+# THEN, AND, OR, FINALLY, WHEREAS.
+
+# Prepositions that get their own line in canonical decompile when they
+# come after a direct object — they declare a constraint or relation on
+# the result rather than being a directional complement of the verb.
+# Set narrowed to only those EMPIRICALLY proven by SPEC examples to break:
+#   SUBJECT_TO — #7, #12, #24, #25, #26, #28
+#   CONTAINS   — #5
+# The Phase 5 plan approved a wider set, but #6 disproved ON_BEHALF_OF
+# (used inline) and the other "structural" preps don't appear in tail
+# position with an object in the 28 examples — leave them inline by
+# default; expand the set if a future SPEC example breaks on one.
+STRUCTURAL_PREPOSITIONS = {"SUBJECT_TO", "CONTAINS"}
 # Pronouns supported in v0.1e+ (object / prep-target positions).
 # SAID and cross-sentence "THE <noun>" back-references land later.
 #
@@ -331,17 +353,26 @@ class TRLGrammarError(TRLError):
 def parse(src: str, lang: Optional[dict] = None) -> list[Sentence]:
     """Parse TRL source into a list of Sentences.
 
-    v0.1: supports only SUBJECT_NOUN identifier VERB . form.
+    Detects blank lines between sentences (line gap ≥ 2) and tags the
+    next sentence with `preceded_by_blank_line=True` so decompile can
+    reproduce paragraph breaks (Cat G — SPEC examples #27, #28).
     """
     if lang is None:
         lang = load_language()
     tokens = tokenize(src)
     sentences: list[Sentence] = []
     pos = 0
+    prev_terminator_line: Optional[int] = None
 
     while pos < len(tokens) and tokens[pos].kind != "EOF":
+        first_line = tokens[pos].line
         sentence, pos = _parse_sentence(tokens, pos, lang)
+        if prev_terminator_line is not None and first_line - prev_terminator_line >= 2:
+            sentence.preceded_by_blank_line = True
         sentences.append(sentence)
+        # The token before pos is the terminator '.'; record its line.
+        if pos > 0 and tokens[pos - 1].kind == "PUNCT":
+            prev_terminator_line = tokens[pos - 1].line
 
     return sentences
 
@@ -657,13 +688,20 @@ def _parse_sentence(tokens: list[Token], pos: int, lang: dict) -> tuple[Sentence
 
     # First clause — subject required
     clause, pos = _parse_clause(tokens, pos, lang, require_subject=True)
+    clause.depth = 0
     clauses.append(clause)
 
-    # Subsequent clauses joined by conjunctions
+    # Subsequent clauses joined by conjunctions. Track depth: each
+    # SUBORDINATING_CONJUNCTION nests under its parent (depth+1);
+    # COORDINATING conjunctions stay at the parent's depth.
+    current_depth = 0
     while tokens[pos].kind == "WORD" and tokens[pos].value in CONJUNCTIONS:
         conj = tokens[pos].value
         pos += 1
         clause, pos = _parse_clause(tokens, pos, lang, require_subject=False)
+        if conj in SUBORDINATING_CONJUNCTIONS:
+            current_depth += 1
+        clause.depth = current_depth
         clauses.append(clause)
         conjunctions.append(conj)
 
@@ -741,7 +779,25 @@ def compile(src_or_sentences, lang: Optional[dict] = None) -> dict:
 
     inherited_verb_phrase: Optional[VerbPhrase] = None
     cross_sentence_prev_op: Optional[str] = None
+
+    def _mark_first_node_for_sentence(sentence: Sentence, before_index: int,
+                                       first_op_id: Optional[str] = None) -> None:
+        """Tag the first emit-target node for this sentence so decompile
+        can emit a blank line. For DEFINE sentences we tag the DEFINED_TERM
+        node; for operative sentences we tag the first OP node (which
+        anchors the sentence walk)."""
+        if not sentence.preceded_by_blank_line:
+            return
+        target: Optional[dict] = None
+        if first_op_id is not None:
+            target = next((n for n in nodes if n["id"] == first_op_id), None)
+        if target is None and before_index < len(nodes):
+            target = nodes[before_index]
+        if target is not None:
+            target.setdefault("properties", {})["preceded_by_blank_line"] = True
+
     for sentence in sentences:
+        _node_count_before = len(nodes)
         # DEFINE sentence: emit a DEFINED_TERM node, no ops/edges.
         # DEFINE-site attributes (article + adjectives) live under
         # `properties.defined_attributes` so they only render at the
@@ -872,6 +928,8 @@ def compile(src_or_sentences, lang: Optional[dict] = None) -> dict:
             if clause.verb_phrase.verb is None:
                 # Original source had no verb — mark for elision on decompile
                 op_props["verb_elided"] = True
+            if clause.depth:
+                op_props["depth"] = clause.depth
             nodes.append({"id": op_id, "type": "TRANSFORM", "properties": op_props})
 
             relation = effective_vp.modal if effective_vp.modal else "EXECUTES"
@@ -933,6 +991,12 @@ def compile(src_or_sentences, lang: Optional[dict] = None) -> dict:
                 "to_id": clause_op_ids[i + 1],
                 "relation": conj,
             })
+
+        # Mark the FIRST node emitted during this sentence with the
+        # preceded_by_blank_line flag (Cat G — paragraph break). For
+        # operative sentences we tag the first op (anchors decompile walk).
+        first_op = clause_op_ids[0] if clause_op_ids else None
+        _mark_first_node_for_sentence(sentence, _node_count_before, first_op_id=first_op)
 
     return {"nodes": nodes, "edges": edges}
 
@@ -1035,7 +1099,13 @@ def _render_clause(op_id: str, op_nodes: dict, edges: list[dict], nodes_by_id: d
         shape = props.get("np_shape")
         return _render_noun_phrase(node, lang=lang, shape=shape)
 
-    # 1. Direct object(s) — possibly AND-chained via chain_id
+    # 1. Direct object(s) — possibly AND-chained via chain_id.
+    # AND-chains stay inline. SPEC examples disagree on when to break
+    # before AND in object lists (#23 keeps `MODULE a AND MODULE b AND
+    # MODULE c` inline; #27 breaks similar list; #20 breaks complex
+    # object-with-prep groups). The pattern is too stylistic for a
+    # deterministic rule — leave inline as the canonical form. SPEC may
+    # be updated to match (or this rule refined when a clear signal emerges).
     obj_edges = [e for e in edges
                  if e["from_id"] == op_id and e.get("relation") == "ACTS_ON"]
     if obj_edges:
@@ -1048,8 +1118,12 @@ def _render_clause(op_id: str, op_nodes: dict, edges: list[dict], nodes_by_id: d
                     parts.append("AND")
                     parts.append(_render_target(e))
 
-    # 2. Preposition phrases — group AND-chained noun_lists by chain_id
+    # 2. Preposition phrases — group AND-chained noun_lists by chain_id.
+    # Structural prepositions (SUBJECT_TO, CONTAINS, ...) get a sentinel
+    # `\x00TAIL_BREAK\x00` inserted before them; sentence-assembly
+    # replaces the sentinel with `\n` + parent-indent + 2 spaces.
     rendered_chain_ids: set[int] = set()
+    has_object = bool(obj_edges)
     for e in edges:
         if e["from_id"] != op_id:
             continue
@@ -1059,6 +1133,9 @@ def _render_clause(op_id: str, op_nodes: dict, edges: list[dict], nodes_by_id: d
         cid = (e.get("properties") or {}).get("chain_id")
         if cid is not None and cid in rendered_chain_ids:
             continue
+        # Tail-prep break: structural prep AFTER an object goes on its own line
+        if rel in STRUCTURAL_PREPOSITIONS and has_object:
+            parts.append("\x00TAIL_BREAK\x00")
         parts.append(rel)
         parts.append(_render_target(e))
         if cid is not None:
@@ -1071,8 +1148,18 @@ def _render_clause(op_id: str, op_nodes: dict, edges: list[dict], nodes_by_id: d
                     parts.append("AND")
                     parts.append(_render_target(e2))
 
-    # 3. Adverbs (after preps so #28's `... FROM STREAM raw-events WITHIN 100ms` round-trips)
-    for adv in op["properties"].get("adverbs", []):
+    # 3. Adverbs (after preps so #28's `... FROM STREAM raw-events WITHIN 100ms` round-trips).
+    # When the clause has prep phrases AND adverbs, the SPEC convention
+    # breaks before each adverb (Cat F refinement, #28). When there are no
+    # prep phrases, adverbs stay inline (#3, #15, #18).
+    has_preps = any(
+        e.get("relation") in preposition_words
+        for e in edges if e["from_id"] == op_id
+    )
+    advs = op["properties"].get("adverbs", [])
+    for adv in advs:
+        if has_preps and advs:
+            parts.append("\x00TAIL_BREAK\x00")
         parts.append(adv["adverb"])
         if "value" in adv and adv["value"] is not None:
             parts.append(adv["value"])
@@ -1171,12 +1258,17 @@ def decompile(graph: dict, lang: Optional[dict] = None) -> str:
             if i in rendered_stative:
                 continue
             if e["from_id"] == node_id:
-                sentences_out.append(_emit_stative(e))
+                src = nodes_by_id.get(e["from_id"])
+                blank = bool((src or {}).get("properties", {}).get("preceded_by_blank_line"))
+                sentences_out.append(("\n" if blank else "") + _emit_stative(e))
                 rendered_stative.add(i)
+
+    def _maybe_blank_prefix(node: dict) -> str:
+        return "\n" if node.get("properties", {}).get("preceded_by_blank_line") else ""
 
     for node in graph["nodes"]:
         if node.get("properties", {}).get("defined") is True:
-            sentences_out.append(_render_define(node, lang))
+            sentences_out.append(_maybe_blank_prefix(node) + _render_define(node, lang))
             continue
         _flush_stative_at(node["id"])
         if node.get("type") != "TRANSFORM":
@@ -1201,6 +1293,7 @@ def decompile(graph: dict, lang: Optional[dict] = None) -> str:
 
         clause_texts: list[str] = [first_clause_text]
         clause_conjunctions: list[str] = []  # length = len(clause_texts) - 1
+        clause_depths: list[int] = [0]  # depth of each clause; 0 = top-level
         visited_ops.add(op_id)
         cur = op_id
         prev_subject_id = next(e["from_id"] for e in edges
@@ -1237,34 +1330,72 @@ def decompile(graph: dict, lang: Optional[dict] = None) -> str:
                             stative_parts.append(_render_noun_phrase(target, lang=lang, shape=shape))
                 clause_conjunctions.append(conj)
                 clause_texts.append(" ".join(stative_parts))
+                # Stative continuations don't carry their own op; use parent depth + 1
+                # if conjunction is subordinating, else parent depth.
+                stative_depth = clause_depths[-1] + (1 if conj in SUBORDINATING_CONJUNCTIONS else 0)
+                clause_depths.append(stative_depth)
                 break
-            nxt_subject_id = next(e["from_id"] for e in edges
-                                   if e["to_id"] == nxt and e.get("relation") in MODALS | {"EXECUTES"})
+            nxt_subject_edge = next(e for e in edges
+                                     if e["to_id"] == nxt and e.get("relation") in MODALS | {"EXECUTES"})
+            nxt_subject_id = nxt_subject_edge["from_id"]
+            nxt_modal = nxt_subject_edge.get("relation")
             same_subject = nxt_subject_id == prev_subject_id
             inherit = conj in INHERITING_CONJUNCTIONS and same_subject
             include_subject = not inherit
             # Category E: first coordinated clause after a leading IF/WHEN
-            # repeats subject (scope boundary). Subsequent clauses follow
-            # the normal inheritance rule.
+            # repeats subject (scope boundary).
             if leading_conj_active and clauses_seen_after_leading == 0:
+                include_subject = True
+            # Category E (PR-B refinement): a clause with its own modal
+            # (SHALL/MAY/SHALL_NOT) is a full standalone clause and always
+            # repeats its subject. Verb-only continuations (relation=EXECUTES)
+            # may inherit per the rule above.
+            if nxt_modal in MODALS:
                 include_subject = True
             clauses_seen_after_leading += 1
             clause_conjunctions.append(conj)
             clause_texts.append(_render_clause(nxt, op_nodes, edges, nodes_by_id, lang,
                                                  include_subject=include_subject))
+            # Read depth from the next op's properties (set by compile per
+            # SUBORDINATING_CONJUNCTIONS); fall back to 0 for back-compat.
+            nxt_depth = nodes_by_id.get(nxt, {}).get("properties", {}).get("depth", 0)
+            clause_depths.append(nxt_depth)
             visited_ops.add(nxt)
             prev_subject_id = nxt_subject_id
             cur = nxt
 
         # Assemble: single-clause inline; multi-clause one per line with
-        # 2-space indented continuations per SPEC_examples.md formatting.
-        if not clause_conjunctions:
-            sentence_text = clause_texts[0]
+        # depth-aware indentation per SPEC_examples.md.
+        # Indent = 2 * max(depth, 1) spaces:
+        #   depth 0 (coordinating continuation, e.g. THEN at parent level): 2 sp
+        #   depth 1 (first subordinate, e.g. UNLESS in #2 / #16): 2 sp
+        #   depth 2 (PROVIDED_THAT under UNLESS in #16): 4 sp
+        #   depth 3 (EXCEPT under PROVIDED_THAT in #16): 6 sp
+        def _resolve_tail_breaks(text: str, parent_indent: str, is_last_clause: bool) -> str:
+            """Replace `\\x00TAIL_BREAK\\x00 ` with newline + indent.
+
+            End-of-sentence tail preps (e.g. SUBJECT_TO at the very end in #7,
+            #12) use the same indent as the parent clause's conjunction line.
+            Mid-sentence tail preps (e.g. SUBJECT_TO inside #25) use
+            parent_indent + 2 (one more level deep).
+            """
+            extra = "" if is_last_clause else "  "
+            replacement_indent = (parent_indent or "  ") + extra
+            return text.replace(" \x00TAIL_BREAK\x00 ", f"\n{replacement_indent}")
+
+        n_clauses = len(clause_texts)
+        if n_clauses == 1:
+            sentence_text = _resolve_tail_breaks(clause_texts[0], "", is_last_clause=True)
         else:
-            sentence_text = clause_texts[0]
-            for conj, txt in zip(clause_conjunctions, clause_texts[1:]):
-                sentence_text += f"\n  {conj} {txt}"
-        sentences_out.append(sentence_text + ".")
+            sentence_text = _resolve_tail_breaks(clause_texts[0], "", is_last_clause=False)
+            for i, (conj, txt, depth) in enumerate(zip(
+                clause_conjunctions, clause_texts[1:], clause_depths[1:]
+            )):
+                indent = "  " * max(depth, 1)
+                is_last = (i == len(clause_conjunctions) - 1)
+                resolved = _resolve_tail_breaks(txt, indent, is_last_clause=is_last)
+                sentence_text += f"\n{indent}{conj} {resolved}"
+        sentences_out.append(_maybe_blank_prefix(node) + sentence_text + ".")
 
     return "\n".join(sentences_out)
 
