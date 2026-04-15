@@ -516,6 +516,34 @@ def test_clause_level_and_still_works() -> None:
     assert back == src
 
 
+# ─── v0.2.1 — Verb elision and current-op pronouns ───────────────────
+
+def test_verb_elision_in_except_clause() -> None:
+    src = "NO PARTY MAY WRITE RECORD ledger EXCEPT PARTY system."
+    g = trl.compile(src)
+    back = trl.decompile(g)
+    assert back == src
+    # The EXCEPT clause's op should carry verb_elided so canonical form drops verb+modal
+    op2 = next(n for n in g["nodes"] if n["id"] == "op-2")
+    assert op2["properties"]["verb_elided"] is True
+    # Compiler still records the inherited verb for graph use
+    assert op2["properties"]["operation"] == "WRITE"
+
+
+def test_input_pronoun_resolves_to_current_op() -> None:
+    src = "EACH AGENT SHALL HANDLE INPUT PARALLEL."
+    g = trl.compile(src)
+    back = trl.decompile(g)
+    assert back == src
+    # The INPUT pronoun creates an ACTS_ON edge from op back to itself
+    op = next(n for n in g["nodes"] if n.get("type") == "TRANSFORM")
+    self_edge = next(e for e in g["edges"]
+                     if e["from_id"] == op["id"]
+                     and e.get("relation") == "ACTS_ON"
+                     and (e.get("properties") or {}).get("pronoun") == "INPUT")
+    assert self_edge["to_id"] == op["id"]
+
+
 # ─── v0.1h — Sweep all SPEC_examples.md examples ─────────────────────
 
 import re
@@ -524,11 +552,10 @@ from pathlib import Path
 SPEC_EXAMPLES_PATH = Path(__file__).resolve().parent.parent / "TRUGS_LANGUAGE" / "SPEC_examples.md"
 
 # Examples this compiler version cannot round-trip yet — each tracked for follow-on:
-#   7, 24 — uses DEADLINE / PRECEDENT (not in 190-word vocabulary, TRUGS-DEV#1542)
-#   9, 13, 14, 28 — edge-case spec patterns (single-clause EXCEPT, INPUT pronoun
-#      semantics, REMEDY-as-subject, FEEDS-as-verb-in-WHEREAS) — own follow-ons
-#   v0.2 (TRUGS-DEV#1541) unlocked AND-chained noun lists for #20, #23, #27
-KNOWN_DEFERRED = {7, 9, 13, 14, 24, 28}
+#   7, 24 — DEADLINE / PRECEDENT not in 190-word vocabulary (TRUGS-DEV#1542)
+#   9, 28 — stative clause: subject + PREPOSITION + object (no verb)
+#   14   — SAID pronoun used as article-like ("SAID RECORD")
+KNOWN_DEFERRED = {7, 9, 14, 24, 28}
 
 
 def _extract_examples():
@@ -563,7 +590,7 @@ def test_spec_examples_in_scope_round_trip() -> None:
 
 
 def test_spec_examples_coverage_summary() -> None:
-    """Sanity assertion: at least 22 of the 28 examples round-trip post-v0.2."""
+    """Sanity assertion: at least 23 of the 28 examples round-trip post-v0.2.1."""
     examples = _extract_examples()
     passed = 0
     for n, _, body in examples:
@@ -574,7 +601,7 @@ def test_spec_examples_coverage_summary() -> None:
                 passed += 1
         except trl.TRLError:
             pass
-    assert passed >= 22, f"only {passed} examples round-trip; expected ≥ 22"
+    assert passed >= 23, f"only {passed} examples round-trip; expected ≥ 23"
 
 
 # ─── Decompile ───────────────────────────────────────────────────────
