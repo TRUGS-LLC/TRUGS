@@ -80,7 +80,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_LANGUAGE_TRUG = REPO_ROOT / "TRUGS_LANGUAGE" / "language.trug.json"
 
 SUGAR_RE = re.compile(r"'[a-z_]+")
-IDENTIFIER_RE = re.compile(r"[a-z_][a-z0-9_]*")
+IDENTIFIER_RE = re.compile(r"[a-z_][a-z0-9_-]*")
 WORD_RE = re.compile(r"[A-Z_]+")
 DURATION_RE = re.compile(r"\d+[smhd]")
 INTEGER_RE = re.compile(r"\d+")
@@ -212,6 +212,7 @@ class Clause:
     verb_phrase: VerbPhrase
     object: Optional[NounPhrase] = None
     prep_phrases: list["PrepPhrase"] = field(default_factory=list)
+    value_arg: Optional[str] = None    # trailing INTEGER argument (e.g. "10" in TAKE RESULT 10)
 
 
 @dataclass
@@ -225,6 +226,7 @@ class Sentence:
     clauses: list["Clause"] = field(default_factory=list)  # >=1 clause for normal/preamble
     conjunctions: list[str] = field(default_factory=list)  # length = len(clauses)-1
     preamble: bool = False          # True for WHEREAS preambles
+    leading_conjunction: Optional[str] = None  # "IF" | "WHEN" — sentence-starting conditional
     definition: Optional[Definition] = None   # set iff this sentence is a DEFINE
 
 
@@ -311,6 +313,13 @@ def _parse_noun_phrase(tokens: list[Token], pos: int, lang: dict,
             article = tokens[pos].value
             pos += 1
 
+    # Article + pronoun shortcut (e.g. EACH RESULT)
+    if article is not None and tokens[pos].kind == "WORD" and tokens[pos].value in PRONOUNS:
+        if not allow_pronoun:
+            raise TRLGrammarError(f"{tokens[pos].value!r} pronoun not allowed here")
+        np = NounPhrase(article=article, pronoun=tokens[pos].value)
+        return np, pos + 1
+
     # Zero or more adjectives
     while tokens[pos].kind == "WORD":
         entry = lang.get(tokens[pos].value)
@@ -394,8 +403,20 @@ def _parse_clause(tokens: list[Token], pos: int, lang: dict,
     adverbs: list[AdverbPhrase] = []
     obj: Optional[NounPhrase] = None
     prep_phrases: list[PrepPhrase] = []
+    value_arg: Optional[str] = None
 
-    while tokens[pos].kind == "WORD" and tokens[pos].value not in CONJUNCTIONS:
+    while tokens[pos].kind != "PUNCT" and tokens[pos].kind != "EOF":
+        # Trailing INTEGER as a verb-argument (e.g. TAKE RESULT 10, BATCH RESULT 100)
+        if tokens[pos].kind == "INTEGER":
+            if value_arg is not None:
+                break  # only one trailing int per verb
+            value_arg = tokens[pos].value
+            pos += 1
+            continue
+        if tokens[pos].kind != "WORD":
+            break
+        if tokens[pos].value in CONJUNCTIONS:
+            break
         tok = tokens[pos]
         entry = lang.get(tok.value)
         if not entry:
@@ -424,6 +445,7 @@ def _parse_clause(tokens: list[Token], pos: int, lang: dict,
         verb_phrase=VerbPhrase(verb=verb, modal=modal, adverbs=adverbs),
         object=obj,
         prep_phrases=prep_phrases,
+        value_arg=value_arg,
     ), pos
 
 
@@ -450,11 +472,17 @@ def _parse_sentence(tokens: list[Token], pos: int, lang: dict) -> tuple[Sentence
     if tokens[pos].kind == "WORD" and tokens[pos].value == "DEFINE":
         return _parse_definition(tokens, pos, lang)
 
-    # WHEREAS preamble — sentence starts with WHEREAS
+    # Sentence-starting prefixes: WHEREAS preamble or IF/WHEN conditional.
+    # Each tags the first clause's op with a property so decompile reproduces it.
     preamble = False
-    if tokens[pos].kind == "WORD" and tokens[pos].value == "WHEREAS":
-        preamble = True
-        pos += 1
+    leading_conjunction: Optional[str] = None
+    if tokens[pos].kind == "WORD":
+        if tokens[pos].value == "WHEREAS":
+            preamble = True
+            pos += 1
+        elif tokens[pos].value in ("IF", "WHEN"):
+            leading_conjunction = tokens[pos].value
+            pos += 1
 
     clauses: list[Clause] = []
     conjunctions: list[str] = []
@@ -479,7 +507,10 @@ def _parse_sentence(tokens: list[Token], pos: int, lang: dict) -> tuple[Sentence
         )
     pos += 1
 
-    return Sentence(clauses=clauses, conjunctions=conjunctions, preamble=preamble), pos
+    return Sentence(
+        clauses=clauses, conjunctions=conjunctions, preamble=preamble,
+        leading_conjunction=leading_conjunction,
+    ), pos
 
 
 # ─── Compile (TRL → TRUG) ────────────────────────────────────────────
@@ -589,8 +620,12 @@ def compile(src_or_sentences, lang: Optional[dict] = None) -> dict:
                      if a.value is not None else {"adverb": a.adverb})
                     for a in clause.verb_phrase.adverbs
                 ]
-            if sentence.preamble:
+            if sentence.preamble and not clause_op_ids:
                 op_props["preamble"] = True
+            if sentence.leading_conjunction and not clause_op_ids:
+                op_props["leading_conjunction"] = sentence.leading_conjunction
+            if clause.value_arg is not None:
+                op_props["value_arg"] = clause.value_arg
             nodes.append({"id": op_id, "type": "TRANSFORM", "properties": op_props})
 
             relation = clause.verb_phrase.modal if clause.verb_phrase.modal else "EXECUTES"
@@ -732,6 +767,10 @@ def _render_clause(op_id: str, op_nodes: dict, edges: list[dict], nodes_by_id: d
             if target_node is not None:
                 parts.append(_render_noun_phrase(target_node, lang=lang))
 
+    # 4. Trailing integer argument (TAKE RESULT 10, BATCH RESULT 100)
+    if op["properties"].get("value_arg") is not None:
+        parts.append(op["properties"]["value_arg"])
+
     return " ".join(parts)
 
 
@@ -794,9 +833,12 @@ def decompile(graph: dict, lang: Optional[dict] = None) -> str:
             continue
 
         preamble = bool(node["properties"].get("preamble"))
+        leading = node["properties"].get("leading_conjunction")
         parts: list[str] = []
         if preamble:
             parts.append("WHEREAS")
+        elif leading:
+            parts.append(leading)
         parts.append(_render_clause(op_id, op_nodes, edges, nodes_by_id, lang,
                                      include_subject=True))
         visited_ops.add(op_id)

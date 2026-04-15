@@ -479,6 +479,65 @@ def test_spec_example_18_verbatim() -> None:
     assert trl.compile(back) == g
 
 
+# ─── v0.1h — Sweep all SPEC_examples.md examples ─────────────────────
+
+import re
+from pathlib import Path
+
+SPEC_EXAMPLES_PATH = Path(__file__).resolve().parent.parent / "TRUGS_LANGUAGE" / "SPEC_examples.md"
+
+# Examples that v0.1 cannot round-trip yet — each tracked for follow-on:
+#   7, 24 — uses DEADLINE / PRECEDENT (not in 190-word vocabulary)
+#   9, 13, 14, 20, 23, 27, 28 — uses AND-chained noun lists / prep phrases
+KNOWN_DEFERRED = {7, 9, 13, 14, 20, 23, 24, 27, 28}
+
+
+def _extract_examples():
+    text = SPEC_EXAMPLES_PATH.read_text()
+    pat = re.compile(r"### (\d+)\.\s+([^\n]+)\n```\n(.+?)\n```", re.DOTALL)
+    return [(int(m.group(1)), m.group(2), m.group(3).strip()) for m in pat.finditer(text)]
+
+
+def _normalize_whitespace(src: str) -> str:
+    return re.sub(r"\s+", " ", src).strip()
+
+
+def test_spec_examples_in_scope_round_trip() -> None:
+    """Every SPEC_examples.md example not in KNOWN_DEFERRED must round-trip
+    at the graph level (compile(decompile(g)) == g)."""
+    examples = _extract_examples()
+    assert examples, "failed to extract examples from SPEC_examples.md"
+    failures: list[str] = []
+    for n, title, body in examples:
+        if n in KNOWN_DEFERRED:
+            continue
+        norm = _normalize_whitespace(body)
+        try:
+            g = trl.compile(norm)
+            back = trl.decompile(g)
+            g2 = trl.compile(back)
+            if g != g2:
+                failures.append(f"#{n} {title}: graph diverged on round-trip")
+        except trl.TRLError as e:
+            failures.append(f"#{n} {title}: {type(e).__name__}: {e}")
+    assert not failures, "in-scope examples failed:\n" + "\n".join(failures)
+
+
+def test_spec_examples_coverage_summary() -> None:
+    """Sanity assertion: at least 19 of the 28 examples round-trip in v0.1."""
+    examples = _extract_examples()
+    passed = 0
+    for n, _, body in examples:
+        norm = _normalize_whitespace(body)
+        try:
+            g = trl.compile(norm)
+            if trl.compile(trl.decompile(g)) == g:
+                passed += 1
+        except trl.TRLError:
+            pass
+    assert passed >= 19, f"only {passed} examples round-trip; expected ≥ 19"
+
+
 # ─── Decompile ───────────────────────────────────────────────────────
 
 def test_decompile_minimum_graph() -> None:
