@@ -282,9 +282,12 @@ CONJUNCTIONS = {
     "UNLESS", "EXCEPT", "NOTWITHSTANDING", "PROVIDED_THAT", "WHEREAS",
 }
 # Conjunctions where canonical form omits the subject when it matches
-# the prior clause. Others (AND/OR/UNLESS/IF/WHEN/WHILE/etc.) always
+# the prior clause. Others (AND/UNLESS/IF/WHEN/WHILE/EXCEPT/...) always
 # repeat the subject for clarity — they introduce scope or parallelism.
-INHERITING_CONJUNCTIONS = {"THEN", "FINALLY", "ELSE"}
+# OR inherits same-subject (SPEC #17 `OR REJECT THE MESSAGE`) but still
+# requires explicit subject when the alternative actor differs (SPEC #3
+# `OR PARTY client MAY RETRY ...`).
+INHERITING_CONJUNCTIONS = {"THEN", "FINALLY", "ELSE", "OR"}
 # Pronouns supported in v0.1e+ (object / prep-target positions).
 # SAID and cross-sentence "THE <noun>" back-references land later.
 #
@@ -697,8 +700,17 @@ def compile(src_or_sentences, lang: Optional[dict] = None) -> dict:
     anon_counters: dict[str, int] = {}
 
     def _np_shape(np: NounPhrase) -> dict:
-        """Per-mention attributes (article + adjectives) grouped by subcategory."""
+        """Per-mention attributes (noun type, article, adjectives) grouped by subcategory.
+
+        `noun_type` is the noun word at this mention. Different mentions of
+        the same identified entity may use different noun types (e.g.
+        `PARTY gateway` and `SERVICE gateway` both refer to the entity
+        `gateway`); the node carries one fallback type, but each mention's
+        actual rendering uses the per-edge `noun_type` from this shape.
+        """
         shape: dict = {}
+        if np.noun:
+            shape["noun_type"] = np.noun
         if np.article:
             shape["article"] = np.article
         if np.adjectives:
@@ -773,14 +785,28 @@ def compile(src_or_sentences, lang: Optional[dict] = None) -> dict:
                 return prev_op_id
             raise TRLGrammarError(f"unhandled pronoun {word!r}")
 
+        last_subject_id: Optional[str] = None  # for inheriting anon subjects without re-counter
+        last_subject_shape: Optional[dict] = None
         for clause in sentence.clauses:
-            subject_np = clause.subject or inherited_subject
-            if subject_np is None:
-                raise TRLGrammarError(
-                    "clause has no subject and no prior clause to inherit from"
-                )
-            subj_id = _ensure_noun_node(subject_np)
-            inherited_subject = subject_np
+            if clause.subject is not None:
+                subject_np = clause.subject
+                subj_id = _ensure_noun_node(subject_np)
+                last_subject_shape = _np_shape(subject_np)
+                inherited_subject = subject_np
+            else:
+                # Inherit subject node + shape from prior clause's emission
+                if last_subject_id is None:
+                    if inherited_subject is None:
+                        raise TRLGrammarError(
+                            "clause has no subject and no prior clause to inherit from"
+                        )
+                    subject_np = inherited_subject
+                    subj_id = _ensure_noun_node(subject_np)
+                    last_subject_shape = _np_shape(subject_np)
+                else:
+                    subj_id = last_subject_id
+                    subject_np = inherited_subject  # for pronoun-resolution below
+            last_subject_id = subj_id
 
             # Stative clause: no op, just direct edges subject → target via PREP.
             if clause.stative:
@@ -913,16 +939,28 @@ def compile(src_or_sentences, lang: Optional[dict] = None) -> dict:
 
 # ─── Decompile (TRUG → TRL) ───────────────────────────────────────────
 
-def _is_anonymous_id(node: dict) -> bool:
-    """Auto-generated IDs follow `{type_lower}-N`. Skip them on render."""
+def _is_anonymous_id(node: dict, mention_type: Optional[str] = None) -> bool:
+    """Auto-generated IDs follow `{type_lower}-N`. Skip them on render.
+
+    `mention_type` is the per-mention noun type from the edge shape; when
+    a node is referenced via a different type than its node["type"], the
+    auto-id pattern is anchored on the node's first-mention type, so we
+    check against that.
+    """
+    base = (mention_type or node["type"]).lower()
+    if re.fullmatch(rf"{re.escape(base)}-\d+", node["id"]) is not None:
+        return True
+    # Also catch the case where node["type"] differs from mention_type
     return re.fullmatch(rf"{re.escape(node['type'].lower())}-\d+", node["id"]) is not None
 
 
 def _render_noun_phrase(node: dict, lang: dict, shape: Optional[dict] = None) -> str:
     """Render a noun node back to its TRL form: [article] [adj]* NOUN [id].
 
-    `shape` is per-mention attributes (article + adjectives) carried on the
-    edge that references the node. If None, the noun is rendered bare.
+    `shape` is per-mention attributes (noun_type + article + adjectives)
+    carried on the edge that references the node. The noun TYPE used in
+    rendering comes from `shape['noun_type']` if present, otherwise from
+    the node's own `type` (the first-mention fallback).
     """
     parts: list[str] = []
     shape = shape or {}
@@ -943,8 +981,9 @@ def _render_noun_phrase(node: dict, lang: dict, shape: Optional[dict] = None) ->
         elif isinstance(vals, list):
             parts.extend(vals)
 
-    parts.append(node["type"])
-    if not _is_anonymous_id(node):
+    noun_type = shape.get("noun_type") or node["type"]
+    parts.append(noun_type)
+    if not _is_anonymous_id(node, noun_type):
         parts.append(node["id"])
     return " ".join(parts)
 
@@ -977,10 +1016,12 @@ def _render_clause(op_id: str, op_nodes: dict, edges: list[dict], nodes_by_id: d
 
     # Canonical post-verb order:
     #   1. direct object (ACTS_ON edge, if any)
-    #   2. adverbs (op.properties.adverbs, in stored order)
-    #   3. preposition phrases (outgoing preposition edges, in edge-list order)
-    # This matches SPEC_examples.md: adverbs after the object when one is present
-    # (Examples 7, 15, 18); after the verb directly when there is none (Example 3).
+    #   2. preposition phrases (outgoing preposition edges, in edge-list order)
+    #   3. adverbs (op.properties.adverbs, in stored order)
+    #   4. trailing integer argument (TAKE RESULT 10, BATCH RESULT 100)
+    # SPEC_examples.md examples #7/#15/#18 have no preps + adverbs after
+    # object — handled. Example #28 has both, with adverbs after preps —
+    # handled by this order.
 
     def _render_target(e: dict) -> str:
         props = e.get("properties") or {}
@@ -1007,13 +1048,7 @@ def _render_clause(op_id: str, op_nodes: dict, edges: list[dict], nodes_by_id: d
                     parts.append("AND")
                     parts.append(_render_target(e))
 
-    # 2. Adverbs
-    for adv in op["properties"].get("adverbs", []):
-        parts.append(adv["adverb"])
-        if "value" in adv and adv["value"] is not None:
-            parts.append(adv["value"])
-
-    # 3. Preposition phrases — group AND-chained noun_lists by chain_id
+    # 2. Preposition phrases — group AND-chained noun_lists by chain_id
     rendered_chain_ids: set[int] = set()
     for e in edges:
         if e["from_id"] != op_id:
@@ -1035,6 +1070,12 @@ def _render_clause(op_id: str, op_nodes: dict, edges: list[dict], nodes_by_id: d
                         and e2 is not e):
                     parts.append("AND")
                     parts.append(_render_target(e2))
+
+    # 3. Adverbs (after preps so #28's `... FROM STREAM raw-events WITHIN 100ms` round-trips)
+    for adv in op["properties"].get("adverbs", []):
+        parts.append(adv["adverb"])
+        if "value" in adv and adv["value"] is not None:
+            parts.append(adv["value"])
 
     # 4. Trailing integer argument (TAKE RESULT 10, BATCH RESULT 100)
     if op["properties"].get("value_arg") is not None:
@@ -1164,6 +1205,12 @@ def decompile(graph: dict, lang: Optional[dict] = None) -> str:
         cur = op_id
         prev_subject_id = next(e["from_id"] for e in edges
                                 if e["to_id"] == cur and e.get("relation") in MODALS | {"EXECUTES"})
+        # Per SPEC §1 examples (e.g. #8): when the parent clause has a
+        # leading conjunction (IF / WHEN), the FIRST coordinated clause
+        # repeats its subject regardless of inheritance — the gate
+        # creates a scope boundary that suppresses elision once.
+        clauses_seen_after_leading = 0
+        leading_conj_active = leading is not None
         while cur in conj_next:
             conj, nxt = conj_next[cur]
             # Stative continuation
@@ -1196,6 +1243,12 @@ def decompile(graph: dict, lang: Optional[dict] = None) -> str:
             same_subject = nxt_subject_id == prev_subject_id
             inherit = conj in INHERITING_CONJUNCTIONS and same_subject
             include_subject = not inherit
+            # Category E: first coordinated clause after a leading IF/WHEN
+            # repeats subject (scope boundary). Subsequent clauses follow
+            # the normal inheritance rule.
+            if leading_conj_active and clauses_seen_after_leading == 0:
+                include_subject = True
+            clauses_seen_after_leading += 1
             clause_conjunctions.append(conj)
             clause_texts.append(_render_clause(nxt, op_nodes, edges, nodes_by_id, lang,
                                                  include_subject=include_subject))
