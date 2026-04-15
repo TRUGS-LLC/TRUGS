@@ -140,12 +140,46 @@ def test_compile_reuses_existing_subject_node() -> None:
     assert len(g["edges"]) == 2
 
 
-def test_compile_requires_identifier() -> None:
+def test_compile_requires_identifier_on_subject() -> None:
     try:
-        trl.compile("PARTY VALIDATE.")  # no identifier
+        trl.compile("PARTY VALIDATE.")  # no identifier on subject
     except trl.TRLGrammarError:
         return
     assert False, "expected TRLGrammarError for bare noun subject"
+
+
+def test_compile_modal_on_edge() -> None:
+    g = trl.compile("PARTY system SHALL VALIDATE.")
+    assert g["edges"][0]["relation"] == "SHALL"
+
+
+def test_compile_shall_not_on_edge() -> None:
+    g = trl.compile("PARTY system SHALL_NOT WRITE.")
+    assert g["edges"][0]["relation"] == "SHALL_NOT"
+
+
+def test_compile_anonymous_object_gets_auto_id() -> None:
+    g = trl.compile("PARTY system SHALL VALIDATE ALL PENDING RECORD.")
+    record = next(n for n in g["nodes"] if n["type"] == "RECORD")
+    assert record["id"] == "record-1"  # auto-generated for anonymous noun
+    assert record["properties"]["scope"]["quantifier"] == "ALL"
+    assert record["properties"]["state"] == "PENDING"
+
+
+def test_compile_spec_example_1_verbatim() -> None:
+    """The very first example in SPEC_examples.md round-trips exactly."""
+    g = trl.compile(SPEC_EXAMPLE_1)
+    back = trl.decompile(g)
+    assert back == SPEC_EXAMPLE_1
+    g2 = trl.compile(back)
+    assert g == g2
+
+
+def test_compile_reuses_existing_identified_object() -> None:
+    # PARTY server (identified) should reuse a pre-existing node
+    g = trl.compile("PARTY a SHALL REQUEST PARTY server. PARTY b SHALL REQUEST PARTY server.")
+    servers = [n for n in g["nodes"] if n["id"] == "server"]
+    assert len(servers) == 1
 
 
 # ─── Decompile ───────────────────────────────────────────────────────
@@ -165,12 +199,27 @@ def test_decompile_minimum_graph() -> None:
 # ─── Round-trip (the primary acceptance criterion) ──────────────────
 
 ROUND_TRIP_FIXTURES = [
+    # v0.1a — minimum form
     "PARTY system VALIDATE.",
     "PARTY api FILTER.",
     "PARTY user AUTHENTICATE.",
     "AGENT worker FILTER.",
     "SERVICE gateway VALIDATE.",
+    # v0.1b — modals
+    "PARTY system SHALL VALIDATE.",
+    "AGENT worker MAY FILTER.",
+    "PARTY system SHALL_NOT WRITE.",
+    # v0.1b — single object
+    "PARTY client SHALL REQUEST PARTY server.",
+    "PARTY system SHALL VALIDATE DATA.",
+    # v0.1b — articles + adjectives on anonymous objects
+    "PARTY system SHALL VALIDATE ALL PENDING RECORD.",  # Example 1 verbatim
+    "PARTY api SHALL FILTER ALL ACTIVE DATA.",
+    "AGENT worker MAY READ ANY CRITICAL FILE.",
+    "PARTY system SHALL_NOT WRITE ANY READONLY RESOURCE.",
 ]
+
+SPEC_EXAMPLE_1 = "PARTY system SHALL VALIDATE ALL PENDING RECORD."
 
 
 def test_round_trip_trl_to_trug_to_trl() -> None:
