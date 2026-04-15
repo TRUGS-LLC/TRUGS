@@ -17,20 +17,21 @@ examples in SPEC_examples.md):
 4. **v0.1d** — prepositional phrases after the verb:
    `clause := subject verb_phrase [direct_object] (PREPOSITION noun_phrase)*`
 5. **v0.1e** — pronouns in object / prep-target position.
-6. **v0.1f** (this slice) — adverbs + value literals:
-   - Adverbs between verb and object: `VERB (ADVERB [value])* [object] ...`
-   - All 18 TRL adverbs recognised
-   - INTEGER literals (`\d+`) and DURATION literals (`\d+[smhd]`) parsed
-     as Token.kind=="INTEGER" / "DURATION"
-   - Each adverb compiles to an entry on `op.properties.adverbs`:
-     `[{"adverb": "WITHIN", "value": "30s"}, ...]` preserving source order
-   - Decompile walks the list in order, emitting `ADVERB [value]`
-   - STRING and DATE literals deferred; they appear rarely in examples
-     and land with DEFINE / WHEREAS in v0.1g.
+6. **v0.1f** — adverbs + value literals (INTEGER, DURATION).
+7. **v0.1g** (this slice) — DEFINE / WHEREAS / STRING literals:
+   - STRING literal tokens: `"quoted text"` → Token.kind="STRING"
+   - `DEFINE "name" AS noun_phrase .` — emits a `DEFINED_TERM` node
+     tagged with the quoted name. Per §3: `{id: name, type: NOUN,
+     properties: {defined: true}}`.
+   - `WHEREAS clause .` — a sentence-starting WHEREAS becomes a
+     preamble. Compiles identically to a regular clause, with
+     `op.properties.preamble = true` so execution semantics are
+     declared as context-only.
+   - Decompile restores the DEFINE / WHEREAS form verbatim.
 
-Still not implemented: WHEREAS preamble semantics, DEFINE definitions,
-multi-sentence cross-sentence references (SAID / THE-noun across
-sentences), AND-chained prep phrases.
+Still not implemented: DATE literals, AND-chained prep phrases,
+cross-sentence back-references (SAID), noun conjunction in
+object/prep lists (e.g. `AGENT a AND AGENT b`).
 
 ## Not yet implemented (tracked in TRUGS-DEVELOPMENT#1539 / #1540)
 
@@ -83,6 +84,7 @@ IDENTIFIER_RE = re.compile(r"[a-z_][a-z0-9_]*")
 WORD_RE = re.compile(r"[A-Z_]+")
 DURATION_RE = re.compile(r"\d+[smhd]")
 INTEGER_RE = re.compile(r"\d+")
+STRING_RE = re.compile(r'"([^"\\]*(?:\\.[^"\\]*)*)"')
 
 
 # ─── Tokenizer ────────────────────────────────────────────────────────
@@ -110,6 +112,14 @@ def tokenize(src: str) -> list[Token]:
         if ch == ".":
             tokens.append(Token("PUNCT", "."))
             i += 1
+            continue
+        # String literal: "..."
+        if ch == '"':
+            m = STRING_RE.match(stripped, i)
+            if not m:
+                raise TRLSyntaxError(f"unterminated string literal at position {i}")
+            tokens.append(Token("STRING", m.group(1)))
+            i = m.end()
             continue
         m = WORD_RE.match(stripped, i)
         if m and (m.end() == len(stripped) or not stripped[m.end()].isalnum() and stripped[m.end()] != "_"):
@@ -205,9 +215,17 @@ class Clause:
 
 
 @dataclass
+class Definition:
+    name: str          # quoted string, e.g. "curator"
+    noun_phrase: NounPhrase  # e.g. IMMUTABLE RECORD
+
+
+@dataclass
 class Sentence:
-    clauses: list["Clause"]            # >=1 clause
+    clauses: list["Clause"] = field(default_factory=list)  # >=1 clause for normal/preamble
     conjunctions: list[str] = field(default_factory=list)  # length = len(clauses)-1
+    preamble: bool = False          # True for WHEREAS preambles
+    definition: Optional[Definition] = None   # set iff this sentence is a DEFINE
 
 
 MODALS = {"SHALL", "MAY", "SHALL_NOT"}
@@ -215,6 +233,10 @@ CONJUNCTIONS = {
     "THEN", "AND", "OR", "ELSE", "IF", "WHEN", "WHILE", "FINALLY",
     "UNLESS", "EXCEPT", "NOTWITHSTANDING", "PROVIDED_THAT", "WHEREAS",
 }
+# Conjunctions where canonical form omits the subject when it matches
+# the prior clause. Others (AND/OR/UNLESS/IF/WHEN/WHILE/etc.) always
+# repeat the subject for clarity — they introduce scope or parallelism.
+INHERITING_CONJUNCTIONS = {"THEN", "FINALLY", "ELSE"}
 # Pronouns supported in v0.1e (object / prep-target positions).
 # SAID and cross-sentence "THE <noun>" back-references land later.
 PRONOUNS_OP_ANTECEDENT = {"RESULT", "OUTPUT", "INPUT", "SOURCE", "TARGET"}
@@ -261,10 +283,17 @@ def parse(src: str, lang: Optional[dict] = None) -> list[Sentence]:
 
 
 def _parse_noun_phrase(tokens: list[Token], pos: int, lang: dict,
-                        require_identifier: bool = False) -> tuple[NounPhrase, int]:
+                        require_identifier: bool = False,
+                        allow_pronoun: bool = True) -> tuple[NounPhrase, int]:
     """Parse [article] [adjective]* NOUN [identifier], OR a bare pronoun."""
-    # Pronoun shortcut (object / prep-target position)
+    # Pronoun shortcut (object / prep-target position). Subjects set
+    # allow_pronoun=False — cross-sentence / back-reference pronouns as
+    # subjects are deferred past v0.1.
     if tokens[pos].kind == "WORD" and tokens[pos].value in PRONOUNS:
+        if not allow_pronoun:
+            raise TRLGrammarError(
+                f"{tokens[pos].value!r} is a pronoun and cannot appear here — subjects require a noun phrase"
+            )
         if require_identifier:
             raise TRLGrammarError(
                 f"{tokens[pos].value!r} is a pronoun and cannot be a required-identifier subject"
@@ -319,7 +348,11 @@ def _parse_clause(tokens: list[Token], pos: int, lang: dict,
     """
     subject: Optional[NounPhrase] = None
     if require_subject:
-        subject, pos = _parse_noun_phrase(tokens, pos, lang, require_identifier=True)
+        # First clause — subject required but identifier optional.
+        # Anonymous subjects like "ALL RECORD" or "NO PARTY" are valid
+        # per SPEC_grammar.md §1 BNF (noun_phrase := [ARTICLE] [ADJ]* NOUN [id]).
+        # Pronouns as subjects are deferred past v0.1.
+        subject, pos = _parse_noun_phrase(tokens, pos, lang, require_identifier=False, allow_pronoun=False)
     else:
         # Speculative parse: try noun_phrase, check that modal/verb follows.
         # If it doesn't, back up and inherit subject from prior clause.
@@ -356,37 +389,35 @@ def _parse_clause(tokens: list[Token], pos: int, lang: dict,
         raise TRLGrammarError(f"{verb!r} is a modal and cannot appear as the primary verb")
     pos += 1
 
-    # Zero or more adverb phrases: ADVERB [value]
+    # After the verb: a mix of adverbs, one optional direct object, and zero or
+    # more prep phrases, in any source order. Accept until punctuation/conjunction.
     adverbs: list[AdverbPhrase] = []
-    while tokens[pos].kind == "WORD":
-        entry = lang.get(tokens[pos].value)
-        if not (entry and entry["speech"] == "adverb"):
-            break
-        adv_word = tokens[pos].value
-        pos += 1
-        adv_value: Optional[str] = None
-        if tokens[pos].kind in ("DURATION", "INTEGER"):
-            adv_value = tokens[pos].value
-            pos += 1
-        adverbs.append(AdverbPhrase(adverb=adv_word, value=adv_value))
-
-    # Optional direct-object noun_phrase (a regular noun_phrase or a pronoun)
     obj: Optional[NounPhrase] = None
-    if tokens[pos].kind == "WORD" and tokens[pos].value not in CONJUNCTIONS:
-        first_entry = lang.get(tokens[pos].value)
-        if first_entry and first_entry["speech"] in ("noun", "article", "adjective", "pronoun"):
-            obj, pos = _parse_noun_phrase(tokens, pos, lang, require_identifier=False)
-
-    # Zero or more prepositional phrases: PREPOSITION noun_phrase
     prep_phrases: list[PrepPhrase] = []
+
     while tokens[pos].kind == "WORD" and tokens[pos].value not in CONJUNCTIONS:
-        entry = lang.get(tokens[pos].value)
-        if not (entry and entry["speech"] == "preposition"):
+        tok = tokens[pos]
+        entry = lang.get(tok.value)
+        if not entry:
             break
-        prep_word = tokens[pos].value
-        pos += 1
-        target, pos = _parse_noun_phrase(tokens, pos, lang, require_identifier=False)
-        prep_phrases.append(PrepPhrase(preposition=prep_word, target=target))
+        sp = entry["speech"]
+        if sp == "adverb":
+            adv_word = tok.value
+            pos += 1
+            adv_value: Optional[str] = None
+            if tokens[pos].kind in ("DURATION", "INTEGER"):
+                adv_value = tokens[pos].value
+                pos += 1
+            adverbs.append(AdverbPhrase(adverb=adv_word, value=adv_value))
+        elif sp == "preposition":
+            prep_word = tok.value
+            pos += 1
+            target, pos = _parse_noun_phrase(tokens, pos, lang, require_identifier=False)
+            prep_phrases.append(PrepPhrase(preposition=prep_word, target=target))
+        elif sp in ("noun", "article", "adjective", "pronoun") and obj is None:
+            obj, pos = _parse_noun_phrase(tokens, pos, lang, require_identifier=False)
+        else:
+            break
 
     return Clause(
         subject=subject,
@@ -396,7 +427,35 @@ def _parse_clause(tokens: list[Token], pos: int, lang: dict,
     ), pos
 
 
+def _parse_definition(tokens: list[Token], pos: int, lang: dict) -> tuple[Sentence, int]:
+    """Parse `DEFINE "name" AS noun_phrase .`. Caller has NOT consumed DEFINE yet."""
+    assert tokens[pos].kind == "WORD" and tokens[pos].value == "DEFINE"
+    pos += 1
+    if tokens[pos].kind != "STRING":
+        raise TRLSyntaxError(f"DEFINE requires a quoted string name, got {tokens[pos]!r}")
+    name = tokens[pos].value
+    pos += 1
+    if tokens[pos].kind != "WORD" or tokens[pos].value != "AS":
+        raise TRLSyntaxError(f"expected 'AS' after DEFINE name, got {tokens[pos]!r}")
+    pos += 1
+    np, pos = _parse_noun_phrase(tokens, pos, lang, require_identifier=False)
+    if tokens[pos].kind != "PUNCT" or tokens[pos].value != ".":
+        raise TRLSyntaxError(f"expected '.' after DEFINE clause, got {tokens[pos]!r}")
+    pos += 1
+    return Sentence(definition=Definition(name=name, noun_phrase=np)), pos
+
+
 def _parse_sentence(tokens: list[Token], pos: int, lang: dict) -> tuple[Sentence, int]:
+    # DEFINE definition — sentence-level
+    if tokens[pos].kind == "WORD" and tokens[pos].value == "DEFINE":
+        return _parse_definition(tokens, pos, lang)
+
+    # WHEREAS preamble — sentence starts with WHEREAS
+    preamble = False
+    if tokens[pos].kind == "WORD" and tokens[pos].value == "WHEREAS":
+        preamble = True
+        pos += 1
+
     clauses: list[Clause] = []
     conjunctions: list[str] = []
 
@@ -416,11 +475,11 @@ def _parse_sentence(tokens: list[Token], pos: int, lang: dict) -> tuple[Sentence
     if tokens[pos].kind != "PUNCT" or tokens[pos].value != ".":
         raise TRLSyntaxError(
             f"expected '.' at position {pos}, got {tokens[pos]!r}. "
-            "Remaining v0.1 grammar (prepositions / pronouns / literals) lands in later PRs."
+            "Remaining v0.1 grammar (noun conjunctions, DATE literals) lands in later PRs."
         )
     pos += 1
 
-    return Sentence(clauses=clauses, conjunctions=conjunctions), pos
+    return Sentence(clauses=clauses, conjunctions=conjunctions, preamble=preamble), pos
 
 
 # ─── Compile (TRL → TRUG) ────────────────────────────────────────────
@@ -475,6 +534,23 @@ def compile(src_or_sentences, lang: Optional[dict] = None) -> dict:
         return node_id
 
     for sentence in sentences:
+        # DEFINE sentence: emit a DEFINED_TERM node, no ops/edges
+        if sentence.definition is not None:
+            d = sentence.definition
+            # Build property dict from the noun_phrase (adjectives, article)
+            def_props: dict = {"defined": True, "name": d.name}
+            if d.noun_phrase.article:
+                def_props["scope"] = {"quantifier": d.noun_phrase.article}
+            for adj in d.noun_phrase.adjectives:
+                sub = classify(adj, lang)["subcategory"]
+                def_props.setdefault(sub, adj)
+            nodes.append({
+                "id": d.name,
+                "type": d.noun_phrase.noun,
+                "properties": def_props,
+            })
+            continue
+
         inherited_subject: Optional[NounPhrase] = None
         clause_op_ids: list[str] = []
         prev_op_id: Optional[str] = None
@@ -513,6 +589,8 @@ def compile(src_or_sentences, lang: Optional[dict] = None) -> dict:
                      if a.value is not None else {"adverb": a.adverb})
                     for a in clause.verb_phrase.adverbs
                 ]
+            if sentence.preamble:
+                op_props["preamble"] = True
             nodes.append({"id": op_id, "type": "TRANSFORM", "properties": op_props})
 
             relation = clause.verb_phrase.modal if clause.verb_phrase.modal else "EXECUTES"
@@ -610,40 +688,72 @@ def _render_clause(op_id: str, op_nodes: dict, edges: list[dict], nodes_by_id: d
         raise TRLGrammarError(f"unknown subject→operation relation {modal!r}")
     parts.append(op["properties"]["operation"])
 
-    # Adverbs — stored on op.properties.adverbs as ordered list
+    preposition_words = {w for w, e in lang.items() if e["speech"] == "preposition"}
+
+    # Canonical post-verb order:
+    #   1. direct object (ACTS_ON edge, if any)
+    #   2. adverbs (op.properties.adverbs, in stored order)
+    #   3. preposition phrases (outgoing preposition edges, in edge-list order)
+    # This matches SPEC_examples.md: adverbs after the object when one is present
+    # (Examples 7, 15, 18); after the verb directly when there is none (Example 3).
+
+    # 1. Direct object
+    for e in edges:
+        if e["from_id"] != op_id or e.get("relation") != "ACTS_ON":
+            continue
+        pronoun = (e.get("properties") or {}).get("pronoun")
+        if pronoun:
+            parts.append(pronoun)
+        else:
+            obj_node = nodes_by_id.get(e["to_id"])
+            if obj_node is not None:
+                parts.append(_render_noun_phrase(obj_node, lang=lang))
+        break  # at most one direct object per v0.1
+
+    # 2. Adverbs
     for adv in op["properties"].get("adverbs", []):
         parts.append(adv["adverb"])
         if "value" in adv and adv["value"] is not None:
             parts.append(adv["value"])
 
-    # Preposition set from the language TRUG (what relations count as prep edges)
-    preposition_words = {w for w, e in lang.items() if e["speech"] == "preposition"}
-
-    # Outgoing edges from this op, in list order. ACTS_ON renders as a bare
-    # direct object; preposition edges render as "PREP target_noun_phrase".
-    # Pronoun edges carry `properties.pronoun` and render that word instead.
+    # 3. Preposition phrases
     for e in edges:
         if e["from_id"] != op_id:
             continue
         rel = e.get("relation")
+        if rel not in preposition_words:
+            continue
         pronoun = (e.get("properties") or {}).get("pronoun")
-        if rel == "ACTS_ON":
-            if pronoun:
-                parts.append(pronoun)
-            else:
-                obj_node = nodes_by_id.get(e["to_id"])
-                if obj_node is not None:
-                    parts.append(_render_noun_phrase(obj_node, lang=lang))
-        elif rel in preposition_words:
-            parts.append(rel)
-            if pronoun:
-                parts.append(pronoun)
-            else:
-                target_node = nodes_by_id.get(e["to_id"])
-                if target_node is not None:
-                    parts.append(_render_noun_phrase(target_node, lang=lang))
+        parts.append(rel)
+        if pronoun:
+            parts.append(pronoun)
+        else:
+            target_node = nodes_by_id.get(e["to_id"])
+            if target_node is not None:
+                parts.append(_render_noun_phrase(target_node, lang=lang))
 
     return " ".join(parts)
+
+
+def _render_define(node: dict, lang: dict) -> str:
+    """Render a DEFINED_TERM node back to its `DEFINE "name" AS np .` form."""
+    props = node.get("properties") or {}
+    name = props.get("name", node["id"])
+    parts = [f'DEFINE "{name}" AS']
+    scope = (props.get("scope") or {}).get("quantifier")
+    if scope:
+        parts.append(scope)
+    for sub in ["quantity", "priority", "state", "access", "type"]:
+        val = props.get(sub)
+        if val is None:
+            continue
+        if sub == "type" and isinstance(val, str) and val.isupper() \
+                and not lang.get(val, {}).get("speech") == "adjective":
+            continue
+        if isinstance(val, str):
+            parts.append(val)
+    parts.append(node["type"])
+    return " ".join(parts) + "."
 
 
 def decompile(graph: dict, lang: Optional[dict] = None) -> str:
@@ -666,36 +776,47 @@ def decompile(graph: dict, lang: Optional[dict] = None) -> str:
             conj_next[e["from_id"]] = (rel, e["to_id"])
             conj_targets.add(e["to_id"])
 
-    # Roots of sentences = ops with no incoming conjunction edge.
-    # Iterate in op-1, op-2, ... order for determinism.
-    def op_order_key(op_id: str) -> int:
-        try:
-            return int(op_id.split("-", 1)[1])
-        except (IndexError, ValueError):
-            return 10**9
-
     sentences_out: list[str] = []
-    visited: set[str] = set()
-    for op_id in sorted(op_nodes.keys(), key=op_order_key):
-        if op_id in conj_targets or op_id in visited:
+    visited_ops: set[str] = set()
+
+    # Walk nodes in graph order. DEFINED_TERM nodes emit as DEFINE sentences.
+    # Operation nodes that are not conjunction-targets start a sentence chain.
+    for node in graph["nodes"]:
+        if node.get("properties", {}).get("defined") is True:
+            sentences_out.append(_render_define(node, lang))
             continue
-        # Walk the conjunction chain from this root
-        parts: list[str] = [_render_clause(op_id, op_nodes, edges, nodes_by_id, lang,
-                                            include_subject=True)]
-        visited.add(op_id)
+        if node.get("type") != "TRANSFORM":
+            continue
+        if node.get("properties", {}).get("operation") is None:
+            continue
+        op_id = node["id"]
+        if op_id in visited_ops or op_id in conj_targets:
+            continue
+
+        preamble = bool(node["properties"].get("preamble"))
+        parts: list[str] = []
+        if preamble:
+            parts.append("WHEREAS")
+        parts.append(_render_clause(op_id, op_nodes, edges, nodes_by_id, lang,
+                                     include_subject=True))
+        visited_ops.add(op_id)
         cur = op_id
-        # Track last-clause's subject to decide whether to reprint it
         prev_subject_id = next(e["from_id"] for e in edges
                                 if e["to_id"] == cur and e.get("relation") in MODALS | {"EXECUTES"})
         while cur in conj_next:
             conj, nxt = conj_next[cur]
             nxt_subject_id = next(e["from_id"] for e in edges
                                    if e["to_id"] == nxt and e.get("relation") in MODALS | {"EXECUTES"})
-            include_subject = nxt_subject_id != prev_subject_id
+            # Canonical form: omit the subject only for INHERITING_CONJUNCTIONS
+            # (THEN/FINALLY/ELSE — sequential/continuation). AND/OR/UNLESS/etc.
+            # always repeat the subject, matching SPEC_examples.md conventions.
+            same_subject = nxt_subject_id == prev_subject_id
+            inherit = conj in INHERITING_CONJUNCTIONS and same_subject
+            include_subject = not inherit
             parts.append(conj)
             parts.append(_render_clause(nxt, op_nodes, edges, nodes_by_id, lang,
                                           include_subject=include_subject))
-            visited.add(nxt)
+            visited_ops.add(nxt)
             prev_subject_id = nxt_subject_id
             cur = nxt
         sentences_out.append(" ".join(parts) + ".")
