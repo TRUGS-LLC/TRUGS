@@ -204,6 +204,7 @@ class VerbPhrase:
 class PrepPhrase:
     preposition: str               # e.g. "TO"
     target: NounPhrase
+    extra_targets: list[NounPhrase] = field(default_factory=list)  # AND-chained: TO a AND b AND c
 
 
 @dataclass
@@ -211,6 +212,7 @@ class Clause:
     subject: Optional[NounPhrase]      # None means inherit from prior clause
     verb_phrase: VerbPhrase
     object: Optional[NounPhrase] = None
+    extra_objects: list[NounPhrase] = field(default_factory=list)  # AND-chained: A AND B AND C
     prep_phrases: list["PrepPhrase"] = field(default_factory=list)
     value_arg: Optional[str] = None    # trailing INTEGER argument (e.g. "10" in TAKE RESULT 10)
 
@@ -349,6 +351,41 @@ def _parse_noun_phrase(tokens: list[Token], pos: int, lang: dict,
     return NounPhrase(noun=noun, identifier=identifier, article=article, adjectives=adjectives), pos
 
 
+def _peek_and_noun_phrase(tokens: list[Token], pos: int, lang: dict) -> bool:
+    """True if the current token is AND introducing a noun_list extension.
+
+    Disambiguates noun_list AND (binds within prep_phrase / object list) from
+    clause-level AND (joins clauses with verbs). Algorithm: speculatively parse
+    a noun_phrase after the AND; if what follows that noun_phrase is a modal
+    or verb, the AND is clause-level (the noun_phrase is the next clause's
+    subject). Otherwise it's noun_list AND.
+    """
+    if pos >= len(tokens) or tokens[pos].kind != "WORD" or tokens[pos].value != "AND":
+        return False
+    nxt = tokens[pos + 1] if pos + 1 < len(tokens) else None
+    if nxt is None or nxt.kind != "WORD":
+        return False
+    if nxt.value in MODALS or nxt.value in CONJUNCTIONS:
+        return False
+    e = lang.get(nxt.value)
+    if not e or e["speech"] not in ("noun", "article", "adjective", "pronoun"):
+        return False
+    # Speculatively parse the noun_phrase starting at pos+1; check the
+    # follow-on token. If modal/verb, it's clause-level AND.
+    try:
+        _, after = _parse_noun_phrase(tokens, pos + 1, lang, require_identifier=False)
+    except TRLError:
+        return False
+    follow = tokens[after] if after < len(tokens) else None
+    if follow is not None and follow.kind == "WORD":
+        if follow.value in MODALS:
+            return False
+        f_entry = lang.get(follow.value)
+        if f_entry and f_entry["speech"] == "verb":
+            return False
+    return True
+
+
 def _parse_clause(tokens: list[Token], pos: int, lang: dict,
                    require_subject: bool) -> tuple[Clause, int]:
     """Parse one clause: [subject] [modal] VERB [object].
@@ -402,6 +439,7 @@ def _parse_clause(tokens: list[Token], pos: int, lang: dict,
     # more prep phrases, in any source order. Accept until punctuation/conjunction.
     adverbs: list[AdverbPhrase] = []
     obj: Optional[NounPhrase] = None
+    extra_objects: list[NounPhrase] = []
     prep_phrases: list[PrepPhrase] = []
     value_arg: Optional[str] = None
 
@@ -434,9 +472,20 @@ def _parse_clause(tokens: list[Token], pos: int, lang: dict,
             prep_word = tok.value
             pos += 1
             target, pos = _parse_noun_phrase(tokens, pos, lang, require_identifier=False)
-            prep_phrases.append(PrepPhrase(preposition=prep_word, target=target))
+            extras: list[NounPhrase] = []
+            # AND-chained noun_list within a prep_phrase: TO a AND b AND c
+            while _peek_and_noun_phrase(tokens, pos, lang):
+                pos += 1  # consume AND
+                extra, pos = _parse_noun_phrase(tokens, pos, lang, require_identifier=False)
+                extras.append(extra)
+            prep_phrases.append(PrepPhrase(preposition=prep_word, target=target, extra_targets=extras))
         elif sp in ("noun", "article", "adjective", "pronoun") and obj is None:
             obj, pos = _parse_noun_phrase(tokens, pos, lang, require_identifier=False)
+            # AND-chained object list: MERGE A AND B AND C
+            while _peek_and_noun_phrase(tokens, pos, lang):
+                pos += 1  # consume AND
+                extra, pos = _parse_noun_phrase(tokens, pos, lang, require_identifier=False)
+                extra_objects.append(extra)
         else:
             break
 
@@ -444,6 +493,7 @@ def _parse_clause(tokens: list[Token], pos: int, lang: dict,
         subject=subject,
         verb_phrase=VerbPhrase(verb=verb, modal=modal, adverbs=adverbs),
         object=obj,
+        extra_objects=extra_objects,
         prep_phrases=prep_phrases,
         value_arg=value_arg,
     ), pos
@@ -631,27 +681,39 @@ def compile(src_or_sentences, lang: Optional[dict] = None) -> dict:
             relation = clause.verb_phrase.modal if clause.verb_phrase.modal else "EXECUTES"
             edges.append({"from_id": subj_id, "to_id": op_id, "relation": relation})
 
-            if clause.object is not None:
-                if clause.object.pronoun:
-                    target_id = _resolve_pronoun(clause.object, subj_id)
-                    edges.append({
-                        "from_id": op_id, "to_id": target_id, "relation": "ACTS_ON",
-                        "properties": {"pronoun": clause.object.pronoun},
-                    })
+            chain_counter = 0
+
+            def _emit_target_edge(np: NounPhrase, relation: str, chain_id: Optional[int]) -> None:
+                edge_props: dict = {}
+                if np.pronoun:
+                    target_id = _resolve_pronoun(np, subj_id)
+                    edge_props["pronoun"] = np.pronoun
                 else:
-                    obj_id = _ensure_noun_node(clause.object)
-                    edges.append({"from_id": op_id, "to_id": obj_id, "relation": "ACTS_ON"})
+                    target_id = _ensure_noun_node(np)
+                if chain_id is not None:
+                    edge_props["chain_id"] = chain_id
+                edge: dict = {"from_id": op_id, "to_id": target_id, "relation": relation}
+                if edge_props:
+                    edge["properties"] = edge_props
+                edges.append(edge)
+
+            if clause.object is not None:
+                cid: Optional[int] = None
+                if clause.extra_objects:
+                    chain_counter += 1
+                    cid = chain_counter
+                _emit_target_edge(clause.object, "ACTS_ON", cid)
+                for extra in clause.extra_objects:
+                    _emit_target_edge(extra, "ACTS_ON", cid)
 
             for pp in clause.prep_phrases:
-                if pp.target.pronoun:
-                    target_id = _resolve_pronoun(pp.target, subj_id)
-                    edges.append({
-                        "from_id": op_id, "to_id": target_id, "relation": pp.preposition,
-                        "properties": {"pronoun": pp.target.pronoun},
-                    })
-                else:
-                    target_id = _ensure_noun_node(pp.target)
-                    edges.append({"from_id": op_id, "to_id": target_id, "relation": pp.preposition})
+                cid = None
+                if pp.extra_targets:
+                    chain_counter += 1
+                    cid = chain_counter
+                _emit_target_edge(pp.target, pp.preposition, cid)
+                for extra in pp.extra_targets:
+                    _emit_target_edge(extra, pp.preposition, cid)
 
             clause_op_ids.append(op_id)
             prev_op_id = op_id
@@ -732,18 +794,25 @@ def _render_clause(op_id: str, op_nodes: dict, edges: list[dict], nodes_by_id: d
     # This matches SPEC_examples.md: adverbs after the object when one is present
     # (Examples 7, 15, 18); after the verb directly when there is none (Example 3).
 
-    # 1. Direct object
-    for e in edges:
-        if e["from_id"] != op_id or e.get("relation") != "ACTS_ON":
-            continue
+    def _render_target(e: dict) -> str:
         pronoun = (e.get("properties") or {}).get("pronoun")
         if pronoun:
-            parts.append(pronoun)
-        else:
-            obj_node = nodes_by_id.get(e["to_id"])
-            if obj_node is not None:
-                parts.append(_render_noun_phrase(obj_node, lang=lang))
-        break  # at most one direct object per v0.1
+            return pronoun
+        node = nodes_by_id.get(e["to_id"])
+        return _render_noun_phrase(node, lang=lang) if node else ""
+
+    # 1. Direct object(s) — possibly AND-chained via chain_id
+    obj_edges = [e for e in edges
+                 if e["from_id"] == op_id and e.get("relation") == "ACTS_ON"]
+    if obj_edges:
+        first = obj_edges[0]
+        parts.append(_render_target(first))
+        cid = (first.get("properties") or {}).get("chain_id")
+        if cid is not None:
+            for e in obj_edges[1:]:
+                if (e.get("properties") or {}).get("chain_id") == cid:
+                    parts.append("AND")
+                    parts.append(_render_target(e))
 
     # 2. Adverbs
     for adv in op["properties"].get("adverbs", []):
@@ -751,21 +820,28 @@ def _render_clause(op_id: str, op_nodes: dict, edges: list[dict], nodes_by_id: d
         if "value" in adv and adv["value"] is not None:
             parts.append(adv["value"])
 
-    # 3. Preposition phrases
+    # 3. Preposition phrases — group AND-chained noun_lists by chain_id
+    rendered_chain_ids: set[int] = set()
     for e in edges:
         if e["from_id"] != op_id:
             continue
         rel = e.get("relation")
         if rel not in preposition_words:
             continue
-        pronoun = (e.get("properties") or {}).get("pronoun")
+        cid = (e.get("properties") or {}).get("chain_id")
+        if cid is not None and cid in rendered_chain_ids:
+            continue
         parts.append(rel)
-        if pronoun:
-            parts.append(pronoun)
-        else:
-            target_node = nodes_by_id.get(e["to_id"])
-            if target_node is not None:
-                parts.append(_render_noun_phrase(target_node, lang=lang))
+        parts.append(_render_target(e))
+        if cid is not None:
+            rendered_chain_ids.add(cid)
+            for e2 in edges:
+                if (e2["from_id"] == op_id
+                        and e2.get("relation") == rel
+                        and (e2.get("properties") or {}).get("chain_id") == cid
+                        and e2 is not e):
+                    parts.append("AND")
+                    parts.append(_render_target(e2))
 
     # 4. Trailing integer argument (TAKE RESULT 10, BATCH RESULT 100)
     if op["properties"].get("value_arg") is not None:

@@ -479,6 +479,43 @@ def test_spec_example_18_verbatim() -> None:
     assert trl.compile(back) == g
 
 
+# ─── v0.2 — AND-chained noun lists ────────────────────────────────────
+
+def test_object_and_chain_two_items() -> None:
+    g = trl.compile("PARTY analyst SHALL READ DATA AND RECORD.")
+    acts_on = [e for e in g["edges"] if e.get("relation") == "ACTS_ON"]
+    assert len(acts_on) == 2
+    # Both should share the same chain_id
+    cid = (acts_on[0].get("properties") or {}).get("chain_id")
+    assert cid is not None
+    assert (acts_on[1].get("properties") or {}).get("chain_id") == cid
+
+
+def test_object_and_chain_three_items_with_prep() -> None:
+    src = "PARTY system SHALL NEST MODULE auth AND MODULE data AND MODULE search TO NAMESPACE api-system."
+    g = trl.compile(src)
+    back = trl.decompile(g)
+    assert back == src
+    assert trl.compile(back) == g
+
+
+def test_prep_noun_list_and_chain() -> None:
+    src = "PARTY a SHALL SPLIT THE MESSAGE TO AGENT worker-a AND AGENT worker-b."
+    g = trl.compile(src)
+    back = trl.decompile(g)
+    assert back == src
+    to_edges = [e for e in g["edges"] if e.get("relation") == "TO"]
+    assert len(to_edges) == 2
+
+
+def test_clause_level_and_still_works() -> None:
+    """Smarter peek must not break clause-level AND."""
+    src = "PARTY system SHALL FILTER DATA AND PARTY system SHALL VALIDATE RECORD."
+    g = trl.compile(src)
+    back = trl.decompile(g)
+    assert back == src
+
+
 # ─── v0.1h — Sweep all SPEC_examples.md examples ─────────────────────
 
 import re
@@ -486,10 +523,12 @@ from pathlib import Path
 
 SPEC_EXAMPLES_PATH = Path(__file__).resolve().parent.parent / "TRUGS_LANGUAGE" / "SPEC_examples.md"
 
-# Examples that v0.1 cannot round-trip yet — each tracked for follow-on:
-#   7, 24 — uses DEADLINE / PRECEDENT (not in 190-word vocabulary)
-#   9, 13, 14, 20, 23, 27, 28 — uses AND-chained noun lists / prep phrases
-KNOWN_DEFERRED = {7, 9, 13, 14, 20, 23, 24, 27, 28}
+# Examples this compiler version cannot round-trip yet — each tracked for follow-on:
+#   7, 24 — uses DEADLINE / PRECEDENT (not in 190-word vocabulary, TRUGS-DEV#1542)
+#   9, 13, 14, 28 — edge-case spec patterns (single-clause EXCEPT, INPUT pronoun
+#      semantics, REMEDY-as-subject, FEEDS-as-verb-in-WHEREAS) — own follow-ons
+#   v0.2 (TRUGS-DEV#1541) unlocked AND-chained noun lists for #20, #23, #27
+KNOWN_DEFERRED = {7, 9, 13, 14, 24, 28}
 
 
 def _extract_examples():
@@ -524,7 +563,7 @@ def test_spec_examples_in_scope_round_trip() -> None:
 
 
 def test_spec_examples_coverage_summary() -> None:
-    """Sanity assertion: at least 19 of the 28 examples round-trip in v0.1."""
+    """Sanity assertion: at least 22 of the 28 examples round-trip post-v0.2."""
     examples = _extract_examples()
     passed = 0
     for n, _, body in examples:
@@ -535,7 +574,7 @@ def test_spec_examples_coverage_summary() -> None:
                 passed += 1
         except trl.TRLError:
             pass
-    assert passed >= 19, f"only {passed} examples round-trip; expected ≥ 19"
+    assert passed >= 22, f"only {passed} examples round-trip; expected ≥ 22"
 
 
 # ─── Decompile ───────────────────────────────────────────────────────
