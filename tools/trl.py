@@ -4,17 +4,25 @@ TRL (TRUGS Language) is a closed 190-word subset of English. Every valid
 sentence round-trips through a TRUG graph with no information loss beyond
 sugar tokens. This module implements that round-trip.
 
-## What's implemented in v0.1
+## What's implemented
 
-Minimum valid sentence form only, per SPEC_grammar.md §1.2:
+Incrementally, toward #1539 full v0.1 (round-trip all 30 canonical
+examples in SPEC_examples.md):
 
-    SUBJECT_NOUN identifier VERB .
+1. **v0.1a** (initial) — minimum valid sentence: `SUBJ_NOUN id VERB .`
+2. **v0.1b** (this slice) — modals + single object phrase:
+   `[SUBJ_NOUN id] [modal] VERB [article] [adj]* NOUN [id] .`
+   - Modals: SHALL, MAY, SHALL_NOT
+   - Articles on objects: ALL, EACH, EVERY, ANY, SOME, A, NO, NONE, THE, THIS
+   - Stacked adjectives preceding the object noun
+   - Anonymous (bare) object nouns get auto-generated IDs: `{noun}-N`
+   - Identified object nouns work (e.g. `PARTY server`)
+   - Covers SPEC_examples.md Example 1 (`Simple obligation`)
 
-Example: `PARTY system VALIDATE.`
-
-Tokenizer, word classifier (backed by language.trug.json), and round-trip
-for this form are complete. Subsequent PRs expand coverage per
-SPEC_grammar.md §1 BNF and the 30 canonical examples in SPEC_examples.md.
+Still not implemented (future PRs on this branch or subsequent):
+conjunctions (THEN/AND/OR/UNLESS/etc.), prepositions (TO/FROM/CONTAINS),
+pronouns (RESULT/SELF), adverbs + value literals, WHEREAS preambles,
+DEFINE definitions, multi-sentence programs with cross-references.
 
 ## Not yet implemented (tracked in TRUGS-DEVELOPMENT#1539 / #1540)
 
@@ -143,18 +151,24 @@ def classify(word: str, lang: dict) -> dict:
 class NounPhrase:
     noun: str                      # e.g. "PARTY"
     identifier: Optional[str] = None  # e.g. "system"
+    article: Optional[str] = None     # "ALL" | "EACH" | "NO" | ...
+    adjectives: list[str] = field(default_factory=list)  # ["PENDING", "CRITICAL"]
 
 
 @dataclass
 class VerbPhrase:
     verb: str                      # e.g. "VALIDATE"
-    modal: Optional[str] = None    # "SHALL" | "MAY" | "SHALL_NOT" — v0.2+
+    modal: Optional[str] = None    # "SHALL" | "MAY" | "SHALL_NOT"
 
 
 @dataclass
 class Sentence:
     subject: NounPhrase
     verb_phrase: VerbPhrase
+    object: Optional[NounPhrase] = None
+
+
+MODALS = {"SHALL", "MAY", "SHALL_NOT"}
 
 
 # ─── Errors ───────────────────────────────────────────────────────────
@@ -195,19 +209,56 @@ def parse(src: str, lang: Optional[dict] = None) -> list[Sentence]:
     return sentences
 
 
-def _parse_sentence(tokens: list[Token], pos: int, lang: dict) -> tuple[Sentence, int]:
-    # Subject: WORD (noun) + IDENTIFIER
+def _parse_noun_phrase(tokens: list[Token], pos: int, lang: dict,
+                        require_identifier: bool = False) -> tuple[NounPhrase, int]:
+    """Parse [article] [adjective]* NOUN [identifier]."""
+    article: Optional[str] = None
+    adjectives: list[str] = []
+
+    # Optional article
+    if tokens[pos].kind == "WORD":
+        entry = lang.get(tokens[pos].value)
+        if entry and entry["speech"] == "article":
+            article = tokens[pos].value
+            pos += 1
+
+    # Zero or more adjectives
+    while tokens[pos].kind == "WORD":
+        entry = lang.get(tokens[pos].value)
+        if entry and entry["speech"] == "adjective":
+            adjectives.append(tokens[pos].value)
+            pos += 1
+        else:
+            break
+
+    # Required noun
     if tokens[pos].kind != "WORD":
         raise TRLSyntaxError(f"expected noun at position {pos}, got {tokens[pos]!r}")
     noun = tokens[pos].value
     entry = classify(noun, lang)
     if entry["speech"] != "noun":
-        raise TRLGrammarError(f"{noun!r} is a {entry['speech']}, not a noun — expected subject")
+        raise TRLGrammarError(f"{noun!r} is a {entry['speech']}, not a noun")
     pos += 1
 
+    # Optional identifier
     identifier: Optional[str] = None
     if tokens[pos].kind == "IDENTIFIER":
         identifier = tokens[pos].value
+        pos += 1
+    elif require_identifier:
+        raise TRLGrammarError(f"{noun!r} requires an identifier as a subject")
+
+    return NounPhrase(noun=noun, identifier=identifier, article=article, adjectives=adjectives), pos
+
+
+def _parse_sentence(tokens: list[Token], pos: int, lang: dict) -> tuple[Sentence, int]:
+    # Subject noun_phrase (identifier required)
+    subject, pos = _parse_noun_phrase(tokens, pos, lang, require_identifier=True)
+
+    # Optional modal
+    modal: Optional[str] = None
+    if tokens[pos].kind == "WORD" and tokens[pos].value in MODALS:
+        modal = tokens[pos].value
         pos += 1
 
     # Verb
@@ -217,20 +268,29 @@ def _parse_sentence(tokens: list[Token], pos: int, lang: dict) -> tuple[Sentence
     verb_entry = classify(verb, lang)
     if verb_entry["speech"] != "verb":
         raise TRLGrammarError(f"{verb!r} is a {verb_entry['speech']}, not a verb")
+    if verb in MODALS:
+        raise TRLGrammarError(f"{verb!r} is a modal and cannot appear as the primary verb")
     pos += 1
+
+    # Optional object noun_phrase
+    obj: Optional[NounPhrase] = None
+    if tokens[pos].kind == "WORD" and tokens[pos].value != "." and tokens[pos].kind != "EOF":
+        # Peek: if next WORD is a noun/article/adjective, parse as object
+        first_w = tokens[pos].value
+        first_entry = lang.get(first_w)
+        if first_entry and first_entry["speech"] in ("noun", "article", "adjective"):
+            obj, pos = _parse_noun_phrase(tokens, pos, lang, require_identifier=False)
 
     # Terminator
     if tokens[pos].kind != "PUNCT" or tokens[pos].value != ".":
         raise TRLSyntaxError(
             f"expected '.' at position {pos}, got {tokens[pos]!r}. "
-            "v0.1 supports only SUBJECT VERB. form — complex sentences land in later PRs."
+            "This slice supports SUBJECT [modal] VERB [object] . — "
+            "conjunctions/prepositions/pronouns land in later PRs."
         )
     pos += 1
 
-    return Sentence(
-        subject=NounPhrase(noun=noun, identifier=identifier),
-        verb_phrase=VerbPhrase(verb=verb),
-    ), pos
+    return Sentence(subject=subject, verb_phrase=VerbPhrase(verb=verb, modal=modal), object=obj), pos
 
 
 # ─── Compile (TRL → TRUG) ────────────────────────────────────────────
@@ -249,18 +309,44 @@ def compile(src_or_sentences, lang: Optional[dict] = None) -> dict:
     nodes: list[dict] = []
     edges: list[dict] = []
     op_counter = 0
+    anon_counters: dict[str, int] = {}
+
+    def _ensure_noun_node(np: NounPhrase) -> str:
+        """Emit a node for a noun_phrase, return its id. Idempotent by id."""
+        if np.identifier:
+            node_id = np.identifier
+        else:
+            anon_counters[np.noun] = anon_counters.get(np.noun, 0) + 1
+            node_id = f"{np.noun.lower()}-{anon_counters[np.noun]}"
+
+        # Build properties from article + adjectives
+        props: dict = {}
+        if np.article:
+            props["scope"] = {"quantifier": np.article}
+        if np.adjectives:
+            # Group adjectives by their subcategory (state/type/priority/...) per §3
+            adj_groups: dict[str, list[str]] = {}
+            for adj in np.adjectives:
+                sub = classify(adj, lang)["subcategory"]
+                adj_groups.setdefault(sub, []).append(adj)
+            for sub, vals in adj_groups.items():
+                props[sub] = vals[0] if len(vals) == 1 else vals
+
+        # Find existing node; if present and identified, merge compatibly
+        existing = next((n for n in nodes if n["id"] == node_id), None)
+        if existing is None:
+            node: dict = {"id": node_id, "type": np.noun}
+            if props:
+                node["properties"] = props
+            nodes.append(node)
+        elif props:
+            # Only merge properties if node is identified (re-used subject)
+            existing.setdefault("properties", {}).update(props)
+        return node_id
 
     for sentence in sentences:
-        subj_id = sentence.subject.identifier
-        if subj_id is None:
-            raise TRLGrammarError(
-                "v0.1 requires an identifier on the subject noun (e.g. 'PARTY system' not 'PARTY')"
-            )
-        # §3: NOUN + identifier -> node
-        if not any(n["id"] == subj_id for n in nodes):
-            nodes.append({"id": subj_id, "type": sentence.subject.noun})
+        subj_id = _ensure_noun_node(sentence.subject)
 
-        # §3: VERB -> operation node (type="TRANSFORM" per spec literal)
         op_counter += 1
         op_id = f"op-{op_counter}"
         nodes.append({
@@ -272,49 +358,103 @@ def compile(src_or_sentences, lang: Optional[dict] = None) -> dict:
             },
         })
 
-        # Subject -> operation edge. v0.1: unmodaled uses "EXECUTES"
         relation = sentence.verb_phrase.modal if sentence.verb_phrase.modal else "EXECUTES"
         edges.append({"from_id": subj_id, "to_id": op_id, "relation": relation})
+
+        if sentence.object is not None:
+            obj_id = _ensure_noun_node(sentence.object)
+            # Operation → object edge. §3: verb-object relation.
+            # v0.1 convention: unnamed edge uses relation "ACTS_ON" until a
+            # preposition appears between verb and object.
+            edges.append({"from_id": op_id, "to_id": obj_id, "relation": "ACTS_ON"})
 
     return {"nodes": nodes, "edges": edges}
 
 
 # ─── Decompile (TRUG → TRL) ───────────────────────────────────────────
 
+def _render_noun_phrase(node: dict, anonymous: bool, lang: dict) -> str:
+    """Render a noun node back to its TRL form: [article] [adj]* NOUN [id]."""
+    parts: list[str] = []
+    props = node.get("properties") or {}
+    scope = props.get("scope") or {}
+    article = scope.get("quantifier")
+    if article:
+        parts.append(article)
+
+    # Adjectives: reconstruct in §2.5 fixed order
+    # [QUANTITY] [PRIORITY] [STATE] [ACCESS] [TYPE]
+    adj_order = ["quantity", "priority", "state", "access", "type"]
+    for sub in adj_order:
+        vals = props.get(sub)
+        if vals is None:
+            continue
+        # Skip reserved keys that aren't adjectives (e.g. 'type' vs adj subcategory 'type')
+        if sub == "type" and isinstance(vals, str) and vals.isupper() and not lang.get(vals, {}).get("speech") == "adjective":
+            continue
+        if isinstance(vals, str):
+            parts.append(vals)
+        elif isinstance(vals, list):
+            parts.extend(vals)
+
+    parts.append(node["type"])
+    if not anonymous:
+        parts.append(node["id"])
+    return " ".join(parts)
+
+
 def decompile(graph: dict, lang: Optional[dict] = None) -> str:
     """Turn a TRUG graph fragment back into canonical TRL source.
 
-    For v0.1 minimum-form graphs only. Round-trip guarantee per
-    SPEC_grammar.md §3: `compile(decompile(g)) == g`.
+    Round-trip guarantee: `compile(decompile(g)) == g` for graphs produced
+    by this compiler.
     """
     if lang is None:
         lang = load_language()
 
-    # Find operation nodes (type TRANSFORM with properties.operation)
+    nodes_by_id = {n["id"]: n for n in graph["nodes"]}
     op_nodes = [n for n in graph["nodes"] if n.get("type") == "TRANSFORM"
                 and n.get("properties", {}).get("operation")]
-    # Map each op to its incoming subject edge
     op_by_id = {n["id"]: n for n in op_nodes}
-    subj_nodes = {n["id"]: n for n in graph["nodes"] if n.get("type") != "TRANSFORM"}
+
+    # Build subject and object edges per op
+    subj_edge_by_op: dict[str, dict] = {}
+    obj_edge_by_op: dict[str, dict] = {}
+    for e in graph["edges"]:
+        if e["to_id"] in op_by_id:
+            subj_edge_by_op[e["to_id"]] = e
+        elif e["from_id"] in op_by_id and e.get("relation") == "ACTS_ON":
+            obj_edge_by_op[e["from_id"]] = e
 
     sentences_out: list[str] = []
-    # Stable order: by op index (op-1, op-2, ...) then fallback to node order
-    for edge in graph["edges"]:
-        op = op_by_id.get(edge["to_id"])
-        subj = subj_nodes.get(edge["from_id"])
-        if op is None or subj is None:
+    for op_id, op in op_by_id.items():
+        subj_edge = subj_edge_by_op.get(op_id)
+        if subj_edge is None:
             continue
-        subj_noun = subj["type"]
-        subj_id = subj["id"]
+        subj_node = nodes_by_id.get(subj_edge["from_id"])
+        if subj_node is None:
+            continue
+
+        subj_str = _render_noun_phrase(subj_node, anonymous=False, lang=lang)
         verb = op["properties"]["operation"]
-        modal = edge.get("relation")
-        if modal == "EXECUTES":
-            # Unmodaled
-            sentences_out.append(f"{subj_noun} {subj_id} {verb}.")
-        elif modal in ("SHALL", "MAY", "SHALL_NOT"):
-            sentences_out.append(f"{subj_noun} {subj_id} {modal} {verb}.")
-        else:
-            raise TRLGrammarError(f"unknown subject→operation relation {modal!r} — v0.1 only handles EXECUTES/SHALL/MAY/SHALL_NOT")
+        modal = subj_edge.get("relation")
+
+        parts = [subj_str]
+        if modal in MODALS:
+            parts.append(modal)
+        elif modal != "EXECUTES":
+            raise TRLGrammarError(f"unknown subject→operation relation {modal!r}")
+        parts.append(verb)
+
+        obj_edge = obj_edge_by_op.get(op_id)
+        if obj_edge is not None:
+            obj_node = nodes_by_id.get(obj_edge["to_id"])
+            if obj_node is not None:
+                # Anonymous if id matches the auto-pattern `<type_lower>-N`
+                anon = re.fullmatch(rf"{re.escape(obj_node['type'].lower())}-\d+", obj_node["id"]) is not None
+                parts.append(_render_noun_phrase(obj_node, anonymous=anon, lang=lang))
+
+        sentences_out.append(" ".join(parts) + ".")
 
     return "\n".join(sentences_out)
 
@@ -335,7 +475,7 @@ def validate(graph: dict, lang: Optional[dict] = None) -> list[str]:
 
     nouns = {w for w, e in lang.items() if e["speech"] == "noun"}
     prepositions = {w for w, e in lang.items() if e["speech"] == "preposition"}
-    v01_relations = prepositions | {"SHALL", "MAY", "SHALL_NOT", "EXECUTES", "TRANSFORM"}
+    v01_relations = prepositions | {"SHALL", "MAY", "SHALL_NOT", "EXECUTES", "ACTS_ON"}
 
     for n in graph.get("nodes", []):
         if "type" not in n:
