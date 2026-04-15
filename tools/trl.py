@@ -195,7 +195,7 @@ class AdverbPhrase:
 
 @dataclass
 class VerbPhrase:
-    verb: str                      # e.g. "VALIDATE"
+    verb: Optional[str] = None     # e.g. "VALIDATE"; None means inherit from prior clause
     modal: Optional[str] = None    # "SHALL" | "MAY" | "SHALL_NOT"
     adverbs: list[AdverbPhrase] = field(default_factory=list)
 
@@ -241,11 +241,17 @@ CONJUNCTIONS = {
 # the prior clause. Others (AND/OR/UNLESS/IF/WHEN/WHILE/etc.) always
 # repeat the subject for clarity — they introduce scope or parallelism.
 INHERITING_CONJUNCTIONS = {"THEN", "FINALLY", "ELSE"}
-# Pronouns supported in v0.1e (object / prep-target positions).
+# Pronouns supported in v0.1e+ (object / prep-target positions).
 # SAID and cross-sentence "THE <noun>" back-references land later.
-PRONOUNS_OP_ANTECEDENT = {"RESULT", "OUTPUT", "INPUT", "SOURCE", "TARGET"}
+#
+# Antecedent semantics:
+#   PRIOR_OP   — refers to the previous clause's op (RESULT, OUTPUT)
+#   CURRENT_OP — refers to the current clause's op-self (INPUT, SOURCE, TARGET)
+#   SUBJECT    — refers to the current clause's subject (SELF)
+PRONOUNS_PRIOR_OP = {"RESULT", "OUTPUT"}
+PRONOUNS_CURRENT_OP = {"INPUT", "SOURCE", "TARGET"}
 PRONOUNS_SUBJECT_ANTECEDENT = {"SELF"}
-PRONOUNS = PRONOUNS_OP_ANTECEDENT | PRONOUNS_SUBJECT_ANTECEDENT
+PRONOUNS = PRONOUNS_PRIOR_OP | PRONOUNS_CURRENT_OP | PRONOUNS_SUBJECT_ANTECEDENT
 
 
 # ─── Errors ───────────────────────────────────────────────────────────
@@ -407,12 +413,14 @@ def _parse_clause(tokens: list[Token], pos: int, lang: dict,
         if cur.kind == "WORD" and lang.get(cur.value, {}).get("speech") in ("noun", "article", "adjective"):
             try:
                 trial_subject, trial_pos = _parse_noun_phrase(tokens, pos, lang, require_identifier=False)
-                # After a real subject, the next token must be a modal or a verb.
+                # Commit subject if the next token is:
+                #   - a modal or verb (regular clause)
+                #   - PUNCT '.' (subject-only carve-out, verb elided)
                 nxt = tokens[trial_pos]
-                if nxt.kind == "WORD" and (
+                if (nxt.kind == "PUNCT" and nxt.value == ".") or (nxt.kind == "WORD" and (
                     nxt.value in MODALS
                     or lang.get(nxt.value, {}).get("speech") == "verb"
-                ):
+                )):
                     subject = trial_subject
                     pos = trial_pos
             except TRLError:
@@ -424,16 +432,28 @@ def _parse_clause(tokens: list[Token], pos: int, lang: dict,
         modal = tokens[pos].value
         pos += 1
 
-    # Verb
-    if tokens[pos].kind != "WORD":
-        raise TRLSyntaxError(f"expected verb at position {pos}, got {tokens[pos]!r}")
-    verb = tokens[pos].value
-    verb_entry = classify(verb, lang)
-    if verb_entry["speech"] != "verb":
-        raise TRLGrammarError(f"{verb!r} is a {verb_entry['speech']}, not a verb")
-    if verb in MODALS:
-        raise TRLGrammarError(f"{verb!r} is a modal and cannot appear as the primary verb")
-    pos += 1
+    # Verb. May be elided when the clause is a subject-only carve-out (e.g.
+    # `EXCEPT PARTY system` after a clause that established the verb).
+    # Returns verb=None to signal verb-inheritance to the caller.
+    verb: Optional[str] = None
+    if tokens[pos].kind == "WORD":
+        v = tokens[pos].value
+        v_entry = lang.get(v)
+        if v_entry and v_entry["speech"] == "verb" and v not in MODALS:
+            verb = v
+            pos += 1
+        elif tokens[pos].kind == "PUNCT" or v in CONJUNCTIONS:
+            pass  # subject-only clause, verb inherited
+    # If we still don't have a verb and the next token isn't a sentence
+    # terminator or another conjunction, fall through — caller may treat
+    # as stative or error.
+    if verb is None and tokens[pos].kind != "PUNCT" and not (
+        tokens[pos].kind == "WORD" and tokens[pos].value in CONJUNCTIONS
+    ):
+        # Allow stative form: subject + PREPOSITION + noun_phrase
+        # (handled below — verb stays None and we fall through to the
+        # post-verb loop, which will pick up the preposition).
+        pass
 
     # After the verb: a mix of adverbs, one optional direct object, and zero or
     # more prep phrases, in any source order. Accept until punctuation/conjunction.
@@ -614,6 +634,7 @@ def compile(src_or_sentences, lang: Optional[dict] = None) -> dict:
             existing.setdefault("properties", {}).update(props)
         return node_id
 
+    inherited_verb_phrase: Optional[VerbPhrase] = None
     for sentence in sentences:
         # DEFINE sentence: emit a DEFINED_TERM node, no ops/edges
         if sentence.definition is not None:
@@ -636,12 +657,14 @@ def compile(src_or_sentences, lang: Optional[dict] = None) -> dict:
         clause_op_ids: list[str] = []
         prev_op_id: Optional[str] = None
 
-        def _resolve_pronoun(np: NounPhrase, current_subj_id: str) -> str:
+        def _resolve_pronoun(np: NounPhrase, current_subj_id: str, current_op_id: str) -> str:
             """Return the antecedent node id for a pronoun noun_phrase."""
             word = np.pronoun
             if word in PRONOUNS_SUBJECT_ANTECEDENT:
                 return current_subj_id
-            if word in PRONOUNS_OP_ANTECEDENT:
+            if word in PRONOUNS_CURRENT_OP:
+                return current_op_id
+            if word in PRONOUNS_PRIOR_OP:
                 if prev_op_id is None:
                     raise TRLGrammarError(
                         f"pronoun {word!r} has no prior clause to reference"
@@ -658,17 +681,33 @@ def compile(src_or_sentences, lang: Optional[dict] = None) -> dict:
             subj_id = _ensure_noun_node(subject_np)
             inherited_subject = subject_np
 
+            # Verb may be elided in carve-out clauses (e.g. EXCEPT PARTY system).
+            # Inherit verb_phrase from prior clause if so.
+            effective_vp = clause.verb_phrase
+            if effective_vp.verb is None:
+                if inherited_verb_phrase is None:
+                    raise TRLGrammarError(
+                        "clause has no verb and no prior clause to inherit from"
+                    )
+                # Keep clause's own modal if present, otherwise inherit prior modal too
+                effective_vp = VerbPhrase(
+                    verb=inherited_verb_phrase.verb,
+                    modal=clause.verb_phrase.modal or inherited_verb_phrase.modal,
+                    adverbs=clause.verb_phrase.adverbs,
+                )
+            inherited_verb_phrase = effective_vp
+
             op_counter += 1
             op_id = f"op-{op_counter}"
             op_props: dict = {
-                "operation": clause.verb_phrase.verb,
-                "verb_subcategory": classify(clause.verb_phrase.verb, lang)["subcategory"],
+                "operation": effective_vp.verb,
+                "verb_subcategory": classify(effective_vp.verb, lang)["subcategory"],
             }
-            if clause.verb_phrase.adverbs:
+            if effective_vp.adverbs:
                 op_props["adverbs"] = [
                     ({"adverb": a.adverb, "value": a.value}
                      if a.value is not None else {"adverb": a.adverb})
-                    for a in clause.verb_phrase.adverbs
+                    for a in effective_vp.adverbs
                 ]
             if sentence.preamble and not clause_op_ids:
                 op_props["preamble"] = True
@@ -676,9 +715,12 @@ def compile(src_or_sentences, lang: Optional[dict] = None) -> dict:
                 op_props["leading_conjunction"] = sentence.leading_conjunction
             if clause.value_arg is not None:
                 op_props["value_arg"] = clause.value_arg
+            if clause.verb_phrase.verb is None:
+                # Original source had no verb — mark for elision on decompile
+                op_props["verb_elided"] = True
             nodes.append({"id": op_id, "type": "TRANSFORM", "properties": op_props})
 
-            relation = clause.verb_phrase.modal if clause.verb_phrase.modal else "EXECUTES"
+            relation = effective_vp.modal if effective_vp.modal else "EXECUTES"
             edges.append({"from_id": subj_id, "to_id": op_id, "relation": relation})
 
             chain_counter = 0
@@ -686,7 +728,7 @@ def compile(src_or_sentences, lang: Optional[dict] = None) -> dict:
             def _emit_target_edge(np: NounPhrase, relation: str, chain_id: Optional[int]) -> None:
                 edge_props: dict = {}
                 if np.pronoun:
-                    target_id = _resolve_pronoun(np, subj_id)
+                    target_id = _resolve_pronoun(np, subj_id, op_id)
                     edge_props["pronoun"] = np.pronoun
                 else:
                     target_id = _ensure_noun_node(np)
@@ -779,11 +821,13 @@ def _render_clause(op_id: str, op_nodes: dict, edges: list[dict], nodes_by_id: d
     parts: list[str] = []
     if include_subject:
         parts.append(_render_noun_phrase(subj_node, lang=lang))
-    if modal in MODALS:
+    elided = op["properties"].get("verb_elided")
+    if modal in MODALS and not elided:
         parts.append(modal)
-    elif modal != "EXECUTES":
+    elif modal != "EXECUTES" and modal not in MODALS:
         raise TRLGrammarError(f"unknown subject→operation relation {modal!r}")
-    parts.append(op["properties"]["operation"])
+    if not elided:
+        parts.append(op["properties"]["operation"])
 
     preposition_words = {w for w, e in lang.items() if e["speech"] == "preposition"}
 
