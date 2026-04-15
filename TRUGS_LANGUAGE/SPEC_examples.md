@@ -66,8 +66,7 @@ Four sentences. ON_BEHALF_OF delegation. ADMINISTER establishes authority chain.
 ### 7. Scheduled operation with deadline
 ```
 DEFINE "deadline" AS INSTRUMENT.
-PARTY scheduler SHALL AGGREGATE ALL ACTIVE RECORD
-  ONCE WITHIN 24h
+PARTY scheduler SHALL AGGREGATE ALL ACTIVE RECORD ONCE WITHIN 24h
   THEN WRITE RESULT TO ENDPOINT report
   SUBJECT_TO INSTRUMENT deadline.
 ```
@@ -207,8 +206,7 @@ THE + NOUN for cross-sentence reference (not pronouns). Multi-actor pipeline acr
 ```
 PARTY worker-a SHALL FILTER ALL RECORD PARALLEL.
 PARTY worker-b SHALL SORT ALL RECORD PARALLEL.
-PARTY coordinator SHALL MERGE THE RECORD FROM PARTY worker-a
-  AND THE RECORD FROM PARTY worker-b
+PARTY coordinator SHALL MERGE THE RECORD FROM PARTY worker-a AND THE RECORD FROM PARTY worker-b
   THEN WRITE RESULT TO ENDPOINT output.
 ```
 Prepositional phrase conjunction (FROM X AND FROM Y). PARALLEL on separate actors. MERGE synchronization.
@@ -234,12 +232,9 @@ Four-step functional pipeline. Clean first-attempt parse.
 ### 23. Multi-level containment
 ```
 DEFINE "api-system" AS NAMESPACE.
-PARTY system SHALL NEST MODULE auth AND MODULE data AND MODULE search
-  TO NAMESPACE api-system.
-PARTY system SHALL NEST FUNCTION login AND FUNCTION logout
-  TO MODULE auth.
-PARTY system SHALL NEST FUNCTION read-record AND FUNCTION write-record
-  TO MODULE data.
+PARTY system SHALL NEST MODULE auth AND MODULE data AND MODULE search TO NAMESPACE api-system.
+PARTY system SHALL NEST FUNCTION login AND FUNCTION logout TO MODULE auth.
+PARTY system SHALL NEST FUNCTION read-record AND FUNCTION write-record TO MODULE data.
 FUNCTION read-record REQUIRE MODULE auth.
 FUNCTION write-record REQUIRE MODULE auth.
 ```
@@ -260,15 +255,16 @@ PARTY loader SHALL READ ALL RECORD FROM ENDPOINT source
   THEN MAP EACH RESULT TO VALID DATA
     SUBJECT_TO INTERFACE schema
   THEN WRITE RESULT TO ENDPOINT destination
-    OR RETRY BOUNDED 3 WITHIN 60s.
+  OR RETRY BOUNDED 3 WITHIN 60s.
 ```
 Multiple adverb_phrases on RETRY (BOUNDED 3 + WITHIN 60s). OR for retry fallback.
 
 ### 26. API rate limiting
 ```
 DEFINE "rate-limit" AS REQUIRED INTEGER DATA.
-PARTY client SHALL REQUEST PARTY api WITHIN 1s
-  SUBJECT_TO DATA rate-limit.
+PARTY client SHALL REQUEST PARTY api
+  SUBJECT_TO DATA rate-limit
+  WITHIN 1s.
 IF PARTY client REQUEST PARTY api
   AND DATA rate-limit EXCEEDS 100
   THEN PARTY api SHALL REJECT THE MESSAGE
@@ -282,13 +278,9 @@ DEFINE "word" AS DATA.
 DEFINE "grammar-rule" AS DATA.
 DEFINE "constraint" AS DATA.
 
-EACH DATA word NEST STRING DATA name
-  AND STRING DATA speech
-  AND STRING DATA definition.
+EACH DATA word NEST STRING DATA name AND STRING DATA speech AND STRING DATA definition.
 
-PARTY language SHALL ADMINISTER ALL DATA word
-  AND ALL DATA grammar-rule
-  AND ALL DATA constraint.
+PARTY language SHALL ADMINISTER ALL DATA word AND ALL DATA grammar-rule AND ALL DATA constraint.
 
 PARTY language SHALL VALIDATE EACH DATA word
   SUBJECT_TO INTERFACE language-schema.
@@ -308,12 +300,12 @@ WHEREAS SERVICE kafka FEEDS STREAM raw-events.
 WHEREAS ENDPOINT event-store REQUIRE MODULE postgres.
 
 PARTY ingester SHALL READ EACH DATA raw-event FROM STREAM raw-events
-  WITHIN 100ms
+    WITHIN 100ms
   OR PARTY ingester SHALL RETRY BOUNDED 5 WITHIN 30s
   OR THROW EXCEPTION.
 
 PARTY transformer SHALL VALIDATE THE DATA raw-event
-  SUBJECT_TO INTERFACE event-schema
+    SUBJECT_TO INTERFACE event-schema
   THEN MAP RESULT TO DATA clean-event
   THEN BATCH RESULT 500.
 
@@ -326,11 +318,9 @@ IF PARTY loader THROW EXCEPTION
 
 NO PARTY SHALL WRITE ENDPOINT event-store
   EXCEPT PARTY loader
-  PROVIDED_THAT PARTY loader AUTHENTICATE TO SERVICE auth.
+    PROVIDED_THAT PARTY loader AUTHENTICATE TO SERVICE auth.
 
-PARTY monitor SHALL ADMINISTER PARTY ingester
-  AND PARTY transformer
-  AND PARTY loader.
+PARTY monitor SHALL ADMINISTER PARTY ingester AND PARTY transformer AND PARTY loader.
 ```
 11 sentences. 3 definitions. 2 preambles. 4 actors. Retry, timeout, error handling, authentication, authority. ADMINISTER and REQUIRE as verbs. Complete real-world ETL in the language.
 
