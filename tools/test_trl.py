@@ -234,6 +234,62 @@ def test_decompile_omits_inherited_subject() -> None:
     assert " PARTY a SORT " not in back  # sanity: subject is omitted after THEN
 
 
+# ─── v0.1d — Prepositions ─────────────────────────────────────────────
+
+def test_parse_single_preposition() -> None:
+    s = trl.parse("PARTY user SHALL AUTHENTICATE TO SERVICE gateway.")[0]
+    c = s.clauses[0]
+    assert c.object is None
+    assert len(c.prep_phrases) == 1
+    assert c.prep_phrases[0].preposition == "TO"
+    assert c.prep_phrases[0].target.noun == "SERVICE"
+    assert c.prep_phrases[0].target.identifier == "gateway"
+
+
+def test_parse_object_then_preposition() -> None:
+    s = trl.parse("PARTY system SHALL WRITE DATA TO ENDPOINT output.")[0]
+    c = s.clauses[0]
+    assert c.object.noun == "DATA"
+    assert [pp.preposition for pp in c.prep_phrases] == ["TO"]
+
+
+def test_parse_multiple_prepositions() -> None:
+    s = trl.parse("PARTY system SHALL FILTER DATA FROM ENDPOINT input TO ENDPOINT output.")[0]
+    c = s.clauses[0]
+    assert [pp.preposition for pp in c.prep_phrases] == ["FROM", "TO"]
+
+
+def test_compile_emits_preposition_edges() -> None:
+    g = trl.compile("PARTY user SHALL AUTHENTICATE TO SERVICE gateway.")
+    to_edges = [e for e in g["edges"] if e.get("relation") == "TO"]
+    assert len(to_edges) == 1
+    assert to_edges[0]["to_id"] == "gateway"
+
+
+def test_compile_preserves_preposition_order() -> None:
+    g = trl.compile("PARTY system SHALL FILTER DATA FROM ENDPOINT a TO ENDPOINT b.")
+    prep_rels = [e["relation"] for e in g["edges"]
+                 if e["from_id"].startswith("op-") and e.get("relation") in ("FROM", "TO")]
+    assert prep_rels == ["FROM", "TO"]
+
+
+def test_contains_preposition_roundtrip() -> None:
+    src = "PARTY admin SHALL ADMINISTER RESOURCE CONTAINS NAMESPACE production."
+    g = trl.compile(src)
+    assert trl.decompile(g) == src
+
+
+def test_preposition_with_conjunction_combination() -> None:
+    src = "PARTY system SHALL FILTER DATA TO ENDPOINT output THEN VALIDATE RECORD."
+    g = trl.compile(src)
+    back = trl.decompile(g)
+    assert back == src
+    # Verify the TO edge is attached to op-1 (the FILTER op), not op-2
+    to_edges = [e for e in g["edges"] if e.get("relation") == "TO"]
+    assert len(to_edges) == 1
+    assert to_edges[0]["from_id"] == "op-1"
+
+
 # ─── Decompile ───────────────────────────────────────────────────────
 
 def test_decompile_minimum_graph() -> None:
@@ -284,6 +340,16 @@ ROUND_TRIP_FIXTURES = [
     "PARTY admin MAY APPROVE RECORD IF AUTHENTICATE.",
     "PARTY system SHALL VALIDATE RECORD PROVIDED_THAT PARTY admin APPROVE.",
     "PARTY system SHALL FILTER RECORD THEN VALIDATE RECORD FINALLY WRITE RECORD.",
+    # v0.1d — prepositions
+    "PARTY user SHALL AUTHENTICATE TO SERVICE gateway.",
+    "PARTY system SHALL WRITE DATA TO ENDPOINT output.",
+    "PARTY agent SHALL RESPOND ON_BEHALF_OF PARTY user.",
+    "PARTY system SHALL FILTER DATA FROM ENDPOINT input TO ENDPOINT output.",
+    "PARTY admin SHALL ADMINISTER RESOURCE CONTAINS NAMESPACE production.",
+    "PARTY a SHALL READ DATA REFERENCES RESOURCE store.",
+    "PARTY system SHALL VALIDATE RECORD SUBJECT_TO INTERFACE schema.",
+    # v0.1d — preposition + conjunction combined
+    "PARTY system SHALL FILTER DATA TO ENDPOINT output THEN VALIDATE RECORD.",
 ]
 
 SPEC_EXAMPLE_1 = "PARTY system SHALL VALIDATE ALL PENDING RECORD."
