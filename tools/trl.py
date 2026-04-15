@@ -12,19 +12,23 @@ examples in SPEC_examples.md):
 1. **v0.1a** — minimum valid sentence: `SUBJ_NOUN id VERB .`
 2. **v0.1b** — modals + single object phrase:
    `[SUBJ_NOUN id] [modal] VERB [article] [adj]* NOUN [id] .`
-3. **v0.1c** (this slice) — conjunctions, multi-clause sentences:
+3. **v0.1c** — conjunctions, multi-clause sentences:
    `clause (CONJUNCTION clause)* .`
-   - Conjunctions: THEN, AND, OR, ELSE, IF, WHEN, WHILE, FINALLY, UNLESS,
-     EXCEPT, NOTWITHSTANDING, PROVIDED_THAT, WHEREAS
-   - Later clauses may omit subject — inherits from prior clause
-   - Each conjunction becomes an edge between operation nodes with
-     `relation=<CONJUNCTION_WORD>`. §3 maps conjunctions to "graph
-     structure"; v0.1c uses named edges to preserve round-trip.
+4. **v0.1d** (this slice) — prepositional phrases after the verb:
+   `clause := subject verb_phrase [direct_object] (PREPOSITION noun_phrase)*`
+   - All 18 TRL prepositions: FEEDS / ROUTES / TO / FROM / RETURNS_TO
+     / BINDS / DEPENDS_ON / IMPLEMENTS / EXTENDS / SUBJECT_TO / GOVERNS
+     / PURSUANT_TO / ON_BEHALF_OF / CONTAINS / REFERENCES / SUPERSEDES
+     / AS / BY
+   - Each `PREPOSITION noun_phrase` compiles to an edge from the
+     operation node to the target noun node, `relation=<PREPOSITION>`
+   - Decompile preserves source order of preposition phrases
+   - Not yet: AND-chained prep phrases (`TO a AND TO b`) — v0.1 defers
 
-Still not implemented: prepositions (TO / FROM / CONTAINS / SUBJECT_TO /
-etc.), pronouns (RESULT / SELF / THE <noun>), adverbs + value literals,
-WHEREAS as true preamble with no-execution semantics, DEFINE definitions,
-multi-sentence programs with cross-sentence references.
+Still not implemented: pronouns (RESULT / SELF / THE <noun>), adverbs
++ value literals, WHEREAS as true preamble with no-execution semantics,
+DEFINE definitions, multi-sentence programs with cross-sentence
+references.
 
 ## Not yet implemented (tracked in TRUGS-DEVELOPMENT#1539 / #1540)
 
@@ -164,10 +168,17 @@ class VerbPhrase:
 
 
 @dataclass
+class PrepPhrase:
+    preposition: str               # e.g. "TO"
+    target: NounPhrase
+
+
+@dataclass
 class Clause:
     subject: Optional[NounPhrase]      # None means inherit from prior clause
     verb_phrase: VerbPhrase
     object: Optional[NounPhrase] = None
+    prep_phrases: list["PrepPhrase"] = field(default_factory=list)
 
 
 @dataclass
@@ -308,15 +319,30 @@ def _parse_clause(tokens: list[Token], pos: int, lang: dict,
         raise TRLGrammarError(f"{verb!r} is a modal and cannot appear as the primary verb")
     pos += 1
 
-    # Optional object noun_phrase — until '.' / EOF / CONJUNCTION
+    # Optional direct-object noun_phrase
     obj: Optional[NounPhrase] = None
     if tokens[pos].kind == "WORD" and tokens[pos].value not in CONJUNCTIONS:
-        first_w = tokens[pos].value
-        first_entry = lang.get(first_w)
+        first_entry = lang.get(tokens[pos].value)
         if first_entry and first_entry["speech"] in ("noun", "article", "adjective"):
             obj, pos = _parse_noun_phrase(tokens, pos, lang, require_identifier=False)
 
-    return Clause(subject=subject, verb_phrase=VerbPhrase(verb=verb, modal=modal), object=obj), pos
+    # Zero or more prepositional phrases: PREPOSITION noun_phrase
+    prep_phrases: list[PrepPhrase] = []
+    while tokens[pos].kind == "WORD" and tokens[pos].value not in CONJUNCTIONS:
+        entry = lang.get(tokens[pos].value)
+        if not (entry and entry["speech"] == "preposition"):
+            break
+        prep_word = tokens[pos].value
+        pos += 1
+        target, pos = _parse_noun_phrase(tokens, pos, lang, require_identifier=False)
+        prep_phrases.append(PrepPhrase(preposition=prep_word, target=target))
+
+    return Clause(
+        subject=subject,
+        verb_phrase=VerbPhrase(verb=verb, modal=modal),
+        object=obj,
+        prep_phrases=prep_phrases,
+    ), pos
 
 
 def _parse_sentence(tokens: list[Token], pos: int, lang: dict) -> tuple[Sentence, int]:
@@ -428,6 +454,10 @@ def compile(src_or_sentences, lang: Optional[dict] = None) -> dict:
                 obj_id = _ensure_noun_node(clause.object)
                 edges.append({"from_id": op_id, "to_id": obj_id, "relation": "ACTS_ON"})
 
+            for pp in clause.prep_phrases:
+                target_id = _ensure_noun_node(pp.target)
+                edges.append({"from_id": op_id, "to_id": target_id, "relation": pp.preposition})
+
             clause_op_ids.append(op_id)
 
         # Conjunction edges between consecutive ops in the same sentence
@@ -497,13 +527,25 @@ def _render_clause(op_id: str, op_nodes: dict, edges: list[dict], nodes_by_id: d
         raise TRLGrammarError(f"unknown subject→operation relation {modal!r}")
     parts.append(op["properties"]["operation"])
 
-    # Object edge (ACTS_ON outgoing)
-    obj_edge = next((e for e in edges if e["from_id"] == op_id
-                     and e.get("relation") == "ACTS_ON"), None)
-    if obj_edge is not None:
-        obj_node = nodes_by_id.get(obj_edge["to_id"])
-        if obj_node is not None:
-            parts.append(_render_noun_phrase(obj_node, lang=lang))
+    # Preposition set from the language TRUG (what relations count as prep edges)
+    preposition_words = {w for w, e in lang.items() if e["speech"] == "preposition"}
+
+    # Outgoing edges from this op, in list order. ACTS_ON renders as a bare
+    # direct object; preposition edges render as "PREP target_noun_phrase".
+    for e in edges:
+        if e["from_id"] != op_id:
+            continue
+        rel = e.get("relation")
+        if rel == "ACTS_ON":
+            obj_node = nodes_by_id.get(e["to_id"])
+            if obj_node is not None:
+                parts.append(_render_noun_phrase(obj_node, lang=lang))
+        elif rel in preposition_words:
+            target_node = nodes_by_id.get(e["to_id"])
+            if target_node is not None:
+                parts.append(rel)
+                parts.append(_render_noun_phrase(target_node, lang=lang))
+
     return " ".join(parts)
 
 
