@@ -82,7 +82,7 @@ DEFAULT_LANGUAGE_TRUG = REPO_ROOT / "TRUGS_LANGUAGE" / "language.trug.json"
 SUGAR_RE = re.compile(r"'[a-z_]+")
 IDENTIFIER_RE = re.compile(r"[a-z_][a-z0-9_-]*")
 WORD_RE = re.compile(r"[A-Z_]+")
-DURATION_RE = re.compile(r"\d+[smhd]")
+DURATION_RE = re.compile(r"\d+(?:ms|us|ns|s|m|h|d)\b")
 INTEGER_RE = re.compile(r"\d+")
 STRING_RE = re.compile(r'"([^"\\]*(?:\\.[^"\\]*)*)"')
 
@@ -452,10 +452,12 @@ def _parse_clause(tokens: list[Token], pos: int, lang: dict,
                 # Commit subject if the next token is:
                 #   - a modal or verb (regular clause)
                 #   - a preposition (stative clause: subject + PREP + target)
+                #   - a CONJUNCTION (subject-only with elided verb, joined to next clause)
                 #   - PUNCT '.' (subject-only carve-out, verb elided)
                 nxt = tokens[trial_pos]
                 if (nxt.kind == "PUNCT" and nxt.value == ".") or (nxt.kind == "WORD" and (
                     nxt.value in MODALS
+                    or nxt.value in CONJUNCTIONS
                     or lang.get(nxt.value, {}).get("speech") in ("verb", "preposition")
                 )):
                     subject = trial_subject
@@ -681,6 +683,7 @@ def compile(src_or_sentences, lang: Optional[dict] = None) -> dict:
         return node_id
 
     inherited_verb_phrase: Optional[VerbPhrase] = None
+    cross_sentence_prev_op: Optional[str] = None
     for sentence in sentences:
         # DEFINE sentence: emit a DEFINED_TERM node, no ops/edges.
         # DEFINE-site attributes (article + adjectives) live under
@@ -706,7 +709,9 @@ def compile(src_or_sentences, lang: Optional[dict] = None) -> dict:
 
         inherited_subject: Optional[NounPhrase] = None
         clause_op_ids: list[str] = []
-        prev_op_id: Optional[str] = None
+        # Inherit prev_op from the prior sentence so cross-sentence
+        # RESULT/OUTPUT pronouns can resolve.
+        prev_op_id: Optional[str] = cross_sentence_prev_op
 
         def _resolve_pronoun(np: NounPhrase, current_subj_id: str, current_op_id: str) -> str:
             """Return the antecedent node id for a pronoun noun_phrase."""
@@ -812,6 +817,10 @@ def compile(src_or_sentences, lang: Optional[dict] = None) -> dict:
                 if np.pronoun:
                     target_id = _resolve_pronoun(np, subj_id, op_id)
                     edge_props["pronoun"] = np.pronoun
+                    # Article-before-pronoun (e.g. EACH RESULT) — store article
+                    # alongside the pronoun so decompile can reproduce it.
+                    if np.article:
+                        edge_props["pronoun_article"] = np.article
                 else:
                     target_id = _ensure_noun_node(np)
                     shape = _np_shape(np)
@@ -844,6 +853,7 @@ def compile(src_or_sentences, lang: Optional[dict] = None) -> dict:
 
             clause_op_ids.append(op_id)
             prev_op_id = op_id
+            cross_sentence_prev_op = op_id
 
         # Conjunction edges between consecutive ops in the same sentence
         for i, conj in enumerate(sentence.conjunctions):
@@ -928,13 +938,15 @@ def _render_clause(op_id: str, op_nodes: dict, edges: list[dict], nodes_by_id: d
     # (Examples 7, 15, 18); after the verb directly when there is none (Example 3).
 
     def _render_target(e: dict) -> str:
-        pronoun = (e.get("properties") or {}).get("pronoun")
+        props = e.get("properties") or {}
+        pronoun = props.get("pronoun")
         if pronoun:
-            return pronoun
+            article = props.get("pronoun_article")
+            return f"{article} {pronoun}" if article else pronoun
         node = nodes_by_id.get(e["to_id"])
         if node is None:
             return ""
-        shape = (e.get("properties") or {}).get("np_shape")
+        shape = props.get("np_shape")
         return _render_noun_phrase(node, lang=lang, shape=shape)
 
     # 1. Direct object(s) — possibly AND-chained via chain_id
