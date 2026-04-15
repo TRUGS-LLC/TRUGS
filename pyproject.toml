@@ -20,6 +20,7 @@ trugs-tget = "tools.tget:main"
 trugs-tupdate = "tools.tupdate:main"
 trugs-tdelete = "tools.tdelete:main"
 trugs-tunlink = "tools.tunlink:main"
+trugs-trl = "tools.trl:main"
 
 [tool.setuptools.packages.find]
 include = ["tools*"]
