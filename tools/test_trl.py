@@ -350,6 +350,71 @@ def test_spec_example_2_verbatim() -> None:
     assert trl.compile(back) == g
 
 
+# ─── v0.1f — Adverbs + value literals ─────────────────────────────────
+
+def test_tokenize_duration_literal() -> None:
+    tokens = trl.tokenize("WITHIN 30s.")
+    kinds = [t.kind for t in tokens if t.kind != "EOF"]
+    assert kinds == ["WORD", "DURATION", "PUNCT"]
+    assert tokens[1].value == "30s"
+
+
+def test_tokenize_integer_literal() -> None:
+    tokens = trl.tokenize("BOUNDED 3.")
+    kinds = [t.kind for t in tokens if t.kind != "EOF"]
+    assert kinds == ["WORD", "INTEGER", "PUNCT"]
+    assert tokens[1].value == "3"
+
+
+def test_parse_adverb_no_value() -> None:
+    s = trl.parse("PARTY server SHALL RESPOND PROMPTLY.")[0]
+    advs = s.clauses[0].verb_phrase.adverbs
+    assert len(advs) == 1
+    assert advs[0].adverb == "PROMPTLY"
+    assert advs[0].value is None
+
+
+def test_parse_adverb_with_duration() -> None:
+    s = trl.parse("PARTY server SHALL RESPOND WITHIN 30s.")[0]
+    advs = s.clauses[0].verb_phrase.adverbs
+    assert advs[0].adverb == "WITHIN"
+    assert advs[0].value == "30s"
+
+
+def test_parse_adverb_with_integer() -> None:
+    s = trl.parse("PARTY client MAY RETRY BOUNDED 3.")[0]
+    advs = s.clauses[0].verb_phrase.adverbs
+    assert advs[0].adverb == "BOUNDED"
+    assert advs[0].value == "3"
+
+
+def test_parse_multiple_adverbs() -> None:
+    s = trl.parse("PARTY server SHALL RESPOND PROMPTLY WITHIN 30s.")[0]
+    advs = s.clauses[0].verb_phrase.adverbs
+    assert [(a.adverb, a.value) for a in advs] == [
+        ("PROMPTLY", None),
+        ("WITHIN", "30s"),
+    ]
+
+
+def test_compile_stores_adverbs_on_op() -> None:
+    g = trl.compile("PARTY server SHALL RESPOND PROMPTLY WITHIN 30s.")
+    op = next(n for n in g["nodes"] if n.get("type") == "TRANSFORM")
+    assert op["properties"]["adverbs"] == [
+        {"adverb": "PROMPTLY"},
+        {"adverb": "WITHIN", "value": "30s"},
+    ]
+
+
+def test_spec_example_3_verbatim() -> None:
+    """SPEC_examples.md §1 Example 3 round-trips — multi-sentence with
+    adverbs, value literals, OR, THEN, and THE <noun> back-reference."""
+    g = trl.compile(SPEC_EXAMPLE_3)
+    back = trl.decompile(g)
+    assert back == SPEC_EXAMPLE_3
+    assert trl.compile(back) == g
+
+
 # ─── Decompile ───────────────────────────────────────────────────────
 
 def test_decompile_minimum_graph() -> None:
@@ -416,10 +481,22 @@ ROUND_TRIP_FIXTURES = [
     "PARTY admin SHALL ADMINISTER RESOURCE REFERENCES SELF.",
     "PARTY a SHALL FILTER DATA THEN VALIDATE OUTPUT.",
     "PARTY system SHALL FILTER DATA THEN WRITE RESULT TO ENDPOINT destination.",
+    # v0.1f — adverbs and value literals
+    "PARTY server SHALL RESPOND PROMPTLY.",
+    "PARTY server SHALL RESPOND WITHIN 30s.",
+    "PARTY client MAY RETRY BOUNDED 3.",
+    "PARTY server SHALL RESPOND PROMPTLY WITHIN 30s.",
+    "PARTY server SHALL RESPOND PROMPTLY WITHIN 30s OR PARTY client MAY RETRY BOUNDED 3.",
 ]
 
 SPEC_EXAMPLE_1 = "PARTY system SHALL VALIDATE ALL PENDING RECORD."
 SPEC_EXAMPLE_2 = "PARTY api SHALL FILTER ALL ACTIVE RECORD THEN SORT RESULT UNLESS NO VALID RECORD REQUIRE SELF."
+SPEC_EXAMPLE_3 = (
+    "PARTY client SHALL REQUEST PARTY server.\n"
+    "PARTY server SHALL RESPOND PROMPTLY WITHIN 30s "
+    "OR PARTY client MAY RETRY BOUNDED 3 "
+    "THEN HANDLE THE ERROR."
+)
 
 
 def test_round_trip_trl_to_trug_to_trl() -> None:

@@ -1,4 +1,4 @@
-"""TRL compiler v0.1 — deterministic TRL ↔ TRUG round-trip.
+r"""TRL compiler v0.1 — deterministic TRL ↔ TRUG round-trip.
 
 TRL (TRUGS Language) is a closed 190-word subset of English. Every valid
 sentence round-trips through a TRUG graph with no information loss beyond
@@ -16,18 +16,21 @@ examples in SPEC_examples.md):
    `clause (CONJUNCTION clause)* .`
 4. **v0.1d** — prepositional phrases after the verb:
    `clause := subject verb_phrase [direct_object] (PREPOSITION noun_phrase)*`
-5. **v0.1e** (this slice) — pronouns in object / prep-target position:
-   - Pronouns recognised: RESULT, OUTPUT, INPUT, SOURCE, TARGET, SELF
-   - Antecedent resolution (v0.1e): RESULT / OUTPUT / INPUT / SOURCE /
-     TARGET → previous clause's operation node; SELF → current clause
-     subject node.
-   - The edge carries `relation` (either preposition or `ACTS_ON`) plus
-     `properties.pronoun = <word>` so decompile reproduces the pronoun.
-   - SAID (legal cross-sentence "the") deferred to v0.1 finalization.
+5. **v0.1e** — pronouns in object / prep-target position.
+6. **v0.1f** (this slice) — adverbs + value literals:
+   - Adverbs between verb and object: `VERB (ADVERB [value])* [object] ...`
+   - All 18 TRL adverbs recognised
+   - INTEGER literals (`\d+`) and DURATION literals (`\d+[smhd]`) parsed
+     as Token.kind=="INTEGER" / "DURATION"
+   - Each adverb compiles to an entry on `op.properties.adverbs`:
+     `[{"adverb": "WITHIN", "value": "30s"}, ...]` preserving source order
+   - Decompile walks the list in order, emitting `ADVERB [value]`
+   - STRING and DATE literals deferred; they appear rarely in examples
+     and land with DEFINE / WHEREAS in v0.1g.
 
-Still not implemented: adverbs + value literals, WHEREAS as true preamble
-with no-execution semantics, DEFINE definitions, multi-sentence programs
-with cross-sentence references, AND-chained prep phrases.
+Still not implemented: WHEREAS preamble semantics, DEFINE definitions,
+multi-sentence cross-sentence references (SAID / THE-noun across
+sentences), AND-chained prep phrases.
 
 ## Not yet implemented (tracked in TRUGS-DEVELOPMENT#1539 / #1540)
 
@@ -78,6 +81,8 @@ DEFAULT_LANGUAGE_TRUG = REPO_ROOT / "TRUGS_LANGUAGE" / "language.trug.json"
 SUGAR_RE = re.compile(r"'[a-z_]+")
 IDENTIFIER_RE = re.compile(r"[a-z_][a-z0-9_]*")
 WORD_RE = re.compile(r"[A-Z_]+")
+DURATION_RE = re.compile(r"\d+[smhd]")
+INTEGER_RE = re.compile(r"\d+")
 
 
 # ─── Tokenizer ────────────────────────────────────────────────────────
@@ -109,6 +114,17 @@ def tokenize(src: str) -> list[Token]:
         m = WORD_RE.match(stripped, i)
         if m and (m.end() == len(stripped) or not stripped[m.end()].isalnum() and stripped[m.end()] != "_"):
             tokens.append(Token("WORD", m.group()))
+            i = m.end()
+            continue
+        # Duration literal first (more specific than bare integer)
+        m = DURATION_RE.match(stripped, i)
+        if m:
+            tokens.append(Token("DURATION", m.group()))
+            i = m.end()
+            continue
+        m = INTEGER_RE.match(stripped, i)
+        if m:
+            tokens.append(Token("INTEGER", m.group()))
             i = m.end()
             continue
         m = IDENTIFIER_RE.match(stripped, i)
@@ -162,9 +178,16 @@ class NounPhrase:
 
 
 @dataclass
+class AdverbPhrase:
+    adverb: str                    # e.g. "WITHIN"
+    value: Optional[str] = None    # raw literal text, e.g. "30s" or "3"
+
+
+@dataclass
 class VerbPhrase:
     verb: str                      # e.g. "VALIDATE"
     modal: Optional[str] = None    # "SHALL" | "MAY" | "SHALL_NOT"
+    adverbs: list[AdverbPhrase] = field(default_factory=list)
 
 
 @dataclass
@@ -333,6 +356,20 @@ def _parse_clause(tokens: list[Token], pos: int, lang: dict,
         raise TRLGrammarError(f"{verb!r} is a modal and cannot appear as the primary verb")
     pos += 1
 
+    # Zero or more adverb phrases: ADVERB [value]
+    adverbs: list[AdverbPhrase] = []
+    while tokens[pos].kind == "WORD":
+        entry = lang.get(tokens[pos].value)
+        if not (entry and entry["speech"] == "adverb"):
+            break
+        adv_word = tokens[pos].value
+        pos += 1
+        adv_value: Optional[str] = None
+        if tokens[pos].kind in ("DURATION", "INTEGER"):
+            adv_value = tokens[pos].value
+            pos += 1
+        adverbs.append(AdverbPhrase(adverb=adv_word, value=adv_value))
+
     # Optional direct-object noun_phrase (a regular noun_phrase or a pronoun)
     obj: Optional[NounPhrase] = None
     if tokens[pos].kind == "WORD" and tokens[pos].value not in CONJUNCTIONS:
@@ -353,7 +390,7 @@ def _parse_clause(tokens: list[Token], pos: int, lang: dict,
 
     return Clause(
         subject=subject,
-        verb_phrase=VerbPhrase(verb=verb, modal=modal),
+        verb_phrase=VerbPhrase(verb=verb, modal=modal, adverbs=adverbs),
         object=obj,
         prep_phrases=prep_phrases,
     ), pos
@@ -466,14 +503,17 @@ def compile(src_or_sentences, lang: Optional[dict] = None) -> dict:
 
             op_counter += 1
             op_id = f"op-{op_counter}"
-            nodes.append({
-                "id": op_id,
-                "type": "TRANSFORM",
-                "properties": {
-                    "operation": clause.verb_phrase.verb,
-                    "verb_subcategory": classify(clause.verb_phrase.verb, lang)["subcategory"],
-                },
-            })
+            op_props: dict = {
+                "operation": clause.verb_phrase.verb,
+                "verb_subcategory": classify(clause.verb_phrase.verb, lang)["subcategory"],
+            }
+            if clause.verb_phrase.adverbs:
+                op_props["adverbs"] = [
+                    ({"adverb": a.adverb, "value": a.value}
+                     if a.value is not None else {"adverb": a.adverb})
+                    for a in clause.verb_phrase.adverbs
+                ]
+            nodes.append({"id": op_id, "type": "TRANSFORM", "properties": op_props})
 
             relation = clause.verb_phrase.modal if clause.verb_phrase.modal else "EXECUTES"
             edges.append({"from_id": subj_id, "to_id": op_id, "relation": relation})
@@ -569,6 +609,12 @@ def _render_clause(op_id: str, op_nodes: dict, edges: list[dict], nodes_by_id: d
     elif modal != "EXECUTES":
         raise TRLGrammarError(f"unknown subject→operation relation {modal!r}")
     parts.append(op["properties"]["operation"])
+
+    # Adverbs — stored on op.properties.adverbs as ordered list
+    for adv in op["properties"].get("adverbs", []):
+        parts.append(adv["adverb"])
+        if "value" in adv and adv["value"] is not None:
+            parts.append(adv["value"])
 
     # Preposition set from the language TRUG (what relations count as prep edges)
     preposition_words = {w for w, e in lang.items() if e["speech"] == "preposition"}
