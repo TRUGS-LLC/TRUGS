@@ -23,10 +23,11 @@ from tools import trl  # noqa: E402  (path-fix above must precede import)
 
 
 def _canonical(s: str) -> str:
-    """Canonicalize whitespace for comparison: collapse `\\n  ` (the
-    multi-line indented continuation that decompile emits) back to ` `.
+    """Canonicalize whitespace for comparison: collapse `\\n\\s+` (any
+    multi-line indented continuation decompile emits) back to ` `.
     Round-trip equality is canonical-equality, not byte-identical."""
-    return s.replace("\n  ", " ")
+    import re as _re
+    return _re.sub(r"\n\s+", " ", s)
 
 
 # ─── Tokenizer ───────────────────────────────────────────────────────
@@ -1037,10 +1038,64 @@ def test_or_inherits_same_subject() -> None:
 
 
 def test_adverbs_after_preps_in_decompile() -> None:
-    """Cat F — adverbs come after preposition phrases in canonical form."""
+    """Cat F — adverbs come after preposition phrases in canonical form.
+    PR-B refinement: when prep + adverb both present, adverb breaks to own line."""
     src = "PARTY ingester SHALL READ EACH DATA raw-event FROM STREAM raw-events WITHIN 100ms."
     back = trl.decompile(trl.compile(src))
-    assert "FROM STREAM raw-events WITHIN 100ms" in back, f"got: {back!r}"
+    # FROM is inline; WITHIN breaks to own line under prep+adverb refinement
+    assert "FROM STREAM raw-events" in back
+    assert "\n  WITHIN 100ms" in back, f"got: {back!r}"
+
+
+# ─── v0.3 PR-B — formatting (Categories A, B, G + refinements) ──────
+
+def test_clause_depth_increases_under_subordinating_conjunction() -> None:
+    """Cat A — UNLESS / PROVIDED_THAT / EXCEPT nest each clause deeper."""
+    src = (
+        "PARTY api SHALL FILTER ALL RECORD\n"
+        "  UNLESS PARTY admin OVERRIDE\n"
+        "    PROVIDED_THAT PARTY admin AUTHENTICATE TO SERVICE auth\n"
+        "      EXCEPT PARTY admin ADMINISTER SERVICE auth."
+    )
+    g = trl.compile(src)
+    back = trl.decompile(g)
+    assert back == src, f"got: {back!r}"
+
+
+def test_tail_structural_prep_breaks_to_new_line() -> None:
+    """Cat B — SUBJECT_TO/CONTAINS after object break to new line."""
+    src = (
+        "PARTY administrator SHALL ADMINISTER ALL PRIVATE RESOURCE\n"
+        "  CONTAINS NAMESPACE production."
+    )
+    back = trl.decompile(trl.compile(src))
+    assert back == src, f"got: {back!r}"
+
+
+def test_paragraph_break_preserved_through_round_trip() -> None:
+    """Cat G — blank line in source survives compile/decompile."""
+    src = (
+        'DEFINE "word" AS DATA.\n'
+        'DEFINE "constraint" AS DATA.\n'
+        '\n'
+        'PARTY language SHALL VALIDATE EACH DATA word.'
+    )
+    back = trl.decompile(trl.compile(src))
+    assert back == src, f"got: {back!r}"
+
+
+def test_modal_bearing_clause_repeats_subject_after_inherit() -> None:
+    """Cat E refinement — modal-bearing clause always repeats subject."""
+    src = (
+        "PARTY processor SHALL VALIDATE EACH REQUIRED RECORD.\n"
+        "IF PARTY processor THROW EXCEPTION\n"
+        "  THEN PARTY processor SHALL CATCH THE EXCEPTION\n"
+        "  THEN HANDLE THE ERROR\n"
+        "  OR PARTY processor SHALL SEND MESSAGE TO PARTY admin."
+    )
+    back = trl.decompile(trl.compile(src))
+    # Both modal-bearing OR/THEN clauses keep their explicit subject
+    assert "OR PARTY processor SHALL SEND" in back, f"got: {back!r}"
 
 
 def _run_all_tests() -> int:
