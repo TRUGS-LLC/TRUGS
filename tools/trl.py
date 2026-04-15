@@ -215,6 +215,7 @@ class Clause:
     extra_objects: list[NounPhrase] = field(default_factory=list)  # AND-chained: A AND B AND C
     prep_phrases: list["PrepPhrase"] = field(default_factory=list)
     value_arg: Optional[str] = None    # trailing INTEGER argument (e.g. "10" in TAKE RESULT 10)
+    stative: bool = False              # True for `subject PREP target` clauses (no verb, no op)
 
 
 @dataclass
@@ -415,11 +416,12 @@ def _parse_clause(tokens: list[Token], pos: int, lang: dict,
                 trial_subject, trial_pos = _parse_noun_phrase(tokens, pos, lang, require_identifier=False)
                 # Commit subject if the next token is:
                 #   - a modal or verb (regular clause)
+                #   - a preposition (stative clause: subject + PREP + target)
                 #   - PUNCT '.' (subject-only carve-out, verb elided)
                 nxt = tokens[trial_pos]
                 if (nxt.kind == "PUNCT" and nxt.value == ".") or (nxt.kind == "WORD" and (
                     nxt.value in MODALS
-                    or lang.get(nxt.value, {}).get("speech") == "verb"
+                    or lang.get(nxt.value, {}).get("speech") in ("verb", "preposition")
                 )):
                     subject = trial_subject
                     pos = trial_pos
@@ -509,6 +511,16 @@ def _parse_clause(tokens: list[Token], pos: int, lang: dict,
         else:
             break
 
+    # Detect stative clause: no verb, no modal, no object, only prep_phrases.
+    # Example: `THE REMEDY DEPENDS_ON PARTY owner.`
+    stative = (
+        verb is None
+        and modal is None
+        and obj is None
+        and not adverbs
+        and len(prep_phrases) >= 1
+    )
+
     return Clause(
         subject=subject,
         verb_phrase=VerbPhrase(verb=verb, modal=modal, adverbs=adverbs),
@@ -516,6 +528,7 @@ def _parse_clause(tokens: list[Token], pos: int, lang: dict,
         extra_objects=extra_objects,
         prep_phrases=prep_phrases,
         value_arg=value_arg,
+        stative=stative,
     ), pos
 
 
@@ -680,6 +693,22 @@ def compile(src_or_sentences, lang: Optional[dict] = None) -> dict:
                 )
             subj_id = _ensure_noun_node(subject_np)
             inherited_subject = subject_np
+
+            # Stative clause: no op, just direct edges subject → target via PREP.
+            if clause.stative:
+                for pp in clause.prep_phrases:
+                    target_id = _ensure_noun_node(pp.target)
+                    edge: dict = {"from_id": subj_id, "to_id": target_id, "relation": pp.preposition}
+                    if sentence.preamble:
+                        edge["properties"] = {"preamble": True}
+                    edges.append(edge)
+                # Use the stative subject id as the "op id slot" so any
+                # following conjunction edge has a target. The conjunction
+                # edge ends up pointing at the stative subject, which the
+                # decompiler interprets as "THEN <stative clause>".
+                clause_op_ids.append(subj_id)
+                # Don't update prev_op_id (pronouns shouldn't reference statives)
+                continue
 
             # Verb may be elided in carve-out clauses (e.g. EXCEPT PARTY system).
             # Inherit verb_phrase from prior clause if so.
@@ -926,24 +955,65 @@ def decompile(graph: dict, lang: Optional[dict] = None) -> str:
                 and n.get("properties", {}).get("operation")}
     edges = graph["edges"]
 
-    # Index conjunction edges: op_from -> (conjunction_word, op_to)
+    # Index conjunction edges: op_from -> (conjunction_word, target_id).
+    # Target may be an op (regular conjunction) or a non-op subject node
+    # (stative continuation: ... THEN <stative-clause>).
     conj_next: dict[str, tuple[str, str]] = {}
     conj_targets: set[str] = set()
     for e in edges:
         rel = e.get("relation")
-        if rel in CONJUNCTIONS and e["from_id"] in op_nodes and e["to_id"] in op_nodes:
+        if rel in CONJUNCTIONS and e["from_id"] in op_nodes:
             conj_next[e["from_id"]] = (rel, e["to_id"])
             conj_targets.add(e["to_id"])
+
+    preposition_words_set = {w for w, ent in lang.items() if ent["speech"] == "preposition"}
+    # Stative edges: source is NOT an op-node, relation is a preposition.
+    # Emit one stative sentence per such edge, in graph edge order.
+    stative_edges: list[dict] = [
+        e for e in edges
+        if e["from_id"] not in op_nodes
+        and e.get("relation") in preposition_words_set
+    ]
+    rendered_stative: set[int] = set()  # by edge index
 
     sentences_out: list[str] = []
     visited_ops: set[str] = set()
 
+    # Track which graph element we should emit next, by walking nodes + edges
+    # in source order. Stative edges are interleaved with op-rooted sentences
+    # using a simple heuristic: emit stative for any edge whose target node
+    # appears in the graph before the next op.
+    def _emit_stative(e: dict) -> str:
+        subj = nodes_by_id.get(e["from_id"])
+        tgt = nodes_by_id.get(e["to_id"])
+        if subj is None or tgt is None:
+            return ""
+        prefix = "WHEREAS " if (e.get("properties") or {}).get("preamble") else ""
+        return (
+            prefix
+            + _render_noun_phrase(subj, lang=lang)
+            + " " + e["relation"] + " "
+            + _render_noun_phrase(tgt, lang=lang)
+            + "."
+        )
+
     # Walk nodes in graph order. DEFINED_TERM nodes emit as DEFINE sentences.
     # Operation nodes that are not conjunction-targets start a sentence chain.
+    # Stative edges are flushed when we hit a node that appears as either
+    # endpoint of an unrendered stative edge.
+    def _flush_stative_at(node_id: str) -> None:
+        for i, e in enumerate(stative_edges):
+            if i in rendered_stative:
+                continue
+            if e["from_id"] == node_id:
+                sentences_out.append(_emit_stative(e))
+                rendered_stative.add(i)
+
     for node in graph["nodes"]:
         if node.get("properties", {}).get("defined") is True:
             sentences_out.append(_render_define(node, lang))
             continue
+        _flush_stative_at(node["id"])
         if node.get("type") != "TRANSFORM":
             continue
         if node.get("properties", {}).get("operation") is None:
@@ -967,11 +1037,25 @@ def decompile(graph: dict, lang: Optional[dict] = None) -> str:
                                 if e["to_id"] == cur and e.get("relation") in MODALS | {"EXECUTES"})
         while cur in conj_next:
             conj, nxt = conj_next[cur]
+            # If nxt is NOT an op, it's a stative continuation. Render the
+            # stative clause inline using outgoing preposition edges from nxt.
+            if nxt not in op_nodes:
+                parts.append(conj)
+                stative_subj = nodes_by_id.get(nxt)
+                if stative_subj is not None:
+                    parts.append(_render_noun_phrase(stative_subj, lang=lang))
+                # Find the preposition edge(s) from this stative subject and
+                # mark them rendered so we don't emit them as standalone sentences.
+                for i, e in enumerate(stative_edges):
+                    if e["from_id"] == nxt:
+                        rendered_stative.add(i)
+                        target = nodes_by_id.get(e["to_id"])
+                        parts.append(e["relation"])
+                        if target is not None:
+                            parts.append(_render_noun_phrase(target, lang=lang))
+                break  # stative ends a chain in v0.2.2
             nxt_subject_id = next(e["from_id"] for e in edges
                                    if e["to_id"] == nxt and e.get("relation") in MODALS | {"EXECUTES"})
-            # Canonical form: omit the subject only for INHERITING_CONJUNCTIONS
-            # (THEN/FINALLY/ELSE — sequential/continuation). AND/OR/UNLESS/etc.
-            # always repeat the subject, matching SPEC_examples.md conventions.
             same_subject = nxt_subject_id == prev_subject_id
             inherit = conj in INHERITING_CONJUNCTIONS and same_subject
             include_subject = not inherit
