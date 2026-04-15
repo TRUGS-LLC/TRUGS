@@ -1,4 +1,4 @@
-r"""TRL compiler v0.1 — deterministic TRL ↔ TRUG round-trip.
+r"""TRL compiler — deterministic TRL ↔ TRUG round-trip.
 
 TRL (TRUGS Language) is a closed 190-word subset of English. Every valid
 sentence round-trips through a TRUG graph with no information loss beyond
@@ -76,12 +76,29 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Optional
 
+__all__ = [
+    # Public API
+    "tokenize", "parse", "compile", "decompile", "validate",
+    "load_language", "classify",
+    # AST types
+    "Token", "NounPhrase", "VerbPhrase", "AdverbPhrase",
+    "PrepPhrase", "Clause", "Sentence", "Definition",
+    # Errors
+    "TRLError", "TRLSyntaxError", "TRLVocabularyError", "TRLGrammarError",
+    # Word-class sets (consumers may need these for spec-aware code)
+    "MODALS", "CONJUNCTIONS", "PRONOUNS",
+    # CLI
+    "main",
+]
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_LANGUAGE_TRUG = REPO_ROOT / "TRUGS_LANGUAGE" / "language.trug.json"
 
 SUGAR_RE = re.compile(r"'[a-z_]+")
 IDENTIFIER_RE = re.compile(r"[a-z_][a-z0-9_-]*")
 WORD_RE = re.compile(r"[A-Z_]+")
+# Duration units (longest-prefix-first): ns, us, ms, s, m, h, d.
+# Note `m` is treated as minutes (not meters) by convention.
 DURATION_RE = re.compile(r"\d+(?:ms|us|ns|s|m|h|d)\b")
 INTEGER_RE = re.compile(r"\d+")
 STRING_RE = re.compile(r'"([^"\\]*(?:\\.[^"\\]*)*)"')
@@ -91,59 +108,85 @@ STRING_RE = re.compile(r'"([^"\\]*(?:\\.[^"\\]*)*)"')
 
 @dataclass(frozen=True)
 class Token:
-    kind: str   # 'WORD' | 'IDENTIFIER' | 'PUNCT' | 'EOF'
+    kind: str   # 'WORD' | 'IDENTIFIER' | 'PUNCT' | 'INTEGER' | 'DURATION' | 'STRING' | 'EOF'
     value: str
+    line: int = 1     # 1-based line number in source
+    col: int = 1      # 1-based column number in source
+
+    def location(self) -> str:
+        """Return human-readable `line:col` for error messages."""
+        return f"line {self.line}, col {self.col}"
 
 
 def tokenize(src: str) -> list[Token]:
-    """Strip sugar, split into tokens. Spec §1.1 (sugar) + §1 BNF tokens.
+    """Strip sugar, split into tokens with line/col tracking.
 
-    Produces WORD (uppercase TRL word), IDENTIFIER (lowercase_name),
-    and PUNCT ('.'). Whitespace is discarded.
+    Produces WORD / IDENTIFIER / PUNCT / INTEGER / DURATION / STRING.
+    Whitespace is discarded. Sugar tokens (`'word`) are stripped per §1.1.
+
+    Each token carries 1-based line and col offsets in the original source
+    (BEFORE sugar stripping) so error messages can point at the actual
+    location.
     """
-    stripped = SUGAR_RE.sub("", src)
     tokens: list[Token] = []
     i = 0
-    while i < len(stripped):
-        ch = stripped[i]
+    line = 1
+    col = 1
+
+    def _advance(n: int) -> None:
+        nonlocal i, line, col
+        for _ in range(n):
+            if i < len(src) and src[i] == "\n":
+                line += 1
+                col = 1
+            else:
+                col += 1
+            i += 1
+
+    while i < len(src):
+        ch = src[i]
+        # Sugar token — skip without emitting
+        m = SUGAR_RE.match(src, i)
+        if m:
+            _advance(m.end() - i)
+            continue
         if ch.isspace():
-            i += 1
+            _advance(1)
             continue
+        tk_line, tk_col = line, col
         if ch == ".":
-            tokens.append(Token("PUNCT", "."))
-            i += 1
+            tokens.append(Token("PUNCT", ".", tk_line, tk_col))
+            _advance(1)
             continue
-        # String literal: "..."
         if ch == '"':
-            m = STRING_RE.match(stripped, i)
+            m = STRING_RE.match(src, i)
             if not m:
-                raise TRLSyntaxError(f"unterminated string literal at position {i}")
-            tokens.append(Token("STRING", m.group(1)))
-            i = m.end()
+                raise TRLSyntaxError(f"unterminated string literal at line {tk_line}, col {tk_col}")
+            tokens.append(Token("STRING", m.group(1), tk_line, tk_col))
+            _advance(m.end() - i)
             continue
-        m = WORD_RE.match(stripped, i)
-        if m and (m.end() == len(stripped) or not stripped[m.end()].isalnum() and stripped[m.end()] != "_"):
-            tokens.append(Token("WORD", m.group()))
-            i = m.end()
+        m = WORD_RE.match(src, i)
+        if m and (m.end() == len(src) or not src[m.end()].isalnum() and src[m.end()] != "_"):
+            tokens.append(Token("WORD", m.group(), tk_line, tk_col))
+            _advance(m.end() - i)
             continue
-        # Duration literal first (more specific than bare integer)
-        m = DURATION_RE.match(stripped, i)
+        m = DURATION_RE.match(src, i)
         if m:
-            tokens.append(Token("DURATION", m.group()))
-            i = m.end()
+            tokens.append(Token("DURATION", m.group(), tk_line, tk_col))
+            _advance(m.end() - i)
             continue
-        m = INTEGER_RE.match(stripped, i)
+        m = INTEGER_RE.match(src, i)
         if m:
-            tokens.append(Token("INTEGER", m.group()))
-            i = m.end()
+            tokens.append(Token("INTEGER", m.group(), tk_line, tk_col))
+            _advance(m.end() - i)
             continue
-        m = IDENTIFIER_RE.match(stripped, i)
+        m = IDENTIFIER_RE.match(src, i)
         if m:
-            tokens.append(Token("IDENTIFIER", m.group()))
-            i = m.end()
+            tokens.append(Token("IDENTIFIER", m.group(), tk_line, tk_col))
+            _advance(m.end() - i)
             continue
-        raise TRLSyntaxError(f"unexpected character {ch!r} at position {i}")
-    tokens.append(Token("EOF", ""))
+        raise TRLSyntaxError(f"unexpected character {ch!r} at line {tk_line}, col {tk_col}")
+    tokens.append(Token("EOF", "", line, col))
     return tokens
 
 
@@ -375,7 +418,9 @@ def _parse_noun_phrase(tokens: list[Token], pos: int, lang: dict,
 
     # Required noun
     if tokens[pos].kind != "WORD":
-        raise TRLSyntaxError(f"expected noun at position {pos}, got {tokens[pos]!r}")
+        raise TRLSyntaxError(
+            f"expected noun at {tokens[pos].location()}, got {tokens[pos].kind} {tokens[pos].value!r}"
+        )
     noun = tokens[pos].value
     entry = classify(noun, lang)
     if entry["speech"] != "noun":
@@ -622,8 +667,8 @@ def _parse_sentence(tokens: list[Token], pos: int, lang: dict) -> tuple[Sentence
     # Terminator
     if tokens[pos].kind != "PUNCT" or tokens[pos].value != ".":
         raise TRLSyntaxError(
-            f"expected '.' at position {pos}, got {tokens[pos]!r}. "
-            "Remaining v0.1 grammar (noun conjunctions, DATE literals) lands in later PRs."
+            f"expected '.' at {tokens[pos].location()}, got {tokens[pos].kind} {tokens[pos].value!r}. "
+            "Check that the previous clause is well-formed (subject + verb + objects)."
         )
     pos += 1
 
@@ -1103,25 +1148,27 @@ def decompile(graph: dict, lang: Optional[dict] = None) -> str:
 
         preamble = bool(node["properties"].get("preamble"))
         leading = node["properties"].get("leading_conjunction")
-        parts: list[str] = []
+        # Track clauses and inter-clause conjunctions so multi-clause sentences
+        # can be re-broken at canonical SPEC_examples.md formatting (one clause
+        # per line, 2-space indented continuation per §1.2 examples).
+        first_clause_text = _render_clause(op_id, op_nodes, edges, nodes_by_id, lang,
+                                            include_subject=True)
         if preamble:
-            parts.append("WHEREAS")
+            first_clause_text = "WHEREAS " + first_clause_text
         elif leading:
-            parts.append(leading)
-        parts.append(_render_clause(op_id, op_nodes, edges, nodes_by_id, lang,
-                                     include_subject=True))
+            first_clause_text = leading + " " + first_clause_text
+
+        clause_texts: list[str] = [first_clause_text]
+        clause_conjunctions: list[str] = []  # length = len(clause_texts) - 1
         visited_ops.add(op_id)
         cur = op_id
         prev_subject_id = next(e["from_id"] for e in edges
                                 if e["to_id"] == cur and e.get("relation") in MODALS | {"EXECUTES"})
         while cur in conj_next:
             conj, nxt = conj_next[cur]
-            # If nxt is NOT an op, it's a stative continuation. Render the
-            # stative clause inline using outgoing preposition edges from nxt.
+            # Stative continuation
             if nxt not in op_nodes:
-                parts.append(conj)
                 stative_subj = nodes_by_id.get(nxt)
-                # Use subject_np_shape from the FIRST stative edge from this subject
                 first_stative = next(
                     (e for e in stative_edges if e["from_id"] == nxt), None
                 )
@@ -1129,45 +1176,77 @@ def decompile(graph: dict, lang: Optional[dict] = None) -> str:
                     (first_stative.get("properties") or {}).get("subject_np_shape")
                     if first_stative else None
                 )
+                stative_parts: list[str] = []
                 if stative_subj is not None:
-                    parts.append(_render_noun_phrase(stative_subj, lang=lang,
-                                                       shape=subj_shape_for_stative))
-                # Find the preposition edge(s) from this stative subject and
-                # mark them rendered so we don't emit them as standalone sentences.
+                    stative_parts.append(_render_noun_phrase(stative_subj, lang=lang,
+                                                               shape=subj_shape_for_stative))
                 for i, e in enumerate(stative_edges):
                     if e["from_id"] == nxt:
                         rendered_stative.add(i)
                         target = nodes_by_id.get(e["to_id"])
-                        parts.append(e["relation"])
+                        stative_parts.append(e["relation"])
                         if target is not None:
                             shape = (e.get("properties") or {}).get("np_shape")
-                            parts.append(_render_noun_phrase(target, lang=lang, shape=shape))
-                break  # stative ends a chain in v0.2.2
+                            stative_parts.append(_render_noun_phrase(target, lang=lang, shape=shape))
+                clause_conjunctions.append(conj)
+                clause_texts.append(" ".join(stative_parts))
+                break
             nxt_subject_id = next(e["from_id"] for e in edges
                                    if e["to_id"] == nxt and e.get("relation") in MODALS | {"EXECUTES"})
             same_subject = nxt_subject_id == prev_subject_id
             inherit = conj in INHERITING_CONJUNCTIONS and same_subject
             include_subject = not inherit
-            parts.append(conj)
-            parts.append(_render_clause(nxt, op_nodes, edges, nodes_by_id, lang,
-                                          include_subject=include_subject))
+            clause_conjunctions.append(conj)
+            clause_texts.append(_render_clause(nxt, op_nodes, edges, nodes_by_id, lang,
+                                                 include_subject=include_subject))
             visited_ops.add(nxt)
             prev_subject_id = nxt_subject_id
             cur = nxt
-        sentences_out.append(" ".join(parts) + ".")
+
+        # Assemble: single-clause inline; multi-clause one per line with
+        # 2-space indented continuations per SPEC_examples.md formatting.
+        if not clause_conjunctions:
+            sentence_text = clause_texts[0]
+        else:
+            sentence_text = clause_texts[0]
+            for conj, txt in zip(clause_conjunctions, clause_texts[1:]):
+                sentence_text += f"\n  {conj} {txt}"
+        sentences_out.append(sentence_text + ".")
 
     return "\n".join(sentences_out)
 
 
 # ─── Validate ─────────────────────────────────────────────────────────
 
+# SPEC_grammar.md §2.1 — Subject subcategory + verb subcategory compatibility.
+# True = combination is allowed.
+_SUBJ_VERB_OK: set[tuple[str, str]] = (
+    # Actors can be subjects of any verb subcategory
+    {("actors", v) for v in ("transform", "move", "obligate", "permit",
+                              "prohibit", "control", "bind", "resolve")}
+    # Containers can transform / control / bind
+    | {("containers", "transform"), ("containers", "control"), ("containers", "bind")}
+    # Artifacts can only be subjects of comparison/existence Control verbs (footnote)
+    | {("artifacts", "control")}
+    # Boundaries / Outcomes cannot be primary subjects (per spec table)
+)
+
+_NEGATIVE_ARTICLES = {"NO", "NONE"}
+
+
 def validate(graph: dict, lang: Optional[dict] = None) -> list[str]:
     """Return a list of validation errors. Empty list = valid.
 
-    v0.1 implements a subset of SPEC_grammar.md §4 rules:
-      - Rule 1: every node has a type from the noun vocabulary (or TRANSFORM for ops)
-      - Rule 2: every edge has a relation (TRL preposition or v0.1 convention)
-    Full 12-rule validator is v0.2+ work.
+    Implements these SPEC_grammar.md §4 rules:
+      Rule 1  — every node has a type from the noun vocabulary (or TRANSFORM)
+      Rule 2  — every edge has a relation (TRL preposition or convention)
+      Rule 3  — subject-verb compatibility per §2.1
+      Rule 7  — modals (SHALL/MAY/SHALL_NOT) require Actor subjects per §2.3
+      Rule 11 — no double negation (Negative article + Prohibit modal)
+
+    Rules 4 (verb-object), 5 (adj-noun), 6 (adv-verb), 8 (pronoun resolution),
+    9 (SUPERSEDES/EXTENDS type match), 10 (orphan nodes), 12 (pronoun scope)
+    are deferred — see TRUGS-DEVELOPMENT issues for tracking.
     """
     if lang is None:
         lang = load_language()
@@ -1175,22 +1254,75 @@ def validate(graph: dict, lang: Optional[dict] = None) -> list[str]:
 
     nouns = {w for w, e in lang.items() if e["speech"] == "noun"}
     prepositions = {w for w, e in lang.items() if e["speech"] == "preposition"}
-    v01_relations = prepositions | MODALS | CONJUNCTIONS | {"EXECUTES", "ACTS_ON"}
+    valid_relations = prepositions | MODALS | CONJUNCTIONS | {"EXECUTES", "ACTS_ON"}
 
+    nodes_by_id = {n.get("id"): n for n in graph.get("nodes", []) if "id" in n}
+    edges = graph.get("edges", [])
+
+    def _subcategory_of(noun_word: str) -> Optional[str]:
+        e = lang.get(noun_word)
+        return e.get("subcategory") if e else None
+
+    # Rules 1 & 2 (existing)
     for n in graph.get("nodes", []):
         if "type" not in n:
             errors.append(f"node {n.get('id', '?')}: missing type")
         elif n["type"] == "TRANSFORM":
-            pass  # Operation nodes are fine
+            pass
         elif n["type"] not in nouns:
             errors.append(f"node {n.get('id', '?')}: type {n['type']!r} is not a TRL noun")
 
-    for e in graph.get("edges", []):
+    for e in edges:
         rel = e.get("relation")
         if not rel:
             errors.append(f"edge {e.get('from_id')} → {e.get('to_id')}: missing relation")
-        elif rel not in v01_relations:
+        elif rel not in valid_relations:
             errors.append(f"edge {e.get('from_id')} → {e.get('to_id')}: unknown relation {rel!r}")
+
+    # Rules 3, 7, 11 — operate per operation node (TRANSFORM with operation prop)
+    op_nodes = [n for n in graph.get("nodes", [])
+                if n.get("type") == "TRANSFORM"
+                and n.get("properties", {}).get("operation")]
+    for op in op_nodes:
+        op_id = op["id"]
+        verb_sub = op.get("properties", {}).get("verb_subcategory")
+        # Find the subject edge for this op
+        subj_edge = next(
+            (e for e in edges if e.get("to_id") == op_id
+             and e.get("relation") in MODALS | {"EXECUTES"}),
+            None,
+        )
+        if subj_edge is None or verb_sub is None:
+            continue
+        subj_node = nodes_by_id.get(subj_edge.get("from_id"))
+        if subj_node is None:
+            continue
+        subj_type = subj_node.get("type")
+        subj_sub = _subcategory_of(subj_type)
+
+        # Rule 3 — subject-verb compatibility
+        if subj_sub and (subj_sub, verb_sub) not in _SUBJ_VERB_OK:
+            errors.append(
+                f"op {op_id}: subject {subj_type!r} ({subj_sub}) cannot perform "
+                f"{op['properties']['operation']!r} ({verb_sub} verb) — §2.1"
+            )
+
+        # Rule 7 — modals require Actor subjects
+        modal = subj_edge.get("relation")
+        if modal in MODALS and subj_sub != "actors":
+            errors.append(
+                f"op {op_id}: modal {modal!r} on non-Actor subject {subj_type!r} "
+                f"({subj_sub}) — §2.3"
+            )
+
+        # Rule 11 — no double negation (Negative article + Prohibit modal)
+        if modal == "SHALL_NOT":
+            np_shape = (subj_edge.get("properties") or {}).get("np_shape") or {}
+            if np_shape.get("article") in _NEGATIVE_ARTICLES:
+                errors.append(
+                    f"op {op_id}: double negation — Negative article "
+                    f"{np_shape['article']!r} with SHALL_NOT modal — §4.11"
+                )
 
     return errors
 
@@ -1198,28 +1330,53 @@ def validate(graph: dict, lang: Optional[dict] = None) -> list[str]:
 # ─── CLI ──────────────────────────────────────────────────────────────
 
 def main(argv: Optional[list] = None) -> int:
+    """CLI entry point for `trugs-trl` (compile / decompile / validate).
+
+    Exit codes:
+      0 — success
+      1 — validation errors
+      2 — input error (file not found, malformed JSON, TRL syntax/grammar error)
+    """
     parser = argparse.ArgumentParser(
         prog="trugs-trl",
         description="TRL compiler — compile/decompile/validate TRL ↔ TRUG.",
     )
     sub = parser.add_subparsers(dest="command", required=True)
-
     for cmd, help_text in [("compile", "Compile TRL to TRUG JSON"),
                             ("decompile", "Decompile TRUG JSON to TRL"),
                             ("validate", "Validate a TRUG JSON")]:
         sp = sub.add_parser(cmd, help=help_text)
         sp.add_argument("file", help="input file, or - for stdin")
-
     ns = parser.parse_args(argv)
-    src = sys.stdin.read() if ns.file == "-" else Path(ns.file).read_text()
+
+    # Read input — friendly error on missing file
+    try:
+        src = sys.stdin.read() if ns.file == "-" else Path(ns.file).read_text()
+    except FileNotFoundError as e:
+        print(f"error: input file not found: {e.filename}", file=sys.stderr)
+        return 2
+    except OSError as e:
+        print(f"error: could not read input: {e}", file=sys.stderr)
+        return 2
+
+    def _parse_json_input() -> object:
+        try:
+            return json.loads(src)
+        except json.JSONDecodeError as e:
+            print(
+                f"error: input is not valid JSON ({e.msg} at line {e.lineno}, col {e.colno}). "
+                "Did you pass a `.trl` file to a JSON-input command?",
+                file=sys.stderr,
+            )
+            sys.exit(2)
 
     try:
         if ns.command == "compile":
             print(json.dumps(compile(src), indent=2))
         elif ns.command == "decompile":
-            print(decompile(json.loads(src)))
+            print(decompile(_parse_json_input()))
         elif ns.command == "validate":
-            errors = validate(json.loads(src))
+            errors = validate(_parse_json_input())
             for err in errors:
                 print(f"  {err}", file=sys.stderr)
             if errors:
