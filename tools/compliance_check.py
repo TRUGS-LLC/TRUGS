@@ -494,31 +494,49 @@ def check_trug_file(path: Path, report: Report, root: Path, folder_code_artifact
                 ))
 
 
+# AGENT compliance SHALL DELEGATE C7 TO PROCESS trugs_validate.
 def _run_folder_check(trug_path: Path, report: Report) -> None:
-    """C7 — delegate to trugs-folder-check via subprocess.
+    """C7 — validate a TRUG file against CORE rules.
 
-    # AGENT compliance SHALL DELEGATE C7 TO PROCESS trugs-folder-check.
+    Preferred: in-process import of tools.validate (always available in TRUGS itself
+    and in any repo that installs the `trugs` package). Falls back to subprocess
+    `trugs-validate` for resilience, and `trugs-folder-check` if that's the tool
+    available in the environment.
     """
+    # Preferred: in-process validator from the trugs package
     try:
-        result = subprocess.run(
-            ["trugs-folder-check", str(trug_path)],
-            capture_output=True, text=True, timeout=30,
-        )
-    except (FileNotFoundError, subprocess.TimeoutExpired):
-        # If trugs-folder-check is not installed, skip with a warning — one violation.
-        report.violations.append(Violation(
-            rule="C7", path=trug_path, line=None, symbol=None,
-            message="trugs-folder-check is not installed or timed out — install trugs_tools to enable",
-        ))
+        from tools import validate as _validate_mod
+        result_obj = _validate_mod.validate_file(trug_path)
+        if not result_obj.valid:
+            first_err = result_obj.errors[0] if result_obj.errors else None
+            msg = f"{first_err.code}: {first_err.message}" if first_err else "validate reported errors"
+            report.violations.append(Violation(
+                rule="C7", path=trug_path, line=None, symbol=None,
+                message=f"validate_graph failed: {msg}",
+            ))
         return
-    if result.returncode != 0:
-        # Parse the first line of stderr/stdout for the error message
-        msg = (result.stdout + result.stderr).strip().splitlines()
-        first = msg[0] if msg else "trugs-folder-check reported errors"
-        report.violations.append(Violation(
-            rule="C7", path=trug_path, line=None, symbol=None,
-            message=f"trugs-folder-check failed: {first}",
-        ))
+    except ImportError:
+        pass  # fall through to subprocess
+
+    # Fallback: subprocess, try trugs-validate first, then trugs-folder-check
+    for cmd in (["trugs-validate", str(trug_path)], ["trugs-folder-check", str(trug_path)]):
+        try:
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+        except (FileNotFoundError, subprocess.TimeoutExpired):
+            continue
+        if result.returncode != 0:
+            msg = (result.stdout + result.stderr).strip().splitlines()
+            first = msg[0] if msg else f"{cmd[0]} reported errors"
+            report.violations.append(Violation(
+                rule="C7", path=trug_path, line=None, symbol=None,
+                message=f"{cmd[0]} failed: {first}",
+            ))
+        return
+    # Neither validator available — one violation
+    report.violations.append(Violation(
+        rule="C7", path=trug_path, line=None, symbol=None,
+        message="no validator available — install trugs (tools.validate) or trugs-tools (trugs-folder-check)",
+    ))
 
 
 # AGENT compliance SHALL VALIDATE EACH RECORD invariant SUBJECT_TO A RECORD assertion AND A RECORD test.
