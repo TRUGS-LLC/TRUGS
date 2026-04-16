@@ -1,0 +1,58 @@
+name: Dark Code compliance
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  compliance:
+    runs-on: ubuntu-latest
+    name: trugs-compliance-check
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install package
+        run: pip install -e .
+
+      - name: Run trugs-compliance-check
+        run: trugs-compliance-check .
+
+      - name: Upload detailed report
+        if: failure()
+        run: trugs-compliance-check --json . > compliance-report.json
+        continue-on-error: true
+
+      - name: Attach report artifact
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: compliance-report
+          path: compliance-report.json
+
+  tests:
+    runs-on: ubuntu-latest
+    name: pytest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install
+        run: |
+          pip install -e .
+          pip install pytest
+
+      - name: Run compliance_check tests
+        run: pytest tools/test_compliance_check.py -v
