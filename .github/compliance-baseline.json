@@ -1,14 +1,12 @@
 {
-  "compliance_percent": 42.24,
+  "compliance_percent": 99.48,
   "files_checked": 24,
   "functions_checked": 113,
   "tests_checked": 346,
   "nodes_checked": 4,
   "trug_files_checked": 4,
-  "violation_count": 335,
+  "violation_count": 3,
   "violations_by_rule": {
-    "C4": 323,
-    "C1": 9,
     "C7": 3
   }
 }
