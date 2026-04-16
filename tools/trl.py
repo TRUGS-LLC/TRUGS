@@ -106,6 +106,7 @@ STRING_RE = re.compile(r'"([^"\\]*(?:\\.[^"\\]*)*)"')
 
 # ─── Tokenizer ────────────────────────────────────────────────────────
 
+# AGENT claude SHALL DEFINE RECORD token AS A RECORD word.
 @dataclass(frozen=True)
 class Token:
     kind: str   # 'WORD' | 'IDENTIFIER' | 'PUNCT' | 'INTEGER' | 'DURATION' | 'STRING' | 'EOF'
@@ -113,11 +114,13 @@ class Token:
     line: int = 1     # 1-based line number in source
     col: int = 1      # 1-based column number in source
 
+    # AGENT claude SHALL MAP RECORD token TO STRING DATA output.
     def location(self) -> str:
         """Return human-readable `line:col` for error messages."""
         return f"line {self.line}, col {self.col}"
 
 
+# PROCESS tokenize SHALL SPLIT STRING DATA source THEN RETURN ALL RECORD token.
 def tokenize(src: str) -> list[Token]:
     """Strip sugar, split into tokens with line/col tracking.
 
@@ -192,6 +195,7 @@ def tokenize(src: str) -> list[Token]:
 
 # ─── Language lookup ─────────────────────────────────────────────────
 
+# PROCESS loader SHALL READ FILE language THEN RETURN RECORD vocabulary.
 @lru_cache(maxsize=4)
 def load_language(path: Optional[str] = None) -> dict:
     """Load language.trug.json, return dict of {WORD: {speech, subcategory, ...}}."""
@@ -211,8 +215,9 @@ def load_language(path: Optional[str] = None) -> dict:
     return lookup
 
 
+# PROCESS classifier SHALL MATCH STRING DATA word SUBJECT_TO RECORD vocabulary.
 def classify(word: str, lang: dict) -> dict:
-    """Return {speech, subcategory, ...} for a TRL word. Raises on unknown."""
+    """Return {speech, subcategory, ...} for a TRUG/L word. Raises on unknown."""
     entry = lang.get(word)
     if not entry:
         raise TRLVocabularyError(f"{word!r} is not in the TRL vocabulary")
@@ -221,6 +226,7 @@ def classify(word: str, lang: dict) -> dict:
 
 # ─── AST ──────────────────────────────────────────────────────────────
 
+# AGENT claude SHALL DEFINE RECORD noun_phrase AS A RECORD phrase.
 @dataclass
 class NounPhrase:
     noun: str = ""                  # e.g. "PARTY". Empty if pronoun is set.
@@ -230,12 +236,14 @@ class NounPhrase:
     pronoun: Optional[str] = None     # "RESULT" | "SELF" | "OUTPUT" | ...
 
 
+# AGENT claude SHALL DEFINE RECORD adverb_phrase AS A RECORD phrase.
 @dataclass
 class AdverbPhrase:
     adverb: str                    # e.g. "WITHIN"
     value: Optional[str] = None    # raw literal text, e.g. "30s" or "3"
 
 
+# AGENT claude SHALL DEFINE RECORD verb_phrase AS A RECORD phrase.
 @dataclass
 class VerbPhrase:
     verb: Optional[str] = None     # e.g. "VALIDATE"; None means inherit from prior clause
@@ -243,6 +251,7 @@ class VerbPhrase:
     adverbs: list[AdverbPhrase] = field(default_factory=list)
 
 
+# AGENT claude SHALL DEFINE RECORD prep_phrase AS A RECORD phrase.
 @dataclass
 class PrepPhrase:
     preposition: str               # e.g. "TO"
@@ -250,6 +259,7 @@ class PrepPhrase:
     extra_targets: list[NounPhrase] = field(default_factory=list)  # AND-chained: TO a AND b AND c
 
 
+# AGENT claude SHALL DEFINE RECORD clause AS A RECORD group.
 @dataclass
 class Clause:
     subject: Optional[NounPhrase]      # None means inherit from prior clause
@@ -262,12 +272,14 @@ class Clause:
     depth: int = 0                     # 0 = top-level; +1 per SUBORDINATING_CONJUNCTION nesting
 
 
+# AGENT claude SHALL DEFINE RECORD definition AS A RECORD binding.
 @dataclass
 class Definition:
     name: str          # quoted string, e.g. "curator"
     noun_phrase: NounPhrase  # e.g. IMMUTABLE RECORD
 
 
+# AGENT claude SHALL DEFINE RECORD sentence AS A RECORD statement.
 @dataclass
 class Sentence:
     clauses: list["Clause"] = field(default_factory=list)  # >=1 clause for normal/preamble
@@ -332,26 +344,31 @@ PRONOUNS = (
 
 # ─── Errors ───────────────────────────────────────────────────────────
 
+# AGENT claude SHALL DEFINE RECORD error AS A RECORD exception.
 class TRLError(Exception):
-    """Base for TRL compiler errors."""
+    """Base for TRUG/L compiler errors."""
 
 
+# AGENT claude SHALL DEFINE RECORD syntax_error AS A RECORD exception.
 class TRLSyntaxError(TRLError):
-    """Malformed TRL — tokens do not match the grammar."""
+    """Malformed TRUG/L — tokens do not match the grammar."""
 
 
+# AGENT claude SHALL DEFINE RECORD vocabulary_error AS A RECORD exception.
 class TRLVocabularyError(TRLError):
-    """Word is not in the 190-word TRL vocabulary."""
+    """Word is not in the 190-word TRUG/L vocabulary."""
 
 
+# AGENT claude SHALL DEFINE RECORD grammar_error AS A RECORD exception.
 class TRLGrammarError(TRLError):
     """Valid tokens, wrong composition (e.g. modal on non-Actor subject)."""
 
 
 # ─── Parser ───────────────────────────────────────────────────────────
 
+# PROCESS parser SHALL VALIDATE ALL RECORD token THEN RETURN RECORD sentence.
 def parse(src: str, lang: Optional[dict] = None) -> list[Sentence]:
-    """Parse TRL source into a list of Sentences.
+    """Parse TRUG/L source into a list of Sentences.
 
     Detects blank lines between sentences (line gap ≥ 2) and tags the
     next sentence with `preceded_by_blank_line=True` so decompile can
@@ -719,10 +736,11 @@ def _parse_sentence(tokens: list[Token], pos: int, lang: dict) -> tuple[Sentence
     ), pos
 
 
-# ─── Compile (TRL → TRUG) ────────────────────────────────────────────
+# ─── Compile (TRUG/L → TRUG) ─────────────────────────────────────────
 
+# PROCESS compiler SHALL MAP STRING DATA source TO RECORD graph.
 def compile(src_or_sentences, lang: Optional[dict] = None) -> dict:
-    """Compile TRL into a TRUG graph fragment (nodes + edges).
+    """Compile TRUG/L into a TRUG graph fragment (nodes + edges).
 
     Accepts a string or a pre-parsed list[Sentence]. Returns a graph
     dict with keys {nodes, edges}. Deterministic — the same input
@@ -1193,8 +1211,9 @@ def _render_define(node: dict, lang: dict) -> str:
     return " ".join(parts) + "."
 
 
+# PROCESS decompiler SHALL MAP RECORD graph TO STRING DATA source.
 def decompile(graph: dict, lang: Optional[dict] = None) -> str:
-    """Turn a TRUG graph fragment back into canonical TRL source."""
+    """Turn a TRUG graph fragment back into canonical TRUG/L source."""
     if lang is None:
         lang = load_language()
 
@@ -1430,12 +1449,13 @@ _SUBJ_VERB_OK: set[tuple[str, str]] = (
 _NEGATIVE_ARTICLES = {"NO", "NONE"}
 
 
+# PROCESS validator SHALL VALIDATE RECORD graph SUBJECT_TO DATA vocabulary.
 def validate(graph: dict, lang: Optional[dict] = None) -> list[str]:
     """Return a list of validation errors. Empty list = valid.
 
     Implements these SPEC_grammar.md §4 rules:
       Rule 1  — every node has a type from the noun vocabulary (or TRANSFORM)
-      Rule 2  — every edge has a relation (TRL preposition or convention)
+      Rule 2  — every edge has a relation (TRUG/L preposition or convention)
       Rule 3  — subject-verb compatibility per §2.1
       Rule 7  — modals (SHALL/MAY/SHALL_NOT) require Actor subjects per §2.3
       Rule 11 — no double negation (Negative article + Prohibit modal)
@@ -1525,13 +1545,14 @@ def validate(graph: dict, lang: Optional[dict] = None) -> list[str]:
 
 # ─── CLI ──────────────────────────────────────────────────────────────
 
+# AGENT claude SHALL READ DATA argv THEN RETURN INTEGER DATA exit_code.
 def main(argv: Optional[list] = None) -> int:
     """CLI entry point for `trugs-trl` (compile / decompile / validate).
 
     Exit codes:
       0 — success
       1 — validation errors
-      2 — input error (file not found, malformed JSON, TRL syntax/grammar error)
+      2 — input error (file not found, malformed JSON, TRUG/L syntax/grammar error)
     """
     parser = argparse.ArgumentParser(
         prog="trugs-trl",
