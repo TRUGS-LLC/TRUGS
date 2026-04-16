@@ -21,6 +21,7 @@ trugs-tupdate = "tools.tupdate:main"
 trugs-tdelete = "tools.tdelete:main"
 trugs-tunlink = "tools.tunlink:main"
 trugs-trl = "tools.trl:main"
+trugs-compliance-check = "tools.compliance_check:main"
 
 [tool.setuptools.packages.find]
 include = ["tools*"]
