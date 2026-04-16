@@ -22,7 +22,7 @@ from validate import validate
 # ─── Frontmatter parser ────────────────────────────────────────────────────────
 
 
-# AGENT SHALL VALIDATE DATA memory_import.
+# AGENT SHALL VALIDATE PROCESS parse_markdown_with_frontmatter THEN READ EACH DATA field FROM DATA frontmatter.
 def test_parse_with_full_frontmatter():
     content = "---\nname: Test name\ndescription: Short desc\ntype: feedback\n---\nBody paragraph."
     parsed = parse_markdown_with_frontmatter(content)
@@ -32,7 +32,7 @@ def test_parse_with_full_frontmatter():
     assert parsed.body == "Body paragraph."
 
 
-# AGENT SHALL VALIDATE DATA memory_import.
+# AGENT SHALL VALIDATE PROCESS parse_markdown_with_frontmatter THEN RETURN RECORD empty_frontmatter WHEN DATA input CONTAINS NO RECORD delimiter.
 def test_parse_without_frontmatter():
     content = "Just a body with no frontmatter."
     parsed = parse_markdown_with_frontmatter(content)
@@ -40,14 +40,14 @@ def test_parse_without_frontmatter():
     assert parsed.body == "Just a body with no frontmatter."
 
 
-# AGENT SHALL VALIDATE DATA memory_import.
+# AGENT SHALL VALIDATE PROCESS parse_markdown_with_frontmatter THEN RETURN RECORD empty_frontmatter WHEN DATA input EQUALS RECORD empty_string.
 def test_parse_empty_content():
     parsed = parse_markdown_with_frontmatter("")
     assert parsed.frontmatter == {}
     assert parsed.body == ""
 
 
-# AGENT SHALL VALIDATE DATA memory_import.
+# AGENT SHALL VALIDATE PROCESS parse_markdown_with_frontmatter THEN WRITE RECORD unclosed_delimiter TO DATA body.
 def test_parse_unclosed_frontmatter_treated_as_body():
     content = "---\nname: Unclosed\nno trailing delimiter"
     parsed = parse_markdown_with_frontmatter(content)
@@ -56,7 +56,7 @@ def test_parse_unclosed_frontmatter_treated_as_body():
     assert "Unclosed" in parsed.body
 
 
-# AGENT SHALL VALIDATE DATA memory_import.
+# AGENT SHALL VALIDATE PROCESS parse_markdown_with_frontmatter THEN ASSERT RESULT CONTAINS DATA colon WHEN DATA value CONTAINS DATA colon.
 def test_parse_value_with_colon():
     content = "---\nname: Format: subtitle\ndescription: A: B: C\ntype: user\n---\nBody"
     parsed = parse_markdown_with_frontmatter(content)
@@ -64,7 +64,7 @@ def test_parse_value_with_colon():
     assert parsed.description == "A: B: C"
 
 
-# AGENT SHALL VALIDATE DATA memory_import.
+# AGENT SHALL VALIDATE PROCESS parse_markdown_with_frontmatter THEN SKIP DATA line WHEN DATA line CONTAINS NO DATA colon.
 def test_parse_ignores_lines_without_colon():
     content = "---\nname: Foo\nthis line has no colon\ntype: feedback\n---\nBody"
     parsed = parse_markdown_with_frontmatter(content)
@@ -73,7 +73,7 @@ def test_parse_ignores_lines_without_colon():
     assert "no_colon" not in parsed.frontmatter
 
 
-# AGENT SHALL VALIDATE DATA memory_import.
+# AGENT SHALL VALIDATE PROCESS parse_markdown_with_frontmatter THEN ASSERT DATA body CONTAINS ALL DATA lines.
 def test_parse_multiline_body():
     content = "---\nname: X\n---\nLine 1\n\nLine 2\n\nLine 3"
     parsed = parse_markdown_with_frontmatter(content)
@@ -85,13 +85,13 @@ def test_parse_multiline_body():
 # ─── Type derivation ──────────────────────────────────────────────────────────
 
 
-# AGENT SHALL VALIDATE DATA memory_import.
+# AGENT SHALL VALIDATE PROCESS derive_memory_type THEN RETURN DATA type FROM RECORD frontmatter WHEN RECORD frontmatter SUPERSEDES FILE name.
 def test_derive_type_from_frontmatter_wins():
     parsed = ParsedFile(frontmatter={"type": "feedback"}, body="")
     assert derive_memory_type(parsed, "user_xepayac.md", type_from_filename=True) == "feedback"
 
 
-# AGENT SHALL VALIDATE DATA memory_import.
+# AGENT SHALL VALIDATE PROCESS derive_memory_type THEN RETURN DATA type FROM FILE name_prefix WHEN RECORD frontmatter EQUALS RECORD empty.
 def test_derive_type_from_filename_when_no_frontmatter():
     parsed = ParsedFile(frontmatter={}, body="body")
     assert derive_memory_type(parsed, "user_xepayac.md", type_from_filename=True) == "user"
@@ -100,25 +100,25 @@ def test_derive_type_from_filename_when_no_frontmatter():
     assert derive_memory_type(parsed, "reference_foo.md", type_from_filename=True) == "reference"
 
 
-# AGENT SHALL VALIDATE DATA memory_import.
+# AGENT SHALL VALIDATE PROCESS derive_memory_type THEN ASSERT RESULT SUBJECT_TO DATA fact_default.
 def test_derive_type_default_fact():
     parsed = ParsedFile(frontmatter={}, body="")
     assert derive_memory_type(parsed, "random_name.md", type_from_filename=True) == "fact"
 
 
-# AGENT SHALL VALIDATE DATA memory_import.
+# AGENT SHALL VALIDATE PROCESS derive_memory_type THEN ASSERT RESULT SUBJECT_TO DATA fact_default WHEN DATA type_from_filename EXISTS.
 def test_derive_type_filename_disabled():
     parsed = ParsedFile(frontmatter={}, body="")
     assert derive_memory_type(parsed, "user_xepayac.md", type_from_filename=False) == "fact"
 
 
-# AGENT SHALL VALIDATE DATA memory_import.
+# AGENT SHALL VALIDATE PROCESS derive_memory_type THEN MAP DATA type_value TO DATA lowercase WHEN RECORD frontmatter CONTAINS DATA uppercase.
 def test_derive_type_lowercases_frontmatter():
     parsed = ParsedFile(frontmatter={"type": "FEEDBACK"}, body="")
     assert derive_memory_type(parsed, "x.md", type_from_filename=False) == "feedback"
 
 
-# AGENT SHALL VALIDATE DATA memory_import.
+# AGENT SHALL VALIDATE DATA prefixes THEN ASSERT RESULT CONTAINS EACH DATA canonical_type.
 def test_filename_prefixes_cover_all_canonical_types():
     prefixes = {p[1] for p in FILENAME_TYPE_PREFIXES}
     assert {"user", "feedback", "project", "reference"} <= prefixes
@@ -167,7 +167,7 @@ def sample_dir():
         yield base
 
 
-# AGENT SHALL VALIDATE DATA memory_import.
+# AGENT SHALL VALIDATE PROCESS import_flat_directory THEN READ ALL FILE markdown THEN ASSERT RECORD report.
 def test_import_scans_all_md_files(sample_dir):
     with tempfile.TemporaryDirectory() as out_dir:
         out = Path(out_dir) / "memory.trug.json"
@@ -178,7 +178,7 @@ def test_import_scans_all_md_files(sample_dir):
         assert report.skipped_malformed == 0
 
 
-# AGENT SHALL VALIDATE DATA memory_import.
+# AGENT SHALL VALIDATE PROCESS import_flat_directory THEN WRITE FILE output SUBJECT_TO PROCESS validate.
 def test_import_produces_valid_graph(sample_dir):
     with tempfile.TemporaryDirectory() as out_dir:
         out = Path(out_dir) / "memory.trug.json"
@@ -188,7 +188,7 @@ def test_import_produces_valid_graph(sample_dir):
         assert result.valid, f"Imported graph invalid: {[e.message for e in result.errors]}"
 
 
-# AGENT SHALL VALIDATE DATA memory_import.
+# AGENT SHALL VALIDATE PROCESS import_flat_directory THEN MAP DATA frontmatter TO RECORD rule AND RECORD rationale.
 def test_import_maps_frontmatter_to_rule_and_rationale(sample_dir):
     with tempfile.TemporaryDirectory() as out_dir:
         out = Path(out_dir) / "memory.trug.json"
@@ -206,7 +206,7 @@ def test_import_maps_frontmatter_to_rule_and_rationale(sample_dir):
         assert "HITM on all merges" in props["text"]
 
 
-# AGENT SHALL VALIDATE DATA memory_import.
+# AGENT SHALL VALIDATE EACH RECORD node THEN ASSERT DATA source SUBJECT_TO FILE name.
 def test_import_preserves_source_path(sample_dir):
     with tempfile.TemporaryDirectory() as out_dir:
         out = Path(out_dir) / "memory.trug.json"
@@ -221,7 +221,7 @@ def test_import_preserves_source_path(sample_dir):
         assert "feedback_audit_rule.md" in sources
 
 
-# AGENT SHALL VALIDATE DATA memory_import.
+# AGENT SHALL VALIDATE PROCESS import_flat_directory THEN AUGMENT DATA source_field BY DATA prefix WHEN RECORD source_prefix EXISTS.
 def test_import_source_prefix(sample_dir):
     with tempfile.TemporaryDirectory() as out_dir:
         out = Path(out_dir) / "memory.trug.json"
@@ -235,7 +235,7 @@ def test_import_source_prefix(sample_dir):
         assert any(s and s.startswith("legacy:") for s in sources)
 
 
-# AGENT SHALL VALIDATE DATA memory_import.
+# AGENT SHALL VALIDATE PROCESS import_flat_directory THEN WRITE DATA tags_list TO EACH RECORD node WHEN RECORD tags_option EXISTS.
 def test_import_assigns_tags(sample_dir):
     with tempfile.TemporaryDirectory() as out_dir:
         out = Path(out_dir) / "memory.trug.json"
@@ -247,7 +247,7 @@ def test_import_assigns_tags(sample_dir):
             assert "migrated-2026-04" in n["properties"]["tags"]
 
 
-# AGENT SHALL VALIDATE DATA memory_import.
+# AGENT SHALL VALIDATE PROCESS import_flat_directory THEN ASSERT DATA memory_type SUBJECT_TO DATA fact_default WHEN FILE source CONTAINS NO RECORD frontmatter.
 def test_import_plain_file_without_frontmatter_uses_filename_type(sample_dir):
     with tempfile.TemporaryDirectory() as out_dir:
         out = Path(out_dir) / "memory.trug.json"
@@ -267,7 +267,7 @@ def test_import_plain_file_without_frontmatter_uses_filename_type(sample_dir):
 # ─── Idempotency ──────────────────────────────────────────────────────────────
 
 
-# AGENT SHALL VALIDATE DATA memory_import.
+# AGENT SHALL VALIDATE PROCESS import_flat_directory THEN SKIP ALL RECORD duplicate THEN ASSERT DATA imported SUBJECT_TO DATA zero_count.
 def test_import_is_idempotent_on_rerun(sample_dir):
     with tempfile.TemporaryDirectory() as out_dir:
         out = Path(out_dir) / "memory.trug.json"
@@ -280,7 +280,7 @@ def test_import_is_idempotent_on_rerun(sample_dir):
         assert second.files_scanned == 5
 
 
-# AGENT SHALL VALIDATE DATA memory_import.
+# AGENT SHALL VALIDATE PROCESS import_flat_directory THEN MERGE RECORD new_file THEN SKIP EACH RECORD existing.
 def test_import_picks_up_new_files_on_rerun(sample_dir):
     with tempfile.TemporaryDirectory() as out_dir:
         out = Path(out_dir) / "memory.trug.json"
@@ -301,7 +301,7 @@ def test_import_picks_up_new_files_on_rerun(sample_dir):
 # ─── Dry run ──────────────────────────────────────────────────────────────────
 
 
-# AGENT SHALL VALIDATE DATA memory_import.
+# AGENT SHALL VALIDATE PROCESS import_flat_directory THEN DENY FILE output WHEN DATA dry_run EXISTS.
 def test_dry_run_does_not_write_file(sample_dir):
     with tempfile.TemporaryDirectory() as out_dir:
         out = Path(out_dir) / "memory.trug.json"
@@ -310,7 +310,7 @@ def test_dry_run_does_not_write_file(sample_dir):
         assert not out.exists()
 
 
-# AGENT SHALL VALIDATE DATA memory_import.
+# AGENT SHALL VALIDATE PROCESS import_flat_directory THEN DENY DATA existing_graph WHEN DATA dry_run EXISTS.
 def test_dry_run_against_existing_graph_does_not_mutate(sample_dir):
     with tempfile.TemporaryDirectory() as out_dir:
         out = Path(out_dir) / "memory.trug.json"
@@ -333,13 +333,13 @@ def test_dry_run_against_existing_graph_does_not_mutate(sample_dir):
 # ─── Error handling ───────────────────────────────────────────────────────────
 
 
-# AGENT SHALL VALIDATE DATA memory_import.
+# AGENT SHALL VALIDATE PROCESS import_flat_directory THEN THROW EXCEPTION missing_directory WHEN DATA src_dir SHALL_NOT EXISTS.
 def test_import_raises_on_missing_src_dir():
     with pytest.raises(FileNotFoundError):
         import_flat_directory(Path("/nonexistent/totally/fake"), Path("/tmp/x.trug.json"))
 
 
-# AGENT SHALL VALIDATE DATA memory_import.
+# AGENT SHALL VALIDATE PROCESS import_flat_directory THEN READ FILE markdown FROM EACH NAMESPACE subdirectory.
 def test_import_recursive_subdirs(tmp_path):
     (tmp_path / "sub").mkdir()
     (tmp_path / "sub" / "nested.md").write_text(
@@ -356,7 +356,7 @@ def test_import_recursive_subdirs(tmp_path):
         assert report.imported == 2
 
 
-# AGENT SHALL VALIDATE DATA memory_import.
+# AGENT SHALL VALIDATE PROCESS import_flat_directory THEN SKIP FILE source WHEN DATA content EQUALS DATA empty_value.
 def test_import_skips_empty_files(tmp_path):
     (tmp_path / "empty.md").write_text("", encoding="utf-8")
     (tmp_path / "real.md").write_text("Content", encoding="utf-8")
@@ -370,7 +370,7 @@ def test_import_skips_empty_files(tmp_path):
 # ─── Report ───────────────────────────────────────────────────────────────────
 
 
-# AGENT SHALL VALIDATE DATA memory_import.
+# AGENT SHALL VALIDATE RECORD report THEN ASSERT DATA new_ids SUBJECT_TO RECORD imported.
 def test_import_report_new_ids_match_count(sample_dir):
     with tempfile.TemporaryDirectory() as out_dir:
         out = Path(out_dir) / "memory.trug.json"
@@ -384,7 +384,7 @@ def test_import_report_new_ids_match_count(sample_dir):
 # ─── Audit round 2 regression tests ──────────────────────────────────────────
 
 
-# AGENT SHALL VALIDATE DATA memory_import.
+# AGENT SHALL VALIDATE PROCESS strip_yaml_quotes THEN FILTER DATA quotes FROM DATA value THEN HANDLE RECORD mismatched AND RECORD empty_input.
 def test_parse_strip_yaml_double_quotes():
     """Audit #19 — `name: "Format: subtitle"` strips the quotes."""
     from memory_import import _strip_yaml_quotes
@@ -396,7 +396,7 @@ def test_parse_strip_yaml_double_quotes():
     assert _strip_yaml_quotes('') == ''
 
 
-# AGENT SHALL VALIDATE DATA memory_import.
+# AGENT SHALL VALIDATE PROCESS parse_markdown_with_frontmatter THEN FILTER DATA quotes FROM DATA value THEN ASSERT RESULT CONTAINS DATA colon.
 def test_parse_frontmatter_with_quoted_colon():
     """Audit #19 — a quoted value containing a colon keeps the colon but loses the quotes."""
     content = '---\nname: "Format: subtitle"\ndescription: "A: B: C"\ntype: user\n---\nBody'
@@ -406,7 +406,7 @@ def test_parse_frontmatter_with_quoted_colon():
     assert parsed.type == "user"
 
 
-# AGENT SHALL VALIDATE DATA memory_import.
+# AGENT SHALL VALIDATE PROCESS import_flat_directory THEN WRITE EACH RECORD node AS UNIQUE RECORD entry UNLESS RECORD metadata EQUALS RECORD other.
 def test_import_preserves_files_with_same_body_but_different_metadata(tmp_path):
     """Audit #7 (MED) — idempotency keyed on (text, rule, rationale, type).
 
@@ -428,7 +428,7 @@ def test_import_preserves_files_with_same_body_but_different_metadata(tmp_path):
     assert report.skipped_duplicate == 0
 
 
-# AGENT SHALL VALIDATE DATA memory_import.
+# AGENT SHALL VALIDATE PROCESS import_flat_directory THEN SKIP RECORD duplicate WHEN RECORD frontmatter AND DATA body EQUALS RECORD identical_pair.
 def test_import_still_dedupes_true_duplicates(tmp_path):
     """Audit #7 — two files with identical frontmatter AND body are still 1."""
     for name in ("a.md", "b.md"):
@@ -443,7 +443,7 @@ def test_import_still_dedupes_true_duplicates(tmp_path):
     assert report.skipped_duplicate == 1
 
 
-# AGENT SHALL VALIDATE DATA memory_import.
+# AGENT SHALL VALIDATE PROCESS import_flat_directory THEN DENY FILE symlink SUBJECT_TO NAMESPACE src_dir.
 def test_import_skips_symlinks_escaping_src_dir(tmp_path):
     """Audit #16 (LOW) — symlinks pointing outside src_dir are skipped."""
     import os
@@ -471,7 +471,7 @@ def test_import_skips_symlinks_escaping_src_dir(tmp_path):
         assert texts == ["real content"]
 
 
-# AGENT SHALL VALIDATE DATA memory_import.
+# AGENT SHALL VALIDATE PROCESS import_flat_directory THEN WRITE DATA checkpoint TO FILE output THEN RECOVER RECORD persisted.
 def test_import_checkpoints_partial_progress(tmp_path):
     """Audit #9 (MED) — checkpoint_every flushes progress mid-walk.
 
@@ -513,7 +513,7 @@ def test_import_checkpoints_partial_progress(tmp_path):
         assert len(persisted) >= 6, f"Expected ≥6 persisted, got {len(persisted)}"
 
 
-# AGENT SHALL VALIDATE DATA memory_import.
+# AGENT SHALL VALIDATE PROCESS idempotency_key THEN RETURN UNIQUE DATA hash_value WHEN DATA separator EXISTS FROM DATA content.
 def test_idempotency_key_no_collision_on_separator_in_content():
     """L3 — two files with colliding raw join but different field boundaries
     must produce different idempotency keys after SHA-256 hashing."""

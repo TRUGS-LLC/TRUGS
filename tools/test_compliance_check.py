@@ -1,6 +1,6 @@
 """Tests for trugs-compliance-check.
 
-# AGENT claude SHALL VALIDATE DATA compliance_check SUBJECT_TO DATA standard.
+# AGENT claude SHALL VALIDATE PROCESS compliance_check SUBJECT_TO DATA standard_dark_code_compliance.
 
 Covers C1, C3, C4, C5, C7 behavior end-to-end against synthetic fixtures
 written to a temp directory.
@@ -39,7 +39,7 @@ def _write(path: Path, content: str) -> None:
 # =============================================================================
 
 
-# AGENT SHALL VALIDATE DATA c1.
+# AGENT SHALL VALIDATE PROCESS c1 THEN ASSERT RECORD compliant_function IMPLEMENTS DATA trl.
 def test_c1_compliant_function_passes(tmp_repo: Path) -> None:
     _write(tmp_repo / "src.py", """
 # AGENT claude SHALL VALIDATE DATA input.
@@ -52,7 +52,7 @@ def public_function(x):
     assert report.functions_checked == 1
 
 
-# AGENT SHALL VALIDATE DATA c1.
+# AGENT SHALL VALIDATE PROCESS c1 THEN ASSERT RECORD missing_comment FEEDS RECORD violation.
 def test_c1_missing_comment_flagged(tmp_repo: Path) -> None:
     _write(tmp_repo / "src.py", """
 def public_function(x):
@@ -65,7 +65,7 @@ def public_function(x):
     assert c1[0].symbol == "public_function"
 
 
-# AGENT SHALL VALIDATE DATA c1.
+# AGENT SHALL VALIDATE PROCESS c1 THEN REJECT DATA unparseable_comment.
 def test_c1_unparseable_comment_flagged(tmp_repo: Path) -> None:
     _write(tmp_repo / "src.py", """
 # this is just plain English, not TRUG/L
@@ -78,7 +78,7 @@ def public_function(x):
     assert "does not parse as TRUG/L" in c1[0].message
 
 
-# AGENT SHALL VALIDATE DATA c1.
+# AGENT SHALL VALIDATE PROCESS c1 THEN FILTER PRIVATE FUNCTION FROM DATA audit.
 def test_c1_private_function_exempt(tmp_repo: Path) -> None:
     _write(tmp_repo / "src.py", """
 def _private_function(x):
@@ -89,7 +89,7 @@ def _private_function(x):
     assert report.functions_checked == 0
 
 
-# AGENT SHALL VALIDATE DATA c1.
+# AGENT SHALL VALIDATE PROCESS c1 THEN FILTER FUNCTION dunder FROM DATA audit.
 def test_c1_dunder_exempt(tmp_repo: Path) -> None:
     _write(tmp_repo / "src.py", """
 # AGENT claude SHALL DEFINE RECORD thing.
@@ -102,7 +102,7 @@ class Thing:
     assert c1 == [], f"unexpected C1 violations: {c1}"
 
 
-# AGENT SHALL VALIDATE DATA c1.
+# AGENT SHALL VALIDATE PROCESS c1 THEN FILTER FUNCTION nested FROM DATA audit.
 def test_c1_nested_function_exempt(tmp_repo: Path) -> None:
     _write(tmp_repo / "src.py", """
 # AGENT claude SHALL VALIDATE DATA outer.
@@ -116,7 +116,7 @@ def outer():
     assert c1 == [], f"nested inner should be exempt: {c1}"
 
 
-# AGENT SHALL VALIDATE DATA c1.
+# AGENT SHALL VALIDATE PROCESS c1 THEN FILTER DATA banner FROM DATA comment_block.
 def test_c1_banner_comment_doesnt_become_trl(tmp_repo: Path) -> None:
     _write(tmp_repo / "src.py", """
 # ===============================================================
@@ -137,7 +137,7 @@ def public_function(x):
 # =============================================================================
 
 
-# AGENT SHALL VALIDATE DATA c3.
+# AGENT SHALL VALIDATE PROCESS c3 THEN ASSERT RECORD node IMPLEMENTS VALID DATA trl.
 def test_c3_compliant_node_passes(tmp_repo: Path) -> None:
     _write(tmp_repo / "folder.trug.json", json.dumps({
         "nodes": [{
@@ -160,7 +160,7 @@ def test_c3_compliant_node_passes(tmp_repo: Path) -> None:
     assert report.nodes_checked == 1
 
 
-# AGENT SHALL VALIDATE DATA c3.
+# AGENT SHALL VALIDATE PROCESS c3 THEN REJECT INVALID DATA trl FROM RECORD node.
 def test_c3_invalid_trl_flagged(tmp_repo: Path) -> None:
     _write(tmp_repo / "folder.trug.json", json.dumps({
         "nodes": [{
@@ -188,7 +188,7 @@ def test_c3_invalid_trl_flagged(tmp_repo: Path) -> None:
 # =============================================================================
 
 
-# AGENT SHALL VALIDATE DATA c4.
+# AGENT SHALL VALIDATE PROCESS c4 THEN ASSERT FUNCTION test IMPLEMENTS DATA trl_comment.
 def test_c4_compliant_test_passes(tmp_repo: Path) -> None:
     _write(tmp_repo / "test_thing.py", """
 # AGENT SHALL VALIDATE DATA input.
@@ -201,7 +201,7 @@ def test_something():
     assert report.tests_checked == 1
 
 
-# AGENT SHALL VALIDATE DATA c4.
+# AGENT SHALL VALIDATE PROCESS c4 THEN ASSERT FUNCTION test FEEDS RECORD violation.
 def test_c4_missing_test_comment_flagged(tmp_repo: Path) -> None:
     _write(tmp_repo / "test_thing.py", """
 def test_something():
@@ -213,7 +213,7 @@ def test_something():
     assert "has no TRUG/L comment" in c4[0].message
 
 
-# AGENT SHALL VALIDATE DATA c4.
+# AGENT SHALL VALIDATE PROCESS c4 THEN REJECT DATA wrong_prefix FROM FUNCTION test.
 def test_c4_wrong_prefix_flagged(tmp_repo: Path) -> None:
     _write(tmp_repo / "test_thing.py", """
 # AGENT claude SHALL READ DATA input.
@@ -231,7 +231,7 @@ def test_something():
 # =============================================================================
 
 
-# AGENT SHALL VALIDATE DATA c5.
+# AGENT SHALL VALIDATE PROCESS c5 THEN ASSERT RECORD test_node FEEDS RECORD function.
 def test_c5_test_with_validates_edge_passes(tmp_repo: Path) -> None:
     _write(tmp_repo / "folder.trug.json", json.dumps({
         "nodes": [
@@ -247,7 +247,7 @@ def test_c5_test_with_validates_edge_passes(tmp_repo: Path) -> None:
     assert c5 == []
 
 
-# AGENT SHALL VALIDATE DATA c5.
+# AGENT SHALL VALIDATE PROCESS c5 THEN ASSERT RECORD orphan_test FEEDS RECORD violation.
 def test_c5_orphan_test_flagged(tmp_repo: Path) -> None:
     _write(tmp_repo / "folder.trug.json", json.dumps({
         "nodes": [
@@ -266,7 +266,7 @@ def test_c5_orphan_test_flagged(tmp_repo: Path) -> None:
 # =============================================================================
 
 
-# AGENT SHALL VALIDATE DATA exclusion.
+# AGENT SHALL VALIDATE PROCESS discovery THEN FILTER DATA zzz_archive FROM DATA audit.
 def test_zzz_excluded(tmp_repo: Path) -> None:
     _write(tmp_repo / "zzz_archive/old.py", """
 def bad_function():
@@ -277,7 +277,7 @@ def bad_function():
     assert report.violation_count == 0
 
 
-# AGENT SHALL VALIDATE DATA exclusion.
+# AGENT SHALL VALIDATE PROCESS discovery THEN FILTER DATA pycache FROM DATA audit.
 def test_pycache_excluded(tmp_repo: Path) -> None:
     _write(tmp_repo / "__pycache__/compiled.py", """
 def bad_function():
@@ -292,7 +292,7 @@ def bad_function():
 # =============================================================================
 
 
-# AGENT SHALL VALIDATE DATA metric.
+# AGENT SHALL VALIDATE PROCESS metric THEN AGGREGATE RECORD violation TO DATA compliance_percent.
 def test_compliance_percent_for_all_violations(tmp_repo: Path) -> None:
     _write(tmp_repo / "src.py", """
 def a():
@@ -307,14 +307,14 @@ def b():
     assert report.compliance_percent == 50.0
 
 
-# AGENT SHALL VALIDATE DATA metric.
+# AGENT SHALL VALIDATE PROCESS metric THEN ASSERT DATA compliance_percent FROM RECORD empty_report.
 def test_compliance_percent_hundred_when_empty(tmp_repo: Path) -> None:
     report = cc.audit(tmp_repo)
     assert report.compliance_percent == 100.0
     assert report.violation_count == 0
 
 
-# AGENT SHALL VALIDATE DATA metric.
+# AGENT SHALL VALIDATE PROCESS metric THEN GROUP RECORD violation BY DATA rule.
 def test_violations_by_rule(tmp_repo: Path) -> None:
     _write(tmp_repo / "src.py", """
 def a():
@@ -338,20 +338,20 @@ def test_c():
 # =============================================================================
 
 
-# AGENT SHALL VALIDATE DATA cli.
+# AGENT SHALL VALIDATE PROCESS main THEN ASSERT DATA exit_code FROM RECORD clean_report.
 def test_main_returns_zero_for_clean(tmp_repo: Path, capsys: pytest.CaptureFixture) -> None:
     exit_code = cc.main([str(tmp_repo)])
     assert exit_code == 0
 
 
-# AGENT SHALL VALIDATE DATA cli.
+# AGENT SHALL VALIDATE PROCESS main THEN ASSERT DATA strict_exit FROM RECORD violation.
 def test_main_strict_returns_one_on_violation(tmp_repo: Path, capsys: pytest.CaptureFixture) -> None:
     _write(tmp_repo / "src.py", "def a():\n    return 1\n")
     exit_code = cc.main([str(tmp_repo), "--strict"])
     assert exit_code == 1
 
 
-# AGENT SHALL VALIDATE DATA cli.
+# AGENT SHALL VALIDATE PROCESS main THEN WRITE DATA json_output FROM RECORD report.
 def test_main_json_output(tmp_repo: Path, capsys: pytest.CaptureFixture) -> None:
     _write(tmp_repo / "src.py", "def a():\n    return 1\n")
     cc.main([str(tmp_repo), "--json"])
@@ -362,7 +362,7 @@ def test_main_json_output(tmp_repo: Path, capsys: pytest.CaptureFixture) -> None
     assert parsed["violation_count"] == 1
 
 
-# AGENT SHALL VALIDATE DATA cli.
+# AGENT SHALL VALIDATE PROCESS main THEN WRITE DATA baseline TO FILE compliance_baseline.
 def test_main_baseline_update_writes_file(tmp_repo: Path) -> None:
     _write(tmp_repo / "src.py", "def a():\n    return 1\n")
     cc.main([str(tmp_repo), "--baseline-update"])

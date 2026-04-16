@@ -58,7 +58,7 @@ def fixed_now():
 # ─── Determinism ───────────────────────────────────────────────────────────────
 
 
-# AGENT SHALL VALIDATE DATA memory_render.
+# AGENT SHALL VALIDATE PROCESS render THEN ASSERT RESULT.
 def test_render_is_byte_deterministic(small_graph, fixed_now):
     a = render(small_graph, now=fixed_now)
     b = render(small_graph, now=fixed_now)
@@ -68,7 +68,7 @@ def test_render_is_byte_deterministic(small_graph, fixed_now):
     assert a.endswith("\n")
 
 
-# AGENT SHALL VALIDATE DATA memory_render.
+# AGENT SHALL VALIDATE PROCESS render THEN PROCESS render SHALL_NOT READ DATA wall_clock.
 def test_render_is_byte_deterministic_under_real_wall_clock(small_graph):
     """Round-5 audit C-H4 regression guard.
 
@@ -87,7 +87,7 @@ def test_render_is_byte_deterministic_under_real_wall_clock(small_graph):
     assert a == b, "render() must be a pure function of the graph"
 
 
-# AGENT SHALL VALIDATE DATA memory_render.
+# AGENT SHALL VALIDATE PROCESS render WHEN DATA insertion_order EQUALS DATA reordered THEN ASSERT RESULT.
 def test_render_stable_under_reordered_insertion(empty_graph, fixed_now):
     # Build two graphs with the same memories but different creation timestamps.
     # A fixed `now` alone isn't enough — the `created` field is set by `remember`
@@ -134,7 +134,7 @@ def test_render_stable_under_reordered_insertion(empty_graph, fixed_now):
 # ─── Content ───────────────────────────────────────────────────────────────────
 
 
-# AGENT SHALL VALIDATE DATA memory_render.
+# AGENT SHALL VALIDATE PROCESS render THEN HANDLE DATA empty_graph THEN RETURN DATA header.
 def test_render_empty_graph_does_not_crash(empty_graph, fixed_now):
     out = render(empty_graph, now=fixed_now)
     assert "# MEMORY" in out
@@ -142,7 +142,7 @@ def test_render_empty_graph_does_not_crash(empty_graph, fixed_now):
     assert "_(no active memories)_" in out
 
 
-# AGENT SHALL VALIDATE DATA memory_render.
+# AGENT SHALL VALIDATE PROCESS render THEN SORT RECORD section BY DATA type_order.
 def test_render_groups_by_type_in_default_order(small_graph, fixed_now):
     out = render(small_graph, now=fixed_now)
     # Find each section's line index.
@@ -160,7 +160,7 @@ def test_render_groups_by_type_in_default_order(small_graph, fixed_now):
     assert ordered == sorted(ordered)
 
 
-# AGENT SHALL VALIDATE DATA memory_render.
+# AGENT SHALL VALIDATE PROCESS render THEN SEND RECORD unknown_type ROUTES ENDPOINT last_section.
 def test_render_unknown_type_goes_last(empty_graph, fixed_now):
     g = deepcopy(empty_graph)
     remember(g, "Rule 1", memory_type="feedback")
@@ -170,7 +170,7 @@ def test_render_unknown_type_goes_last(empty_graph, fixed_now):
     assert out.index("## feedback") < out.index("## wildcard")
 
 
-# AGENT SHALL VALIDATE DATA memory_render.
+# AGENT SHALL VALIDATE PROCESS render THEN READ DATA rule THEN PROCESS render SHALL_NOT READ DATA text WHEN DATA rule EXISTS.
 def test_render_prefers_rule_over_text(empty_graph, fixed_now):
     g = deepcopy(empty_graph)
     remember(g, "Full prose with rationale paragraphs", memory_type="feedback")
@@ -181,7 +181,7 @@ def test_render_prefers_rule_over_text(empty_graph, fixed_now):
     assert "Full prose with rationale paragraphs" not in out
 
 
-# AGENT SHALL VALIDATE DATA memory_render.
+# AGENT SHALL VALIDATE PROCESS render THEN PROCESS render SHALL_NOT WRITE DATA rationale.
 def test_render_does_not_include_rationale_by_default(empty_graph, fixed_now):
     g = deepcopy(empty_graph)
     remember(g, "Rule body", memory_type="feedback")
@@ -191,7 +191,7 @@ def test_render_does_not_include_rationale_by_default(empty_graph, fixed_now):
     assert "Long explanation of why." not in out
 
 
-# AGENT SHALL VALIDATE DATA memory_render.
+# AGENT SHALL VALIDATE PROCESS render THEN WRITE DATA rationale WHEN BOOLEAN DATA include_rationale.
 def test_render_includes_rationale_when_requested(empty_graph, fixed_now):
     g = deepcopy(empty_graph)
     remember(g, "Rule body", memory_type="feedback")
@@ -202,7 +202,7 @@ def test_render_includes_rationale_when_requested(empty_graph, fixed_now):
     assert "> Line two." in out
 
 
-# AGENT SHALL VALIDATE DATA memory_render.
+# AGENT SHALL VALIDATE PROCESS render THEN WRITE DATA tags TO EACH RECORD memory_line.
 def test_render_includes_tags(small_graph, fixed_now):
     out = render(small_graph, now=fixed_now)
     assert "tags: audit" in out or "tags: audit," in out
@@ -212,7 +212,7 @@ def test_render_includes_tags(small_graph, fixed_now):
 # ─── Temporal filtering ────────────────────────────────────────────────────────
 
 
-# AGENT SHALL VALIDATE DATA memory_render.
+# AGENT SHALL VALIDATE PROCESS render THEN FILTER RECORD memory WHEN DATA valid_to EXCEEDS DATA now.
 def test_render_filters_expired_valid_to(empty_graph, fixed_now):
     g = deepcopy(empty_graph)
     remember(g, "Active rule", memory_type="feedback")
@@ -224,7 +224,7 @@ def test_render_filters_expired_valid_to(empty_graph, fixed_now):
     assert "Expired rule" not in out
 
 
-# AGENT SHALL VALIDATE DATA memory_render.
+# AGENT SHALL VALIDATE PROCESS render THEN ASSERT RECORD memory WHEN DATA valid_to EXCEEDS DATA now.
 def test_render_keeps_future_valid_to(empty_graph, fixed_now):
     g = deepcopy(empty_graph)
     remember(g, "Scheduled retire", memory_type="feedback")
@@ -233,17 +233,17 @@ def test_render_keeps_future_valid_to(empty_graph, fixed_now):
     assert "Scheduled retire" in out
 
 
-# AGENT SHALL VALIDATE DATA memory_render.
+# AGENT SHALL VALIDATE PROCESS _is_past WHEN DATA input EQUALS DATA none THEN ASSERT RESULT.
 def test_is_past_handles_none(fixed_now):
     assert _is_past(None, now=fixed_now) is False
 
 
-# AGENT SHALL VALIDATE DATA memory_render.
+# AGENT SHALL VALIDATE PROCESS _is_past WHEN DATA input EQUALS INVALID DATA value THEN ASSERT RESULT.
 def test_is_past_handles_malformed(fixed_now):
     assert _is_past("not a date", now=fixed_now) is False
 
 
-# AGENT SHALL VALIDATE DATA memory_render.
+# AGENT SHALL VALIDATE PROCESS _is_past THEN HANDLE DATA naive_timestamp AS DATA utc.
 def test_is_past_handles_naive_iso(fixed_now):
     # Naive timestamps assumed UTC.
     assert _is_past("2026-01-01T00:00:00", now=fixed_now) is True
@@ -252,13 +252,13 @@ def test_is_past_handles_naive_iso(fixed_now):
 # ─── Budget ────────────────────────────────────────────────────────────────────
 
 
-# AGENT SHALL VALIDATE DATA memory_render.
+# AGENT SHALL VALIDATE PROCESS render THEN PROCESS render SHALL_NOT SKIP ANY RECORD SUBJECT_TO DATA budget.
 def test_render_under_budget_is_unchanged(small_graph, fixed_now):
     a = render(small_graph, token_budget=DEFAULT_BUDGET_TOKENS, now=fixed_now)
     assert "demoted for budget" not in a
 
 
-# AGENT SHALL VALIDATE DATA memory_render.
+# AGENT SHALL VALIDATE PROCESS render THEN SKIP RECORD project THEN ASSERT RECORD feedback AND RECORD user.
 def test_render_over_budget_demotes_project_first(empty_graph, fixed_now):
     g = deepcopy(empty_graph)
     # One feedback + one user + many project memories.
@@ -281,7 +281,7 @@ def test_render_over_budget_demotes_project_first(empty_graph, fixed_now):
     assert "demoted for budget" in out
 
 
-# AGENT SHALL VALIDATE DATA memory_render.
+# AGENT SHALL VALIDATE PROCESS render THEN PROCESS render SHALL_NOT SKIP RECORD user OR RECORD feedback WHEN DATA budget EQUALS LOW DATA value.
 def test_render_never_demotes_user_or_feedback(empty_graph, fixed_now):
     g = deepcopy(empty_graph)
     for i in range(50):
@@ -293,26 +293,26 @@ def test_render_never_demotes_user_or_feedback(empty_graph, fixed_now):
         assert f"Feedback rule {i:03d}" in out
 
 
-# AGENT SHALL VALIDATE DATA memory_render.
+# AGENT SHALL VALIDATE DATA demotion_order THEN AGENT SHALL_NOT MATCH DATA user FROM DATA demotion_order.
 def test_demotion_order_constant_excludes_user_feedback():
     assert "user" not in DEMOTION_ORDER
     assert "feedback" not in DEMOTION_ORDER
 
 
-# AGENT SHALL VALIDATE DATA memory_render.
+# AGENT SHALL VALIDATE PROCESS _approx_tokens WHEN DATA input EQUALS DATA empty THEN ASSERT INTEGER DATA result.
 def test_approx_tokens_empty_is_zero():
     """Audit round 2 #18 — empty string should cost 0 tokens, not 1."""
     assert _approx_tokens("") == 0
 
 
-# AGENT SHALL VALIDATE DATA memory_render.
+# AGENT SHALL VALIDATE PROCESS _approx_tokens THEN ASSERT DATA result FROM DATA input.
 def test_approx_tokens_is_4_char_ratio():
     assert _approx_tokens("abcd") == 1
     assert _approx_tokens("abcdefgh") == 2
     assert _approx_tokens("a" * 400) == 100
 
 
-# AGENT SHALL VALIDATE DATA memory_render.
+# AGENT SHALL VALIDATE PROCESS render THEN WRITE DATA warning WHEN RECORD protected EXCEEDS DATA budget THEN PROCESS render SHALL_NOT SKIP RECORD project.
 def test_render_protected_overflow_warns_instead_of_pointless_demotion(empty_graph, fixed_now):
     """Audit round 2 #3 — user/feedback alone over budget → no pointless demotion of project/reference.
 
@@ -339,7 +339,7 @@ def test_render_protected_overflow_warns_instead_of_pointless_demotion(empty_gra
     assert "no demotion applied" in out.lower()
 
 
-# AGENT SHALL VALIDATE DATA memory_render.
+# AGENT SHALL VALIDATE PROCESS render THEN HANDLE DATA token_budget THEN WRITE DATA warning.
 def test_render_zero_budget_emits_warning_but_renders(empty_graph, fixed_now):
     """Audit round 2 #3 — token_budget=0 should not infinite-loop or return nothing."""
     g = deepcopy(empty_graph)
@@ -352,7 +352,7 @@ def test_render_zero_budget_emits_warning_but_renders(empty_graph, fixed_now):
     assert "token_budget" in out.lower()
 
 
-# AGENT SHALL VALIDATE DATA memory_render.
+# AGENT SHALL VALIDATE PROCESS render THEN SKIP RECORD oldest_project SEQUENTIAL THEN ASSERT RECORD newest_project.
 def test_render_incremental_demotion_matches_old_behavior(empty_graph, fixed_now):
     """Audit round 2 #5 — the O(n²) → O(n) rewrite must produce the same final set.
 
@@ -382,7 +382,7 @@ def test_render_incremental_demotion_matches_old_behavior(empty_graph, fixed_now
 # ─── Sorting ───────────────────────────────────────────────────────────────────
 
 
-# AGENT SHALL VALIDATE DATA memory_render.
+# AGENT SHALL VALIDATE PROCESS _group_by_type THEN SORT EACH RECORD memory BY DATA created.
 def test_group_by_type_sorts_newest_first(empty_graph, fixed_now):
     g = deepcopy(empty_graph)
     remember(g, "Oldest", memory_type="feedback")
@@ -403,7 +403,7 @@ def test_group_by_type_sorts_newest_first(empty_graph, fixed_now):
 # ─── File writes & validation ─────────────────────────────────────────────────
 
 
-# AGENT SHALL VALIDATE DATA memory_render.
+# AGENT SHALL VALIDATE PROCESS render_to_file THEN WRITE FILE output AS DATA utf8.
 def test_render_to_file_creates_parent_and_writes_utf8(small_graph, fixed_now):
     with tempfile.TemporaryDirectory() as d:
         out_path = Path(d) / "subdir" / "MEMORY.md"
@@ -414,7 +414,7 @@ def test_render_to_file_creates_parent_and_writes_utf8(small_graph, fixed_now):
         assert "# MEMORY" in content
 
 
-# AGENT SHALL VALIDATE DATA memory_render.
+# AGENT SHALL VALIDATE PROCESS render THEN PROCESS render SHALL_NOT REPLACE ANY DATA FROM RESULT.
 def test_render_never_mutates_the_source_graph(small_graph, fixed_now):
     before = json.dumps(small_graph, sort_keys=True)
     _ = render(small_graph, now=fixed_now)
@@ -422,14 +422,14 @@ def test_render_never_mutates_the_source_graph(small_graph, fixed_now):
     assert before == after
 
 
-# AGENT SHALL VALIDATE DATA memory_render.
+# AGENT SHALL VALIDATE DATA source_graph SUBJECT_TO PROCESS validate THEN VALIDATE DATA source_graph SUBJECT_TO PROCESS render.
 def test_rendered_source_graph_still_validates(small_graph):
     # Sanity — the graph we rendered from is still a valid CORE TRUG.
     result = validate(small_graph)
     assert result.valid, f"Render fixture graph is invalid: {result.errors}"
 
 
-# AGENT SHALL VALIDATE DATA memory_render.
+# AGENT SHALL VALIDATE PROCESS render THEN SPLIT DATA multiline_body THEN MERGE RESULT TO DATA single_line.
 def test_render_memory_collapses_multiline_body(empty_graph, fixed_now):
     """I1 — a memory body with newlines and markdown syntax must render as
     a single line, not inject headings into MEMORY.md."""
@@ -450,7 +450,7 @@ def test_render_memory_collapses_multiline_body(empty_graph, fixed_now):
 # ─── Phase 2: Project decay ──────────────────────────────────────────────────
 
 
-# AGENT SHALL VALIDATE DATA memory_render.
+# AGENT SHALL VALIDATE PROCESS render THEN FILTER RECORD project WHEN DATA age EXCEEDS DATA threshold AND DATA edge_count EQUALS DATA zero.
 def test_project_decay_old_no_edges_excluded(empty_graph):
     """Project memories older than 7 days with no edges should NOT render."""
     g = deepcopy(empty_graph)
@@ -462,7 +462,7 @@ def test_project_decay_old_no_edges_excluded(empty_graph):
     assert "Session summary April 1" not in out
 
 
-# AGENT SHALL VALIDATE DATA memory_render.
+# AGENT SHALL VALIDATE PROCESS render THEN ASSERT RECORD project WHEN DATA age EXCEEDS DATA threshold AND DATA edge_count EXCEEDS DATA zero.
 def test_project_decay_old_with_edge_survives(empty_graph):
     """Project memories older than 7 days WITH edges should survive."""
     g = deepcopy(empty_graph)
@@ -479,7 +479,7 @@ def test_project_decay_old_with_edge_survives(empty_graph):
     assert "Important decision" in out
 
 
-# AGENT SHALL VALIDATE DATA memory_render.
+# AGENT SHALL VALIDATE PROCESS render THEN ASSERT RECORD project WHEN DATA age WITHIN 7d.
 def test_project_decay_recent_no_edges_survives(empty_graph):
     """Project memories within 7 days survive even without edges."""
     g = deepcopy(empty_graph)
@@ -491,7 +491,7 @@ def test_project_decay_recent_no_edges_survives(empty_graph):
     assert "Yesterday summary" in out
 
 
-# AGENT SHALL VALIDATE DATA memory_render.
+# AGENT SHALL VALIDATE PROCESS render THEN PROCESS render SHALL_NOT FILTER RECORD feedback SUBJECT_TO DATA age.
 def test_feedback_never_decays(empty_graph):
     """Feedback memories survive regardless of age, even with 0 edges."""
     g = deepcopy(empty_graph)
@@ -506,7 +506,7 @@ def test_feedback_never_decays(empty_graph):
 # ─── Phase 2: Feedback tag grouping ──────────────────────────────────────────
 
 
-# AGENT SHALL VALIDATE DATA memory_render.
+# AGENT SHALL VALIDATE PROCESS render THEN GROUP RECORD feedback BY DATA first_tag WHEN DATA feedback_count EXCEEDS DATA threshold.
 def test_feedback_tag_grouping_renders_subheadings(empty_graph, fixed_now):
     """When >5 feedback memories exist, they group by first tag."""
     g = deepcopy(empty_graph)
@@ -522,7 +522,7 @@ def test_feedback_tag_grouping_renders_subheadings(empty_graph, fixed_now):
     assert "Naming rule 0" in out
 
 
-# AGENT SHALL VALIDATE DATA memory_render.
+# AGENT SHALL VALIDATE PROCESS render THEN PROCESS render SHALL_NOT GROUP RECORD feedback WHEN DATA feedback_count EQUALS LOW DATA value.
 def test_feedback_no_grouping_when_few(empty_graph, fixed_now):
     """When ≤5 feedback memories, no sub-grouping (flat list)."""
     g = deepcopy(empty_graph)
@@ -534,7 +534,7 @@ def test_feedback_no_grouping_when_few(empty_graph, fixed_now):
     assert "Rule 0" in out
 
 
-# AGENT SHALL VALIDATE DATA memory_render.
+# AGENT SHALL VALIDATE PROCESS render THEN SEND RECORD untagged ROUTES DATA general.
 def test_feedback_untagged_goes_to_general(empty_graph, fixed_now):
     """Untagged feedback memories land under '### general'."""
     g = deepcopy(empty_graph)

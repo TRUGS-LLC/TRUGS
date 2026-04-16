@@ -55,7 +55,7 @@ def graph_path():
 # ─── Backwards compatibility ───────────────────────────────────────────────────
 
 
-# AGENT SHALL VALIDATE DATA memory.
+# AGENT SHALL VALIDATE PROCESS remember THEN ASSERT RECORD node SUBJECT_TO DATA backwards_compat.
 def test_remember_without_new_kwargs_produces_1_0_0_shape(empty_graph):
     g = deepcopy(empty_graph)
     mid = remember(g, "Legacy memory", memory_type="feedback", tags=["a", "b"])
@@ -70,7 +70,7 @@ def test_remember_without_new_kwargs_produces_1_0_0_shape(empty_graph):
         assert k not in props, f"Unexpected key {k!r} in 1.0.0-compat write"
 
 
-# AGENT SHALL VALIDATE DATA memory.
+# AGENT SHALL VALIDATE PROCESS remember THEN VALIDATE DATA graph SUBJECT_TO DATA extended_properties.
 def test_graph_written_by_new_remember_still_validates(empty_graph):
     g = deepcopy(empty_graph)
     remember(
@@ -86,7 +86,7 @@ def test_graph_written_by_new_remember_still_validates(empty_graph):
     assert result.valid, f"Validation failed: {[e.message for e in result.errors]}"
 
 
-# AGENT SHALL VALIDATE DATA memory.
+# AGENT SHALL VALIDATE PROCESS load_graph THEN WRITE DATA extended_properties TO RECORD legacy_graph.
 def test_load_graph_written_by_1_0_0_then_remember_with_new_props(tmp_path):
     """Round-trip: a graph the old format wrote can accept new-format writes."""
     path = tmp_path / "legacy.trug.json"
@@ -148,7 +148,7 @@ def test_load_graph_written_by_1_0_0_then_remember_with_new_props(tmp_path):
 # ─── Extended properties ──────────────────────────────────────────────────────
 
 
-# AGENT SHALL VALIDATE DATA memory.
+# AGENT SHALL VALIDATE PROCESS remember THEN WRITE DATA rule TO RECORD node.
 def test_remember_with_rule_sets_rule_property(empty_graph):
     g = deepcopy(empty_graph)
     mid = remember(g, "Long prose", rule="Short rule")
@@ -157,7 +157,7 @@ def test_remember_with_rule_sets_rule_property(empty_graph):
     assert node["properties"]["text"] == "Long prose"
 
 
-# AGENT SHALL VALIDATE DATA memory.
+# AGENT SHALL VALIDATE PROCESS remember THEN WRITE DATA extended_properties TO RECORD node.
 def test_remember_with_all_new_props(empty_graph):
     g = deepcopy(empty_graph)
     mid = remember(
@@ -176,7 +176,7 @@ def test_remember_with_all_new_props(empty_graph):
     assert props["session_id"] == "sess-1"
 
 
-# AGENT SHALL VALIDATE DATA memory.
+# AGENT SHALL VALIDATE PROCESS remember THEN DENY RECORD optional_properties FROM RECORD node.
 def test_remember_optional_kwargs_none_means_not_set(empty_graph):
     g = deepcopy(empty_graph)
     mid = remember(g, "Memory", rule=None, rationale=None, valid_to=None, session_id=None)
@@ -190,7 +190,7 @@ def test_remember_optional_kwargs_none_means_not_set(empty_graph):
 # ─── Supersede workflow ───────────────────────────────────────────────────────
 
 
-# AGENT SHALL VALIDATE DATA memory.
+# AGENT SHALL VALIDATE PROCESS supersede THEN WRITE DATA valid_to TO RECORD old_node THEN ASSERT RECORD supersedes_edge.
 def test_supersede_closes_old_and_links_new(empty_graph):
     g = deepcopy(empty_graph)
     old_id = remember(g, "Old rule", memory_type="feedback", rule="Do X.")
@@ -215,7 +215,7 @@ def test_supersede_closes_old_and_links_new(empty_graph):
     assert len(edges) == 1
 
 
-# AGENT SHALL VALIDATE DATA memory.
+# AGENT SHALL VALIDATE FUNCTION _apply_supersede THEN REJECT RECORD nonexistent_target.
 def test_supersede_unknown_id_returns_false():
     g = {"nodes": [{"id": "memory-root", "type": "MODULE", "properties": {}, "parent_id": None,
                     "contains": [], "metric_level": "KILO_STORE", "dimension": "memory"}],
@@ -225,7 +225,7 @@ def test_supersede_unknown_id_returns_false():
     assert result is False
 
 
-# AGENT SHALL VALIDATE DATA memory.
+# AGENT SHALL VALIDATE PROCESS supersede THEN ASSERT DATA explicit_valid_to SUBJECT_TO RECORD old_node.
 def test_supersede_preserves_explicit_valid_to(empty_graph):
     g = deepcopy(empty_graph)
     old_id = remember(g, "Old", valid_to="2025-12-31T00:00:00+00:00")
@@ -235,7 +235,7 @@ def test_supersede_preserves_explicit_valid_to(empty_graph):
     assert old_node["properties"]["valid_to"] == "2025-12-31T00:00:00+00:00"
 
 
-# AGENT SHALL VALIDATE DATA memory.
+# AGENT SHALL VALIDATE PROCESS recall THEN FILTER RECORD superseded_node FROM DATA active_results.
 def test_superseded_memory_excluded_by_active_only_recall(empty_graph):
     g = deepcopy(empty_graph)
     old_id = remember(g, "Old rule")
@@ -253,7 +253,7 @@ def test_superseded_memory_excluded_by_active_only_recall(empty_graph):
 # ─── active-only recall ───────────────────────────────────────────────────────
 
 
-# AGENT SHALL VALIDATE DATA memory.
+# AGENT SHALL VALIDATE PROCESS recall THEN FILTER RECORD expired_node FROM DATA active_results.
 def test_recall_active_only_filters_expired(empty_graph):
     g = deepcopy(empty_graph)
     remember(g, "Still valid", memory_type="feedback")
@@ -266,7 +266,7 @@ def test_recall_active_only_filters_expired(empty_graph):
     assert "Expired" not in texts
 
 
-# AGENT SHALL VALIDATE DATA memory.
+# AGENT SHALL VALIDATE PROCESS recall THEN ASSERT RECORD future_valid_to SUBJECT_TO DATA active_results.
 def test_recall_active_only_keeps_future_valid_to(empty_graph):
     g = deepcopy(empty_graph)
     remember(g, "Scheduled retire", valid_to="2027-01-01T00:00:00+00:00")
@@ -275,7 +275,7 @@ def test_recall_active_only_keeps_future_valid_to(empty_graph):
     assert len(results) == 1
 
 
-# AGENT SHALL VALIDATE DATA memory.
+# AGENT SHALL VALIDATE PROCESS recall THEN ASSERT DATA all_results CONTAINS RECORD expired_node.
 def test_recall_without_active_only_returns_everything(empty_graph):
     g = deepcopy(empty_graph)
     remember(g, "Active")
@@ -284,7 +284,7 @@ def test_recall_without_active_only_returns_everything(empty_graph):
     assert len(results) == 2
 
 
-# AGENT SHALL VALIDATE DATA memory.
+# AGENT SHALL VALIDATE PROCESS recall THEN READ DATA rule FROM RECORD node SUBJECT_TO DATA query.
 def test_recall_query_matches_rule_field(empty_graph):
     g = deepcopy(empty_graph)
     remember(g, "Some long prose about auditing", rule="Always fix findings")
@@ -292,7 +292,7 @@ def test_recall_query_matches_rule_field(empty_graph):
     assert len(results) == 1
 
 
-# AGENT SHALL VALIDATE DATA memory.
+# AGENT SHALL VALIDATE FUNCTION _is_expired THEN HANDLE RECORD malformed_date.
 def test_is_expired_handles_malformed_date(empty_graph):
     g = deepcopy(empty_graph)
     remember(g, "Garbage date", valid_to="not-a-date")
@@ -303,7 +303,7 @@ def test_is_expired_handles_malformed_date(empty_graph):
 # ─── _format_memory ───────────────────────────────────────────────────────────
 
 
-# AGENT SHALL VALIDATE DATA memory.
+# AGENT SHALL VALIDATE FUNCTION _format_memory THEN ASSERT DATA rule SUPERSEDES DATA text.
 def test_format_memory_prefers_rule_over_text(empty_graph):
     g = deepcopy(empty_graph)
     mid = remember(g, "Verbose prose", rule="Do thing.")
@@ -313,7 +313,7 @@ def test_format_memory_prefers_rule_over_text(empty_graph):
     assert "Verbose prose" not in formatted
 
 
-# AGENT SHALL VALIDATE DATA memory.
+# AGENT SHALL VALIDATE FUNCTION _format_memory THEN ASSERT RESULT CONTAINS DATA valid_to.
 def test_format_memory_shows_valid_to(empty_graph):
     g = deepcopy(empty_graph)
     mid = remember(g, "Memory", valid_to="2027-01-01T00:00:00+00:00")
@@ -337,7 +337,7 @@ def _run_cli(*args):
     return result.returncode, result.stdout, result.stderr
 
 
-# AGENT SHALL VALIDATE DATA memory.
+# AGENT SHALL VALIDATE PROCESS cli THEN ASSERT DATA help_output.
 def test_cli_help_exits_zero():
     rc, out, _ = _run_cli("--help")
     assert rc == 0
@@ -346,7 +346,7 @@ def test_cli_help_exits_zero():
     assert "remember" in out
 
 
-# AGENT SHALL VALIDATE DATA memory.
+# AGENT SHALL VALIDATE PROCESS cli THEN ASSERT DATA remember_help CONTAINS DATA extended_flags.
 def test_cli_remember_help_lists_new_flags():
     rc, out, _ = _run_cli("remember", "--help")
     assert rc == 0
@@ -357,7 +357,7 @@ def test_cli_remember_help_lists_new_flags():
     assert "--supersede" in out
 
 
-# AGENT SHALL VALIDATE DATA memory.
+# AGENT SHALL VALIDATE PROCESS cli THEN WRITE DATA init THEN WRITE DATA remember THEN READ DATA recall.
 def test_cli_init_then_remember_then_recall(tmp_path):
     path = tmp_path / "mem.trug.json"
     rc, _, _ = _run_cli("init", str(path))
@@ -379,7 +379,7 @@ def test_cli_init_then_remember_then_recall(tmp_path):
     assert "tags: a, b" in out
 
 
-# AGENT SHALL VALIDATE DATA memory.
+# AGENT SHALL VALIDATE PROCESS cli THEN FILTER RECORD expired_node FROM DATA recall_output.
 def test_cli_recall_active_only(tmp_path):
     path = tmp_path / "mem.trug.json"
     _run_cli("init", str(path))
@@ -392,7 +392,7 @@ def test_cli_recall_active_only(tmp_path):
     assert "Expired one" not in out
 
 
-# AGENT SHALL VALIDATE DATA memory.
+# AGENT SHALL VALIDATE PROCESS cli THEN WRITE DATA supersede TO RECORD old_node.
 def test_cli_supersede_closes_old(tmp_path):
     path = tmp_path / "mem.trug.json"
     _run_cli("init", str(path))
@@ -410,13 +410,13 @@ def test_cli_supersede_closes_old(tmp_path):
     assert old["properties"]["valid_to"] is not None
 
 
-# AGENT SHALL VALIDATE DATA memory.
+# AGENT SHALL VALIDATE PROCESS cli THEN REJECT RECORD unknown_command.
 def test_cli_unknown_command_exits_nonzero():
     rc, _, err = _run_cli("garble")
     assert rc != 0
 
 
-# AGENT SHALL VALIDATE DATA memory.
+# AGENT SHALL VALIDATE PROCESS cli THEN ASSERT DATA usage_output SUBJECT_TO RECORD missing_command.
 def test_cli_no_command_prints_help(tmp_path):
     rc, out, _ = _run_cli()
     assert rc != 0
@@ -429,7 +429,7 @@ def test_cli_no_command_prints_help(tmp_path):
 # ─── Parser structure sanity ──────────────────────────────────────────────────
 
 
-# AGENT SHALL VALIDATE DATA memory.
+# AGENT SHALL VALIDATE FUNCTION _build_parser THEN ASSERT DATA render_subcommand.
 def test_parser_includes_render_subcommand():
     parser = _build_parser()
     # parse_args will raise SystemExit if the subcommand isn't recognized.
@@ -441,7 +441,7 @@ def test_parser_includes_render_subcommand():
     assert args.include_rationale is False
 
 
-# AGENT SHALL VALIDATE DATA memory.
+# AGENT SHALL VALIDATE FUNCTION _build_parser THEN ASSERT DATA render_flags SUBJECT_TO DATA budget_and_rationale.
 def test_parser_render_with_flags():
     parser = _build_parser()
     args = parser.parse_args(["render", "in.json", "out.md", "--budget", "12000", "--include-rationale"])
@@ -449,7 +449,7 @@ def test_parser_render_with_flags():
     assert args.include_rationale is True
 
 
-# AGENT SHALL VALIDATE DATA memory.
+# AGENT SHALL VALIDATE FUNCTION _build_parser THEN ASSERT DATA remember_defaults.
 def test_parser_remember_minimal():
     parser = _build_parser()
     args = parser.parse_args(["remember", "file.json", "some text"])
@@ -462,7 +462,7 @@ def test_parser_remember_minimal():
 # ─── Audit round 2 regression tests ──────────────────────────────────────────
 
 
-# AGENT SHALL VALIDATE DATA memory.
+# AGENT SHALL VALIDATE PROCESS save_graph THEN ASSERT FILE target SUBJECT_TO DATA crash_simulation.
 def test_save_graph_is_atomic_on_crash_simulation(tmp_path):
     """Audit #1 (HIGH) — a crash mid-save must leave the old file intact.
 
@@ -505,7 +505,7 @@ def test_save_graph_is_atomic_on_crash_simulation(tmp_path):
     assert leftover == [], f"Leftover tmp files: {leftover}"
 
 
-# AGENT SHALL VALIDATE DATA memory.
+# AGENT SHALL VALIDATE PROCESS save_graph THEN WRITE FILE target TO NAMESPACE nested_parent.
 def test_save_graph_creates_parent_dirs(tmp_path):
     """Audit #1 — atomic save should create parent dirs (matches old behavior)."""
     nested = tmp_path / "a" / "b" / "c" / "mem.trug.json"
@@ -514,7 +514,7 @@ def test_save_graph_creates_parent_dirs(tmp_path):
     assert nested.exists()
 
 
-# AGENT SHALL VALIDATE DATA memory.
+# AGENT SHALL VALIDATE FUNCTION _apply_supersede THEN DENY RECORD self_reference.
 def test_supersede_rejects_self(empty_graph):
     """Audit #2 — cannot supersede own ID."""
     g = deepcopy(empty_graph)
@@ -523,7 +523,7 @@ def test_supersede_rejects_self(empty_graph):
         _apply_supersede(g, new_id=mid, old_id=mid, now="2026-04-10T00:00:00+00:00")
 
 
-# AGENT SHALL VALIDATE DATA memory.
+# AGENT SHALL VALIDATE PROCESS supersede THEN ASSERT RECORD chain FEEDS RECORD tail.
 def test_supersede_chain_closes_tail_not_original(empty_graph):
     """Audit #2 (HIGH) — supersede on an already-superseded memory links to the chain tail.
 
@@ -556,7 +556,7 @@ def test_supersede_chain_closes_tail_not_original(empty_graph):
     assert (c, b) in sup_edges
 
 
-# AGENT SHALL VALIDATE DATA memory.
+# AGENT SHALL VALIDATE PROCESS supersede THEN DENY RECORD cycle_in_chain.
 def test_supersede_rejects_cycle_in_chain(empty_graph):
     """Audit #2 — a pre-existing cycle in the chain is refused, not made worse."""
     g = deepcopy(empty_graph)
@@ -569,7 +569,7 @@ def test_supersede_rejects_cycle_in_chain(empty_graph):
         remember(g, "C", supersede=a)
 
 
-# AGENT SHALL VALIDATE DATA memory.
+# AGENT SHALL VALIDATE PROCESS remember THEN DENY RECORD supersede_missing_target.
 def test_supersede_on_missing_old_id_raises(empty_graph):
     """Audit round 3 R3-1 — `remember(supersede=missing)` must RAISE, not
     silently add an orphan memory. Round-2 behavior was to return cleanly
@@ -586,7 +586,7 @@ def test_supersede_on_missing_old_id_raises(empty_graph):
     assert sup == []
 
 
-# AGENT SHALL VALIDATE DATA memory.
+# AGENT SHALL VALIDATE FUNCTION _apply_supersede THEN REJECT RECORD missing_target SUBJECT_TO DATA legacy_contract.
 def test_apply_supersede_helper_still_returns_false_on_missing(empty_graph):
     """Audit round 3 R3-4 — `_apply_supersede` (the lower-level helper)
     preserves its legacy False-return contract even though `remember()`
@@ -600,7 +600,7 @@ def test_apply_supersede_helper_still_returns_false_on_missing(empty_graph):
     ) is False
 
 
-# AGENT SHALL VALIDATE DATA memory.
+# AGENT SHALL VALIDATE FUNCTION _parse_iso_utc THEN HANDLE RECORD invalid_input THEN ASSERT DATA valid_datetime.
 def test_parse_iso_utc_none_and_garbage():
     """Audit #14 (DRY) — shared helper handles every fail-open case."""
     assert _parse_iso_utc(None) is None
@@ -617,7 +617,7 @@ def test_parse_iso_utc_none_and_garbage():
     assert dt_naive.tzinfo == timezone.utc
 
 
-# AGENT SHALL VALIDATE DATA memory.
+# AGENT SHALL VALIDATE FUNCTION _is_expired DEPENDS_ON FUNCTION _parse_iso_utc.
 def test_is_expired_uses_shared_parser(empty_graph):
     """Audit #14 — _is_expired is wired through _parse_iso_utc."""
     g = deepcopy(empty_graph)
@@ -639,7 +639,7 @@ def _run_cli_u2(*args):
     return result.returncode, result.stdout, result.stderr
 
 
-# AGENT SHALL VALIDATE DATA memory.
+# AGENT SHALL VALIDATE PROCESS cli THEN REJECT DATA invalid_valid_to.
 def test_cli_remember_rejects_garbage_valid_to(tmp_path):
     """Audit #8 (MED) — --valid-to must parse; garbage fails loud."""
     path = tmp_path / "mem.trug.json"
@@ -651,7 +651,7 @@ def test_cli_remember_rejects_garbage_valid_to(tmp_path):
     assert "ISO-8601" in err
 
 
-# AGENT SHALL VALIDATE DATA memory.
+# AGENT SHALL VALIDATE PROCESS cli THEN ASSERT DATA valid_iso_valid_to.
 def test_cli_remember_accepts_valid_iso_valid_to(tmp_path):
     """Audit #8 — valid ISO-8601 is accepted."""
     path = tmp_path / "mem.trug.json"
@@ -663,7 +663,7 @@ def test_cli_remember_accepts_valid_iso_valid_to(tmp_path):
     assert "Remembered:" in out
 
 
-# AGENT SHALL VALIDATE DATA memory.
+# AGENT SHALL VALIDATE PROCESS cli THEN ASSERT DATA tag_with_comma SUBJECT_TO RECORD repeatable_flag.
 def test_cli_remember_tag_can_contain_comma(tmp_path):
     """Audit #10 (MED) — --tag (repeatable) accepts commas inside a single tag."""
     path = tmp_path / "mem.trug.json"
@@ -682,7 +682,7 @@ def test_cli_remember_tag_can_contain_comma(tmp_path):
     assert "session-2026-04-10" in tags
 
 
-# AGENT SHALL VALIDATE DATA memory.
+# AGENT SHALL VALIDATE PROCESS cli THEN SPLIT DATA legacy_tags SUBJECT_TO DATA backwards_compat.
 def test_cli_remember_tags_legacy_comma_form_still_works(tmp_path):
     """Audit #10 — backwards compatibility: --tags "a,b,c" still splits."""
     path = tmp_path / "mem.trug.json"
@@ -693,7 +693,7 @@ def test_cli_remember_tags_legacy_comma_form_still_works(tmp_path):
     assert set(tags) == {"a", "b", "c"}
 
 
-# AGENT SHALL VALIDATE DATA memory.
+# AGENT SHALL VALIDATE PROCESS cli THEN ASSERT DATA text_with_dash_prefix SUBJECT_TO DATA separator.
 def test_cli_remember_text_starting_with_dash(tmp_path):
     """Audit #11 (MED) — text beginning with `--` works when `--` separator used."""
     path = tmp_path / "mem.trug.json"
@@ -709,7 +709,7 @@ def test_cli_remember_text_starting_with_dash(tmp_path):
     assert memories[0]["properties"]["text"].startswith("--foo")
 
 
-# AGENT SHALL VALIDATE DATA memory.
+# AGENT SHALL VALIDATE PROCESS remember THEN DENY RECORD orphan_node SUBJECT_TO DATA supersede_error.
 def test_remember_supersede_validation_leaves_graph_clean_on_error(empty_graph):
     """Audit #2 — a SupersedeError during remember() must not leave an orphan."""
     g = deepcopy(empty_graph)
@@ -727,7 +727,7 @@ def test_remember_supersede_validation_leaves_graph_clean_on_error(empty_graph):
 # ─── Audit round 3 regression tests ───────────────────────────────────────────
 
 
-# AGENT SHALL VALIDATE DATA memory.
+# AGENT SHALL VALIDATE RECORD supersede_error EXTENDS RECORD exception THEN DENY RECORD value_error.
 def test_supersede_error_is_not_a_value_error():
     """Audit round 3 R3-12 — SupersedeError subclasses Exception, not ValueError.
 
@@ -738,7 +738,7 @@ def test_supersede_error_is_not_a_value_error():
     assert not issubclass(SupersedeError, ValueError)
 
 
-# AGENT SHALL VALIDATE DATA memory.
+# AGENT SHALL VALIDATE PROCESS save_graph THEN ASSERT DATA file_permissions SUBJECT_TO FILE existing.
 def test_save_graph_preserves_existing_mode(tmp_path):
     """Audit round 3 R3-3 — save_graph must not tighten 0o644 → 0o600."""
     import os
@@ -757,7 +757,7 @@ def test_save_graph_preserves_existing_mode(tmp_path):
     not hasattr(__import__("os"), "O_DIRECTORY"),
     reason="Directory fsync requires POSIX O_DIRECTORY (audit round 4 platform gate)",
 )
-# AGENT SHALL VALIDATE DATA memory.
+# AGENT SHALL VALIDATE PROCESS save_graph THEN ASSERT DATA fsync_on_parent_directory.
 def test_save_graph_fsyncs_parent_directory(tmp_path, monkeypatch):
     """Audit round 3 R3-2 — save_graph must fsync the parent dir after replace.
 
@@ -787,7 +787,7 @@ def test_save_graph_fsyncs_parent_directory(tmp_path, monkeypatch):
     assert len(fsync_fds) >= 2, f"Expected ≥2 fsyncs (file + dir), got {len(fsync_fds)}"
 
 
-# AGENT SHALL VALIDATE DATA memory.
+# AGENT SHALL VALIDATE FUNCTION _cmd_render THEN READ DATA graph SUBJECT_TO FUNCTION load_graph.
 def test_cmd_render_uses_load_graph(tmp_path, monkeypatch):
     """Audit round 3 R3-10 — _cmd_render routes through load_graph."""
     import memory as memory_module
@@ -819,7 +819,7 @@ def test_cmd_render_uses_load_graph(tmp_path, monkeypatch):
     assert call_count[0] == 1, "Expected _cmd_render to call load_graph exactly once"
 
 
-# AGENT SHALL VALIDATE DATA memory.
+# AGENT SHALL VALIDATE PROCESS cli THEN SEND DATA chain_tail_report TO RECORD output.
 def test_cli_remember_supersede_reports_chain_tail(tmp_path):
     """Audit round 3 R3-1 corollary — the CLI must report the memory that
     actually got closed, not necessarily the one the user named (which may
@@ -844,7 +844,7 @@ def test_cli_remember_supersede_reports_chain_tail(tmp_path):
     assert a_id in out_c
 
 
-# AGENT SHALL VALIDATE DATA memory.
+# AGENT SHALL VALIDATE PROCESS cli THEN REJECT RECORD supersede_missing_target.
 def test_cli_remember_supersede_missing_target_fails_loud(tmp_path):
     """Audit round 3 R3-1 — unknown supersede target must return non-zero.
 
@@ -861,7 +861,7 @@ def test_cli_remember_supersede_missing_target_fails_loud(tmp_path):
     assert "not found" in err.lower()
 
 
-# AGENT SHALL VALIDATE DATA memory.
+# AGENT SHALL VALIDATE PROCESS save_graph THEN ASSERT FILE symlink SUBJECT_TO DATA resolve.
 def test_save_graph_resolves_symlinks(tmp_path):
     """M1 — save_graph through a symlink must preserve the symlink and write
     to the real target, not replace the symlink with a regular file."""
@@ -888,7 +888,7 @@ def test_save_graph_resolves_symlinks(tmp_path):
     assert loaded_from_link["name"] == "Updated via symlink"
 
 
-# AGENT SHALL VALIDATE DATA memory.
+# AGENT SHALL VALIDATE FUNCTION init_memory_graph THEN ASSERT DATA version.
 def test_init_memory_graph_version_is_1_2_0(tmp_path):
     """L1 — init_memory_graph must stamp version 1.2.0, not 1.0.0."""
     from memory import MEMORY_GRAPH_VERSION, init_memory_graph
@@ -902,7 +902,7 @@ def test_init_memory_graph_version_is_1_2_0(tmp_path):
 # ─── Phase 2: remember --ref (organic REFERENCES edges) ─────────────────────
 
 
-# AGENT SHALL VALIDATE DATA memory.
+# AGENT SHALL VALIDATE PROCESS remember THEN ASSERT RECORD references_edge SUBJECT_TO DATA ref.
 def test_remember_ref_creates_references_edge(tmp_path):
     """--ref should create a REFERENCES edge from new memory to target."""
     from memory import init_memory_graph, remember
@@ -920,7 +920,7 @@ def test_remember_ref_creates_references_edge(tmp_path):
     assert len(ref_edges) == 1
 
 
-# AGENT SHALL VALIDATE DATA memory.
+# AGENT SHALL VALIDATE PROCESS remember THEN ASSERT RECORD references_edges SUBJECT_TO DATA multiple_refs.
 def test_remember_ref_multiple_targets(tmp_path):
     """Multiple --ref flags should create one REFERENCES edge each."""
     from memory import init_memory_graph, remember
@@ -939,7 +939,7 @@ def test_remember_ref_multiple_targets(tmp_path):
     assert targets == {mid_a, mid_b}
 
 
-# AGENT SHALL VALIDATE DATA memory.
+# AGENT SHALL VALIDATE PROCESS remember THEN DENY RECORD references_edge SUBJECT_TO RECORD missing_ref_target.
 def test_remember_ref_missing_target_skipped(tmp_path):
     """--ref with a non-existent ID should be silently skipped."""
     from memory import init_memory_graph, remember
@@ -954,7 +954,7 @@ def test_remember_ref_missing_target_skipped(tmp_path):
     assert len(ref_edges) == 0
 
 
-# AGENT SHALL VALIDATE DATA memory.
+# AGENT SHALL VALIDATE PROCESS remember THEN DENY RECORD references_edge SUBJECT_TO DATA null_ref.
 def test_remember_ref_none_creates_no_edges(tmp_path):
     """ref=None should create no REFERENCES edges (backwards compat)."""
     from memory import init_memory_graph, remember

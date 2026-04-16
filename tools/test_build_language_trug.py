@@ -29,20 +29,20 @@ EXPECTED_COUNTS = {
 EXPECTED_TOTAL = 190
 
 
-# AGENT SHALL VALIDATE DATA build_language_trug.
+# AGENT SHALL VALIDATE PROCESS parse_spec SUBJECT_TO FILE spec THEN ASSERT DATA word_count.
 def test_parse_spec_returns_190_words() -> None:
     records = parse_spec(SPEC.read_text())
     assert len(records) == EXPECTED_TOTAL
 
 
-# AGENT SHALL VALIDATE DATA build_language_trug.
+# AGENT SHALL VALIDATE EACH RECORD number SUBJECT_TO PROCESS parse_spec.
 def test_numbers_are_contiguous_1_to_190() -> None:
     records = parse_spec(SPEC.read_text())
     numbers = sorted(r["number"] for r in records)
     assert numbers == list(range(1, EXPECTED_TOTAL + 1))
 
 
-# AGENT SHALL VALIDATE DATA build_language_trug.
+# AGENT SHALL VALIDATE DATA part_of_speech SUBJECT_TO DATA expected_counts.
 def test_part_of_speech_counts_match_spec() -> None:
     records = parse_spec(SPEC.read_text())
     from collections import Counter
@@ -50,14 +50,14 @@ def test_part_of_speech_counts_match_spec() -> None:
     assert dict(counts) == EXPECTED_COUNTS
 
 
-# AGENT SHALL VALIDATE DATA build_language_trug.
+# AGENT SHALL VALIDATE EACH RECORD word THEN ASSERT DATA definition.
 def test_every_word_has_definition() -> None:
     records = parse_spec(SPEC.read_text())
     blank = [r["word"] for r in records if not r["definition"]]
     assert blank == []
 
 
-# AGENT SHALL VALIDATE DATA build_language_trug.
+# AGENT SHALL VALIDATE DATA vocabulary THEN ASSERT EACH REQUIRED DATA keyword.
 def test_critical_keywords_present() -> None:
     records = parse_spec(SPEC.read_text())
     words = {r["word"] for r in records}
@@ -67,7 +67,7 @@ def test_critical_keywords_present() -> None:
         assert required in words, f"missing {required}"
 
 
-# AGENT SHALL VALIDATE DATA build_language_trug.
+# AGENT SHALL VALIDATE PROCESS build_trug THEN ASSERT UNIQUE RECORD node.
 def test_build_trug_has_unique_word_ids() -> None:
     records = parse_spec(SPEC.read_text())
     trug = build_trug(records)
@@ -77,7 +77,7 @@ def test_build_trug_has_unique_word_ids() -> None:
     assert len(word_nodes) == EXPECTED_TOTAL
 
 
-# AGENT SHALL VALIDATE DATA build_language_trug.
+# AGENT SHALL VALIDATE FILE language_trug SUBJECT_TO PROCESS build_trug.
 def test_generated_file_matches_fresh_build() -> None:
     """If this fails, re-run tools/build_language_trug.py to regenerate."""
     records = parse_spec(SPEC.read_text())
