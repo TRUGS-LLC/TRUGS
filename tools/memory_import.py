@@ -63,6 +63,7 @@ FILENAME_TYPE_PREFIXES: Tuple[Tuple[str, str], ...] = (
 # ─── Frontmatter parser ────────────────────────────────────────────────────────
 
 
+# AGENT claude SHALL DEFINE RECORD parsed_file AS A RECORD finding.
 @dataclass
 class ParsedFile:
     """Result of parsing one markdown file for memory import."""
@@ -70,14 +71,17 @@ class ParsedFile:
     frontmatter: Dict[str, str]
     body: str
 
+    # AGENT claude SHALL MAP RECORD parsed_file TO STRING DATA name.
     @property
     def name(self) -> Optional[str]:
         return self.frontmatter.get("name")
 
+    # AGENT claude SHALL MAP RECORD parsed_file TO STRING DATA description.
     @property
     def description(self) -> Optional[str]:
         return self.frontmatter.get("description")
 
+    # AGENT claude SHALL MAP RECORD parsed_file TO STRING DATA type.
     @property
     def type(self) -> Optional[str]:
         return self.frontmatter.get("type")
@@ -101,6 +105,7 @@ def _strip_yaml_quotes(value: str) -> str:
     return value
 
 
+# PROCESS parser SHALL READ FILE markdown THEN RETURN RECORD parsed_file.
 def parse_markdown_with_frontmatter(content: str) -> ParsedFile:
     """Parse a markdown file's YAML frontmatter and body.
 
@@ -146,6 +151,7 @@ def parse_markdown_with_frontmatter(content: str) -> ParsedFile:
 # ─── Type derivation ───────────────────────────────────────────────────────────
 
 
+# PROCESS classifier SHALL MATCH RECORD memory TO STRING DATA type.
 def derive_memory_type(
     parsed: ParsedFile,
     filename: str,
@@ -172,6 +178,7 @@ def derive_memory_type(
 # ─── Import ────────────────────────────────────────────────────────────────────
 
 
+# AGENT claude SHALL DEFINE RECORD import_report AS A RECORD finding.
 @dataclass
 class ImportReport:
     """Summary of an import run. Returned by `import_flat_directory`."""
@@ -202,6 +209,7 @@ def _idempotency_key(text: str, rule: Optional[str], rationale: Optional[str], m
     return hashlib.sha256("\x1f".join(parts).encode("utf-8")).hexdigest()
 
 
+# PROCESS importer SHALL READ ALL FILE markdown THEN WRITE EACH RECORD memory TO RECORD graph.
 def import_flat_directory(
     src_dir: Path,
     out_path: Path,
@@ -391,6 +399,7 @@ def _make_ephemeral_graph() -> Dict[str, Any]:
 # ─── CLI ───────────────────────────────────────────────────────────────────────
 
 
+# AGENT claude SHALL READ DATA argv THEN RETURN INTEGER DATA exit_code.
 def main() -> None:
     """CLI entry: `trugs-memory-import <src_dir> <out.trug.json> [flags]`."""
     argv = sys.argv[1:]

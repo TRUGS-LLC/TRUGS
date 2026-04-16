@@ -40,6 +40,7 @@ DEFAULT_BUDGET_TOKENS: int = 8000
 DEMOTION_ORDER: Tuple[str, ...] = ("project", "reference")
 
 
+# PROCESS render SHALL MAP RECORD graph TO STRING DATA output.
 def render(
     graph: Dict[str, Any],
     *,
@@ -87,6 +88,7 @@ def render(
     return out
 
 
+# PROCESS render SHALL MAP RECORD graph TO FILE output.
 def render_to_file(
     graph: Dict[str, Any],
     path: Path,
@@ -487,6 +489,7 @@ def _apply_budget(
 # ─── CLI ───────────────────────────────────────────────────────────────────────
 
 
+# AGENT claude SHALL READ DATA argv THEN RETURN INTEGER DATA exit_code.
 def main() -> None:
     """CLI entry: `trugs-memory-render <in.trug.json> <out.md> [flags]`.
 

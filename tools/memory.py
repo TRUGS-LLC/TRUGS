@@ -28,11 +28,13 @@ from typing import Any, Dict, List, Optional
 
 # ─── Graph Operations ──────────────────────────────────────────────────────────
 
+# PROCESS loader SHALL READ FILE graph THEN RETURN RECORD graph.
 def load_graph(path: Path) -> Dict[str, Any]:
     with open(path, "r", encoding="utf-8") as f:
         return json.load(f)
 
 
+# PROCESS saver SHALL WRITE RECORD graph TO FILE path.
 def save_graph(path: Path, graph: Dict[str, Any]) -> None:
     """Atomically and durably write `graph` to `path`.
 
@@ -116,6 +118,7 @@ def save_graph(path: Path, graph: Dict[str, Any]) -> None:
 MEMORY_GRAPH_VERSION = "1.2.0"
 
 
+# PROCESS init SHALL DEFINE RECORD graph THEN WRITE RESULT TO FILE path.
 def init_memory_graph(path: Path) -> Dict[str, Any]:
     """Create a new empty memory TRUG."""
     graph = {
@@ -156,6 +159,7 @@ def init_memory_graph(path: Path) -> Dict[str, Any]:
 
 # ─── Remember ──────────────────────────────────────────────────────────────────
 
+# PROCESS remember SHALL WRITE RECORD memory TO RECORD graph.
 def remember(
     graph: Dict[str, Any],
     text: str,
@@ -283,6 +287,7 @@ def remember(
     return memory_id
 
 
+# AGENT claude SHALL DEFINE RECORD supersede_error AS A RECORD exception.
 class SupersedeError(Exception):
     """Raised when a supersede call violates the bi-temporal invariant.
 
@@ -397,6 +402,7 @@ def _apply_supersede(
 
 # ─── Recall ────────────────────────────────────────────────────────────────────
 
+# PROCESS recall SHALL FILTER ALL RECORD memory THEN RETURN RECORD result.
 def recall(
     graph: Dict[str, Any],
     query: Optional[str] = None,
@@ -490,6 +496,7 @@ def _is_expired(memory: Dict[str, Any], now: datetime) -> bool:
 
 # ─── Forget ────────────────────────────────────────────────────────────────────
 
+# PROCESS forget SHALL REJECT RECORD memory FROM RECORD graph.
 def forget(graph: Dict[str, Any], memory_id: str) -> bool:
     """Remove a memory node and all its edges. Returns True if found."""
     node = _find_node(graph, memory_id)
@@ -519,6 +526,7 @@ def forget(graph: Dict[str, Any], memory_id: str) -> bool:
 
 # ─── Associate ─────────────────────────────────────────────────────────────────
 
+# PROCESS associate SHALL WRITE RECORD edge TO RECORD graph.
 def associate(
     graph: Dict[str, Any],
     from_id: str,
@@ -915,6 +923,7 @@ _COMMANDS = {
 }
 
 
+# AGENT claude SHALL READ DATA argv THEN RETURN INTEGER DATA exit_code.
 def main() -> None:
     parser = _build_parser()
     args = parser.parse_args()
