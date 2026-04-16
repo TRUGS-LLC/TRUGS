@@ -15,17 +15,20 @@ from pathlib import Path
 from typing import Any, Optional
 
 
+# PROCESS loader SHALL READ FILE path THEN RETURN RECORD graph.
 def load_trug(path: str) -> dict:
     with open(path) as f:
         return json.load(f)
 
 
+# PROCESS saver SHALL WRITE RECORD graph TO FILE path.
 def save_trug(path: str, trug: dict) -> None:
     with open(path, "w") as f:
         json.dump(trug, f, indent=2)
         f.write("\n")
 
 
+# PROCESS parser SHALL MAP STRING DATA input TO RECORD value.
 def parse_value(raw: str) -> Any:
     """Infer type from string value."""
     if raw.lower() == "true":
@@ -45,6 +48,7 @@ def parse_value(raw: str) -> Any:
     return raw
 
 
+# PROCESS updater SHALL WRITE RECORD value TO RECORD node.
 def set_nested(d: dict, key: str, value: Any) -> None:
     """Set a value using dot notation (e.g., 'metadata.source')."""
     parts = key.split(".")
@@ -55,6 +59,7 @@ def set_nested(d: dict, key: str, value: Any) -> None:
     d[parts[-1]] = value
 
 
+# AGENT claude SHALL READ DATA argv THEN RETURN INTEGER DATA exit_code.
 def main(argv: Optional[list] = None) -> int:
     parser = argparse.ArgumentParser(
         prog="trugs-tupdate",

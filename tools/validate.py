@@ -71,6 +71,7 @@ SI_VALUES = {
 
 # ─── Result Types ──────────────────────────────────────────────────────────────
 
+# AGENT claude SHALL DEFINE RECORD validation_error AS A RECORD finding.
 @dataclass
 class ValidationError:
     code: str
@@ -79,21 +80,26 @@ class ValidationError:
     node_id: Optional[str] = None
 
 
+# AGENT claude SHALL DEFINE RECORD validation_result AS A RECORD finding.
 @dataclass
 class ValidationResult:
     errors: List[ValidationError] = field(default_factory=list)
     warnings: List[ValidationError] = field(default_factory=list)
 
+    # AGENT claude SHALL VALIDATE RECORD result THEN RETURN RECORD valid.
     @property
     def valid(self) -> bool:
         return len(self.errors) == 0
 
+    # AGENT claude SHALL WRITE RECORD error TO RECORD result.
     def error(self, code: str, message: str, location: str = "", node_id: Optional[str] = None):
         self.errors.append(ValidationError(code, message, location, node_id))
 
+    # AGENT claude SHALL WRITE RECORD warning TO RECORD result.
     def warn(self, code: str, message: str, location: str = "", node_id: Optional[str] = None):
         self.warnings.append(ValidationError(code, message, location, node_id))
 
+    # AGENT claude SHALL MAP RECORD result TO STRING DATA output.
     def summary(self) -> str:
         if self.valid and not self.warnings:
             return "VALID"
@@ -149,6 +155,7 @@ def _has_core_v091(trug: Dict[str, Any]) -> bool:
 
 # ─── Rules 1-9: Structural ────────────────────────────────────────────────────
 
+# PROCESS validator SHALL ASSERT RECORD rule SUBJECT_TO RECORD graph.
 def rule_1_unique_ids(trug: Dict[str, Any], r: ValidationResult):
     seen: Set[str] = set()
     for i, node in enumerate(trug.get("nodes", [])):
@@ -161,6 +168,7 @@ def rule_1_unique_ids(trug: Dict[str, Any], r: ValidationResult):
             seen.add(nid)
 
 
+# PROCESS validator SHALL ASSERT RECORD rule SUBJECT_TO RECORD graph.
 def rule_2_edge_id_validity(trug: Dict[str, Any], r: ValidationResult):
     node_ids = {n.get("id") for n in trug.get("nodes", []) if n.get("id")}
     for i, edge in enumerate(trug.get("edges", [])):
@@ -172,6 +180,7 @@ def rule_2_edge_id_validity(trug: Dict[str, Any], r: ValidationResult):
             r.error("INVALID_EDGE_REFERENCE", f"Edge to_id '{tid}' not found", f"edges[{i}]")
 
 
+# PROCESS validator SHALL ASSERT RECORD rule SUBJECT_TO RECORD graph.
 def rule_3_hierarchy_consistency(trug: Dict[str, Any], r: ValidationResult):
     node_map = {n.get("id"): n for n in trug.get("nodes", []) if n.get("id")}
     for nid, node in node_map.items():
@@ -187,6 +196,7 @@ def rule_3_hierarchy_consistency(trug: Dict[str, Any], r: ValidationResult):
                     r.error("INCONSISTENT_HIERARCHY", f"'{nid}' lists '{cid}' in contains[] but child's parent_id='{child.get('parent_id')}'", node_id=nid)
 
 
+# PROCESS validator SHALL ASSERT RECORD rule SUBJECT_TO RECORD graph.
 def rule_4_metric_level_ordering(trug: Dict[str, Any], r: ValidationResult):
     node_map = {n.get("id"): n for n in trug.get("nodes", []) if n.get("id")}
     for nid, node in node_map.items():
@@ -203,6 +213,7 @@ def rule_4_metric_level_ordering(trug: Dict[str, Any], r: ValidationResult):
                 r.error("INVALID_METRIC_ORDERING", f"Parent '{pid}' ({p_ml}) < child '{nid}' ({c_ml})", node_id=nid)
 
 
+# PROCESS validator SHALL ASSERT RECORD rule SUBJECT_TO RECORD graph.
 def rule_5_dimension_declaration(trug: Dict[str, Any], r: ValidationResult):
     dims = trug.get("dimensions", {})
     if not isinstance(dims, dict):
@@ -214,6 +225,7 @@ def rule_5_dimension_declaration(trug: Dict[str, Any], r: ValidationResult):
             r.error("UNDECLARED_DIMENSION", f"Node '{node.get('id')}' uses undeclared dimension '{dim}'", node_id=node.get("id"))
 
 
+# PROCESS validator SHALL ASSERT RECORD rule SUBJECT_TO RECORD graph.
 def rule_6_required_fields(trug: Dict[str, Any], r: ValidationResult):
     # Root fields checked separately in validate() for early return
     node_fields = ["id", "type", "properties", "parent_id", "contains", "metric_level"]
@@ -228,6 +240,7 @@ def rule_6_required_fields(trug: Dict[str, Any], r: ValidationResult):
                 r.error("MISSING_REQUIRED_FIELD", f"Edge [{i}] missing field '{f}'", f"edges[{i}]")
 
 
+# PROCESS validator SHALL ASSERT RECORD rule SUBJECT_TO RECORD graph.
 def rule_7_field_type_correctness(trug: Dict[str, Any], r: ValidationResult):
     for i, node in enumerate(trug.get("nodes", [])):
         nid = node.get("id", f"nodes[{i}]")
@@ -255,6 +268,7 @@ def rule_7_field_type_correctness(trug: Dict[str, Any], r: ValidationResult):
                 r.error("INVALID_EDGE_WEIGHT", f"Edge [{i}]: weight {w} outside 0.0-1.0", f"edges[{i}]")
 
 
+# PROCESS validator SHALL ASSERT RECORD rule SUBJECT_TO RECORD graph.
 def rule_8_extension_declaration(trug: Dict[str, Any], r: ValidationResult):
     declared_ext = set(trug.get("capabilities", {}).get("extensions", []))
     for i, node in enumerate(trug.get("nodes", [])):
@@ -263,6 +277,7 @@ def rule_8_extension_declaration(trug: Dict[str, Any], r: ValidationResult):
             r.error("UNDECLARED_EXTENSION", f"Node '{node.get('id')}' uses typed extension but it's not declared", node_id=node.get("id"))
 
 
+# PROCESS validator SHALL ASSERT RECORD rule SUBJECT_TO RECORD graph.
 def rule_9_metric_level_format(trug: Dict[str, Any], r: ValidationResult):
     for i, node in enumerate(trug.get("nodes", [])):
         ml = node.get("metric_level")
@@ -278,6 +293,7 @@ def rule_9_metric_level_format(trug: Dict[str, Any], r: ValidationResult):
 
 # ─── Rules 10-16: Compositional (opt-in via core_v1.0.0) ──────────────────────
 
+# PROCESS validator SHALL ASSERT RECORD rule SUBJECT_TO RECORD graph.
 def rule_10_subject_operation(trug: Dict[str, Any], r: ValidationResult):
     """Subject-Operation compatibility."""
     node_map = {n.get("id"): n for n in trug.get("nodes", []) if n.get("id")}
@@ -307,6 +323,7 @@ def rule_10_subject_operation(trug: Dict[str, Any], r: ValidationResult):
         r.error("INCOMPATIBLE_SUBJECT_OPERATION", f"'{subject_type}' ({ec}) cannot perform '{op}' ({oc})", node_id=fid)
 
 
+# PROCESS validator SHALL ASSERT RECORD rule SUBJECT_TO RECORD graph.
 def rule_11_operation_object(trug: Dict[str, Any], r: ValidationResult):
     """Operation-Object compatibility."""
     node_map = {n.get("id"): n for n in trug.get("nodes", []) if n.get("id")}
@@ -335,6 +352,7 @@ def rule_11_operation_object(trug: Dict[str, Any], r: ValidationResult):
         r.error("INCOMPATIBLE_OPERATION_OBJECT", f"'{obj_type}' ({ec}) cannot be target of '{rel}' ({oc})", node_id=tid)
 
 
+# PROCESS validator SHALL ASSERT RECORD rule SUBJECT_TO RECORD graph.
 def rule_12_modifier_entity(trug: Dict[str, Any], r: ValidationResult):
     """Modifier-Entity compatibility."""
     for node in trug.get("nodes", []):
@@ -356,6 +374,7 @@ def rule_12_modifier_entity(trug: Dict[str, Any], r: ValidationResult):
                 r.error("INCOMPATIBLE_MODIFIER_ENTITY", f"Quantity modifier '{val}' on {ec} '{nid}'", node_id=nid)
 
 
+# PROCESS validator SHALL ASSERT RECORD rule SUBJECT_TO RECORD graph.
 def rule_13_qualifier_operation(trug: Dict[str, Any], r: ValidationResult):
     """Qualifier-Operation compatibility."""
     for node in trug.get("nodes", []):
@@ -380,6 +399,7 @@ def rule_13_qualifier_operation(trug: Dict[str, Any], r: ValidationResult):
                 r.error("INCOMPATIBLE_QUALIFIER_OPERATION", f"Degree qualifier '{val}' on {oc} operation '{op}' in '{nid}'", node_id=nid)
 
 
+# PROCESS validator SHALL ASSERT RECORD rule SUBJECT_TO RECORD graph.
 def rule_14_constraint_subject(trug: Dict[str, Any], r: ValidationResult):
     """Modals (SHALL, SHALL_NOT, MAY) require Actor subjects."""
     node_map = {n.get("id"): n for n in trug.get("nodes", []) if n.get("id")}
@@ -395,6 +415,7 @@ def rule_14_constraint_subject(trug: Dict[str, Any], r: ValidationResult):
             r.error("CONSTRAINT_REQUIRES_ACTOR", f"Modal '{rel}' on non-Actor '{subject_type}' node '{fid}'", node_id=fid)
 
 
+# PROCESS validator SHALL ASSERT RECORD rule SUBJECT_TO RECORD graph.
 def rule_15_no_double_negation(trug: Dict[str, Any], r: ValidationResult):
     """Negative selector + Prohibit modal = double negation."""
     node_map = {n.get("id"): n for n in trug.get("nodes", []) if n.get("id")}
@@ -411,6 +432,7 @@ def rule_15_no_double_negation(trug: Dict[str, Any], r: ValidationResult):
             r.error("DOUBLE_NEGATION", f"Double negation: '{quantifier}' + SHALL_NOT on '{fid}'", node_id=fid)
 
 
+# PROCESS validator SHALL ASSERT RECORD rule SUBJECT_TO RECORD graph.
 def rule_16_reference_scope(trug: Dict[str, Any], r: ValidationResult):
     """References (SELF, RESULT, etc.) must resolve within subgraph scope."""
     references = {"SELF", "RESULT", "OUTPUT", "INPUT", "SOURCE", "TARGET", "SAID"}
@@ -425,6 +447,7 @@ def rule_16_reference_scope(trug: Dict[str, Any], r: ValidationResult):
 
 # ─── Main Validator ────────────────────────────────────────────────────────────
 
+# PROCESS validator SHALL VALIDATE RECORD graph THEN RETURN RECORD result.
 def validate(trug: Dict[str, Any]) -> ValidationResult:
     """Validate a TRUG against all applicable CORE rules."""
     r = ValidationResult()
@@ -465,6 +488,7 @@ def validate(trug: Dict[str, Any]) -> ValidationResult:
     return r
 
 
+# PROCESS validator SHALL READ FILE path THEN VALIDATE RESULT.
 def validate_file(path: Path) -> ValidationResult:
     """Load and validate a .trug.json file."""
     r = ValidationResult()
@@ -482,6 +506,7 @@ def validate_file(path: Path) -> ValidationResult:
 
 # ─── CLI ───────────────────────────────────────────────────────────────────────
 
+# AGENT claude SHALL READ DATA argv THEN RETURN INTEGER DATA exit_code.
 def main():
     if len(sys.argv) < 2:
         print("Usage: python -m trugs_llc.tools.validate <file.trug.json> [--all <dir>]")
