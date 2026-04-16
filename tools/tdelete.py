@@ -13,17 +13,20 @@ import sys
 from typing import Optional
 
 
+# PROCESS loader SHALL READ FILE path THEN RETURN RECORD graph.
 def load_trug(path: str) -> dict:
     with open(path) as f:
         return json.load(f)
 
 
+# PROCESS saver SHALL WRITE RECORD graph TO FILE path.
 def save_trug(path: str, trug: dict) -> None:
     with open(path, "w") as f:
         json.dump(trug, f, indent=2)
         f.write("\n")
 
 
+# AGENT claude SHALL READ DATA argv THEN RETURN INTEGER DATA exit_code.
 def main(argv: Optional[list] = None) -> int:
     parser = argparse.ArgumentParser(
         prog="trugs-tdelete",

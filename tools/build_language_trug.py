@@ -54,6 +54,7 @@ def _parse_row(line: str) -> Optional[tuple]:
     return number, word, source, definition, core == "yes"
 
 
+# PROCESS parser SHALL READ STRING DATA spec THEN RETURN ALL RECORD word.
 def parse_spec(spec_text: str) -> list[dict]:
     """Return list of word records in document order.
 
@@ -96,6 +97,7 @@ def parse_spec(spec_text: str) -> list[dict]:
     return records
 
 
+# PROCESS builder SHALL MAP ALL RECORD word TO RECORD graph.
 def build_trug(records: list[dict]) -> dict:
     """Assemble language.trug.json from parsed records."""
     parts_order: list[str] = []
@@ -199,6 +201,7 @@ def build_trug(records: list[dict]) -> dict:
     return trug
 
 
+# AGENT claude SHALL READ DATA argv THEN RETURN INTEGER DATA exit_code.
 def main(argv: Optional[list] = None) -> int:
     argv = argv if argv is not None else sys.argv[1:]
     if len(argv) != 2:

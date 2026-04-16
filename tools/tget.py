@@ -13,12 +13,14 @@ from pathlib import Path
 from typing import List, Optional
 
 
+# PROCESS loader SHALL READ FILE path THEN RETURN RECORD graph.
 def load_trug(path: str) -> dict:
     """Load a TRUG JSON file."""
     with open(path) as f:
         return json.load(f)
 
 
+# PROCESS finder SHALL MATCH RECORD node FROM RECORD graph.
 def find_node(trug: dict, node_id: str) -> Optional[dict]:
     """Find a node by ID."""
     for node in trug.get("nodes", []):
@@ -27,6 +29,7 @@ def find_node(trug: dict, node_id: str) -> Optional[dict]:
     return None
 
 
+# PROCESS finder SHALL FILTER ALL RECORD edge FROM RECORD graph.
 def find_edges(trug: dict, node_id: str) -> List[dict]:
     """Find all edges connected to a node (incoming and outgoing)."""
     edges = []
@@ -36,6 +39,7 @@ def find_edges(trug: dict, node_id: str) -> List[dict]:
     return edges
 
 
+# PROCESS formatter SHALL MAP RECORD node TO STRING DATA output.
 def format_text(node: dict, edges: Optional[List[dict]] = None) -> str:
     """Format node as human-readable text."""
     lines = [f"Node: {node['id']}"]
@@ -67,6 +71,7 @@ def format_text(node: dict, edges: Optional[List[dict]] = None) -> str:
     return "\n".join(lines)
 
 
+# AGENT claude SHALL READ DATA argv THEN RETURN INTEGER DATA exit_code.
 def main(argv: Optional[list] = None) -> int:
     parser = argparse.ArgumentParser(
         prog="trugs-tget",
