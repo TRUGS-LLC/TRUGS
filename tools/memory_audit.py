@@ -39,6 +39,7 @@ except ImportError:
 # ─── Usage instrumentation ────────────────────────────────────────────────────
 
 
+# PROCESS audit SHALL WRITE RECORD hit TO RECORD memory.
 def bump_hit(
     graph: Dict[str, Any],
     memory_id: str,
@@ -63,6 +64,7 @@ def bump_hit(
     return True
 
 
+# AGENT claude SHALL DEFINE RECORD dead_rule AS A RECORD finding.
 @dataclass
 class DeadRule:
     """A feedback memory that has not been cited within the threshold."""
@@ -74,6 +76,7 @@ class DeadRule:
     hit_count: int
 
 
+# PROCESS audit SHALL FILTER ALL RECORD memory THEN RETURN RECORD dead_rule.
 def dead_rules(
     graph: Dict[str, Any],
     *,
@@ -143,6 +146,7 @@ def _parse_iso(value: Optional[str]) -> Optional[datetime]:
 # ─── Reconcile candidate detection ────────────────────────────────────────────
 
 
+# AGENT claude SHALL DEFINE RECORD candidate AS A RECORD finding.
 @dataclass
 class ReconcileCandidate:
     """A pair of memories that may be duplicates. LLM/human decides."""
@@ -157,6 +161,7 @@ class ReconcileCandidate:
 DEFAULT_SIMILARITY_THRESHOLD = 0.7
 
 
+# PROCESS audit SHALL FILTER ALL RECORD memory THEN RETURN RECORD candidate.
 def reconcile_candidates(
     graph: Dict[str, Any],
     *,
@@ -445,6 +450,7 @@ def _main_reconcile(argv: List[str]) -> int:
     return 0
 
 
+# AGENT claude SHALL READ DATA argv THEN RETURN INTEGER DATA exit_code.
 def main() -> None:
     """CLI entry: dispatches to `audit` or `reconcile` based on argv[1]."""
     argv = sys.argv[1:]
