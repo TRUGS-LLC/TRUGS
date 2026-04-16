@@ -28,6 +28,7 @@ from memory_audit import (
 # ─── Fixtures ──────────────────────────────────────────────────────────────────
 
 
+# AGENT claude SHALL DEFINE RECORD empty_graph AS A RECORD fixture.
 @pytest.fixture
 def empty_graph():
     with tempfile.TemporaryDirectory() as d:
@@ -35,11 +36,13 @@ def empty_graph():
         yield init_memory_graph(path)
 
 
+# AGENT claude SHALL DEFINE RECORD fixed_now AS A RECORD fixture.
 @pytest.fixture
 def fixed_now():
     return datetime(2026, 4, 10, 12, 0, 0, tzinfo=timezone.utc)
 
 
+# AGENT claude SHALL DEFINE RECORD graph_with_old_feedback AS A RECORD fixture.
 @pytest.fixture
 def graph_with_old_feedback(empty_graph, fixed_now):
     """Graph with one recent + one old unconsulted feedback memory."""
@@ -56,6 +59,7 @@ def graph_with_old_feedback(empty_graph, fixed_now):
 # ─── bump_hit ──────────────────────────────────────────────────────────────────
 
 
+# AGENT SHALL VALIDATE DATA memory_audit.
 def test_bump_hit_increments_count(empty_graph, fixed_now):
     g = deepcopy(empty_graph)
     mid = remember(g, "Rule", memory_type="feedback")
@@ -70,16 +74,19 @@ def test_bump_hit_increments_count(empty_graph, fixed_now):
     assert _find_node(g, mid)["properties"]["hit_count"] == 2
 
 
+# AGENT SHALL VALIDATE DATA memory_audit.
 def test_bump_hit_returns_false_on_unknown(empty_graph, fixed_now):
     g = deepcopy(empty_graph)
     assert bump_hit(g, "nonexistent", now=fixed_now) is False
 
 
+# AGENT SHALL VALIDATE DATA memory_audit.
 def test_bump_hit_refuses_memory_root(empty_graph, fixed_now):
     g = deepcopy(empty_graph)
     assert bump_hit(g, "memory-root", now=fixed_now) is False
 
 
+# AGENT SHALL VALIDATE DATA memory_audit.
 def test_bump_hit_on_memory_with_existing_count(empty_graph, fixed_now):
     g = deepcopy(empty_graph)
     mid = remember(g, "Rule")
@@ -91,6 +98,7 @@ def test_bump_hit_on_memory_with_existing_count(empty_graph, fixed_now):
 # ─── dead_rules ────────────────────────────────────────────────────────────────
 
 
+# AGENT SHALL VALIDATE DATA memory_audit.
 def test_dead_rules_finds_old_unconsulted_feedback(graph_with_old_feedback, fixed_now):
     g, old_id, new_id = graph_with_old_feedback
     dead = dead_rules(g, older_than_days=30, now=fixed_now)
@@ -98,6 +106,7 @@ def test_dead_rules_finds_old_unconsulted_feedback(graph_with_old_feedback, fixe
     assert dead[0].memory_id == old_id
 
 
+# AGENT SHALL VALIDATE DATA memory_audit.
 def test_dead_rules_skips_recent_memories(empty_graph, fixed_now):
     """Audit #15 — use controlled created timestamps instead of relying on
     wall-clock `datetime.now()`. Before the fix, this test only passed by
@@ -112,6 +121,7 @@ def test_dead_rules_skips_recent_memories(empty_graph, fixed_now):
     assert mid not in [d.memory_id for d in dead]
 
 
+# AGENT SHALL VALIDATE DATA memory_audit.
 def test_dead_rules_skips_consulted_memories(graph_with_old_feedback, fixed_now):
     g, old_id, _ = graph_with_old_feedback
     bump_hit(g, old_id, now=fixed_now)
@@ -120,6 +130,7 @@ def test_dead_rules_skips_consulted_memories(graph_with_old_feedback, fixed_now)
     assert old_id not in [d.memory_id for d in dead]
 
 
+# AGENT SHALL VALIDATE DATA memory_audit.
 def test_dead_rules_skips_non_feedback_types(empty_graph, fixed_now):
     g = deepcopy(empty_graph)
     for mt in ("user", "project", "reference", "fact"):
@@ -129,6 +140,7 @@ def test_dead_rules_skips_non_feedback_types(empty_graph, fixed_now):
     assert dead == []
 
 
+# AGENT SHALL VALIDATE DATA memory_audit.
 def test_dead_rules_sorted_oldest_first(empty_graph, fixed_now):
     g = deepcopy(empty_graph)
     a = remember(g, "A", memory_type="feedback")
@@ -141,6 +153,7 @@ def test_dead_rules_sorted_oldest_first(empty_graph, fixed_now):
     assert [d.memory_id for d in dead] == [a, b, c]
 
 
+# AGENT SHALL VALIDATE DATA memory_audit.
 def test_dead_rules_handles_missing_created(empty_graph, fixed_now):
     g = deepcopy(empty_graph)
     mid = remember(g, "Rule", memory_type="feedback")
@@ -153,6 +166,7 @@ def test_dead_rules_handles_missing_created(empty_graph, fixed_now):
 # ─── reconcile_candidates ─────────────────────────────────────────────────────
 
 
+# AGENT SHALL VALIDATE DATA memory_audit.
 def test_reconcile_finds_exact_duplicates(empty_graph):
     g = deepcopy(empty_graph)
     remember(g, "Always fix every audit finding", memory_type="feedback")
@@ -162,6 +176,7 @@ def test_reconcile_finds_exact_duplicates(empty_graph):
     assert candidates[0].similarity == 1.0
 
 
+# AGENT SHALL VALIDATE DATA memory_audit.
 def test_reconcile_finds_near_duplicates(empty_graph):
     g = deepcopy(empty_graph)
     remember(g, "Always fix every audit finding regardless of severity", memory_type="feedback")
@@ -170,6 +185,7 @@ def test_reconcile_finds_near_duplicates(empty_graph):
     assert len(candidates) >= 1
 
 
+# AGENT SHALL VALIDATE DATA memory_audit.
 def test_reconcile_respects_threshold(empty_graph):
     g = deepcopy(empty_graph)
     remember(g, "apple banana cherry", memory_type="feedback")
@@ -181,6 +197,7 @@ def test_reconcile_respects_threshold(empty_graph):
     assert len(loose) == 1
 
 
+# AGENT SHALL VALIDATE DATA memory_audit.
 def test_reconcile_dedupes_symmetric_pairs(empty_graph):
     g = deepcopy(empty_graph)
     remember(g, "identical text here please", memory_type="feedback")
@@ -189,6 +206,7 @@ def test_reconcile_dedupes_symmetric_pairs(empty_graph):
     assert len(candidates) == 1  # Not 2.
 
 
+# AGENT SHALL VALIDATE DATA memory_audit.
 def test_reconcile_sorted_by_similarity_descending(empty_graph):
     g = deepcopy(empty_graph)
     remember(g, "alpha beta gamma delta", memory_type="feedback")
@@ -200,6 +218,7 @@ def test_reconcile_sorted_by_similarity_descending(empty_graph):
     assert sims == sorted(sims, reverse=True)
 
 
+# AGENT SHALL VALIDATE DATA memory_audit.
 def test_reconcile_filters_by_type(empty_graph):
     g = deepcopy(empty_graph)
     remember(g, "same text here", memory_type="feedback")
@@ -211,10 +230,12 @@ def test_reconcile_filters_by_type(empty_graph):
     assert len(feedback_only) == 0
 
 
+# AGENT SHALL VALIDATE DATA memory_audit.
 def test_reconcile_empty_graph_returns_empty(empty_graph):
     assert reconcile_candidates(empty_graph) == []
 
 
+# AGENT SHALL VALIDATE DATA memory_audit.
 def test_reconcile_prefers_rule_over_text_for_comparison(empty_graph):
     g = deepcopy(empty_graph)
     # Two memories with very different text but identical rules.
@@ -225,6 +246,7 @@ def test_reconcile_prefers_rule_over_text_for_comparison(empty_graph):
     assert candidates[0].similarity == 1.0
 
 
+# AGENT SHALL VALIDATE DATA memory_audit.
 def test_reconcile_skips_memories_with_empty_text(empty_graph):
     g = deepcopy(empty_graph)
     remember(g, "", memory_type="feedback")  # Empty text.
@@ -237,12 +259,14 @@ def test_reconcile_skips_memories_with_empty_text(empty_graph):
 # ─── Helpers ──────────────────────────────────────────────────────────────────
 
 
+# AGENT SHALL VALIDATE DATA memory_audit.
 def test_tokenize_lowercases_and_alphanumeric_only():
     assert _tokenize("Hello, WORLD! 123") == {"hello", "world", "123"}
     assert _tokenize("") == set()
     assert _tokenize("punctuation!!! only???") == {"punctuation", "only"}
 
 
+# AGENT SHALL VALIDATE DATA memory_audit.
 def test_jaccard_basic():
     assert _jaccard(set(), set()) == 0.0
     assert _jaccard({"a"}, {"a"}) == 1.0
@@ -250,6 +274,7 @@ def test_jaccard_basic():
     assert _jaccard({"a", "b", "c"}, {"d", "e", "f"}) == 0.0
 
 
+# AGENT SHALL VALIDATE DATA memory_audit.
 def test_parse_duration_days_shortforms():
     assert _parse_duration_days("30d") == 30
     assert _parse_duration_days("2w") == 14
@@ -258,6 +283,7 @@ def test_parse_duration_days_shortforms():
     assert _parse_duration_days("60") == 60
 
 
+# AGENT SHALL VALIDATE DATA memory_audit.
 def test_parse_duration_days_rejects_bare_m():
     """Audit round 3 R3-8 — bare `1m` is ambiguous (minutes vs months) and rejected."""
     with pytest.raises(ValueError) as exc:
@@ -265,6 +291,7 @@ def test_parse_duration_days_rejects_bare_m():
     assert "ambiguous" in str(exc.value).lower()
 
 
+# AGENT SHALL VALIDATE DATA memory_audit.
 def test_parse_duration_days_rejects_empty():
     with pytest.raises(ValueError):
         _parse_duration_days("")
@@ -284,18 +311,21 @@ def _run_cli(*args):
     return result.returncode, result.stdout, result.stderr
 
 
+# AGENT SHALL VALIDATE DATA memory_audit.
 def test_cli_help():
     rc, out, _ = _run_cli("--help")
     assert rc == 0
     assert "TRUGS Memory Audit" in out
 
 
+# AGENT SHALL VALIDATE DATA memory_audit.
 def test_cli_audit_missing_file():
     rc, _, err = _run_cli("audit", "/nonexistent/path.json")
     assert rc == 1
     assert "not found" in err
 
 
+# AGENT SHALL VALIDATE DATA memory_audit.
 def test_cli_audit_reports_dead_rules(tmp_path, fixed_now):
     path = tmp_path / "mem.trug.json"
     g = init_memory_graph(path)
@@ -308,6 +338,7 @@ def test_cli_audit_reports_dead_rules(tmp_path, fixed_now):
     assert "1 dead feedback rule" in out
 
 
+# AGENT SHALL VALIDATE DATA memory_audit.
 def test_cli_audit_bump(tmp_path):
     path = tmp_path / "mem.trug.json"
     g = init_memory_graph(path)
@@ -322,6 +353,7 @@ def test_cli_audit_bump(tmp_path):
     assert _find_node(g2, mid)["properties"]["hit_count"] == 1
 
 
+# AGENT SHALL VALIDATE DATA memory_audit.
 def test_cli_audit_bump_unknown_id(tmp_path):
     path = tmp_path / "mem.trug.json"
     init_memory_graph(path)
@@ -330,6 +362,7 @@ def test_cli_audit_bump_unknown_id(tmp_path):
     assert "not found" in err
 
 
+# AGENT SHALL VALIDATE DATA memory_audit.
 def test_cli_reconcile(tmp_path):
     path = tmp_path / "mem.trug.json"
     g = init_memory_graph(path)
@@ -342,6 +375,7 @@ def test_cli_reconcile(tmp_path):
     assert "candidate pair" in out
 
 
+# AGENT SHALL VALIDATE DATA memory_audit.
 def test_cli_reconcile_no_candidates(tmp_path):
     path = tmp_path / "mem.trug.json"
     g = init_memory_graph(path)
@@ -354,6 +388,7 @@ def test_cli_reconcile_no_candidates(tmp_path):
     assert "No duplicate candidates" in out
 
 
+# AGENT SHALL VALIDATE DATA memory_audit.
 def test_cli_unknown_subcommand():
     rc, _, err = _run_cli("garble")
     assert rc == 2
@@ -363,6 +398,7 @@ def test_cli_unknown_subcommand():
 # ─── Audit round 2 regression tests ──────────────────────────────────────────
 
 
+# AGENT SHALL VALIDATE DATA memory_audit.
 def test_parse_duration_rejects_negative():
     """Audit #4 (HIGH) — `-30d` must raise, not produce a future threshold."""
     with pytest.raises(ValueError):
@@ -375,12 +411,14 @@ def test_parse_duration_rejects_negative():
         _parse_duration_days("0")
 
 
+# AGENT SHALL VALIDATE DATA memory_audit.
 def test_parse_duration_positive_still_works():
     """Audit #4 — positive durations continue to parse."""
     assert _parse_duration_days("30d") == 30
     assert _parse_duration_days("1") == 1
 
 
+# AGENT SHALL VALIDATE DATA memory_audit.
 def test_cli_audit_rejects_negative_duration(tmp_path):
     """Audit #4 — CLI fails loud on a negative duration."""
     path = tmp_path / "mem.trug.json"
@@ -390,6 +428,7 @@ def test_cli_audit_rejects_negative_duration(tmp_path):
     assert "invalid duration" in err.lower() or "must be positive" in err.lower()
 
 
+# AGENT SHALL VALIDATE DATA memory_audit.
 def test_reconcile_length_blocking_skips_mismatched_sizes(empty_graph):
     """Audit #6 (MED) — length-ratio pre-check avoids Jaccard when impossible.
 
@@ -414,6 +453,7 @@ def test_reconcile_length_blocking_skips_mismatched_sizes(empty_graph):
     assert len(candidates_loose) == 1
 
 
+# AGENT SHALL VALIDATE DATA memory_audit.
 def test_dead_rules_strips_whitespace_from_memory_type(empty_graph, fixed_now):
     """Audit #17 (LOW) — ' feedback ' should still match the feedback filter."""
     g = deepcopy(empty_graph)
@@ -426,6 +466,7 @@ def test_dead_rules_strips_whitespace_from_memory_type(empty_graph, fixed_now):
     assert dead[0].memory_id == mid
 
 
+# AGENT SHALL VALIDATE DATA memory_audit.
 def test_dead_rules_uses_shared_iso_parser(empty_graph, fixed_now):
     """Audit #14 — _parse_iso in this module should route through the shared
     memory._parse_iso_utc helper, same as memory._is_expired.
@@ -437,6 +478,7 @@ def test_dead_rules_uses_shared_iso_parser(empty_graph, fixed_now):
         assert _parse_iso(sample) == _parse_iso_utc(sample)
 
 
+# AGENT SHALL VALIDATE DATA memory_audit.
 def test_parse_duration_days_overflow_capped():
     """M2 — 99999999y must raise ValueError, not OverflowError."""
     from memory_audit import _parse_duration_days
@@ -446,6 +488,7 @@ def test_parse_duration_days_overflow_capped():
     assert _parse_duration_days("999y") == 999 * 365
 
 
+# AGENT SHALL VALIDATE DATA memory_audit.
 def test_parse_duration_days_rejects_none():
     """L2 — None must raise ValueError, not AttributeError."""
     from memory_audit import _parse_duration_days
@@ -453,6 +496,7 @@ def test_parse_duration_days_rejects_none():
         _parse_duration_days(None)
 
 
+# AGENT SHALL VALIDATE DATA memory_audit.
 def test_parse_duration_days_rejects_int():
     """L2 — integer input must raise ValueError."""
     from memory_audit import _parse_duration_days
@@ -460,6 +504,7 @@ def test_parse_duration_days_rejects_int():
         _parse_duration_days(123)
 
 
+# AGENT SHALL VALIDATE DATA memory_audit.
 def test_parse_duration_days_rejects_internal_whitespace():
     """L2 — '30 d' with internal whitespace must raise ValueError."""
     from memory_audit import _parse_duration_days
