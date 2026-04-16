@@ -7,8 +7,12 @@ from pathlib import Path
 
 import pytest
 
-from memory import load_graph
-from memory_import import (
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+from tools.memory import load_graph
+from tools.memory_import import (
     FILENAME_TYPE_PREFIXES,
     ImportReport,
     ParsedFile,
@@ -16,7 +20,7 @@ from memory_import import (
     import_flat_directory,
     parse_markdown_with_frontmatter,
 )
-from validate import validate
+from tools.validate import validate
 
 
 # ─── Frontmatter parser ────────────────────────────────────────────────────────
@@ -387,7 +391,7 @@ def test_import_report_new_ids_match_count(sample_dir):
 # AGENT SHALL VALIDATE PROCESS strip_yaml_quotes THEN FILTER DATA quotes FROM DATA value THEN HANDLE RECORD mismatched AND RECORD empty_input.
 def test_parse_strip_yaml_double_quotes():
     """Audit #19 — `name: "Format: subtitle"` strips the quotes."""
-    from memory_import import _strip_yaml_quotes
+    from tools.memory_import import _strip_yaml_quotes
     assert _strip_yaml_quotes('"Hello"') == "Hello"
     assert _strip_yaml_quotes("'Hello'") == "Hello"
     assert _strip_yaml_quotes('"multi: word"') == "multi: word"
@@ -487,7 +491,7 @@ def test_import_checkpoints_partial_progress(tmp_path):
     with tempfile.TemporaryDirectory() as out_dir:
         out = Path(out_dir) / "memory.trug.json"
         # Wrap remember to raise on the 7th call.
-        import memory_import
+        import tools.memory_import as memory_import
         real_remember = memory_import.remember
         counter = [0]
 
@@ -517,7 +521,7 @@ def test_import_checkpoints_partial_progress(tmp_path):
 def test_idempotency_key_no_collision_on_separator_in_content():
     """L3 — two files with colliding raw join but different field boundaries
     must produce different idempotency keys after SHA-256 hashing."""
-    from memory_import import _idempotency_key
+    from tools.memory_import import _idempotency_key
 
     # File A: text contains \x1f (the old separator)
     key_a = _idempotency_key(

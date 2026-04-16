@@ -39,6 +39,8 @@ The compliance standard has exactly four corners, each a mechanical validation:
 | **TRUG ↔ tests** | Every SPEC/FUNCTION node has ≥ 1 inbound `VALIDATES` edge from a TEST node | C3 |
 | **TRUG/L ↔ code** | Every public function has a function-level TRUG/L comment that parses | C4 |
 | **TRUG/L ↔ tests** | Every test function has an `AGENT SHALL VALIDATE ...` comment that parses | C5 |
+| **invariants** | Every `invariant_*` property has an assertion in code + a test | C6 |
+| **TRUG validity** | Every `.trug.json` file passes `trugs-folder-check` | C7 |
 | **code ↔ tests** | The test suite passes | existing `pytest` / language-native test runner |
 
 **Dark Code is code where any edge of this square is broken.** Compliance means every edge is intact and mechanically verified.
@@ -238,6 +240,8 @@ These are hard. They are not aspirational.
 Reality bites: vendored code, generated code, or narrowly-scoped legacy material may be unreasonably expensive to bring to compliance. Waivers exist, but are limited and tracked.
 
 ### 8.1 Waiver mechanism
+
+> **Implementation status:** [DEFERRED] — The waiver mechanism is specified here for completeness. `trugs-compliance-check` v1.x does not yet read `.github/compliance-waivers.json` or support `--no-waivers`. Track implementation in a future issue.
 
 A file can be excluded from compliance checks by listing it in `.github/compliance-waivers.json`:
 
