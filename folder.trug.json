@@ -35,6 +35,7 @@
         "folder_examples",
         "folder_tools",
         "folder_paper",
+        "folder_reference",
         "folder_studies",
         "doc_pyproject"
       ],
@@ -284,7 +285,8 @@
         "tools_tget",
         "tools_tupdate",
         "tools_tdelete",
-        "tools_tunlink"
+        "tools_tunlink",
+        "tools_compliance_check"
       ],
       "metric_level": "DEKA_COMPONENT",
       "dimension": "folder_structure"
@@ -392,6 +394,88 @@
       "parent_id": "root",
       "contains": [],
       "metric_level": "DEKA_COMPONENT",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "folder_reference",
+      "type": "COMPONENT",
+      "properties": {
+        "name": "REFERENCE",
+        "purpose": "Canonical home for TRUGS papers, standards, and cross-cutting material — the document trinity: WHY, HOW, CHECK",
+        "file_count": 4
+      },
+      "parent_id": "root",
+      "contains": [
+        "ref_readme",
+        "ref_paper_dark_code",
+        "ref_paper_how_to_code",
+        "ref_standard_dark_code"
+      ],
+      "metric_level": "DEKA_COMPONENT",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "ref_readme",
+      "type": "DOCUMENT",
+      "properties": {
+        "name": "REFERENCE/README.md",
+        "purpose": "Index of the REFERENCE library — trinity overview, layout, cross-links"
+      },
+      "parent_id": "folder_reference",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "ref_paper_dark_code",
+      "type": "DOCUMENT",
+      "properties": {
+        "name": "REFERENCE/PAPER_dark_code.md",
+        "purpose": "The WHY paper — Dark Code problem and TRUGS four-corner verification square as the resolution. Moved from TRUGS-AGENT per #1548.",
+        "trl": "PROCESS paper SHALL DEFINE RECORD dark_code THEN SHALL CITE A RECORD solution."
+      },
+      "parent_id": "folder_reference",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "ref_paper_how_to_code",
+      "type": "DOCUMENT",
+      "properties": {
+        "name": "REFERENCE/PAPER_how_to_code_with_trugs.md",
+        "purpose": "The HOW paper — practitioner guide: greenfield process, refactoring, multi-file, AAA integration, memory, CI, patterns, Python conventions",
+        "trl": "PROCESS paper SHALL DEFINE RECORD practice THEN CITE A RECORD workflow."
+      },
+      "parent_id": "folder_reference",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "ref_standard_dark_code",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "REFERENCE/STANDARD_dark_code_compliance.md",
+        "purpose": "The CHECK — auditable Dark Code compliance checklist. Operationalizes the four corners into C1-C7 mechanical checks.",
+        "trl": "PROCESS standard SHALL ADMINISTER EACH RESOURCE repo SUBJECT_TO DATA compliance."
+      },
+      "parent_id": "folder_reference",
+      "contains": [],
+      "metric_level": "BASE_SPECIFICATION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_compliance_check",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "tools/compliance_check.py",
+        "purpose": "Mechanical Dark Code compliance verifier — implements C1-C7 from STANDARD_dark_code_compliance.md. Entrypoint: trugs-compliance-check.",
+        "trl": "PROCESS compliance SHALL VALIDATE ALL FILE SUBJECT_TO DATA standard THEN RETURN RECORD report."
+      },
+      "parent_id": "folder_tools",
+      "contains": [],
+      "metric_level": "BASE_SPECIFICATION",
       "dimension": "folder_structure"
     },
     {
@@ -563,6 +647,38 @@
       "from_id": "root",
       "to_id": "doc_pyproject",
       "relation": "CONTAINS"
+    },
+    {
+      "from_id": "ref_standard_dark_code",
+      "to_id": "ref_paper_dark_code",
+      "relation": "IMPLEMENTS",
+      "properties": {
+        "scope": "STANDARD operationalizes the four-corner square defined in the PAPER"
+      }
+    },
+    {
+      "from_id": "ref_paper_how_to_code",
+      "to_id": "ref_paper_dark_code",
+      "relation": "REFERENCES",
+      "properties": {
+        "scope": "HOW paper derives from §5 of the Dark Code paper"
+      }
+    },
+    {
+      "from_id": "tools_compliance_check",
+      "to_id": "ref_standard_dark_code",
+      "relation": "IMPLEMENTS",
+      "properties": {
+        "scope": "CLI mechanically enforces C1-C7 from the STANDARD"
+      }
+    },
+    {
+      "from_id": "tools_compliance_check",
+      "to_id": "tools_validate",
+      "relation": "DEPENDS_ON",
+      "properties": {
+        "scope": "Delegates C7 to trugs-folder-check via subprocess"
+      }
     }
   ]
 }
