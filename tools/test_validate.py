@@ -83,13 +83,13 @@ def _errors(result):
 
 # ─── Rule 1: Unique IDs ───────────────────────────────────────────────────────
 
-# AGENT SHALL VALIDATE DATA validate.
+# AGENT SHALL VALIDATE PROCESS rule_1 THEN ASSERT RECORD graph CONTAINS UNIQUE RECORD node.
 def test_rule_1_pass():
     r = _run(MINIMAL_VALID)
     assert "DUPLICATE_NODE_ID" not in _errors(r)
 
 
-# AGENT SHALL VALIDATE DATA validate.
+# AGENT SHALL VALIDATE PROCESS rule_1 THEN REJECT RECORD graph SUBJECT_TO RECORD duplicate.
 def test_rule_1_duplicate():
     t = _make(nodes=[
         {"id": "a", "type": "X", "properties": {}, "parent_id": None, "contains": [], "metric_level": "BASE_X", "dimension": "d"},
@@ -99,7 +99,7 @@ def test_rule_1_duplicate():
     assert "DUPLICATE_NODE_ID" in _errors(r)
 
 
-# AGENT SHALL VALIDATE DATA validate.
+# AGENT SHALL VALIDATE PROCESS rule_1 THEN REQUIRE EACH RECORD node CONTAINS RECORD field.
 def test_rule_1_missing_id():
     t = _make(nodes=[
         {"type": "X", "properties": {}, "parent_id": None, "contains": [], "metric_level": "BASE_X", "dimension": "d"},
@@ -110,7 +110,7 @@ def test_rule_1_missing_id():
 
 # ─── Rule 2: Edge ID Validity ─────────────────────────────────────────────────
 
-# AGENT SHALL VALIDATE DATA validate.
+# AGENT SHALL VALIDATE PROCESS rule_2 THEN ASSERT RECORD edge CONTAINS VALID RECORD source AND RECORD target.
 def test_rule_2_pass():
     t = _make(
         nodes=[
@@ -123,14 +123,14 @@ def test_rule_2_pass():
     assert "INVALID_EDGE_REFERENCE" not in _errors(r)
 
 
-# AGENT SHALL VALIDATE DATA validate.
+# AGENT SHALL VALIDATE PROCESS rule_2 THEN REJECT RECORD edge SUBJECT_TO INVALID RECORD source.
 def test_rule_2_invalid_from():
     t = _make(edges=[{"from_id": "ghost", "to_id": "root", "relation": "X"}])
     r = _run(t)
     assert "INVALID_EDGE_REFERENCE" in _errors(r)
 
 
-# AGENT SHALL VALIDATE DATA validate.
+# AGENT SHALL VALIDATE PROCESS rule_2 THEN ASSERT RECORD edge CONTAINS RECORD reference.
 def test_rule_2_cross_folder_ref_allowed():
     t = _make(edges=[{"from_id": "root", "to_id": "other_folder:node_1", "relation": "X"}])
     r = _run(t)
@@ -139,7 +139,7 @@ def test_rule_2_cross_folder_ref_allowed():
 
 # ─── Rule 3: Hierarchy Consistency ─────────────────────────────────────────────
 
-# AGENT SHALL VALIDATE DATA validate.
+# AGENT SHALL VALIDATE PROCESS rule_3 THEN ASSERT RECORD graph CONTAINS VALID RECORD hierarchy.
 def test_rule_3_pass():
     t = _make(nodes=[
         {"id": "parent", "type": "X", "properties": {}, "parent_id": None, "contains": ["child"], "metric_level": "DEKA_X", "dimension": "d"},
@@ -149,7 +149,7 @@ def test_rule_3_pass():
     assert "INCONSISTENT_HIERARCHY" not in _errors(r)
 
 
-# AGENT SHALL VALIDATE DATA validate.
+# AGENT SHALL VALIDATE PROCESS rule_3 THEN REJECT RECORD node SUBJECT_TO INVALID RECORD hierarchy.
 def test_rule_3_parent_missing_child():
     t = _make(nodes=[
         {"id": "parent", "type": "X", "properties": {}, "parent_id": None, "contains": [], "metric_level": "DEKA_X", "dimension": "d"},
@@ -159,7 +159,7 @@ def test_rule_3_parent_missing_child():
     assert "INCONSISTENT_HIERARCHY" in _errors(r)
 
 
-# AGENT SHALL VALIDATE DATA validate.
+# AGENT SHALL VALIDATE PROCESS rule_3 THEN REJECT RECORD node SUBJECT_TO INVALID RECORD parent.
 def test_rule_3_contains_missing_parent():
     t = _make(nodes=[
         {"id": "parent", "type": "X", "properties": {}, "parent_id": None, "contains": ["child"], "metric_level": "DEKA_X", "dimension": "d"},
@@ -171,7 +171,7 @@ def test_rule_3_contains_missing_parent():
 
 # ─── Rule 4: Metric Level Ordering ────────────────────────────────────────────
 
-# AGENT SHALL VALIDATE DATA validate.
+# AGENT SHALL VALIDATE PROCESS rule_4 THEN ASSERT RECORD hierarchy.
 def test_rule_4_pass():
     t = _make(nodes=[
         {"id": "p", "type": "X", "properties": {}, "parent_id": None, "contains": ["c"], "metric_level": "DEKA_X", "dimension": "d"},
@@ -181,7 +181,7 @@ def test_rule_4_pass():
     assert "INVALID_METRIC_ORDERING" not in _errors(r)
 
 
-# AGENT SHALL VALIDATE DATA validate.
+# AGENT SHALL VALIDATE PROCESS rule_4 THEN REJECT RECORD hierarchy SUBJECT_TO INVALID RECORD ordering.
 def test_rule_4_child_bigger_than_parent():
     t = _make(nodes=[
         {"id": "p", "type": "X", "properties": {}, "parent_id": None, "contains": ["c"], "metric_level": "BASE_X", "dimension": "d"},
@@ -193,13 +193,13 @@ def test_rule_4_child_bigger_than_parent():
 
 # ─── Rule 5: Dimension Declaration ────────────────────────────────────────────
 
-# AGENT SHALL VALIDATE DATA validate.
+# AGENT SHALL VALIDATE PROCESS rule_5 THEN ASSERT RECORD node REFERENCES DATA dimensions.
 def test_rule_5_pass():
     r = _run(MINIMAL_VALID)
     assert "UNDECLARED_DIMENSION" not in _errors(r)
 
 
-# AGENT SHALL VALIDATE DATA validate.
+# AGENT SHALL VALIDATE PROCESS rule_5 THEN REJECT RECORD node SUBJECT_TO INVALID DATA dimensions.
 def test_rule_5_undeclared():
     t = _make(nodes=[
         {"id": "x", "type": "X", "properties": {}, "parent_id": None, "contains": [], "metric_level": "BASE_X", "dimension": "nonexistent"},
@@ -210,20 +210,20 @@ def test_rule_5_undeclared():
 
 # ─── Rule 6: Required Fields ──────────────────────────────────────────────────
 
-# AGENT SHALL VALIDATE DATA validate.
+# AGENT SHALL VALIDATE PROCESS rule_6 THEN ASSERT RECORD graph CONTAINS ALL REQUIRED RECORD field.
 def test_rule_6_pass():
     r = _run(MINIMAL_VALID)
     assert "MISSING_REQUIRED_FIELD" not in _errors(r)
 
 
-# AGENT SHALL VALIDATE DATA validate.
+# AGENT SHALL VALIDATE PROCESS rule_6 THEN REJECT RECORD graph SUBJECT_TO REQUIRED RECORD field.
 def test_rule_6_missing_root_field():
     t = {"version": "1.0.0", "type": "X", "nodes": [], "edges": []}  # missing 'name'
     r = _run(t)
     assert "MISSING_REQUIRED_FIELD" in _errors(r)
 
 
-# AGENT SHALL VALIDATE DATA validate.
+# AGENT SHALL VALIDATE PROCESS rule_6 THEN REJECT RECORD node SUBJECT_TO MULTIPLE REQUIRED RECORD field.
 def test_rule_6_missing_node_field():
     t = _make(nodes=[{"id": "x", "type": "X"}])  # missing properties, parent_id, contains, metric_level
     r = _run(t)
@@ -233,13 +233,13 @@ def test_rule_6_missing_node_field():
 
 # ─── Rule 7: Field Type Correctness ───────────────────────────────────────────
 
-# AGENT SHALL VALIDATE DATA validate.
+# AGENT SHALL VALIDATE PROCESS rule_7 THEN ASSERT RECORD graph CONTAINS ALL VALID RECORD field.
 def test_rule_7_pass():
     r = _run(MINIMAL_VALID)
     assert "INVALID_FIELD_TYPE" not in _errors(r)
 
 
-# AGENT SHALL VALIDATE DATA validate.
+# AGENT SHALL VALIDATE PROCESS rule_7 THEN REJECT RECORD node SUBJECT_TO INTEGER RECORD id.
 def test_rule_7_id_not_string():
     t = _make(nodes=[
         {"id": 123, "type": "X", "properties": {}, "parent_id": None, "contains": [], "metric_level": "BASE_X", "dimension": "d"},
@@ -248,14 +248,14 @@ def test_rule_7_id_not_string():
     assert "INVALID_FIELD_TYPE" in _errors(r)
 
 
-# AGENT SHALL VALIDATE DATA validate.
+# AGENT SHALL VALIDATE PROCESS rule_7 THEN REJECT RECORD edge SUBJECT_TO INVALID RECORD weight.
 def test_rule_7_weight_out_of_range():
     t = _make(edges=[{"from_id": "root", "to_id": "root", "relation": "X", "weight": 1.5}])
     r = _run(t)
     assert "INVALID_EDGE_WEIGHT" in _errors(r)
 
 
-# AGENT SHALL VALIDATE DATA validate.
+# AGENT SHALL VALIDATE PROCESS rule_7 THEN REJECT RECORD edge SUBJECT_TO BOOLEAN RECORD weight.
 def test_rule_7_weight_boolean():
     t = _make(edges=[{"from_id": "root", "to_id": "root", "relation": "X", "weight": True}])
     r = _run(t)
@@ -264,13 +264,13 @@ def test_rule_7_weight_boolean():
 
 # ─── Rule 8: Extension Declaration ────────────────────────────────────────────
 
-# AGENT SHALL VALIDATE DATA validate.
+# AGENT SHALL VALIDATE PROCESS rule_8 THEN ASSERT RECORD graph SUBJECT_TO DATA capabilities.
 def test_rule_8_pass():
     r = _run(MINIMAL_VALID)
     assert "UNDECLARED_EXTENSION" not in _errors(r)
 
 
-# AGENT SHALL VALIDATE DATA validate.
+# AGENT SHALL VALIDATE PROCESS rule_8 THEN REJECT RECORD node SUBJECT_TO INVALID RECORD extension.
 def test_rule_8_undeclared_typed():
     t = _make(nodes=[
         {"id": "x", "type": "X", "properties": {"type_info": {"category": "func"}}, "parent_id": None, "contains": [], "metric_level": "BASE_X", "dimension": "d"},
@@ -281,13 +281,13 @@ def test_rule_8_undeclared_typed():
 
 # ─── Rule 9: Metric Level Format ──────────────────────────────────────────────
 
-# AGENT SHALL VALIDATE DATA validate.
+# AGENT SHALL VALIDATE PROCESS rule_9 THEN ASSERT RECORD node CONTAINS VALID RECORD metric.
 def test_rule_9_pass():
     r = _run(MINIMAL_VALID)
     assert "INVALID_METRIC_FORMAT" not in _errors(r)
 
 
-# AGENT SHALL VALIDATE DATA validate.
+# AGENT SHALL VALIDATE PROCESS rule_9 THEN REJECT RECORD node SUBJECT_TO INVALID RECORD metric.
 def test_rule_9_no_underscore():
     t = _make(nodes=[
         {"id": "x", "type": "X", "properties": {}, "parent_id": None, "contains": [], "metric_level": "BASEMODULE", "dimension": "d"},
@@ -296,7 +296,7 @@ def test_rule_9_no_underscore():
     assert "INVALID_METRIC_FORMAT" in _errors(r)
 
 
-# AGENT SHALL VALIDATE DATA validate.
+# AGENT SHALL VALIDATE PROCESS rule_9 THEN REJECT RECORD node SUBJECT_TO INVALID RECORD prefix.
 def test_rule_9_invalid_prefix():
     t = _make(nodes=[
         {"id": "x", "type": "X", "properties": {}, "parent_id": None, "contains": [], "metric_level": "ULTRA_MODULE", "dimension": "d"},
@@ -307,7 +307,7 @@ def test_rule_9_invalid_prefix():
 
 # ─── Rule 10: Subject-Operation Compatibility ─────────────────────────────────
 
-# AGENT SHALL VALIDATE DATA validate.
+# AGENT SHALL VALIDATE PROCESS rule_10 THEN ASSERT RECORD edge SUBJECT_TO RECORD party.
 def test_rule_10_actor_can_do_anything():
     t = _make_v091(
         nodes=[
@@ -320,7 +320,7 @@ def test_rule_10_actor_can_do_anything():
     assert "INCOMPATIBLE_SUBJECT_OPERATION" not in _errors(r)
 
 
-# AGENT SHALL VALIDATE DATA validate.
+# AGENT SHALL VALIDATE PROCESS rule_10 THEN REJECT RECORD edge SUBJECT_TO DATA source.
 def test_rule_10_artifact_cannot_transform():
     t = _make_v091(
         nodes=[
@@ -333,7 +333,7 @@ def test_rule_10_artifact_cannot_transform():
     assert "INCOMPATIBLE_SUBJECT_OPERATION" in _errors(r)
 
 
-# AGENT SHALL VALIDATE DATA validate.
+# AGENT SHALL VALIDATE PROCESS rule_10 THEN ASSERT RECORD edge SUBJECT_TO DATA source.
 def test_rule_10_artifact_can_exists():
     t = _make_v091(
         nodes=[
@@ -345,7 +345,7 @@ def test_rule_10_artifact_can_exists():
     assert "INCOMPATIBLE_SUBJECT_OPERATION" not in _errors(r)
 
 
-# AGENT SHALL VALIDATE DATA validate.
+# AGENT SHALL VALIDATE PROCESS rule_10 THEN ASSERT RECORD edge SUBJECT_TO RECORD pipeline.
 def test_rule_10_container_can_transform():
     t = _make_v091(
         nodes=[
@@ -358,7 +358,7 @@ def test_rule_10_container_can_transform():
     assert "INCOMPATIBLE_SUBJECT_OPERATION" not in _errors(r)
 
 
-# AGENT SHALL VALIDATE DATA validate.
+# AGENT SHALL VALIDATE PROCESS rule_10 THEN SKIP RECORD check UNLESS DATA vocabularies CONTAINS RECORD core.
 def test_rule_10_not_triggered_without_v091():
     """Rules 10-16 only fire with core_v1.0.0 capability."""
     t = _make(
@@ -373,7 +373,7 @@ def test_rule_10_not_triggered_without_v091():
 
 # ─── Rule 11: Operation-Object Compatibility ──────────────────────────────────
 
-# AGENT SHALL VALIDATE DATA validate.
+# AGENT SHALL VALIDATE PROCESS rule_11 THEN ASSERT RECORD edge SUBJECT_TO RECORD operation.
 def test_rule_11_transform_on_artifact():
     t = _make_v091(
         nodes=[
@@ -386,7 +386,7 @@ def test_rule_11_transform_on_artifact():
     assert "INCOMPATIBLE_OPERATION_OBJECT" not in _errors(r)
 
 
-# AGENT SHALL VALIDATE DATA validate.
+# AGENT SHALL VALIDATE PROCESS rule_11 THEN REJECT RECORD edge SUBJECT_TO RECORD operation TO AGENT target.
 def test_rule_11_transform_on_actor_fails():
     t = _make_v091(
         nodes=[
@@ -399,7 +399,7 @@ def test_rule_11_transform_on_actor_fails():
     assert "INCOMPATIBLE_OPERATION_OBJECT" in _errors(r)
 
 
-# AGENT SHALL VALIDATE DATA validate.
+# AGENT SHALL VALIDATE PROCESS rule_11 THEN ASSERT RECORD edge SUBJECT_TO RECORD operation TO AGENT target.
 def test_rule_11_permit_on_actor():
     t = _make_v091(
         nodes=[
@@ -412,7 +412,7 @@ def test_rule_11_permit_on_actor():
     assert "INCOMPATIBLE_OPERATION_OBJECT" not in _errors(r)
 
 
-# AGENT SHALL VALIDATE DATA validate.
+# AGENT SHALL VALIDATE PROCESS rule_11 THEN ASSERT RECORD edge SUBJECT_TO RECORD operation TO ERROR target.
 def test_rule_11_resolve_on_outcome():
     t = _make_v091(
         nodes=[
@@ -427,7 +427,7 @@ def test_rule_11_resolve_on_outcome():
 
 # ─── Rule 14: Constraint-Subject ───────────────────────────────────────────────
 
-# AGENT SHALL VALIDATE DATA validate.
+# AGENT SHALL VALIDATE PROCESS rule_14 THEN ASSERT RECORD edge SUBJECT_TO RECORD relation TO RECORD party.
 def test_rule_14_modal_on_actor():
     t = _make_v091(
         edges=[{"from_id": "system", "to_id": "system", "relation": "SHALL"}],
@@ -436,7 +436,7 @@ def test_rule_14_modal_on_actor():
     assert "CONSTRAINT_REQUIRES_ACTOR" not in _errors(r)
 
 
-# AGENT SHALL VALIDATE DATA validate.
+# AGENT SHALL VALIDATE PROCESS rule_14 THEN REJECT RECORD edge SUBJECT_TO RECORD relation TO DATA source.
 def test_rule_14_modal_on_non_actor():
     t = _make_v091(
         nodes=[
@@ -450,7 +450,7 @@ def test_rule_14_modal_on_non_actor():
 
 # ─── Rule 15: No Double Negation ──────────────────────────────────────────────
 
-# AGENT SHALL VALIDATE DATA validate.
+# AGENT SHALL VALIDATE PROCESS rule_15 THEN REJECT RECORD edge SUBJECT_TO RECORD negation.
 def test_rule_15_no_double_neg():
     t = _make_v091(
         nodes=[
@@ -462,7 +462,7 @@ def test_rule_15_no_double_neg():
     assert "DOUBLE_NEGATION" in _errors(r)
 
 
-# AGENT SHALL VALIDATE DATA validate.
+# AGENT SHALL VALIDATE PROCESS rule_15 THEN ASSERT RECORD edge SUBJECT_TO RECORD negation.
 def test_rule_15_single_neg_ok():
     t = _make_v091(
         nodes=[
@@ -476,7 +476,7 @@ def test_rule_15_single_neg_ok():
 
 # ─── Rule 16: Reference Scope ─────────────────────────────────────────────────
 
-# AGENT SHALL VALIDATE DATA validate.
+# AGENT SHALL VALIDATE PROCESS rule_16 THEN ASSERT RECORD edge REFERENCES RECORD target.
 def test_rule_16_resolved_reference():
     t = _make_v091(
         nodes=[
@@ -489,7 +489,7 @@ def test_rule_16_resolved_reference():
     assert "UNRESOLVED_REFERENCE" not in _errors(r)
 
 
-# AGENT SHALL VALIDATE DATA validate.
+# AGENT SHALL VALIDATE PROCESS rule_16 THEN REJECT RECORD edge REFERENCES INVALID RECORD target.
 def test_rule_16_unresolved_reference():
     t = _make_v091(
         edges=[{"from_id": "system", "to_id": "RESULT", "relation": "REFERENCES"}],
@@ -500,7 +500,7 @@ def test_rule_16_unresolved_reference():
 
 # ─── Integration: validate_file ────────────────────────────────────────────────
 
-# AGENT SHALL VALIDATE DATA validate.
+# AGENT SHALL VALIDATE PROCESS validate_file THEN ASSERT VALID FILE graph FROM DATA filesystem.
 def test_validate_file_valid():
     with tempfile.NamedTemporaryFile(mode="w", suffix=".trug.json", delete=False) as f:
         json.dump(MINIMAL_VALID, f)
@@ -509,7 +509,7 @@ def test_validate_file_valid():
     assert r.valid
 
 
-# AGENT SHALL VALIDATE DATA validate.
+# AGENT SHALL VALIDATE PROCESS validate_file THEN REJECT INVALID FILE graph AS RECORD parse_error.
 def test_validate_file_invalid_json():
     with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
         f.write("{bad json")
@@ -519,7 +519,7 @@ def test_validate_file_invalid_json():
     assert "PARSE_ERROR" in _errors(r)
 
 
-# AGENT SHALL VALIDATE DATA validate.
+# AGENT SHALL VALIDATE PROCESS validate_file THEN REJECT INVALID FILE path AS RECORD file_not_found.
 def test_validate_file_not_found():
     r = validate_file(Path("/nonexistent/path.json"))
     assert not r.valid
@@ -528,26 +528,26 @@ def test_validate_file_not_found():
 
 # ─── Integration: Full validate ────────────────────────────────────────────────
 
-# AGENT SHALL VALIDATE DATA validate.
+# AGENT SHALL VALIDATE PROCESS validate THEN ASSERT RECORD result.
 def test_minimal_valid_passes():
     r = validate(MINIMAL_VALID)
     assert r.valid
 
 
-# AGENT SHALL VALIDATE DATA validate.
+# AGENT SHALL VALIDATE PROCESS validate THEN ASSERT RECORD result SUBJECT_TO DATA vocabularies.
 def test_minimal_v091_passes():
     r = validate(MINIMAL_V091)
     assert r.valid
 
 
-# AGENT SHALL VALIDATE DATA validate.
+# AGENT SHALL VALIDATE PROCESS validate THEN REJECT ARRAY DATA graph AS RECORD invalid_root.
 def test_not_a_dict():
     r = validate([1, 2, 3])
     assert not r.valid
     assert "INVALID_ROOT" in _errors(r)
 
 
-# AGENT SHALL VALIDATE DATA validate.
+# AGENT SHALL VALIDATE PROCESS validate THEN REQUIRE DATA vocabularies CONTAINS RECORD core.
 def test_v091_opt_in():
     """core_v1.0.0 rules only fire when declared."""
     # This TRUG has DATA doing FILTER (invalid under rule 10) but no core_v1.0.0
