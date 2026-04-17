@@ -45,7 +45,10 @@
         "folder_paper",
         "folder_reference",
         "folder_studies",
-        "doc_pyproject"
+        "doc_pyproject",
+        "doc_changelog",
+        "doc_plan_1544_byte_roundtrip",
+        "doc_plan_1544_pr_b_formatting"
       ],
       "metric_level": "KILO_FOLDER",
       "dimension": "folder_structure"
@@ -479,7 +482,7 @@
       "type": "COMPONENT",
       "properties": {
         "name": "REFERENCE",
-        "purpose": "Canonical home for TRUGS papers, standards, and cross-cutting material — the document trinity: WHY, HOW, CHECK",
+        "purpose": "Canonical home for TRUGS papers, standards, and cross-cutting material \u2014 the document trinity: WHY, HOW, CHECK",
         "file_count": 4
       },
       "parent_id": "root",
@@ -497,7 +500,7 @@
       "type": "DOCUMENT",
       "properties": {
         "name": "REFERENCE/README.md",
-        "purpose": "Index of the REFERENCE library — trinity overview, layout, cross-links"
+        "purpose": "Index of the REFERENCE library \u2014 trinity overview, layout, cross-links"
       },
       "parent_id": "folder_reference",
       "contains": [],
@@ -509,7 +512,7 @@
       "type": "DOCUMENT",
       "properties": {
         "name": "REFERENCE/PAPER_dark_code.md",
-        "purpose": "The WHY paper — Dark Code problem and TRUGS four-corner verification square as the resolution. Moved from TRUGS-AGENT per #1548.",
+        "purpose": "The WHY paper \u2014 Dark Code problem and TRUGS four-corner verification square as the resolution. Moved from TRUGS-AGENT per #1548.",
         "trl": "PROCESS paper SHALL DEFINE RECORD dark_code THEN SHALL CITE A RECORD solution."
       },
       "parent_id": "folder_reference",
@@ -522,7 +525,7 @@
       "type": "DOCUMENT",
       "properties": {
         "name": "REFERENCE/PAPER_how_to_code_with_trugs.md",
-        "purpose": "The HOW paper — practitioner guide: greenfield process, refactoring, multi-file, AAA integration, memory, CI, patterns, Python conventions",
+        "purpose": "The HOW paper \u2014 practitioner guide: greenfield process, refactoring, multi-file, AAA integration, memory, CI, patterns, Python conventions",
         "trl": "PROCESS paper SHALL DEFINE RECORD practice THEN CITE A RECORD workflow."
       },
       "parent_id": "folder_reference",
@@ -535,7 +538,7 @@
       "type": "SPECIFICATION",
       "properties": {
         "name": "REFERENCE/STANDARD_dark_code_compliance.md",
-        "purpose": "The CHECK — auditable Dark Code compliance checklist. Operationalizes the four corners into C1-C7 mechanical checks.",
+        "purpose": "The CHECK \u2014 auditable Dark Code compliance checklist. Operationalizes the four corners into C1-C7 mechanical checks.",
         "trl": "PROCESS standard SHALL ADMINISTER EACH RESOURCE repo SUBJECT_TO DATA compliance."
       },
       "parent_id": "folder_reference",
@@ -548,7 +551,7 @@
       "type": "SPECIFICATION",
       "properties": {
         "name": "tools/compliance_check.py",
-        "purpose": "Mechanical Dark Code compliance verifier — implements C1-C7 from STANDARD_dark_code_compliance.md. Entrypoint: trugs-compliance-check.",
+        "purpose": "Mechanical Dark Code compliance verifier \u2014 implements C1-C7 from STANDARD_dark_code_compliance.md. Entrypoint: trugs-compliance-check.",
         "trl": "PROCESS compliance SHALL VALIDATE ALL FILE SUBJECT_TO DATA standard THEN RETURN RECORD report."
       },
       "parent_id": "folder_tools",
@@ -558,42 +561,81 @@
     },
     {
       "id": "folder_studies",
-      "type": "DATA",
-      "name": "STUDIES",
-      "description": "Long-form research studies authored against the TRUGS spec \u2014 current contents: STUDY_001 (medical evidence synthesis) and STUDY_002 (executable semantic graph genealogy).",
+      "type": "FOLDER",
       "parent_id": "root",
       "contains": [],
-      "metric_level": "DECI_FOLDER",
+      "metric_level": "KILO_FOLDER",
       "dimension": "research",
       "properties": {
+        "name": "STUDIES",
+        "purpose": "Long-form research studies authored against the TRUGS spec \u2014 current contents: STUDY_001 (medical evidence synthesis) and STUDY_002 (executable semantic graph genealogy).",
         "path": "STUDIES/"
       }
     },
     {
       "id": "doc_pyproject",
-      "type": "DATA",
-      "name": "pyproject.toml",
-      "description": "Python package metadata: name=trugs, version=1.2.0, console scripts (trugs-validate, trugs-memory, trugs-memory-render, trugs-memory-import, trugs-memory-audit, etc.), zero runtime dependencies.",
+      "type": "DOCUMENT",
       "parent_id": "root",
       "contains": [],
-      "metric_level": "BASE_DOC",
+      "metric_level": "BASE_DOCUMENT",
       "dimension": "build",
       "properties": {
+        "name": "pyproject.toml",
+        "purpose": "Python package metadata: name=trugs, version=1.2.0, console scripts (trugs-validate, trugs-memory, trugs-memory-render, trugs-memory-import, trugs-memory-audit, etc.), zero runtime dependencies.",
         "path": "pyproject.toml"
       }
+    },
+    {
+      "id": "doc_changelog",
+      "type": "DOCUMENT",
+      "properties": {
+        "name": "CHANGELOG.md",
+        "purpose": "Keep-a-Changelog format \u2014 all notable changes to TRUGS",
+        "path": "CHANGELOG.md"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "doc_plan_1544_byte_roundtrip",
+      "type": "DOCUMENT",
+      "properties": {
+        "name": "PLAN_1544_byte_identical_round_trip.md",
+        "purpose": "Work-product plan for #1544 byte-identical round-trip",
+        "path": "PLAN_1544_byte_identical_round_trip.md"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "doc_plan_1544_pr_b_formatting",
+      "type": "DOCUMENT",
+      "properties": {
+        "name": "PLAN_1544_pr_b_formatting.md",
+        "purpose": "Work-product plan for #1544 PR-B formatting",
+        "path": "PLAN_1544_pr_b_formatting.md"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "folder_structure"
     }
   ],
   "edges": [
     {
       "from_id": "doc_readme",
       "to_id": "root",
-      "relation": "REFERENCES",
+      "relation": "describes",
       "properties": {}
     },
     {
       "from_id": "spec_core",
       "to_id": "folder_protocol",
-      "relation": "GOVERNS",
+      "relation": "governs",
       "properties": {
         "scope": "CORE defines the universal foundation all other specs build on"
       }
@@ -601,7 +643,7 @@
     {
       "from_id": "spec_validation",
       "to_id": "spec_core",
-      "relation": "IMPLEMENTS",
+      "relation": "implements",
       "properties": {
         "scope": "16 rules that enforce CORE boundaries"
       }
@@ -609,7 +651,7 @@
     {
       "from_id": "spec_branches",
       "to_id": "spec_core",
-      "relation": "IMPLEMENTS",
+      "relation": "implements",
       "properties": {
         "scope": "Domain vocabularies built on CORE structure"
       }
@@ -617,7 +659,7 @@
     {
       "from_id": "spec_fundamentals",
       "to_id": "spec_core",
-      "relation": "REFERENCES",
+      "relation": "describes",
       "properties": {
         "scope": "Gentle introduction to CORE concepts"
       }
@@ -625,7 +667,7 @@
     {
       "from_id": "spec_schema",
       "to_id": "spec_core",
-      "relation": "IMPLEMENTS",
+      "relation": "implements",
       "properties": {
         "scope": "JSON schema formalizing CORE field definitions"
       }
@@ -633,7 +675,7 @@
     {
       "from_id": "lang_vocabulary",
       "to_id": "spec_core",
-      "relation": "IMPLEMENTS",
+      "relation": "implements",
       "properties": {
         "scope": "190 words drawn from CORE primitives"
       }
@@ -641,7 +683,7 @@
     {
       "from_id": "lang_grammar",
       "to_id": "lang_vocabulary",
-      "relation": "DEPENDS_ON",
+      "relation": "uses",
       "properties": {
         "scope": "Grammar rules compose vocabulary words"
       }
@@ -649,7 +691,7 @@
     {
       "from_id": "lang_examples",
       "to_id": "lang_grammar",
-      "relation": "DEPENDS_ON",
+      "relation": "uses",
       "properties": {
         "scope": "30 examples parsed against the grammar"
       }
@@ -657,7 +699,7 @@
     {
       "from_id": "lang_trug",
       "to_id": "lang_vocabulary",
-      "relation": "IMPLEMENTS",
+      "relation": "implements",
       "properties": {
         "scope": "Self-defining TRUG uses vocabulary words as nodes"
       }
@@ -665,7 +707,7 @@
     {
       "from_id": "folder_examples",
       "to_id": "spec_branches",
-      "relation": "IMPLEMENTS",
+      "relation": "implements",
       "properties": {
         "scope": "7 domain examples demonstrate branch vocabularies"
       }
@@ -673,7 +715,7 @@
     {
       "from_id": "folder_examples",
       "to_id": "spec_core",
-      "relation": "IMPLEMENTS",
+      "relation": "implements",
       "properties": {
         "scope": "All examples validate against CORE rules"
       }
@@ -681,7 +723,7 @@
     {
       "from_id": "tools_validate",
       "to_id": "spec_validation",
-      "relation": "IMPLEMENTS",
+      "relation": "implements",
       "properties": {
         "scope": "Python implementation of all 16 validation rules"
       }
@@ -689,13 +731,13 @@
     {
       "from_id": "tools_test",
       "to_id": "tools_validate",
-      "relation": "IMPLEMENTS",
+      "relation": "tests",
       "properties": {}
     },
     {
       "from_id": "tools_memory",
       "to_id": "spec_core",
-      "relation": "IMPLEMENTS",
+      "relation": "implements",
       "properties": {
         "scope": "Memory graphs validate against CORE"
       }
@@ -703,7 +745,7 @@
     {
       "from_id": "folder_paper",
       "to_id": "spec_core",
-      "relation": "REFERENCES",
+      "relation": "describes",
       "properties": {
         "scope": "Academic paper presenting the specification"
       }
@@ -711,7 +753,7 @@
     {
       "from_id": "folder_paper",
       "to_id": "folder_language",
-      "relation": "REFERENCES",
+      "relation": "describes",
       "properties": {
         "scope": "Paper presents TRL compilation algorithm"
       }
@@ -719,17 +761,17 @@
     {
       "from_id": "root",
       "to_id": "folder_studies",
-      "relation": "CONTAINS"
+      "relation": "contains"
     },
     {
       "from_id": "root",
       "to_id": "doc_pyproject",
-      "relation": "CONTAINS"
+      "relation": "contains"
     },
     {
       "from_id": "ref_standard_dark_code",
       "to_id": "ref_paper_dark_code",
-      "relation": "IMPLEMENTS",
+      "relation": "implements",
       "properties": {
         "scope": "STANDARD operationalizes the four-corner square defined in the PAPER"
       }
@@ -737,15 +779,15 @@
     {
       "from_id": "ref_paper_how_to_code",
       "to_id": "ref_paper_dark_code",
-      "relation": "REFERENCES",
+      "relation": "describes",
       "properties": {
-        "scope": "HOW paper derives from §5 of the Dark Code paper"
+        "scope": "HOW paper derives from \u00a75 of the Dark Code paper"
       }
     },
     {
       "from_id": "tools_compliance_check",
       "to_id": "ref_standard_dark_code",
-      "relation": "IMPLEMENTS",
+      "relation": "implements",
       "properties": {
         "scope": "CLI mechanically enforces C1-C7 from the STANDARD"
       }
@@ -753,10 +795,88 @@
     {
       "from_id": "tools_compliance_check",
       "to_id": "tools_validate",
-      "relation": "DEPENDS_ON",
+      "relation": "uses",
       "properties": {
         "scope": "Delegates C7 to trugs-folder-check via subprocess"
       }
+    },
+    {
+      "from_id": "root",
+      "to_id": "doc_readme",
+      "relation": "contains",
+      "properties": {}
+    },
+    {
+      "from_id": "root",
+      "to_id": "doc_license",
+      "relation": "contains",
+      "properties": {}
+    },
+    {
+      "from_id": "root",
+      "to_id": "doc_agent",
+      "relation": "contains",
+      "properties": {}
+    },
+    {
+      "from_id": "root",
+      "to_id": "doc_notice",
+      "relation": "contains",
+      "properties": {}
+    },
+    {
+      "from_id": "root",
+      "to_id": "folder_protocol",
+      "relation": "contains",
+      "properties": {}
+    },
+    {
+      "from_id": "root",
+      "to_id": "folder_language",
+      "relation": "contains",
+      "properties": {}
+    },
+    {
+      "from_id": "root",
+      "to_id": "folder_examples",
+      "relation": "contains",
+      "properties": {}
+    },
+    {
+      "from_id": "root",
+      "to_id": "folder_tools",
+      "relation": "contains",
+      "properties": {}
+    },
+    {
+      "from_id": "root",
+      "to_id": "folder_paper",
+      "relation": "contains",
+      "properties": {}
+    },
+    {
+      "from_id": "root",
+      "to_id": "folder_reference",
+      "relation": "contains",
+      "properties": {}
+    },
+    {
+      "from_id": "root",
+      "to_id": "doc_changelog",
+      "relation": "contains",
+      "properties": {}
+    },
+    {
+      "from_id": "root",
+      "to_id": "doc_plan_1544_byte_roundtrip",
+      "relation": "contains",
+      "properties": {}
+    },
+    {
+      "from_id": "root",
+      "to_id": "doc_plan_1544_pr_b_formatting",
+      "relation": "contains",
+      "properties": {}
     }
   ]
 }
