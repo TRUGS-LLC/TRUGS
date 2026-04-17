@@ -84,6 +84,23 @@ See [TRUGS_LANGUAGE/](TRUGS_LANGUAGE/) for the complete specification.
 
 The [EXAMPLES/](EXAMPLES/) directory contains sample TRUGs for 6 domains at varying complexity levels. All 19 examples pass validation.
 
+## This repo, as a TRUG
+
+This repository describes itself as a TRUG. [`folder.trug.json`](folder.trug.json) at the repo root is the machine-readable index — every top-level folder, every reference document, every public tool has a node, with typed edges to the specs and standards it implements or describes.
+
+```bash
+# What's in this repo?
+trugs-tls folder.trug.json
+
+# What does the compliance checker depend on?
+trugs-tget folder.trug.json tools_compliance_check --edges
+
+# Does the graph match the filesystem?
+trugs-folder-check .
+```
+
+CI runs `trugs-folder-check` on every PR — this README's section list, the spec index, the tool table above all correspond to nodes you can traverse programmatically. When the TRUG drifts from the prose or the filesystem, CI fails. We dogfood our own dogfood.
+
 ## Use It
 
 **[TRUGS-AGENT](https://github.com/TRUGS-LLC/TRUGS-AGENT)** — copy one file into your project and your LLM speaks TRL, follows a 9-phase development protocol, tracks projects as graphs, and maintains persistent memory. Seven standalone components:
