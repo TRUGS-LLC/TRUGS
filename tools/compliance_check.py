@@ -166,6 +166,8 @@ _AUTO_GENERATED_FILES = {"ARCHITECTURE.md", "AAA.md", "CLAUDE.md"}
 def _iter_files(root: Path, suffix: str) -> list[Path]:
     # PROCESS discovery SHALL FILTER ALL FILE 'in NAMESPACE root BY SUFFIX
     #   THEN EXCLUDE EACH FILE 'in NAMESPACE zzz_ OR .git OR __pycache__.
+    if root.is_file():
+        return [root] if root.suffix == suffix else []
     out: list[Path] = []
     for p in sorted(root.rglob(f"*{suffix}")):
         # Walk up the path parts; exclude if any segment starts with an excluded prefix

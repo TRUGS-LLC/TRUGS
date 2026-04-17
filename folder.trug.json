@@ -7,6 +7,14 @@
     "folder_structure": {
       "description": "Top-level repo structure \u2014 spec, language, examples, tools, paper",
       "base_level": "BASE"
+    },
+    "research": {
+      "description": "Long-form research studies authored against the TRUGS spec",
+      "base_level": "BASE"
+    },
+    "build": {
+      "description": "Build and packaging configuration",
+      "base_level": "BASE"
     }
   },
   "capabilities": {
@@ -282,6 +290,11 @@
         "tools_validate",
         "tools_test",
         "tools_memory",
+        "tools_trl",
+        "tools_memory_render",
+        "tools_memory_audit",
+        "tools_memory_import",
+        "tools_build_language_trug",
         "tools_tget",
         "tools_tupdate",
         "tools_tdelete",
@@ -325,6 +338,71 @@
         "name": "tools/memory.py",
         "purpose": "LLM memory as a TRUG graph \u2014 remember, recall, forget, associate commands",
         "lines": 371
+      },
+      "parent_id": "folder_tools",
+      "contains": [],
+      "metric_level": "BASE_SPECIFICATION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_trl",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "tools/trl.py",
+        "purpose": "TRUG/L compiler \u2014 deterministic TRUG/L \u2194 TRUG round-trip (tokenize, parse, compile, decompile, validate)",
+        "trl": "PROCESS compiler SHALL MAP STRING DATA source TO RECORD graph."
+      },
+      "parent_id": "folder_tools",
+      "contains": [],
+      "metric_level": "BASE_SPECIFICATION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_memory_render",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "tools/memory_render.py",
+        "purpose": "Deterministic markdown render of memory TRUG graphs with budget enforcement",
+        "trl": "PROCESS render SHALL MAP RECORD graph TO STRING DATA output."
+      },
+      "parent_id": "folder_tools",
+      "contains": [],
+      "metric_level": "BASE_SPECIFICATION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_memory_audit",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "tools/memory_audit.py",
+        "purpose": "Memory hygiene \u2014 dead-rule detection, hit tracking, reconcile candidates",
+        "trl": "PROCESS audit SHALL FILTER ALL RECORD memory THEN RETURN RECORD dead_rule."
+      },
+      "parent_id": "folder_tools",
+      "contains": [],
+      "metric_level": "BASE_SPECIFICATION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_memory_import",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "tools/memory_import.py",
+        "purpose": "Bulk import flat markdown files with YAML frontmatter into a memory TRUG graph",
+        "trl": "PROCESS importer SHALL READ ALL FILE markdown THEN WRITE EACH RECORD memory TO RECORD graph."
+      },
+      "parent_id": "folder_tools",
+      "contains": [],
+      "metric_level": "BASE_SPECIFICATION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_build_language_trug",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "tools/build_language_trug.py",
+        "purpose": "Parse SPEC_vocabulary.md into language.trug.json \u2014 190 words, 242 nodes",
+        "trl": "PROCESS builder SHALL MAP ALL RECORD word TO RECORD graph."
       },
       "parent_id": "folder_tools",
       "contains": [],

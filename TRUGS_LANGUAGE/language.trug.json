@@ -212,7 +212,7 @@
         "description": "Who performs actions",
         "count": 7
       },
-      "metric_level": "DECA_SUBCATEGORY",
+      "metric_level": "DEKA_SUBCATEGORY",
       "dimension": {}
     },
     {
@@ -233,7 +233,7 @@
         "description": "What is acted upon",
         "count": 7
       },
-      "metric_level": "DECA_SUBCATEGORY",
+      "metric_level": "DEKA_SUBCATEGORY",
       "dimension": {}
     },
     {
@@ -251,7 +251,7 @@
         "description": "What holds other things",
         "count": 4
       },
-      "metric_level": "DECA_SUBCATEGORY",
+      "metric_level": "DEKA_SUBCATEGORY",
       "dimension": {}
     },
     {
@@ -270,7 +270,7 @@
         "description": "Where/when things apply",
         "count": 5
       },
-      "metric_level": "DECA_SUBCATEGORY",
+      "metric_level": "DEKA_SUBCATEGORY",
       "dimension": {}
     },
     {
@@ -287,7 +287,7 @@
         "description": "What comes out",
         "count": 3
       },
-      "metric_level": "DECA_SUBCATEGORY",
+      "metric_level": "DEKA_SUBCATEGORY",
       "dimension": {}
     },
     {
@@ -315,7 +315,7 @@
         "description": "Change data shape",
         "count": 14
       },
-      "metric_level": "DECA_SUBCATEGORY",
+      "metric_level": "DEKA_SUBCATEGORY",
       "dimension": {}
     },
     {
@@ -339,7 +339,7 @@
         "description": "Move data between actors",
         "count": 10
       },
-      "metric_level": "DECA_SUBCATEGORY",
+      "metric_level": "DEKA_SUBCATEGORY",
       "dimension": {}
     },
     {
@@ -357,7 +357,7 @@
         "description": "Mandate behavior",
         "count": 4
       },
-      "metric_level": "DECA_SUBCATEGORY",
+      "metric_level": "DEKA_SUBCATEGORY",
       "dimension": {}
     },
     {
@@ -376,7 +376,7 @@
         "description": "Allow behavior",
         "count": 5
       },
-      "metric_level": "DECA_SUBCATEGORY",
+      "metric_level": "DEKA_SUBCATEGORY",
       "dimension": {}
     },
     {
@@ -394,7 +394,7 @@
         "description": "Forbid behavior",
         "count": 4
       },
-      "metric_level": "DECA_SUBCATEGORY",
+      "metric_level": "DEKA_SUBCATEGORY",
       "dimension": {}
     },
     {
@@ -418,7 +418,7 @@
         "description": "Direct execution flow",
         "count": 10
       },
-      "metric_level": "DECA_SUBCATEGORY",
+      "metric_level": "DEKA_SUBCATEGORY",
       "dimension": {}
     },
     {
@@ -441,7 +441,7 @@
         "description": "Establish meaning or structural relationships",
         "count": 9
       },
-      "metric_level": "DECA_SUBCATEGORY",
+      "metric_level": "DEKA_SUBCATEGORY",
       "dimension": {}
     },
     {
@@ -460,7 +460,7 @@
         "description": "Respond to failure",
         "count": 5
       },
-      "metric_level": "DECA_SUBCATEGORY",
+      "metric_level": "DEKA_SUBCATEGORY",
       "dimension": {}
     },
     {
@@ -479,7 +479,7 @@
         "description": "What kind of thing",
         "count": 5
       },
-      "metric_level": "DECA_SUBCATEGORY",
+      "metric_level": "DEKA_SUBCATEGORY",
       "dimension": {}
     },
     {
@@ -498,7 +498,7 @@
         "description": "Who can see/touch it",
         "count": 5
       },
-      "metric_level": "DECA_SUBCATEGORY",
+      "metric_level": "DEKA_SUBCATEGORY",
       "dimension": {}
     },
     {
@@ -526,7 +526,7 @@
         "description": "Current condition",
         "count": 14
       },
-      "metric_level": "DECA_SUBCATEGORY",
+      "metric_level": "DEKA_SUBCATEGORY",
       "dimension": {}
     },
     {
@@ -546,7 +546,7 @@
         "description": "How many / whether required",
         "count": 6
       },
-      "metric_level": "DECA_SUBCATEGORY",
+      "metric_level": "DEKA_SUBCATEGORY",
       "dimension": {}
     },
     {
@@ -566,7 +566,7 @@
         "description": "Relative importance",
         "count": 6
       },
-      "metric_level": "DECA_SUBCATEGORY",
+      "metric_level": "DEKA_SUBCATEGORY",
       "dimension": {}
     },
     {
@@ -589,7 +589,7 @@
         "description": "When/how fast",
         "count": 9
       },
-      "metric_level": "DECA_SUBCATEGORY",
+      "metric_level": "DEKA_SUBCATEGORY",
       "dimension": {}
     },
     {
@@ -607,7 +607,7 @@
         "description": "How often",
         "count": 4
       },
-      "metric_level": "DECA_SUBCATEGORY",
+      "metric_level": "DEKA_SUBCATEGORY",
       "dimension": {}
     },
     {
@@ -625,7 +625,7 @@
         "description": "How precisely",
         "count": 4
       },
-      "metric_level": "DECA_SUBCATEGORY",
+      "metric_level": "DEKA_SUBCATEGORY",
       "dimension": {}
     },
     {
@@ -641,7 +641,7 @@
         "description": "Whether qualified",
         "count": 2
       },
-      "metric_level": "DECA_SUBCATEGORY",
+      "metric_level": "DEKA_SUBCATEGORY",
       "dimension": {}
     },
     {
@@ -660,7 +660,7 @@
         "description": "Data movement direction",
         "count": 5
       },
-      "metric_level": "DECA_SUBCATEGORY",
+      "metric_level": "DEKA_SUBCATEGORY",
       "dimension": {}
     },
     {
@@ -679,7 +679,7 @@
         "description": "What constrains what",
         "count": 5
       },
-      "metric_level": "DECA_SUBCATEGORY",
+      "metric_level": "DEKA_SUBCATEGORY",
       "dimension": {}
     },
     {
@@ -694,7 +694,7 @@
         "description": "",
         "count": 1
       },
-      "metric_level": "DECA_SUBCATEGORY",
+      "metric_level": "DEKA_SUBCATEGORY",
       "dimension": {}
     },
     {
@@ -709,7 +709,7 @@
         "description": "",
         "count": 1
       },
-      "metric_level": "DECA_SUBCATEGORY",
+      "metric_level": "DEKA_SUBCATEGORY",
       "dimension": {}
     },
     {
@@ -724,7 +724,7 @@
         "description": "",
         "count": 1
       },
-      "metric_level": "DECA_SUBCATEGORY",
+      "metric_level": "DEKA_SUBCATEGORY",
       "dimension": {}
     },
     {
@@ -741,7 +741,7 @@
         "description": "",
         "count": 3
       },
-      "metric_level": "DECA_SUBCATEGORY",
+      "metric_level": "DEKA_SUBCATEGORY",
       "dimension": {}
     },
     {
@@ -757,7 +757,7 @@
         "description": "Establish identity or criterion",
         "count": 2
       },
-      "metric_level": "DECA_SUBCATEGORY",
+      "metric_level": "DEKA_SUBCATEGORY",
       "dimension": {}
     },
     {
@@ -773,7 +773,7 @@
         "description": "",
         "count": 2
       },
-      "metric_level": "DECA_SUBCATEGORY",
+      "metric_level": "DEKA_SUBCATEGORY",
       "dimension": {}
     },
     {
@@ -788,7 +788,7 @@
         "description": "",
         "count": 1
       },
-      "metric_level": "DECA_SUBCATEGORY",
+      "metric_level": "DEKA_SUBCATEGORY",
       "dimension": {}
     },
     {
@@ -804,7 +804,7 @@
         "description": "",
         "count": 2
       },
-      "metric_level": "DECA_SUBCATEGORY",
+      "metric_level": "DEKA_SUBCATEGORY",
       "dimension": {}
     },
     {
@@ -821,7 +821,7 @@
         "description": "",
         "count": 3
       },
-      "metric_level": "DECA_SUBCATEGORY",
+      "metric_level": "DEKA_SUBCATEGORY",
       "dimension": {}
     },
     {
@@ -840,7 +840,7 @@
         "description": "",
         "count": 5
       },
-      "metric_level": "DECA_SUBCATEGORY",
+      "metric_level": "DEKA_SUBCATEGORY",
       "dimension": {}
     },
     {
@@ -856,7 +856,7 @@
         "description": "",
         "count": 2
       },
-      "metric_level": "DECA_SUBCATEGORY",
+      "metric_level": "DEKA_SUBCATEGORY",
       "dimension": {}
     },
     {
@@ -873,7 +873,7 @@
         "description": "",
         "count": 3
       },
-      "metric_level": "DECA_SUBCATEGORY",
+      "metric_level": "DEKA_SUBCATEGORY",
       "dimension": {}
     },
     {
@@ -890,7 +890,7 @@
         "description": "",
         "count": 3
       },
-      "metric_level": "DECA_SUBCATEGORY",
+      "metric_level": "DEKA_SUBCATEGORY",
       "dimension": {}
     },
     {
@@ -906,7 +906,7 @@
         "description": "",
         "count": 2
       },
-      "metric_level": "DECA_SUBCATEGORY",
+      "metric_level": "DEKA_SUBCATEGORY",
       "dimension": {}
     },
     {
@@ -921,7 +921,7 @@
         "description": "",
         "count": 1
       },
-      "metric_level": "DECA_SUBCATEGORY",
+      "metric_level": "DEKA_SUBCATEGORY",
       "dimension": {}
     },
     {
@@ -937,7 +937,7 @@
         "description": "",
         "count": 2
       },
-      "metric_level": "DECA_SUBCATEGORY",
+      "metric_level": "DEKA_SUBCATEGORY",
       "dimension": {}
     },
     {
@@ -953,7 +953,7 @@
         "description": "",
         "count": 2
       },
-      "metric_level": "DECA_SUBCATEGORY",
+      "metric_level": "DEKA_SUBCATEGORY",
       "dimension": {}
     },
     {
@@ -968,7 +968,7 @@
         "description": "",
         "count": 1
       },
-      "metric_level": "DECA_SUBCATEGORY",
+      "metric_level": "DEKA_SUBCATEGORY",
       "dimension": {}
     },
     {
@@ -983,7 +983,7 @@
         "description": "",
         "count": 1
       },
-      "metric_level": "DECA_SUBCATEGORY",
+      "metric_level": "DEKA_SUBCATEGORY",
       "dimension": {}
     },
     {

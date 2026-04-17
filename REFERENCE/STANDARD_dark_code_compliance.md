@@ -32,16 +32,18 @@ The compliance standard has exactly four corners, each a mechanical validation:
          TRUG/L tests
 ```
 
-| Edge | What it means | How it is checked |
+| Edge | What it means | Enforced by |
 |---|---|---|
-| **TRUG ↔ code** | Every public function has a TRUG node | `trugs-compliance-check` C1 |
-| **TRUG ↔ TRUG/L** | Every TRUG node with a `trl` property parses via `trl.py` | C2 |
-| **TRUG ↔ tests** | Every SPEC/FUNCTION node has ≥ 1 inbound `VALIDATES` edge from a TEST node | C3 |
-| **TRUG/L ↔ code** | Every public function has a function-level TRUG/L comment that parses | C4 |
-| **TRUG/L ↔ tests** | Every test function has an `AGENT SHALL VALIDATE ...` comment that parses | C5 |
-| **invariants** | Every `invariant_*` property has an assertion in code + a test | C6 |
-| **TRUG validity** | Every `.trug.json` file passes `trugs-folder-check` | C7 |
+| **TRUG/L ↔ code** | Every public function has a function-level TRUG/L comment that parses | check rule C1 |
+| **TRUG ↔ code** | Every public function has a TRUG node | check rule C2 |
+| **TRUG ↔ TRUG/L** | Every TRUG node with a `trl` property parses via `trl.py` | check rule C3 |
+| **TRUG/L ↔ tests** | Every test function has an `AGENT SHALL VALIDATE ...` comment that parses | check rule C4 |
+| **TRUG ↔ tests** | Every SPEC/FUNCTION node has ≥ 1 inbound `VALIDATES` edge from a TEST node | check rule C5 |
+| **invariants** | Every `invariant_*` property has an assertion in code + a test | check rule C6 |
+| **TRUG validity** | Every `.trug.json` file passes validation | check rule C7 |
 | **code ↔ tests** | The test suite passes | existing `pytest` / language-native test runner |
+
+The check rules C1–C7 are defined below in §3–§6 and implemented in `trugs-compliance-check`:
 
 **Dark Code is code where any edge of this square is broken.** Compliance means every edge is intact and mechanically verified.
 

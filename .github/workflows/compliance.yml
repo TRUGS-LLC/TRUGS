@@ -23,7 +23,7 @@ jobs:
         run: pip install -e .
 
       - name: Run trugs-compliance-check
-        run: trugs-compliance-check .
+        run: trugs-compliance-check --strict .
 
       - name: Upload detailed report
         if: failure()
