@@ -1,8 +1,11 @@
 # TRUGS — Traceable Recursive Universal Graph Specification
 
-**Version:** 1.2.0
-**License:** Apache 2.0
-**DOI:** [10.5281/zenodo.19379454](https://doi.org/10.5281/zenodo.19379454)
+[![PyPI](https://img.shields.io/pypi/v/trugs.svg)](https://pypi.org/project/trugs/)
+[![Python](https://img.shields.io/pypi/pyversions/trugs.svg)](https://pypi.org/project/trugs/)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+[![CI](https://github.com/TRUGS-LLC/TRUGS/actions/workflows/compliance.yml/badge.svg)](https://github.com/TRUGS-LLC/TRUGS/actions/workflows/compliance.yml)
+[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.19379454-blue.svg)](https://doi.org/10.5281/zenodo.19379454)
+
 **Maintained by:** TRUGS LLC
 
 ## What is TRUGS?
@@ -14,6 +17,23 @@ TRUGS is a JSON graph specification for representing structured information. A T
 3. **Hierarchy** — organization via parent/child containment using metric levels
 
 **CORE + BRANCH = Complete TRUG.** CORE defines the universal structure every TRUG must satisfy. BRANCHES define domain-specific vocabularies.
+
+```mermaid
+flowchart LR
+    S["TRUG/L sentence<br/>(190 words)"] <-->|compile/decompile| G["TRUG graph<br/>(nodes · edges · hierarchy)"]
+    G -.validates against.-> C["CORE<br/>(7 boundaries · 16 rules)"]
+    G -.extends.-> B["BRANCH<br/>(domain vocabulary)"]
+```
+
+The sentence IS the program. The graph IS the AST. Every valid TRUG/L sentence compiles to a graph losslessly, and every graph decompiles back to a sentence.
+
+## Install
+
+```bash
+pip install trugs
+```
+
+This gives you the full reference toolchain — `trugs-validate`, `trugs-memory`, `trugs-compliance-check`, and the CRUD tools (`trugs-tget`, `trugs-tupdate`, `trugs-tdelete`, `trugs-tunlink`).
 
 ## TRUGS Language
 
