@@ -30,8 +30,17 @@ from typing import Any, Dict, List, Optional
 
 # PROCESS loader SHALL READ FILE graph THEN RETURN RECORD graph.
 def load_graph(path: Path) -> Dict[str, Any]:
-    with open(path, "r", encoding="utf-8") as f:
-        return json.load(f)
+    try:
+        from trugs_store import JsonFilePersistence
+        store = JsonFilePersistence().load(str(path))
+        graph: Dict[str, Any] = dict(store.get_metadata())
+        graph["nodes"] = store.find_nodes()
+        graph["edges"] = store.get_edges()
+        return graph
+    except ImportError:
+        # Fallback: raw JSON load if trugs-store not installed
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f)
 
 
 # PROCESS saver SHALL WRITE RECORD graph TO FILE path.
