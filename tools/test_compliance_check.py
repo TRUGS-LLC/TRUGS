@@ -226,7 +226,7 @@ def test_something():
     assert "AGENT SHALL VALIDATE" in c4[0].message
 
 
-# AGENT SHALL VALIDATE PROCESS c4 THEN FILTER FUNCTION helper FROM DATA audit WHEN FUNCTION 'is PRIVATE.
+# AGENT SHALL VALIDATE DATA c4.
 def test_c4_helper_in_test_class_exempt(tmp_repo: Path) -> None:
     """helper_setup and setUp in a Test* class are NOT test functions — no C4."""
     _write(tmp_repo / "test_thing.py", """
