@@ -1,0 +1,57 @@
+name: Bug report
+description: Report a problem with the specification, reference tools, or documentation
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug. Please fill in the fields below. **Security vulnerabilities should not be filed here — see [SECURITY.md](../blob/main/SECURITY.md).**
+
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Output of `trugs --version` (or the git commit if installed from source)
+      placeholder: e.g. trugs 1.2.0 (commit abc1234)
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Describe the bug. What command did you run, what did you expect, what did you get?
+      placeholder: |
+        Running `trugs-folder-check ./my-project` reports ...
+        But I expected ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Minimal reproduction
+      description: The smallest TRUG or command that reproduces the problem. If it takes more than ~20 lines, attach a file or link to a repo.
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Python version, OS, how you installed trugs
+      placeholder: |
+        Python: 3.11.7
+        OS: Ubuntu 22.04
+        Install: pip install trugs
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context
+      description: Anything else that might help — stack traces, related issues, what you've already tried
+    validations:
+      required: false

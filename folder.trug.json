@@ -48,7 +48,9 @@
         "doc_pyproject",
         "doc_changelog",
         "doc_plan_1544_byte_roundtrip",
-        "doc_plan_1544_pr_b_formatting"
+        "doc_plan_1544_pr_b_formatting",
+        "doc_contributing",
+        "doc_security"
       ],
       "metric_level": "KILO_FOLDER",
       "dimension": "folder_structure"
@@ -623,6 +625,32 @@
       "contains": [],
       "metric_level": "BASE_DOCUMENT",
       "dimension": "folder_structure"
+    },
+    {
+      "id": "doc_contributing",
+      "type": "DOCUMENT",
+      "properties": {
+        "name": "CONTRIBUTING.md",
+        "purpose": "Contribution guide \u2014 branch naming, AAA protocol, compliance gates, HITM rule",
+        "path": "CONTRIBUTING.md"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "doc_security",
+      "type": "DOCUMENT",
+      "properties": {
+        "name": "SECURITY.md",
+        "purpose": "Security policy \u2014 private vulnerability disclosure via GitHub Security Advisories",
+        "path": "SECURITY.md"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "folder_structure"
     }
   ],
   "edges": [
@@ -875,6 +903,18 @@
     {
       "from_id": "root",
       "to_id": "doc_plan_1544_pr_b_formatting",
+      "relation": "contains",
+      "properties": {}
+    },
+    {
+      "from_id": "root",
+      "to_id": "doc_contributing",
+      "relation": "contains",
+      "properties": {}
+    },
+    {
+      "from_id": "root",
+      "to_id": "doc_security",
       "relation": "contains",
       "properties": {}
     }

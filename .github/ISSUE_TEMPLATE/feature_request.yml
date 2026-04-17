@@ -1,0 +1,50 @@
+name: Feature request
+description: Propose a new feature, vocabulary addition, or tool
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for proposing a change. Substantive features follow the AAA protocol (9 phases, human approves the plan before coding, human merges after audit) — see [`PAPER_how_to_code_with_trugs.md`](../blob/main/REFERENCE/PAPER_how_to_code_with_trugs.md) §5 for the full reference.
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What are you proposing?
+      description: Describe the feature or change in 2–3 sentences
+    validations:
+      required: true
+
+  - type: textarea
+    id: why
+    attributes:
+      label: Why does it matter?
+      description: What problem does it solve? Who benefits? What breaks without it?
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: What other approaches did you think about? Why did you pick this one?
+    validations:
+      required: false
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope — what's in, what's out
+      description: Be explicit about what this change does NOT cover. Helps keep the conversation focused.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: compliance
+    attributes:
+      label: Compliance awareness
+      options:
+        - label: I understand this change must pass `trugs-compliance-check` before it can merge
+          required: true
+        - label: I understand only humans merge PRs; agents open them and stop
+          required: true
