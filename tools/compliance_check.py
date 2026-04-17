@@ -197,7 +197,7 @@ def _is_test_function(func: ast.FunctionDef | ast.AsyncFunctionDef, parent: Opti
     if func.name.startswith("test_"):
         return True
     if parent is not None and parent.name.startswith("Test"):
-        return func.name.startswith("test") or True
+        return func.name.startswith("test")
     return False
 
 

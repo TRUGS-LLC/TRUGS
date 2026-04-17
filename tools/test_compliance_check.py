@@ -226,6 +226,28 @@ def test_something():
     assert "AGENT SHALL VALIDATE" in c4[0].message
 
 
+# AGENT SHALL VALIDATE PROCESS c4 THEN FILTER FUNCTION helper FROM DATA audit WHEN FUNCTION 'is PRIVATE.
+def test_c4_helper_in_test_class_exempt(tmp_repo: Path) -> None:
+    """helper_setup and setUp in a Test* class are NOT test functions — no C4."""
+    _write(tmp_repo / "test_thing.py", """
+class TestExample:
+    # AGENT SHALL VALIDATE DATA input.
+    def test_foo(self):
+        assert True
+
+    def helper_setup(self):
+        return 42
+
+    def setUp(self):
+        self.x = 1
+""")
+    report = cc.audit(tmp_repo)
+    c4 = [v for v in report.violations if v.rule == "C4"]
+    assert c4 == [], f"helper/setUp should not trigger C4: {c4}"
+    # Only test_foo should count as a test
+    assert report.tests_checked == 1
+
+
 # =============================================================================
 # C5 — TEST node has outbound VALIDATES edge
 # =============================================================================

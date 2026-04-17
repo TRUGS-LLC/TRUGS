@@ -10,8 +10,12 @@ from pathlib import Path
 
 import pytest
 
-from memory import init_memory_graph, remember
-from memory_render import (
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+from tools.memory import init_memory_graph, remember
+from tools.memory_render import (
     DEFAULT_BUDGET_TOKENS,
     DEFAULT_TYPE_ORDER,
     DEMOTION_ORDER,
@@ -22,7 +26,7 @@ from memory_render import (
     _group_by_type,
     _is_past,
 )
-from validate import validate
+from tools.validate import validate
 
 
 # ─── Fixtures ──────────────────────────────────────────────────────────────────
@@ -433,8 +437,8 @@ def test_rendered_source_graph_still_validates(small_graph):
 def test_render_memory_collapses_multiline_body(empty_graph, fixed_now):
     """I1 — a memory body with newlines and markdown syntax must render as
     a single line, not inject headings into MEMORY.md."""
-    from memory import remember
-    from memory_render import render
+    from tools.memory import remember
+    from tools.memory_render import render
 
     g = empty_graph
     remember(g, "line1\n# Heading\nline3", memory_type="feedback")

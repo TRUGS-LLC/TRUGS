@@ -5,7 +5,11 @@ import tempfile
 from pathlib import Path
 from copy import deepcopy
 
-from validate import (
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+from tools.validate import (
     validate, validate_file, ValidationResult,
     rule_1_unique_ids, rule_2_edge_id_validity, rule_3_hierarchy_consistency,
     rule_4_metric_level_ordering, rule_5_dimension_declaration,
