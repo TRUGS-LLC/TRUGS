@@ -6,682 +6,1325 @@
   "description": "6 papers, 403 paragraph-level nodes, 210 cross-paper edges. Blueprint for combined paper.",
   "nodes": [
     {
+      "id": "root",
+      "type": "FOLDER",
+      "parent_id": null,
+      "contains": [
+        "COMBINED",
+        "P1",
+        "P2",
+        "P3",
+        "P4",
+        "P5",
+        "P6",
+        "S1.1",
+        "S1.10",
+        "S1.11",
+        "S1.12",
+        "S1.13",
+        "S1.14",
+        "S1.2",
+        "S1.3",
+        "S1.4",
+        "S1.5",
+        "S1.6",
+        "S1.7",
+        "S1.8",
+        "S1.9",
+        "S2.1",
+        "S2.10",
+        "S2.11",
+        "S2.2",
+        "S2.3",
+        "S2.4",
+        "S2.5",
+        "S2.6",
+        "S2.7",
+        "S2.8",
+        "S2.9",
+        "S3.1",
+        "S3.2",
+        "S3.3",
+        "S3.4",
+        "S4.1",
+        "S4.10",
+        "S4.11",
+        "S4.2",
+        "S4.3",
+        "S4.4",
+        "S4.5",
+        "S4.6",
+        "S4.7",
+        "S4.8",
+        "S4.9",
+        "S5.1",
+        "S5.10",
+        "S5.11",
+        "S5.12",
+        "S5.13",
+        "S5.14",
+        "S5.15",
+        "S5.16",
+        "S5.17",
+        "S5.2",
+        "S5.3",
+        "S5.4",
+        "S5.5",
+        "S5.6",
+        "S5.7",
+        "S5.8",
+        "S5.9",
+        "S6.1",
+        "S6.10",
+        "S6.2",
+        "S6.3",
+        "S6.4",
+        "S6.5",
+        "S6.6",
+        "S6.7",
+        "S6.8",
+        "S6.9",
+        "STUDY_4S",
+        "STUDY_BLUE_ZONES",
+        "STUDY_CTT",
+        "STUDY_CTT2024",
+        "STUDY_DPP",
+        "STUDY_EMPAREG",
+        "STUDY_FRAMINGHAM",
+        "STUDY_JUPITER",
+        "STUDY_LANCET2025",
+        "STUDY_MENDELIAN",
+        "STUDY_METSIM",
+        "STUDY_PREDIMED",
+        "STUDY_SAMSON",
+        "STUDY_SELECT",
+        "STUDY_SHE2024",
+        "STUDY_SLCO1B1"
+      ],
+      "metric_level": "KILO_FOLDER",
+      "dimension": "research",
+      "properties": {
+        "name": "Heart Health Paper Series \u2014 Complete Graph",
+        "purpose": "6 papers, 403 paragraph-level nodes, 210 cross-paper edges. Blueprint for combined paper."
+      }
+    },
+    {
       "id": "P1",
       "type": "DOCUMENT",
-      "label": "The Evidence-Based Medicine Pyramid",
-      "status": "DONE",
-      "file": "PAPER_1316_evidence_based_medicine_pyramid.md",
-      "words": 5500
+      "properties": {
+        "label": "The Evidence-Based Medicine Pyramid",
+        "status": "DONE",
+        "file": "PAPER_1316_evidence_based_medicine_pyramid.md",
+        "words": 5500
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "P2",
       "type": "DOCUMENT",
-      "label": "The History of Statin Drugs",
-      "status": "DONE",
-      "file": "PAPER_1316_history_of_statin_drugs.md",
-      "words": 7500
+      "properties": {
+        "label": "The History of Statin Drugs",
+        "status": "DONE",
+        "file": "PAPER_1316_history_of_statin_drugs.md",
+        "words": 7500
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "P3",
       "type": "DOCUMENT",
-      "label": "Should I Take a Statin?",
-      "status": "DONE",
-      "file": "PAPER_1316_statin_alternatives_and_criticisms.md",
-      "words": 8500
+      "properties": {
+        "label": "Should I Take a Statin?",
+        "status": "DONE",
+        "file": "PAPER_1316_statin_alternatives_and_criticisms.md",
+        "words": 8500
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "P4",
       "type": "DOCUMENT",
-      "label": "The Gundry Diet: Evidence Review",
-      "status": "DONE",
-      "file": "PAPER_1316_gundry_diet_evidence_review.md",
-      "words": 7000
+      "properties": {
+        "label": "The Gundry Diet: Evidence Review",
+        "status": "DONE",
+        "file": "PAPER_1316_gundry_diet_evidence_review.md",
+        "words": 7000
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "P5",
       "type": "DOCUMENT",
-      "label": "Managing Statin Side Effects",
-      "status": "DONE",
-      "file": "PAPER_1316_statin_side_effects_and_management.md",
-      "words": 7000
+      "properties": {
+        "label": "Managing Statin Side Effects",
+        "status": "DONE",
+        "file": "PAPER_1316_statin_side_effects_and_management.md",
+        "words": 7000
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "P6",
       "type": "DOCUMENT",
-      "label": "The Statin-Metabolic Paradox",
-      "status": "DONE",
-      "file": "PAPER_1316_statin_metabolic_paradox.md",
-      "words": 5500
+      "properties": {
+        "label": "The Statin-Metabolic Paradox",
+        "status": "DONE",
+        "file": "PAPER_1316_statin_metabolic_paradox.md",
+        "words": 5500
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "COMBINED",
       "type": "DOCUMENT",
-      "label": "Combined Paper",
-      "status": "TODO"
+      "properties": {
+        "label": "Combined Paper",
+        "status": "TODO"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "STUDY_CTT",
       "type": "REFERENCE",
-      "label": "CTT Collaboration",
-      "summary": "IPD meta-analyses 2005-2024, foundational statin synthesis",
-      "papers": [
-        "P2",
-        "P3",
-        "P5",
-        "P6"
-      ]
+      "properties": {
+        "label": "CTT Collaboration",
+        "summary": "IPD meta-analyses 2005-2024, foundational statin synthesis",
+        "papers": [
+          "P2",
+          "P3",
+          "P5",
+          "P6"
+        ]
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "STUDY_JUPITER",
       "type": "REFERENCE",
-      "label": "JUPITER Trial",
-      "summary": "Rosuvastatin, healthy elevated-CRP, 44% reduction + diabetes signal",
-      "papers": [
-        "P2",
-        "P3",
-        "P5",
-        "P6"
-      ]
+      "properties": {
+        "label": "JUPITER Trial",
+        "summary": "Rosuvastatin, healthy elevated-CRP, 44% reduction + diabetes signal",
+        "papers": [
+          "P2",
+          "P3",
+          "P5",
+          "P6"
+        ]
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "STUDY_PREDIMED",
       "type": "REFERENCE",
-      "label": "PREDIMED Trial",
-      "summary": "Mediterranean diet ~30% CV reduction",
-      "papers": [
-        "P3",
-        "P4",
-        "P6"
-      ]
+      "properties": {
+        "label": "PREDIMED Trial",
+        "summary": "Mediterranean diet ~30% CV reduction",
+        "papers": [
+          "P3",
+          "P4",
+          "P6"
+        ]
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "STUDY_FRAMINGHAM",
       "type": "REFERENCE",
-      "label": "Framingham Heart Study",
-      "summary": "1948-present, established CV risk factors",
-      "papers": [
-        "P1",
-        "P2",
-        "P3"
-      ]
+      "properties": {
+        "label": "Framingham Heart Study",
+        "summary": "1948-present, established CV risk factors",
+        "papers": [
+          "P1",
+          "P2",
+          "P3"
+        ]
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "STUDY_4S",
       "type": "REFERENCE",
-      "label": "4S Trial",
-      "summary": "First statin mortality trial, 30% reduction",
-      "papers": [
-        "P2"
-      ]
+      "properties": {
+        "label": "4S Trial",
+        "summary": "First statin mortality trial, 30% reduction",
+        "papers": [
+          "P2"
+        ]
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "STUDY_DPP",
       "type": "REFERENCE",
-      "label": "Diabetes Prevention Program",
-      "summary": "Lifestyle 58% diabetes reduction",
-      "papers": [
-        "P6"
-      ]
+      "properties": {
+        "label": "Diabetes Prevention Program",
+        "summary": "Lifestyle 58% diabetes reduction",
+        "papers": [
+          "P6"
+        ]
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "STUDY_SAMSON",
       "type": "REFERENCE",
-      "label": "SAMSON Trial",
-      "summary": "90% nocebo ratio for statin symptoms",
-      "papers": [
-        "P2",
-        "P5"
-      ]
+      "properties": {
+        "label": "SAMSON Trial",
+        "summary": "90% nocebo ratio for statin symptoms",
+        "papers": [
+          "P2",
+          "P5"
+        ]
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "STUDY_SELECT",
       "type": "REFERENCE",
-      "label": "SELECT Trial",
-      "summary": "Semaglutide 20% MACE in non-diabetic obese",
-      "papers": [
-        "P6"
-      ]
+      "properties": {
+        "label": "SELECT Trial",
+        "summary": "Semaglutide 20% MACE in non-diabetic obese",
+        "papers": [
+          "P6"
+        ]
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "STUDY_EMPAREG",
       "type": "REFERENCE",
-      "label": "EMPA-REG OUTCOME",
-      "summary": "Empagliflozin 38% CV death reduction",
-      "papers": [
-        "P6"
-      ]
+      "properties": {
+        "label": "EMPA-REG OUTCOME",
+        "summary": "Empagliflozin 38% CV death reduction",
+        "papers": [
+          "P6"
+        ]
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "STUDY_METSIM",
       "type": "REFERENCE",
-      "label": "METSIM Cohort",
-      "summary": "Statins decrease insulin sensitivity 24%",
-      "papers": [
-        "P6"
-      ]
+      "properties": {
+        "label": "METSIM Cohort",
+        "summary": "Statins decrease insulin sensitivity 24%",
+        "papers": [
+          "P6"
+        ]
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "STUDY_MENDELIAN",
       "type": "REFERENCE",
-      "label": "Mendelian Randomization",
-      "summary": "Genetic evidence for LDL causality",
-      "papers": [
-        "P3"
-      ]
+      "properties": {
+        "label": "Mendelian Randomization",
+        "summary": "Genetic evidence for LDL causality",
+        "papers": [
+          "P3"
+        ]
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "STUDY_BLUE_ZONES",
       "type": "REFERENCE",
-      "label": "Blue Zones Research",
-      "summary": "5 longevity regions eat lectin-rich foods",
-      "papers": [
-        "P4"
-      ]
+      "properties": {
+        "label": "Blue Zones Research",
+        "summary": "5 longevity regions eat lectin-rich foods",
+        "papers": [
+          "P4"
+        ]
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "STUDY_SLCO1B1",
       "type": "REFERENCE",
-      "label": "SEARCH/SLCO1B1",
-      "summary": "4.5x-17x myopathy risk genetic variant",
-      "papers": [
-        "P5"
-      ]
+      "properties": {
+        "label": "SEARCH/SLCO1B1",
+        "summary": "4.5x-17x myopathy risk genetic variant",
+        "papers": [
+          "P5"
+        ]
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "STUDY_LANCET2025",
       "type": "REFERENCE",
-      "label": "Lancet 2025 Label Analysis",
-      "summary": "62/66 labeled side effects unsupported",
-      "papers": [
-        "P5"
-      ]
+      "properties": {
+        "label": "Lancet 2025 Label Analysis",
+        "summary": "62/66 labeled side effects unsupported",
+        "papers": [
+          "P5"
+        ]
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "STUDY_SHE2024",
       "type": "REFERENCE",
-      "label": "She 2024 Cell Metabolism",
-      "summary": "Statins suppress GLP-1 via microbiome",
-      "papers": [
-        "P6"
-      ]
+      "properties": {
+        "label": "She 2024 Cell Metabolism",
+        "summary": "Statins suppress GLP-1 via microbiome",
+        "papers": [
+          "P6"
+        ]
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "STUDY_CTT2024",
       "type": "REFERENCE",
-      "label": "CTT 2024 Diabetes Analysis",
-      "summary": "36% diabetes increase, 13% retinal complications",
-      "papers": [
-        "P6"
-      ]
+      "properties": {
+        "label": "CTT 2024 Diabetes Analysis",
+        "summary": "36% diabetes increase, 13% retinal complications",
+        "papers": [
+          "P6"
+        ]
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S1.1",
       "type": "SECTION",
-      "label": "P1 Introduction",
-      "summary": "EBM origins 1979-1996, pyramid shape reflects volume",
-      "parent": "P1"
+      "properties": {
+        "label": "P1 Introduction",
+        "summary": "EBM origins 1979-1996, pyramid shape reflects volume",
+        "parent": "P1"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S1.2",
       "type": "SECTION",
-      "label": "P1 Expert Opinion (L7)",
-      "summary": "Immediately available but bias-susceptible",
-      "parent": "P1"
+      "properties": {
+        "label": "P1 Expert Opinion (L7)",
+        "summary": "Immediately available but bias-susceptible",
+        "parent": "P1"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S1.3",
       "type": "SECTION",
-      "label": "P1 Animal/In Vitro (L6)",
-      "summary": "Hypotheses but don't translate",
-      "parent": "P1"
+      "properties": {
+        "label": "P1 Animal/In Vitro (L6)",
+        "summary": "Hypotheses but don't translate",
+        "parent": "P1"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S1.4",
       "type": "SECTION",
-      "label": "P1 Case Reports (L5)",
-      "summary": "First signals, no causation",
-      "parent": "P1"
+      "properties": {
+        "label": "P1 Case Reports (L5)",
+        "summary": "First signals, no causation",
+        "parent": "P1"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S1.5",
       "type": "SECTION",
-      "label": "P1 Case-Control (L4)",
-      "summary": "Doll/Hill smoking, odds ratios",
-      "parent": "P1"
+      "properties": {
+        "label": "P1 Case-Control (L4)",
+        "summary": "Doll/Hill smoking, odds ratios",
+        "parent": "P1"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S1.6",
       "type": "SECTION",
-      "label": "P1 Cohort (L3)",
-      "summary": "Framingham, Nurses Health, British Doctors",
-      "parent": "P1"
+      "properties": {
+        "label": "P1 Cohort (L3)",
+        "summary": "Framingham, Nurses Health, British Doctors",
+        "parent": "P1"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S1.7",
       "type": "SECTION",
-      "label": "P1 RCTs (L2)",
-      "summary": "Gold standard, MRC Streptomycin, WHI",
-      "parent": "P1"
+      "properties": {
+        "label": "P1 RCTs (L2)",
+        "summary": "Gold standard, MRC Streptomycin, WHI",
+        "parent": "P1"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S1.8",
       "type": "SECTION",
-      "label": "P1 Systematic Reviews (L1)",
-      "summary": "Lau streptokinase, 80/day by 2019",
-      "parent": "P1"
+      "properties": {
+        "label": "P1 Systematic Reviews (L1)",
+        "summary": "Lau streptokinase, 80/day by 2019",
+        "parent": "P1"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S1.9",
       "type": "SECTION",
-      "label": "P1 Guidelines (Apex)",
-      "summary": "Translate evidence into recommendations",
-      "parent": "P1"
+      "properties": {
+        "label": "P1 Guidelines (Apex)",
+        "summary": "Translate evidence into recommendations",
+        "parent": "P1"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S1.10",
       "type": "SECTION",
-      "label": "P1 Organizations",
-      "summary": "Cochrane, NICE, WHO, AHRQ, USPSTF, GRADE",
-      "parent": "P1"
+      "properties": {
+        "label": "P1 Organizations",
+        "summary": "Cochrane, NICE, WHO, AHRQ, USPSTF, GRADE",
+        "parent": "P1"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S1.11",
       "type": "SECTION",
-      "label": "P1 Modern Revisions",
-      "summary": "Murad wavy lines, 6S, GRADE framework",
-      "parent": "P1"
+      "properties": {
+        "label": "P1 Modern Revisions",
+        "summary": "Murad wavy lines, 6S, GRADE framework",
+        "parent": "P1"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S1.12",
       "type": "SECTION",
-      "label": "P1 Pyramid in Numbers",
-      "summary": "Volume at each level, evidence epidemic",
-      "parent": "P1"
+      "properties": {
+        "label": "P1 Pyramid in Numbers",
+        "summary": "Volume at each level, evidence epidemic",
+        "parent": "P1"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S1.13",
       "type": "SECTION",
-      "label": "P1 Criticisms",
-      "summary": "Design over quality, internal vs external validity",
-      "parent": "P1"
+      "properties": {
+        "label": "P1 Criticisms",
+        "summary": "Design over quality, internal vs external validity",
+        "parent": "P1"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S1.14",
       "type": "SECTION",
-      "label": "P1 Conclusion",
-      "summary": "Teaching tool not dogma",
-      "parent": "P1"
+      "properties": {
+        "label": "P1 Conclusion",
+        "summary": "Teaching tool not dogma",
+        "parent": "P1"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S2.1",
       "type": "SECTION",
-      "label": "P2 Cholesterol Hypothesis",
-      "summary": "Pre-statin era: Anitschkow, Keys, bile sequestrants, niacin, fibrates",
-      "parent": "P2"
+      "properties": {
+        "label": "P2 Cholesterol Hypothesis",
+        "summary": "Pre-statin era: Anitschkow, Keys, bile sequestrants, niacin, fibrates",
+        "parent": "P2"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S2.2",
       "type": "SECTION",
-      "label": "P2 Discovery",
-      "summary": "Endo 6000 broths, compactin 1973, lovastatin 1987",
-      "parent": "P2"
+      "properties": {
+        "label": "P2 Discovery",
+        "summary": "Endo 6000 broths, compactin 1973, lovastatin 1987",
+        "parent": "P2"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S2.3",
       "type": "SECTION",
-      "label": "P2 Case Reports",
-      "summary": "Yamamoto 1980, Mabuchi, early observations",
-      "parent": "P2"
+      "properties": {
+        "label": "P2 Case Reports",
+        "summary": "Yamamoto 1980, Mabuchi, early observations",
+        "parent": "P2"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S2.4",
       "type": "SECTION",
-      "label": "P2 Observational",
-      "summary": "Framingham, MRFIT, Seven Countries",
-      "parent": "P2"
+      "properties": {
+        "label": "P2 Observational",
+        "summary": "Framingham, MRFIT, Seven Countries",
+        "parent": "P2"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S2.5",
       "type": "SECTION",
-      "label": "P2 RCTs",
-      "summary": "11 trials: 4S through HOPE-3",
-      "parent": "P2"
+      "properties": {
+        "label": "P2 RCTs",
+        "summary": "11 trials: 4S through HOPE-3",
+        "parent": "P2"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S2.6",
       "type": "SECTION",
-      "label": "P2 CTT Meta-Analyses",
-      "summary": "20% per mmol/L across all subgroups",
-      "parent": "P2"
+      "properties": {
+        "label": "P2 CTT Meta-Analyses",
+        "summary": "20% per mmol/L across all subgroups",
+        "parent": "P2"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S2.7",
       "type": "SECTION",
-      "label": "P2 Guidelines",
-      "summary": "ATP I-III, 2013/2018 ACC/AHA, ESC/EAS",
-      "parent": "P2"
+      "properties": {
+        "label": "P2 Guidelines",
+        "summary": "ATP I-III, 2013/2018 ACC/AHA, ESC/EAS",
+        "parent": "P2"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S2.8",
       "type": "SECTION",
-      "label": "P2 Controversies",
-      "summary": "Nocebo, diabetes, cognitive, Statin Wars",
-      "parent": "P2"
+      "properties": {
+        "label": "P2 Controversies",
+        "summary": "Nocebo, diabetes, cognitive, Statin Wars",
+        "parent": "P2"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S2.9",
       "type": "SECTION",
-      "label": "P2 Scale",
-      "summary": "200M users, Lipitor $125B",
-      "parent": "P2"
+      "properties": {
+        "label": "P2 Scale",
+        "summary": "200M users, Lipitor $125B",
+        "parent": "P2"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S2.10",
       "type": "SECTION",
-      "label": "P2 Beyond Statins",
-      "summary": "PCSK9i, inclisiran, bempedoic acid",
-      "parent": "P2"
+      "properties": {
+        "label": "P2 Beyond Statins",
+        "summary": "PCSK9i, inclisiran, bempedoic acid",
+        "parent": "P2"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S2.11",
       "type": "SECTION",
-      "label": "P2 Conclusion",
-      "summary": "Every pyramid level contributed",
-      "parent": "P2"
+      "properties": {
+        "label": "P2 Conclusion",
+        "summary": "Every pyramid level contributed",
+        "parent": "P2"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S3.1",
       "type": "SECTION",
-      "label": "P3 Wrong Cholesterol?",
-      "summary": "Particle size, LDL-P, ApoB, Lp(a), oxLDL, TG/HDL, skeptics",
-      "parent": "P3"
+      "properties": {
+        "label": "P3 Wrong Cholesterol?",
+        "summary": "Particle size, LDL-P, ApoB, Lp(a), oxLDL, TG/HDL, skeptics",
+        "parent": "P3"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S3.2",
       "type": "SECTION",
-      "label": "P3 Wrong Measurements?",
-      "summary": "RRR vs ARR, all-cause mortality, CTT transparency",
-      "parent": "P3"
+      "properties": {
+        "label": "P3 Wrong Measurements?",
+        "summary": "RRR vs ARR, all-cause mortality, CTT transparency",
+        "parent": "P3"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S3.3",
       "type": "SECTION",
-      "label": "P3 Alternatives",
-      "summary": "14 interventions from Mediterranean diet to keto",
-      "parent": "P3"
+      "properties": {
+        "label": "P3 Alternatives",
+        "summary": "14 interventions from Mediterranean diet to keto",
+        "parent": "P3"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S3.4",
       "type": "SECTION",
-      "label": "P3 Synthesis",
-      "summary": "6 valid criticisms, 3 refuted, comparison table, patient questions",
-      "parent": "P3"
+      "properties": {
+        "label": "P3 Synthesis",
+        "summary": "6 valid criticisms, 3 refuted, comparison table, patient questions",
+        "parent": "P3"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S4.1",
       "type": "SECTION",
-      "label": "P4 The Man",
-      "summary": "Credentials, business, conflict, weak research",
-      "parent": "P4"
+      "properties": {
+        "label": "P4 The Man",
+        "summary": "Credentials, business, conflict, weak research",
+        "parent": "P4"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S4.2",
       "type": "SECTION",
-      "label": "P4 Lectin Hypothesis",
-      "summary": "What lectins are, claims, cooking 90-99%, gut permeability",
-      "parent": "P4"
+      "properties": {
+        "label": "P4 Lectin Hypothesis",
+        "summary": "What lectins are, claims, cooking 90-99%, gut permeability",
+        "parent": "P4"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S4.3",
       "type": "SECTION",
-      "label": "P4 Population Paradox",
-      "summary": "Blue Zones, Adventists, PREDIMED, GBD",
-      "parent": "P4"
+      "properties": {
+        "label": "P4 Population Paradox",
+        "summary": "Blue Zones, Adventists, PREDIMED, GBD",
+        "parent": "P4"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S4.4",
       "type": "SECTION",
-      "label": "P4 Three-Tier Eval",
-      "summary": "Well-supported, plausible, likely wrong",
-      "parent": "P4"
+      "properties": {
+        "label": "P4 Three-Tier Eval",
+        "summary": "Well-supported, plausible, likely wrong",
+        "parent": "P4"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S4.5",
       "type": "SECTION",
-      "label": "P4 Selective Citations",
-      "summary": "In vitro w/o dose, Fasano beyond scope",
-      "parent": "P4"
+      "properties": {
+        "label": "P4 Selective Citations",
+        "summary": "In vitro w/o dose, Fasano beyond scope",
+        "parent": "P4"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S4.6",
       "type": "SECTION",
-      "label": "P4 Ahead of Curve",
-      "summary": "Microbiome, sweeteners, UPF, PPIs",
-      "parent": "P4"
+      "properties": {
+        "label": "P4 Ahead of Curve",
+        "summary": "Microbiome, sweeteners, UPF, PPIs",
+        "parent": "P4"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S4.7",
       "type": "SECTION",
-      "label": "P4 Practical Tables",
-      "summary": "Keep, consider, question",
-      "parent": "P4"
+      "properties": {
+        "label": "P4 Practical Tables",
+        "summary": "Keep, consider, question",
+        "parent": "P4"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S4.8",
       "type": "SECTION",
-      "label": "P4 Supplements",
-      "summary": "Lectin Shield, business model",
-      "parent": "P4"
+      "properties": {
+        "label": "P4 Supplements",
+        "summary": "Lectin Shield, business model",
+        "parent": "P4"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S4.9",
       "type": "SECTION",
-      "label": "P4 Medical System",
-      "summary": "Nutrition training, reactive healthcare",
-      "parent": "P4"
+      "properties": {
+        "label": "P4 Medical System",
+        "summary": "Nutrition training, reactive healthcare",
+        "parent": "P4"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S4.10",
       "type": "SECTION",
-      "label": "P4 Reader Questions",
-      "summary": "Reintroduction, cost-benefit",
-      "parent": "P4"
+      "properties": {
+        "label": "P4 Reader Questions",
+        "summary": "Reintroduction, cost-benefit",
+        "parent": "P4"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S4.11",
       "type": "SECTION",
-      "label": "P4 Conclusion",
-      "summary": "Pyramid applied to Gundry \u2014 Level 6 hypothesis",
-      "parent": "P4"
+      "properties": {
+        "label": "P4 Conclusion",
+        "summary": "Pyramid applied to Gundry \u2014 Level 6 hypothesis",
+        "parent": "P4"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S5.1",
       "type": "SECTION",
-      "label": "P5 What Is Real",
-      "summary": "Lancet 2025: 62/66 unsupported",
-      "parent": "P5"
+      "properties": {
+        "label": "P5 What Is Real",
+        "summary": "Lancet 2025: 62/66 unsupported",
+        "parent": "P5"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S5.2",
       "type": "SECTION",
-      "label": "P5 Nocebo",
-      "summary": "SAMSON 90%, StatinWISE, CTT >90%",
-      "parent": "P5"
+      "properties": {
+        "label": "P5 Nocebo",
+        "summary": "SAMSON 90%, StatinWISE, CTT >90%",
+        "parent": "P5"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S5.3",
       "type": "SECTION",
-      "label": "P5 Muscle Spectrum",
-      "summary": "Myalgia 1-5%, myopathy 1/10K, rhabdo 0.2/10K",
-      "parent": "P5"
+      "properties": {
+        "label": "P5 Muscle Spectrum",
+        "summary": "Myalgia 1-5%, myopathy 1/10K, rhabdo 0.2/10K",
+        "parent": "P5"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S5.4",
       "type": "SECTION",
-      "label": "P5 CoQ10",
-      "summary": "Equivocal meta-analyses, 200-400mg trial",
-      "parent": "P5"
+      "properties": {
+        "label": "P5 CoQ10",
+        "summary": "Equivocal meta-analyses, 200-400mg trial",
+        "parent": "P5"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S5.5",
       "type": "SECTION",
-      "label": "P5 Vitamin D",
-      "summary": "89% tolerance after supplementation",
-      "parent": "P5"
+      "properties": {
+        "label": "P5 Vitamin D",
+        "summary": "89% tolerance after supplementation",
+        "parent": "P5"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S5.6",
       "type": "SECTION",
-      "label": "P5 Exercise",
-      "summary": "STOMP: 2x myalgia but no strength loss",
-      "parent": "P5"
+      "properties": {
+        "label": "P5 Exercise",
+        "summary": "STOMP: 2x myalgia but no strength loss",
+        "parent": "P5"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S5.7",
       "type": "SECTION",
-      "label": "P5 Diet",
-      "summary": "Mediterranean, omega-3, magnesium",
-      "parent": "P5"
+      "properties": {
+        "label": "P5 Diet",
+        "summary": "Mediterranean, omega-3, magnesium",
+        "parent": "P5"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S5.8",
       "type": "SECTION",
-      "label": "P5 Drug Interactions",
-      "summary": "CYP3A4, grapefruit, fibrates",
-      "parent": "P5"
+      "properties": {
+        "label": "P5 Drug Interactions",
+        "summary": "CYP3A4, grapefruit, fibrates",
+        "parent": "P5"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S5.9",
       "type": "SECTION",
-      "label": "P5 Diabetes",
-      "summary": "JUPITER 25%, concentrated in pre-diabetic",
-      "parent": "P5"
+      "properties": {
+        "label": "P5 Diabetes",
+        "summary": "JUPITER 25%, concentrated in pre-diabetic",
+        "parent": "P5"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S5.10",
       "type": "SECTION",
-      "label": "P5 Liver",
-      "summary": "0.5-2% transient, FDA removed monitoring",
-      "parent": "P5"
+      "properties": {
+        "label": "P5 Liver",
+        "summary": "0.5-2% transient, FDA removed monitoring",
+        "parent": "P5"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S5.11",
       "type": "SECTION",
-      "label": "P5 Genetics",
-      "summary": "SLCO1B1 4.5x-17x, CPIC 2022",
-      "parent": "P5"
+      "properties": {
+        "label": "P5 Genetics",
+        "summary": "SLCO1B1 4.5x-17x, CPIC 2022",
+        "parent": "P5"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S5.12",
       "type": "SECTION",
-      "label": "P5 Switching",
-      "summary": "Hydrophilic, alternate-day, dose reduction",
-      "parent": "P5"
+      "properties": {
+        "label": "P5 Switching",
+        "summary": "Hydrophilic, alternate-day, dose reduction",
+        "parent": "P5"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S5.13",
       "type": "SECTION",
-      "label": "P5 Aspirin",
-      "summary": "Synergy, MAFLD caution",
-      "parent": "P5"
+      "properties": {
+        "label": "P5 Aspirin",
+        "summary": "Synergy, MAFLD caution",
+        "parent": "P5"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S5.14",
       "type": "SECTION",
-      "label": "P5 Fatigue",
-      "summary": "UCSD Golomb 2012",
-      "parent": "P5"
+      "properties": {
+        "label": "P5 Fatigue",
+        "summary": "UCSD Golomb 2012",
+        "parent": "P5"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S5.15",
       "type": "SECTION",
-      "label": "P5 When to Stop",
-      "summary": "Red flags, rechallenge protocol",
-      "parent": "P5"
+      "properties": {
+        "label": "P5 When to Stop",
+        "summary": "Red flags, rechallenge protocol",
+        "parent": "P5"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S5.16",
       "type": "SECTION",
-      "label": "P5 Other Effects",
-      "summary": "Cognitive, neuropathy, tendon, cataracts, sleep",
-      "parent": "P5"
+      "properties": {
+        "label": "P5 Other Effects",
+        "summary": "Cognitive, neuropathy, tendon, cataracts, sleep",
+        "parent": "P5"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S5.17",
       "type": "SECTION",
-      "label": "P5 Decision Framework",
-      "summary": "8-step sequence",
-      "parent": "P5"
+      "properties": {
+        "label": "P5 Decision Framework",
+        "summary": "8-step sequence",
+        "parent": "P5"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S6.1",
       "type": "SECTION",
-      "label": "P6 One Disease",
-      "summary": "Reaven 1988 Syndrome X",
-      "parent": "P6"
+      "properties": {
+        "label": "P6 One Disease",
+        "summary": "Reaven 1988 Syndrome X",
+        "parent": "P6"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S6.2",
       "type": "SECTION",
-      "label": "P6 Metabolic Harm",
-      "summary": "CTT 2024, METSIM, 5 mechanisms",
-      "parent": "P6"
+      "properties": {
+        "label": "P6 Metabolic Harm",
+        "summary": "CTT 2024, METSIM, 5 mechanisms",
+        "parent": "P6"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S6.3",
       "type": "SECTION",
-      "label": "P6 Feedback Loop",
-      "summary": "7 steps, Crandall attenuates lifestyle",
-      "parent": "P6"
+      "properties": {
+        "label": "P6 Feedback Loop",
+        "summary": "7 steps, Crandall attenuates lifestyle",
+        "parent": "P6"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S6.4",
       "type": "SECTION",
-      "label": "P6 Same Disease?",
-      "summary": "Nielsen 2014, CTT 2024 retinal",
-      "parent": "P6"
+      "properties": {
+        "label": "P6 Same Disease?",
+        "summary": "Nielsen 2014, CTT 2024 retinal",
+        "parent": "P6"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S6.5",
       "type": "SECTION",
-      "label": "P6 Shared Root",
-      "summary": "Type 3 diabetes, brain insulin resistance",
-      "parent": "P6"
+      "properties": {
+        "label": "P6 Shared Root",
+        "summary": "Type 3 diabetes, brain insulin resistance",
+        "parent": "P6"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S6.6",
       "type": "SECTION",
-      "label": "P6 Alternatives",
-      "summary": "DPP, PREDIMED, metformin, SGLT2, SELECT",
-      "parent": "P6"
+      "properties": {
+        "label": "P6 Alternatives",
+        "summary": "DPP, PREDIMED, metformin, SGLT2, SELECT",
+        "parent": "P6"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S6.7",
       "type": "SECTION",
-      "label": "P6 Guidelines Gap",
-      "summary": "No guideline addresses feedback loop",
-      "parent": "P6"
+      "properties": {
+        "label": "P6 Guidelines Gap",
+        "summary": "No guideline addresses feedback loop",
+        "parent": "P6"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S6.8",
       "type": "SECTION",
-      "label": "P6 What Should Change",
-      "summary": "5-step protocol",
-      "parent": "P6"
+      "properties": {
+        "label": "P6 What Should Change",
+        "summary": "5-step protocol",
+        "parent": "P6"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S6.9",
       "type": "SECTION",
-      "label": "P6 Patient Questions",
-      "summary": "HOMA-IR, HbA1c, lifestyle trial",
-      "parent": "P6"
+      "properties": {
+        "label": "P6 Patient Questions",
+        "summary": "HOMA-IR, HbA1c, lifestyle trial",
+        "parent": "P6"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     },
     {
       "id": "S6.10",
       "type": "SECTION",
-      "label": "P6 Conclusion",
-      "summary": "Reaven was right",
-      "parent": "P6"
+      "properties": {
+        "label": "P6 Conclusion",
+        "summary": "Reaven was right",
+        "parent": "P6"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "research"
     }
   ],
   "edges": [
@@ -1825,5 +2468,11 @@
       "relation": "FEEDS",
       "label": "P1 provides framework P4 uses to evaluate Gundry"
     }
-  ]
+  ],
+  "dimensions": {
+    "research": {
+      "description": "Long-form research papers in this study series",
+      "base_level": "BASE"
+    }
+  }
 }
