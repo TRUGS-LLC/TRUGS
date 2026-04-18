@@ -9,7 +9,7 @@
 
 ## Abstract
 
-`PAPER_dark_code.md` established the problem — LLM-generated code accumulates as Dark Code: correct, tested, opaque — and proposed TRUGS (Traceable Recursive Universal Graph Specification) as the structural fix. That paper argues the theory. This paper teaches the practice. It covers how to start a project TRUG-first, how to refactor existing dark code into compliance, how compliance composes across files and modules, how the AAA development protocol wraps the day-to-day work, how memory captures intent over time, how CI enforces the gates, and what patterns and anti-patterns practitioners encounter. It then specifies the Python dialect conventions that the `trugs-compliance-check` tool audits against.
+`PAPER_dark_code.md` established the problem — LLM-generated code accumulates as Dark Code: correct, tested, opaque — and proposed TRUGS (Traceable Recursive Universal Graph Specification) as the structural fix. That paper argues the theory. This paper teaches the practice. It covers how to start a project TRUG-first, how to refactor existing dark code into compliance, how compliance composes across files and modules, how the AAA development protocol wraps the day-to-day work, how memory captures intent over time, how CI enforces the gates, and what patterns and anti-patterns practitioners encounter. It then specifies the Python dialect conventions that the `tg compliance` tool audits against.
 
 Readers who have not read `PAPER_dark_code.md` will miss the *why*. Readers who have read it and now want to write TRUGS code start here.
 
@@ -198,7 +198,7 @@ def test_parse_trims_whitespace():
     assert parse_input(" a , b , c ") == ["a", "b", "c"]
 ```
 
-### Step G — Run `trugs-compliance-check` and iterate
+### Step G — Run `tg compliance` and iterate
 
 The tool reports what's missing. Fix one finding at a time. Each fix is a micro-commit. Compliance % monotonically rises.
 
@@ -250,7 +250,7 @@ These cross-graph edges let someone understand the system from any starting poin
 
 ### 4.3 Compliance checks compose
 
-`trugs-compliance-check` runs across the whole repo. It walks folder-by-folder, checks each source file against its folder's TRUG, checks that cross-graph edges point at nodes that actually exist in the referenced graphs, and reports a single overall percentage.
+`tg compliance` runs across the whole repo. It walks folder-by-folder, checks each source file against its folder's TRUG, checks that cross-graph edges point at nodes that actually exist in the referenced graphs, and reports a single overall percentage.
 
 A repo is compliant if every folder is compliant. A folder is compliant if every check (C1–C7 in the Standard) passes for every file.
 
@@ -259,7 +259,7 @@ A repo is compliant if every folder is compliant. A folder is compliant if every
 Certain folders/files are out of scope by design:
 
 - `zzz_*` archives — marked archive, not audited
-- Auto-generated files (`ARCHITECTURE.md`, `AAA.md`, `CLAUDE.md`) — produced by `trugs-folder-render`, compliance is the responsibility of the source TRUG
+- Auto-generated files (`ARCHITECTURE.md`, `AAA.md`, `CLAUDE.md`) — produced by `tg render`, compliance is the responsibility of the source TRUG
 - Third-party vendored code — requires a waiver (Standard §8)
 
 The boundary must be explicit. Silent exclusion is a hole.
@@ -294,7 +294,7 @@ Phases 1–5 are the PLANNING cycle. Phases 6–9 are the EXECUTION cycle.
 - **Phase 4 (ARCHITECTURE)** — the detailed TRUG. File layout, node breakdown, cross-module edges. This is the outline before the code.
 - **Phase 5 (VALIDATION, HITM)** — human reads the Spec + Architecture TRUGs. Must be able to understand the system without code. If they can't, the TRUG is incomplete.
 - **Phase 6 (CODING)** — Step 3 of §2. Code written top-down from the TRUG. Every `def` has a TRUG/L comment from day one; no "add docs later."
-- **Phase 7 (TESTING)** — Step 4 of §2. Tests with TRUG/L comments. `trugs-compliance-check` passes locally.
+- **Phase 7 (TESTING)** — Step 4 of §2. Tests with TRUG/L comments. `tg compliance` passes locally.
 - **Phase 8 (AUDIT, HITM)** — independent reviewer (human or a different agent) runs the compliance check, reads the TRUG, reads the code, checks alignment.
 - **Phase 9 (DEPLOYMENT)** — PR with the changes. The PR body links the TRUG. The human merges.
 
@@ -319,7 +319,7 @@ Agent memory is itself a TRUG graph. Each memory is a node; each association is 
 During development, decisions that shape the code are captured as memories:
 
 ```
-trugs-memory remember ~/.../memory.trug.json \
+tg memory remember ~/.../memory.trug.json \
   "We chose Fisher-Yates because uniform randomness matters for a casino shoe — other in-place shuffles have bias." \
   --type project \
   --rule "Use Fisher-Yates for any card shuffle; other shuffles have subtle bias" \
@@ -343,7 +343,7 @@ trugs-memory remember ~/.../memory.trug.json \
 
 ### 6.4 Memory in the compliance picture
 
-Memory is not part of `trugs-compliance-check` (yet). But it's part of the broader TRUGS story: the code is legible, and the **decisions that shaped the code** are captured elsewhere in a similarly structured form. Future work may extend compliance to include memory hygiene (e.g., every architectural decision has a memory node).
+Memory is not part of `tg compliance` (yet). But it's part of the broader TRUGS story: the code is legible, and the **decisions that shaped the code** are captured elsewhere in a similarly structured form. Future work may extend compliance to include memory hygiene (e.g., every architectural decision has a memory node).
 
 ---
 
@@ -355,7 +355,7 @@ Compliance that isn't gated is aspirational. CI is where the standard stops bein
 
 Every TRUGS-LLC public repo enforces three CI gates (adopted in `Xepayac/TRUGS-DEVELOPMENT#1548`):
 
-1. **PR gate** — `trugs-compliance-check --strict` must pass. Compliance % may not decrease.
+1. **PR gate** — `tg compliance --strict` must pass. Compliance % may not decrease.
 2. **Release gate** — compliance % must equal 100.0 before a version tag is cut or a package is published (PyPI, npm, crates.io, etc.).
 3. **Promotion gate** — a private `Xepayac/*` repo cannot be transferred to `TRUGS-LLC/*` until it meets 100% compliance.
 
@@ -377,7 +377,7 @@ jobs:
       - name: Install
         run: pip install -e . -e 'git+https://github.com/TRUGS-LLC/TRUGS.git'
       - name: Run compliance check
-        run: trugs-compliance-check --strict
+        run: tg compliance --strict
 ```
 
 On PR, CI runs the check against the PR branch and compares to the baseline on the target branch. On push to `main`, it updates the baseline.
@@ -449,7 +449,7 @@ A compliance PR annotates; it doesn't refactor. A refactor PR changes code; its 
 
 ## 9. Python conventions
 
-This section specifies the Python dialect of TRUGS compliance — the concrete rules that `trugs-compliance-check` enforces. It is the Python appendix of `STANDARD_dark_code_compliance.md`; readers seeking the normative text should refer to the Standard directly.
+This section specifies the Python dialect of TRUGS compliance — the concrete rules that `tg compliance` enforces. It is the Python appendix of `STANDARD_dark_code_compliance.md`; readers seeking the normative text should refer to the Standard directly.
 
 ### 9.1 Function-level comment placement
 
@@ -473,7 +473,7 @@ Public: not prefixed with `_`, not a dunder. Private: prefixed with `_` or dunde
 
 ### 9.6 What the CLI actually checks
 
-Refer to `STANDARD_dark_code_compliance.md` §3 and §6 for the C1–C7 check specifications. The `--help` output of `trugs-compliance-check` is the runtime reference.
+Refer to `STANDARD_dark_code_compliance.md` §3 and §6 for the C1–C7 check specifications. The `--help` output of `tg compliance` is the runtime reference.
 
 ---
 

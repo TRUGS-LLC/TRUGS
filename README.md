@@ -33,7 +33,16 @@ The sentence IS the program. The graph IS the AST. Every valid TRUG/L sentence c
 pip install trugs
 ```
 
-This gives you the full reference toolchain — `trugs-validate`, `trugs-memory`, `trugs-compliance-check`, and the CRUD tools (`trugs-tget`, `trugs-tupdate`, `trugs-tdelete`, `trugs-tunlink`).
+**As of 2.0.0 (breaking), `trugs` ships the specification only — no CLIs.** Spec content (`CORE`, `TRL` vocabulary, reference papers) is packaged as data. For the `tg` CLI and all tooling, install the sibling package:
+
+```bash
+pip install trugs-tools    # provides the `tg` binary (36 operations)
+tg --help
+```
+
+See [TRUGS-LLC/TRUGS-TOOLS](https://github.com/TRUGS-LLC/TRUGS-TOOLS) for the unified `tg` CLI — validation, memory, compliance, AAA protocol, and more.
+
+**Migrating from `trugs` 1.x?** The pre-2.0 package shipped `tg validate`, `tg memory`, etc. as entry points. In 2.0.0 those move to `trugs-tools`. Migration is one additional install: `pip install trugs-tools` and every `tg <op>` command works identically.
 
 ## TRUGS Language
 
@@ -69,16 +78,22 @@ See [TRUGS_LANGUAGE/](TRUGS_LANGUAGE/) for the complete specification.
 | [SPEC_examples.md](TRUGS_LANGUAGE/SPEC_examples.md) | 30 parsed examples across 13 patterns |
 | [language.trug.json](TRUGS_LANGUAGE/language.trug.json) | The opening TRUG — the language defining itself |
 
-## Tools
+## Tools — via `trugs-tools`
 
-| Tool | Usage | Description |
+All operations below use the unified `tg` CLI from the sibling [`trugs-tools`](https://github.com/TRUGS-LLC/TRUGS-TOOLS) package (`pip install trugs-tools`). 36 operations under 21 top-level verbs + 3 sub-namespaces.
+
+| Verb | Usage | Description |
 |------|-------|-------------|
-| validate | `python tools/validate.py <file>` | Enforces all 16 CORE rules |
-| validate --all | `python tools/validate.py --all <dir>` | Batch validation |
-| tget | `python tools/tget.py <file> <node_id>` | Read a node |
-| tupdate | `python tools/tupdate.py <file> <node_id> --set key=value` | Update a node |
-| tdelete | `python tools/tdelete.py <file> <node_id>` | Delete a node and its edges |
-| tunlink | `python tools/tunlink.py <file> --from X --to Y` | Remove an edge |
+| `tg validate` | `tg validate <file>` | Enforces all 16 CORE rules |
+| `tg validate` | `tg validate --all <dir>` | Batch validation |
+| `tg get` | `tg get <file> <node_id>` | Read a node |
+| `tg update` | `tg update <file> <node_id> --set key=value` | Update a node |
+| `tg delete` | `tg delete <file> <node_id>` | Delete a node and its edges |
+| `tg unlink` | `tg unlink <file> --from X --to Y` | Remove an edge |
+
+See [`SPEC_cli.md`](https://github.com/TRUGS-LLC/TRUGS-TOOLS/blob/main/REFERENCE/SPEC_cli.md) in the trugs-tools repo for the full command surface.
+
+**Legacy (trugs 1.2.x only):** the same operations are available as `python tools/validate.py`, `python tools/tget.py`, etc. in this repo's `tools/` directory. That directory disappears at `trugs` 2.0.0.
 
 ## Examples
 
@@ -90,16 +105,16 @@ This repository describes itself as a TRUG. [`folder.trug.json`](folder.trug.jso
 
 ```bash
 # What's in this repo?
-trugs-tls folder.trug.json
+tg ls folder.trug.json
 
 # What does the compliance checker depend on?
-trugs-tget folder.trug.json tools_compliance_check --edges
+tg get folder.trug.json tools_compliance_check --edges
 
 # Does the graph match the filesystem?
-trugs-folder-check .
+tg check .
 ```
 
-CI runs `trugs-folder-check` on every PR — this README's section list, the spec index, the tool table above all correspond to nodes you can traverse programmatically. When the TRUG drifts from the prose or the filesystem, CI fails. We dogfood our own dogfood.
+CI runs `tg check` on every PR — this README's section list, the spec index, the tool table above all correspond to nodes you can traverse programmatically. When the TRUG drifts from the prose or the filesystem, CI fails. We dogfood our own dogfood.
 
 ## Use It
 

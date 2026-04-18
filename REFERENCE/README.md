@@ -32,11 +32,11 @@ The three documents in `REFERENCE/` form a trinity:
 
 - **`PAPER_dark_code.md`** — the WHY. Defines the Dark Code problem and TRUGS as the resolution. Starts every reader who has never seen TRUGS.
 - **`PAPER_how_to_code_with_trugs.md`** — the HOW. Practitioner guide derived from §5 of the Dark Code paper, expanded with refactoring, multi-file, AAA, CI, and patterns material.
-- **`STANDARD_dark_code_compliance.md`** — the CHECK. Auditable, mechanical compliance checklist + `trugs-compliance-check` CLI specification. Every TRUGS-LLC public repo is graded against this.
+- **`STANDARD_dark_code_compliance.md`** — the CHECK. Auditable, mechanical compliance checklist + `tg compliance` CLI specification. Every TRUGS-LLC public repo is graded against this.
 
 The trinity flows: WHY you do it → HOW you do it → how you PROVE you did it.
 
 ## Related
 
 - Upstream EPIC: [Xepayac/TRUGS-DEVELOPMENT#1548](https://github.com/Xepayac/TRUGS-DEVELOPMENT/issues/1548) — Bring TRUGS-LLC public portfolio to Dark Code compliance
-- Foundation issue: [TRUGS-LLC/TRUGS#48](https://github.com/TRUGS-LLC/TRUGS/issues/48) — REFERENCE/ foundation: Dark Code trinity + trugs-compliance-check CLI
+- Foundation issue: [TRUGS-LLC/TRUGS#48](https://github.com/TRUGS-LLC/TRUGS/issues/48) — REFERENCE/ foundation: Dark Code trinity + tg compliance CLI

@@ -2,7 +2,7 @@
 
 **Status:** Draft v0.1 — adopted by `TRUGS-LLC/TRUGS#48`
 **Applies to:** every TRUGS-LLC public repo
-**Enforced by:** `trugs-compliance-check` CLI + CI gates (this repo, `tools/compliance_check.py`)
+**Enforced by:** `tg compliance` CLI + CI gates (this repo, `tools/compliance_check.py`)
 **See also:** [`PAPER_dark_code.md`](PAPER_dark_code.md) (the WHY), [`PAPER_how_to_code_with_trugs.md`](PAPER_how_to_code_with_trugs.md) (the HOW)
 
 ---
@@ -15,7 +15,7 @@ This standard operationalizes the four-corner verification square from `PAPER_da
 
 **Covers:** source code, tests, TRUG graph files (`.trug.json`), and prose documents (`.md`).
 
-**Does not cover:** third-party vendored code (call it out with a waiver — see §8), auto-generated files (`ARCHITECTURE.md`, `AAA.md`, `CLAUDE.md` — produced by `trugs-folder-render`), build artifacts.
+**Does not cover:** third-party vendored code (call it out with a waiver — see §8), auto-generated files (`ARCHITECTURE.md`, `AAA.md`, `CLAUDE.md` — produced by `tg render`), build artifacts.
 
 ## 2. The four-corner square
 
@@ -43,7 +43,7 @@ The compliance standard has exactly four corners, each a mechanical validation:
 | **TRUG validity** | Every `.trug.json` file passes validation | check rule C7 |
 | **code ↔ tests** | The test suite passes | existing `pytest` / language-native test runner |
 
-The check rules C1–C7 are defined below in §3–§6 and implemented in `trugs-compliance-check`:
+The check rules C1–C7 are defined below in §3–§6 and implemented in `tg compliance`:
 
 **Dark Code is code where any edge of this square is broken.** Compliance means every edge is intact and mechanically verified.
 
@@ -183,22 +183,22 @@ Edge relations must come from the TRUG/L preposition set (see `TRUGS_LANGUAGE/SP
 
 Every `.trug.json` file in the repo (excluding `zzz_*` archives) must:
 
-- Pass `trugs-folder-check` (existing CORE validation — 16 rules)
+- Pass `tg check` (existing CORE validation — 16 rules)
 - Contain no dangling references (edges to nonexistent nodes, `contains` to missing children)
 - Match the filesystem: nodes with `properties.path` or `properties.file` must reference existing files (or be marked `stale: true` with a reason)
 - Use edge relations from the TRUG/L preposition set
 
-These rules already exist via `trugs-folder-check`; the compliance standard incorporates them rather than re-specifying.
+These rules already exist via `tg check`; the compliance standard incorporates them rather than re-specifying.
 
 ## 6. CI gate
 
-### 6.1 Every PR runs `trugs-compliance-check`
+### 6.1 Every PR runs `tg compliance`
 
 A GitHub Actions workflow at `.github/workflows/compliance.yml` must run on every PR and every push to main:
 
 ```yaml
 - name: Dark Code compliance
-  run: trugs-compliance-check --strict
+  run: tg compliance --strict
 ```
 
 Exit codes:
@@ -224,7 +224,7 @@ PRs that raise compliance update the baseline (committed in the PR). PRs that me
 Certain violations fail CI regardless of overall percentage:
 
 - A TRUG node with an invalid `trl` property that does not parse
-- A `.trug.json` file that fails `trugs-folder-check`
+- A `.trug.json` file that fails `tg check`
 - A test function with no TRUG/L comment at all (total darkness)
 
 ## 7. Hard rules
@@ -243,7 +243,7 @@ Reality bites: vendored code, generated code, or narrowly-scoped legacy material
 
 ### 8.1 Waiver mechanism
 
-> **Implementation status:** [DEFERRED] — The waiver mechanism is specified here for completeness. `trugs-compliance-check` v1.x does not yet read `.github/compliance-waivers.json` or support `--no-waivers`. Track implementation in a future issue.
+> **Implementation status:** [DEFERRED] — The waiver mechanism is specified here for completeness. `tg compliance` v1.x does not yet read `.github/compliance-waivers.json` or support `--no-waivers`. Track implementation in a future issue.
 
 A file can be excluded from compliance checks by listing it in `.github/compliance-waivers.json`:
 
@@ -266,7 +266,7 @@ A file can be excluded from compliance checks by listing it in `.github/complian
 - Waivers expire. Reapply or remove before the expiry date.
 - Waiver files count toward the total file count but not toward the violation count. Compliance % is reported both with and without waivers.
 - No waiver may cover a file that TRUGS-LLC authors own. Waivers are for code we don't control.
-- `trugs-compliance-check --no-waivers` flag produces the unwaived percentage. The baseline can track either the waived or the raw percentage, configured in `.github/compliance-baseline.json`.
+- `tg compliance --no-waivers` flag produces the unwaived percentage. The baseline can track either the waived or the raw percentage, configured in `.github/compliance-baseline.json`.
 
 ## 9. Future language appendices
 
