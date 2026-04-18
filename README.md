@@ -78,16 +78,22 @@ See [TRUGS_LANGUAGE/](TRUGS_LANGUAGE/) for the complete specification.
 | [SPEC_examples.md](TRUGS_LANGUAGE/SPEC_examples.md) | 30 parsed examples across 13 patterns |
 | [language.trug.json](TRUGS_LANGUAGE/language.trug.json) | The opening TRUG — the language defining itself |
 
-## Tools
+## Tools — via `trugs-tools`
 
-| Tool | Usage | Description |
+All operations below use the unified `tg` CLI from the sibling [`trugs-tools`](https://github.com/TRUGS-LLC/TRUGS-TOOLS) package (`pip install trugs-tools`). 36 operations under 21 top-level verbs + 3 sub-namespaces.
+
+| Verb | Usage | Description |
 |------|-------|-------------|
-| validate | `python tools/validate.py <file>` | Enforces all 16 CORE rules |
-| validate --all | `python tools/validate.py --all <dir>` | Batch validation |
-| tget | `python tools/tget.py <file> <node_id>` | Read a node |
-| tupdate | `python tools/tupdate.py <file> <node_id> --set key=value` | Update a node |
-| tdelete | `python tools/tdelete.py <file> <node_id>` | Delete a node and its edges |
-| tunlink | `python tools/tunlink.py <file> --from X --to Y` | Remove an edge |
+| `tg validate` | `tg validate <file>` | Enforces all 16 CORE rules |
+| `tg validate` | `tg validate --all <dir>` | Batch validation |
+| `tg get` | `tg get <file> <node_id>` | Read a node |
+| `tg update` | `tg update <file> <node_id> --set key=value` | Update a node |
+| `tg delete` | `tg delete <file> <node_id>` | Delete a node and its edges |
+| `tg unlink` | `tg unlink <file> --from X --to Y` | Remove an edge |
+
+See [`SPEC_cli.md`](https://github.com/TRUGS-LLC/TRUGS-TOOLS/blob/main/REFERENCE/SPEC_cli.md) in the trugs-tools repo for the full command surface.
+
+**Legacy (trugs 1.2.x only):** the same operations are available as `python tools/validate.py`, `python tools/tget.py`, etc. in this repo's `tools/` directory. That directory disappears at `trugs` 2.0.0.
 
 ## Examples
 
