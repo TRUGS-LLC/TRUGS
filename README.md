@@ -99,10 +99,10 @@ This repository describes itself as a TRUG. [`folder.trug.json`](folder.trug.jso
 
 ```bash
 # What's in this repo?
-trugs-tls folder.trug.json
+tg ls folder.trug.json
 
 # What does the compliance checker depend on?
-trugs-tget folder.trug.json tools_compliance_check --edges
+tg get folder.trug.json tools_compliance_check --edges
 
 # Does the graph match the filesystem?
 tg check .
