@@ -31,8 +31,8 @@ If you're unsure, open an issue and ask. That is always cheaper than writing cod
 3. **Run compliance locally.**
    ```bash
    pip install -e .
-   trugs-compliance-check .
-   trugs-folder-check .
+   tg compliance .
+   tg check .
    pytest tools/
    ```
    All three must pass.
@@ -49,8 +49,8 @@ If you're unsure, open an issue and ask. That is always cheaper than writing cod
 Every PR runs three gates:
 
 - **Build** — package installs cleanly, pytest passes
-- **Compliance** — `trugs-compliance-check` may not decrease. Baseline is ratcheted only upward.
-- **Graph** — `trugs-folder-check` reports zero errors on `folder.trug.json`
+- **Compliance** — `tg compliance` may not decrease. Baseline is ratcheted only upward.
+- **Graph** — `tg check` reports zero errors on `folder.trug.json`
 
 A PR that fails any gate cannot merge. The gate output names the specific failing check.
 

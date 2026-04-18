@@ -17,8 +17,8 @@ Fixes #<!-- issue number, if applicable. For trivial chore/docs PRs, write "none
 
 <!-- What did you do to convince yourself this works? -->
 
-- [ ] `trugs-compliance-check .` passes, % did not decrease
-- [ ] `trugs-folder-check .` reports 0 errors
+- [ ] `tg compliance .` passes, % did not decrease
+- [ ] `tg check .` reports 0 errors
 - [ ] `pytest tools/` passes
 - [ ] Added/updated tests with `AGENT SHALL VALIDATE ...` TRUG/L comments
 - [ ] Manual check: <!-- describe -->

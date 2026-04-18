@@ -28,10 +28,22 @@ EACH RECORD word BELONGS_TO EXACTLY A RECORD part_of_speech.
 |------|---------|
 | `TRUGS_LANGUAGE/` | TRL vocabulary, grammar, examples |
 | `TRUGS_PROTOCOL/` | CORE, BRANCHES, fundamentals, validation |
+| `REFERENCE/` | Dark Code paper, standard, how-to guide |
 | `EXAMPLES/` | Example TRUG JSON files |
 | `PAPER/` | Academic paper source (LaTeX) |
-| `tools/` | Validation tooling |
+| `tools/` | Validation tooling (will migrate to `trugs-tools` in `trugs` 2.0.0 release) |
 | `folder.trug.json` | Structural truth for this repo |
+
+## Companion package: `trugs-tools`
+
+As of `trugs` 2.0.0 (breaking, shipping post-soak on 2026-05-02), this repository will contain the spec only — no CLIs. All tooling lives at [TRUGS-LLC/TRUGS-TOOLS](https://github.com/TRUGS-LLC/TRUGS-TOOLS) and is installed separately:
+
+```bash
+pip install trugs-tools    # provides the `tg` binary
+tg --help                  # 36 operations under 21 top-level verbs + 3 sub-namespaces
+```
+
+This repo describes data. The companion repo implements tools. See `principle_spec_is_data` in the portfolio EPIC.
 
 ## Rules for This Repository
 

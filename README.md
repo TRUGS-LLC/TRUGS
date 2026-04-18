@@ -33,7 +33,16 @@ The sentence IS the program. The graph IS the AST. Every valid TRUG/L sentence c
 pip install trugs
 ```
 
-This gives you the full reference toolchain — `trugs-validate`, `trugs-memory`, `trugs-compliance-check`, and the CRUD tools (`trugs-tget`, `trugs-tupdate`, `trugs-tdelete`, `trugs-tunlink`).
+**As of 2.0.0 (breaking), `trugs` ships the specification only — no CLIs.** Spec content (`CORE`, `TRL` vocabulary, reference papers) is packaged as data. For the `tg` CLI and all tooling, install the sibling package:
+
+```bash
+pip install trugs-tools    # provides the `tg` binary (36 operations)
+tg --help
+```
+
+See [TRUGS-LLC/TRUGS-TOOLS](https://github.com/TRUGS-LLC/TRUGS-TOOLS) for the unified `tg` CLI — validation, memory, compliance, AAA protocol, and more.
+
+**Migrating from `trugs` 1.x?** The pre-2.0 package shipped `tg validate`, `tg memory`, etc. as entry points. In 2.0.0 those move to `trugs-tools`. Migration is one additional install: `pip install trugs-tools` and every `tg <op>` command works identically.
 
 ## TRUGS Language
 
@@ -96,10 +105,10 @@ trugs-tls folder.trug.json
 trugs-tget folder.trug.json tools_compliance_check --edges
 
 # Does the graph match the filesystem?
-trugs-folder-check .
+tg check .
 ```
 
-CI runs `trugs-folder-check` on every PR — this README's section list, the spec index, the tool table above all correspond to nodes you can traverse programmatically. When the TRUG drifts from the prose or the filesystem, CI fails. We dogfood our own dogfood.
+CI runs `tg check` on every PR — this README's section list, the spec index, the tool table above all correspond to nodes you can traverse programmatically. When the TRUG drifts from the prose or the filesystem, CI fails. We dogfood our own dogfood.
 
 ## Use It
 
