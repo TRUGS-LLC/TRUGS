@@ -550,3 +550,43 @@ Three verbs serve as modals — they modify other verbs to establish obligation,
 | MAY | Permitted but not required | Law |
 
 Modals require Actor subjects. A modal + verb creates an obligation/permission on the actor.
+
+---
+
+## 11. Vocabulary-closure design notes
+
+The 190-word vocabulary is **closed by design**. When a domain concept seems to call for a new word, the first move is to express it with existing vocabulary before extending the language. Two worked examples:
+
+### Temporal constraints without `DEADLINE`
+
+A scheduled operation with a time limit uses existing vocabulary:
+
+```
+DEFINE "deadline" AS INSTRUMENT.
+PARTY scheduler SHALL AGGREGATE ALL ACTIVE RECORD ONCE WITHIN 24h
+  THEN WRITE RESULT TO ENDPOINT report
+  SUBJECT_TO INSTRUMENT deadline.
+```
+
+The temporal constraint is modelled as an `INSTRUMENT` (#14, a formal document) defined upfront with `DEFINE ... AS`. Adverb-value pairs (`ONCE`, `WITHIN 24h`) carry the timing. `DEADLINE` is not a keyword — it's an identifier inside quotes. The closed 190-word vocabulary suffices. See SPEC_examples.md example 7.
+
+### Precedent / advisory constraints with `PRECEDENT`
+
+`PRECEDENT` (#108, an adjective / state) is already in the vocabulary under Adjectives → Legal state. `REFERENCES` (#154) is the edge. Combined:
+
+```
+WHEREAS THE RECORD history REFERENCES RECORD current.
+PARTY system SHALL VALIDATE THE RECORD current
+  SUBJECT_TO PRECEDENT RECORD history.
+```
+
+No new keyword needed. See SPEC_examples.md example 24.
+
+### Rule of thumb for would-be new words
+
+1. **Is it already in the vocabulary in a different part of speech?** (PRECEDENT as adjective is different from PRECEDENT as noun — but the adjective form often covers the need.)
+2. **Can it be expressed as `DEFINE "name" AS CATEGORY`?** (INSTRUMENT, RECORD, RESOURCE — generic categories absorb domain-specific instances.)
+3. **Is it a BRANCH concern?** Domain-specific vocabularies layer onto CORE. Legal-domain words like FILING, WITNESS, TESTIMONY belong in a LEGAL branch vocabulary, not in core TRL.
+4. **Only after 1-3 fail:** consider extending the 190.
+
+Resolved in [Xepayac/TRUGS-DEVELOPMENT#1542](https://github.com/Xepayac/TRUGS-DEVELOPMENT/issues/1542) (2026-04-18).
