@@ -1,18 +1,18 @@
 {
   "name": "TRUGS Language Vocabulary",
-  "version": "1.0.1",
+  "version": "2.0.0",
   "type": "NAMESPACE",
-  "description": "Canonical TRL vocabulary — 190 words across 8 parts of speech. Generated from SPEC_vocabulary.md by tools/build_language_trug.py.",
+  "description": "Canonical TRL vocabulary — 211 words across 9 parts of speech. Generated from SPEC_vocabulary.md by tools/build_language_trug.py. v2.0.0 adds 21 SI level prefixes for hierarchy transition markers (TRUGS-DEVELOPMENT#1719).",
   "dimensions": {},
   "capabilities": {
     "vocabularies": [
-      "trl_v1"
+      "trl_v2"
     ]
   },
   "meta": {
     "generated_by": "tools/build_language_trug.py",
     "source": "TRUGS_LANGUAGE/SPEC_vocabulary.md",
-    "word_count": 190,
+    "word_count": 211,
     "part_counts": {
       "noun": 26,
       "verb": 61,
@@ -21,7 +21,8 @@
       "preposition": 18,
       "conjunction": 13,
       "article": 10,
-      "pronoun": 7
+      "pronoun": 7,
+      "level_prefix": 21
     }
   },
   "nodes": [
@@ -37,12 +38,13 @@
         "prepositions",
         "conjunctions",
         "articles",
-        "pronouns"
+        "pronouns",
+        "level_prefixes"
       ],
       "properties": {
         "name": "TRUGS Language (TRL)",
-        "version": "1.0.1",
-        "word_count": 190
+        "version": "2.0.0",
+        "word_count": 211
       },
       "metric_level": "KILO_LANGUAGE",
       "dimension": {}
@@ -192,6 +194,85 @@
         "count": 7
       },
       "metric_level": "HECTO_CATEGORY",
+      "dimension": {}
+    },
+    {
+      "id": "level_prefixes",
+      "type": "DATA",
+      "parent_id": "language",
+      "contains": [
+        "level_prefix-macro",
+        "level_prefix-default",
+        "level_prefix-micro"
+      ],
+      "properties": {
+        "speech": "level_prefix",
+        "count": 21
+      },
+      "metric_level": "HECTO_CATEGORY",
+      "dimension": {}
+    },
+    {
+      "id": "level_prefix-macro",
+      "type": "DATA",
+      "parent_id": "level_prefixes",
+      "contains": [
+        "w-yotta",
+        "w-zetta",
+        "w-exa",
+        "w-peta",
+        "w-tera",
+        "w-giga",
+        "w-mega",
+        "w-kilo",
+        "w-hecto",
+        "w-deka"
+      ],
+      "properties": {
+        "subcategory": "macro",
+        "description": "Zoom out — scaling factors above 10⁰",
+        "count": 10
+      },
+      "metric_level": "DEKA_SUBCATEGORY",
+      "dimension": {}
+    },
+    {
+      "id": "level_prefix-default",
+      "type": "DATA",
+      "parent_id": "level_prefixes",
+      "contains": [
+        "w-base"
+      ],
+      "properties": {
+        "subcategory": "default",
+        "description": "Ground zero — the generally accessible plane",
+        "count": 1
+      },
+      "metric_level": "DEKA_SUBCATEGORY",
+      "dimension": {}
+    },
+    {
+      "id": "level_prefix-micro",
+      "type": "DATA",
+      "parent_id": "level_prefixes",
+      "contains": [
+        "w-deci",
+        "w-centi",
+        "w-milli",
+        "w-micro",
+        "w-nano",
+        "w-pico",
+        "w-femto",
+        "w-atto",
+        "w-zepto",
+        "w-yocto"
+      ],
+      "properties": {
+        "subcategory": "micro",
+        "description": "Zoom in — scaling factors below 10⁰",
+        "count": 10
+      },
+      "metric_level": "DEKA_SUBCATEGORY",
       "dimension": {}
     },
     {
@@ -4211,6 +4292,384 @@
         "subcategory": "legal_reference",
         "source": "law",
         "definition": "The previously named noun (legal \"the\")",
+        "core": false
+      },
+      "metric_level": "BASE_WORD",
+      "dimension": {}
+    },
+    {
+      "id": "w-yotta",
+      "type": "DATA",
+      "parent_id": "level_prefix-macro",
+      "contains": [],
+      "properties": {
+        "word": "YOTTA",
+        "number": 191,
+        "speech": "level_prefix",
+        "subcategory": "macro",
+        "source": "shared",
+        "definition": "SI prefix 10²⁴ — largest macro scale",
+        "factor": "1e24",
+        "core": false
+      },
+      "metric_level": "BASE_WORD",
+      "dimension": {}
+    },
+    {
+      "id": "w-zetta",
+      "type": "DATA",
+      "parent_id": "level_prefix-macro",
+      "contains": [],
+      "properties": {
+        "word": "ZETTA",
+        "number": 192,
+        "speech": "level_prefix",
+        "subcategory": "macro",
+        "source": "shared",
+        "definition": "SI prefix 10²¹",
+        "factor": "1e21",
+        "core": false
+      },
+      "metric_level": "BASE_WORD",
+      "dimension": {}
+    },
+    {
+      "id": "w-exa",
+      "type": "DATA",
+      "parent_id": "level_prefix-macro",
+      "contains": [],
+      "properties": {
+        "word": "EXA",
+        "number": 193,
+        "speech": "level_prefix",
+        "subcategory": "macro",
+        "source": "shared",
+        "definition": "SI prefix 10¹⁸",
+        "factor": "1e18",
+        "core": false
+      },
+      "metric_level": "BASE_WORD",
+      "dimension": {}
+    },
+    {
+      "id": "w-peta",
+      "type": "DATA",
+      "parent_id": "level_prefix-macro",
+      "contains": [],
+      "properties": {
+        "word": "PETA",
+        "number": 194,
+        "speech": "level_prefix",
+        "subcategory": "macro",
+        "source": "shared",
+        "definition": "SI prefix 10¹⁵",
+        "factor": "1e15",
+        "core": false
+      },
+      "metric_level": "BASE_WORD",
+      "dimension": {}
+    },
+    {
+      "id": "w-tera",
+      "type": "DATA",
+      "parent_id": "level_prefix-macro",
+      "contains": [],
+      "properties": {
+        "word": "TERA",
+        "number": 195,
+        "speech": "level_prefix",
+        "subcategory": "macro",
+        "source": "shared",
+        "definition": "SI prefix 10¹²",
+        "factor": "1e12",
+        "core": false
+      },
+      "metric_level": "BASE_WORD",
+      "dimension": {}
+    },
+    {
+      "id": "w-giga",
+      "type": "DATA",
+      "parent_id": "level_prefix-macro",
+      "contains": [],
+      "properties": {
+        "word": "GIGA",
+        "number": 196,
+        "speech": "level_prefix",
+        "subcategory": "macro",
+        "source": "shared",
+        "definition": "SI prefix 10⁹",
+        "factor": "1e9",
+        "core": false
+      },
+      "metric_level": "BASE_WORD",
+      "dimension": {}
+    },
+    {
+      "id": "w-mega",
+      "type": "DATA",
+      "parent_id": "level_prefix-macro",
+      "contains": [],
+      "properties": {
+        "word": "MEGA",
+        "number": 197,
+        "speech": "level_prefix",
+        "subcategory": "macro",
+        "source": "shared",
+        "definition": "SI prefix 10⁶",
+        "factor": "1e6",
+        "core": false
+      },
+      "metric_level": "BASE_WORD",
+      "dimension": {}
+    },
+    {
+      "id": "w-kilo",
+      "type": "DATA",
+      "parent_id": "level_prefix-macro",
+      "contains": [],
+      "properties": {
+        "word": "KILO",
+        "number": 198,
+        "speech": "level_prefix",
+        "subcategory": "macro",
+        "source": "shared",
+        "definition": "SI prefix 10³",
+        "factor": "1e3",
+        "core": false
+      },
+      "metric_level": "BASE_WORD",
+      "dimension": {}
+    },
+    {
+      "id": "w-hecto",
+      "type": "DATA",
+      "parent_id": "level_prefix-macro",
+      "contains": [],
+      "properties": {
+        "word": "HECTO",
+        "number": 199,
+        "speech": "level_prefix",
+        "subcategory": "macro",
+        "source": "shared",
+        "definition": "SI prefix 10²",
+        "factor": "1e2",
+        "core": false
+      },
+      "metric_level": "BASE_WORD",
+      "dimension": {}
+    },
+    {
+      "id": "w-deka",
+      "type": "DATA",
+      "parent_id": "level_prefix-macro",
+      "contains": [],
+      "properties": {
+        "word": "DEKA",
+        "number": 200,
+        "speech": "level_prefix",
+        "subcategory": "macro",
+        "source": "shared",
+        "definition": "SI prefix 10¹ — smallest macro scale",
+        "factor": "1e1",
+        "core": false
+      },
+      "metric_level": "BASE_WORD",
+      "dimension": {}
+    },
+    {
+      "id": "w-base",
+      "type": "DATA",
+      "parent_id": "level_prefix-default",
+      "contains": [],
+      "properties": {
+        "word": "BASE",
+        "number": 201,
+        "speech": "level_prefix",
+        "subcategory": "default",
+        "source": "shared",
+        "definition": "Default consumption level — no prefix scaling, the generally accessible plane",
+        "factor": "1e0",
+        "core": false
+      },
+      "metric_level": "BASE_WORD",
+      "dimension": {}
+    },
+    {
+      "id": "w-deci",
+      "type": "DATA",
+      "parent_id": "level_prefix-micro",
+      "contains": [],
+      "properties": {
+        "word": "DECI",
+        "number": 202,
+        "speech": "level_prefix",
+        "subcategory": "micro",
+        "source": "shared",
+        "definition": "SI prefix 10⁻¹ — largest micro scale",
+        "factor": "1e-1",
+        "core": false
+      },
+      "metric_level": "BASE_WORD",
+      "dimension": {}
+    },
+    {
+      "id": "w-centi",
+      "type": "DATA",
+      "parent_id": "level_prefix-micro",
+      "contains": [],
+      "properties": {
+        "word": "CENTI",
+        "number": 203,
+        "speech": "level_prefix",
+        "subcategory": "micro",
+        "source": "shared",
+        "definition": "SI prefix 10⁻²",
+        "factor": "1e-2",
+        "core": false
+      },
+      "metric_level": "BASE_WORD",
+      "dimension": {}
+    },
+    {
+      "id": "w-milli",
+      "type": "DATA",
+      "parent_id": "level_prefix-micro",
+      "contains": [],
+      "properties": {
+        "word": "MILLI",
+        "number": 204,
+        "speech": "level_prefix",
+        "subcategory": "micro",
+        "source": "shared",
+        "definition": "SI prefix 10⁻³",
+        "factor": "1e-3",
+        "core": false
+      },
+      "metric_level": "BASE_WORD",
+      "dimension": {}
+    },
+    {
+      "id": "w-micro",
+      "type": "DATA",
+      "parent_id": "level_prefix-micro",
+      "contains": [],
+      "properties": {
+        "word": "MICRO",
+        "number": 205,
+        "speech": "level_prefix",
+        "subcategory": "micro",
+        "source": "shared",
+        "definition": "SI prefix 10⁻⁶",
+        "factor": "1e-6",
+        "core": false
+      },
+      "metric_level": "BASE_WORD",
+      "dimension": {}
+    },
+    {
+      "id": "w-nano",
+      "type": "DATA",
+      "parent_id": "level_prefix-micro",
+      "contains": [],
+      "properties": {
+        "word": "NANO",
+        "number": 206,
+        "speech": "level_prefix",
+        "subcategory": "micro",
+        "source": "shared",
+        "definition": "SI prefix 10⁻⁹",
+        "factor": "1e-9",
+        "core": false
+      },
+      "metric_level": "BASE_WORD",
+      "dimension": {}
+    },
+    {
+      "id": "w-pico",
+      "type": "DATA",
+      "parent_id": "level_prefix-micro",
+      "contains": [],
+      "properties": {
+        "word": "PICO",
+        "number": 207,
+        "speech": "level_prefix",
+        "subcategory": "micro",
+        "source": "shared",
+        "definition": "SI prefix 10⁻¹²",
+        "factor": "1e-12",
+        "core": false
+      },
+      "metric_level": "BASE_WORD",
+      "dimension": {}
+    },
+    {
+      "id": "w-femto",
+      "type": "DATA",
+      "parent_id": "level_prefix-micro",
+      "contains": [],
+      "properties": {
+        "word": "FEMTO",
+        "number": 208,
+        "speech": "level_prefix",
+        "subcategory": "micro",
+        "source": "shared",
+        "definition": "SI prefix 10⁻¹⁵",
+        "factor": "1e-15",
+        "core": false
+      },
+      "metric_level": "BASE_WORD",
+      "dimension": {}
+    },
+    {
+      "id": "w-atto",
+      "type": "DATA",
+      "parent_id": "level_prefix-micro",
+      "contains": [],
+      "properties": {
+        "word": "ATTO",
+        "number": 209,
+        "speech": "level_prefix",
+        "subcategory": "micro",
+        "source": "shared",
+        "definition": "SI prefix 10⁻¹⁸",
+        "factor": "1e-18",
+        "core": false
+      },
+      "metric_level": "BASE_WORD",
+      "dimension": {}
+    },
+    {
+      "id": "w-zepto",
+      "type": "DATA",
+      "parent_id": "level_prefix-micro",
+      "contains": [],
+      "properties": {
+        "word": "ZEPTO",
+        "number": 210,
+        "speech": "level_prefix",
+        "subcategory": "micro",
+        "source": "shared",
+        "definition": "SI prefix 10⁻²¹",
+        "factor": "1e-21",
+        "core": false
+      },
+      "metric_level": "BASE_WORD",
+      "dimension": {}
+    },
+    {
+      "id": "w-yocto",
+      "type": "DATA",
+      "parent_id": "level_prefix-micro",
+      "contains": [],
+      "properties": {
+        "word": "YOCTO",
+        "number": 211,
+        "speech": "level_prefix",
+        "subcategory": "micro",
+        "source": "shared",
+        "definition": "SI prefix 10⁻²⁴ — smallest micro scale",
+        "factor": "1e-24",
         "core": false
       },
       "metric_level": "BASE_WORD",

@@ -1,8 +1,8 @@
 # TRUGS Language Vocabulary
 
-> 190 words across 8 parts of speech. Computation primary, law fills gaps.
+> 211 words across 9 parts of speech. Computation primary, law fills gaps. SI prefixes mark hierarchy transitions.
 
-**Issue:** #1211 | **Version:** 1.0.1
+**Issue:** #1211, [TRUGS-DEVELOPMENT#1719](https://github.com/Xepayac/TRUGS-DEVELOPMENT/issues/1719) | **Version:** 2.0.0
 
 ---
 
@@ -459,7 +459,81 @@ A pronoun refers to a previously named noun. Must have an unambiguous antecedent
 
 ---
 
-## 9. Sugar — Human Readability Pattern
+## 9. Level Prefixes — Hierarchy Transition Markers (21)
+
+A level prefix names a metric level in the TRUG hierarchy. The 21 SI prefixes (plus `BASE` for the default level) form a closed scale from macro (10²⁴) to micro (10⁻²⁴). Combined with a semantic name they form a `metric_level` identifier, e.g. `KILO_REPOSITORY`, `BASE_FUNCTION`, `DECI_LINE`.
+
+In TRL, a level prefix joined with an UPPERCASE semantic name appears as a bare token on its own line — a **level directive** — to mark a transition between hierarchy levels for an LLM consumer reading the source. Level directives are an LLM-comprehension affordance: they compile to nothing, produce no node or edge, and the validator does not enforce them. See `SPEC_grammar.md §level_directive`.
+
+`BASE` (10⁰, no scaling factor) names the default consumption level — the "ground zero" plane of every TRUG, the most information-dense and the level a fresh consumer should reach first.
+
+### Macro (10) — Zoom out
+
+| # | Word | Factor | Definition |
+|---|---|---|---|
+| 191 | YOTTA | 10²⁴ | Largest macro scale |
+| 192 | ZETTA | 10²¹ | |
+| 193 | EXA | 10¹⁸ | |
+| 194 | PETA | 10¹⁵ | |
+| 195 | TERA | 10¹² | |
+| 196 | GIGA | 10⁹ | |
+| 197 | MEGA | 10⁶ | |
+| 198 | KILO | 10³ | |
+| 199 | HECTO | 10² | |
+| 200 | DEKA | 10¹ | Smallest macro scale |
+
+### Default (1) — Ground zero
+
+| # | Word | Factor | Definition |
+|---|---|---|---|
+| 201 | BASE | 10⁰ | Default consumption level — no prefix scaling, the generally accessible plane |
+
+### Micro (10) — Zoom in
+
+| # | Word | Factor | Definition |
+|---|---|---|---|
+| 202 | DECI | 10⁻¹ | Largest micro scale |
+| 203 | CENTI | 10⁻² | |
+| 204 | MILLI | 10⁻³ | |
+| 205 | MICRO | 10⁻⁶ | |
+| 206 | NANO | 10⁻⁹ | |
+| 207 | PICO | 10⁻¹² | |
+| 208 | FEMTO | 10⁻¹⁵ | |
+| 209 | ATTO | 10⁻¹⁸ | |
+| 210 | ZEPTO | 10⁻²¹ | |
+| 211 | YOCTO | 10⁻²⁴ | Smallest micro scale |
+
+### Composition
+
+A `metric_level` identifier is formed as `<LEVEL_PREFIX>_<UPPERCASE_SEMANTIC_NAME>`. The semantic name is domain-defined (REPOSITORY, FOLDER, FILE, FUNCTION, LINE, STATEMENT, etc.) and follows the rules in `TRUGS_PROTOCOL/SCHEMA.md §Metric Level Prefixes`. Examples:
+
+```
+KILO_REPOSITORY      MEGA_PORTFOLIO       BASE_FUNCTION
+DECI_STATEMENT       CENTI_TOKEN          MICRO_BIT
+```
+
+### Level directive in TRL
+
+When a TRL source crosses from one metric level to another, the new level's name appears alone on a line. Example:
+
+```
+PARTY system SHALL FILTER ALL ACTIVE RECORD
+  THEN SORT RESULT.
+
+DECI_STATEMENT
+
+PARTY system SHALL VALIDATE EACH FIELD 'of RESULT.
+
+CENTI_TOKEN
+
+PARTY system SHALL ASSERT TYPE EQUALS STRING.
+```
+
+Each directive marks the start of work at that level. Directives are sugar-equivalent: they compile to nothing, but unlike `'sugar` they retain their executable-vocabulary identity and can be referenced inside a sentence as a `metric_level` value (e.g. `... AT BASE_FUNCTION`). See `SPEC_grammar.md` for the BNF rule.
+
+---
+
+## 10. Sugar — Human Readability Pattern
 
 Sugar is any token matching the pattern `'[a-z_]+` — an apostrophe followed by one or more lowercase letters or underscores. Sugar compiles to nothing. No node, no edge, no property. The validator ignores it. The compiler strips it. Sugar exists only to make sentences readable by humans.
 
@@ -522,7 +596,7 @@ PARTY admin 'trugs_llc SHALL ADMINISTER ALL RESOURCE.
 
 ---
 
-## 10. Summary
+## 11. Summary
 
 | Part of Speech | Computation | Law | Shared | Total | Compiles To |
 |---|---|---|---|---|---|
@@ -534,10 +608,11 @@ PARTY admin 'trugs_llc SHALL ADMINISTER ALL RESOURCE.
 | Conjunctions | 8 | 5 | — | 13 | Structure |
 | Articles | — | — | 10 | 10 | Scope |
 | Pronouns | 6 | 1 | — | 7 | References |
+| Level prefixes | — | — | 21 | 21 | Hierarchy markers (no-op in graph) |
 | Sugar | — | — | ∞ (pattern) | `'[a-z_]+` | **Nothing** |
-| **Total** | **128** | **52** | **10** | **190** | |
+| **Total** | **128** | **52** | **31** | **211** | |
 
-190 executable words + `'word` sugar pattern. Sugar is not counted as vocabulary — it is a syntactic pattern (`'[a-z_]+`) that compiles to nothing. The executable vocabulary is 190 words: 71% computation, 24% law, 5% shared.
+211 executable words + `'word` sugar pattern. Sugar is not counted as vocabulary — it is a syntactic pattern (`'[a-z_]+`) that compiles to nothing. Level prefixes are counted but produce no graph artifacts when used as bare-line directives; they DO contribute when used as the prefix of a `metric_level` value. The executable vocabulary is 211 words.
 
 ### Modals (subset of verbs)
 
@@ -553,9 +628,9 @@ Modals require Actor subjects. A modal + verb creates an obligation/permission o
 
 ---
 
-## 11. Vocabulary-closure design notes
+## 12. Vocabulary-closure design notes
 
-The 190-word vocabulary is **closed by design**. When a domain concept seems to call for a new word, the first move is to express it with existing vocabulary before extending the language. Two worked examples:
+The 211-word vocabulary is **closed by design**. When a domain concept seems to call for a new word, the first move is to express it with existing vocabulary before extending the language. Two worked examples:
 
 ### Temporal constraints without `DEADLINE`
 

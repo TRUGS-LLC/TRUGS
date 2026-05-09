@@ -2,7 +2,7 @@
 
 > 30 examples parsed token-by-token against the grammar. Each example was written, parsed, and if it failed, the failure was diagnosed, the vocabulary/grammar was patched, and the sentence was rewritten.
 
-**Issue:** #1211 | **Version:** 1.0.1
+**Issue:** #1211, [TRUGS-DEVELOPMENT#1719](https://github.com/Xepayac/TRUGS-DEVELOPMENT/issues/1719) | **Version:** 2.0.0
 
 For full token-by-token parse tables, see the development workspace at `TRUGS_PROTOCOL/SPEC_language.md` Section 4.
 
@@ -400,6 +400,48 @@ PARTY loader 'postgres SHALL WRITE EACH RESULT TO ENDPOINT event-store.
 `'kafka` and `'postgres` compile to nothing — they annotate for human readers which system backs the actor.
 
 Sugar makes the language read like natural English. The compiler ignores it. The graph is identical. Humans get readability. Machines get precision.
+
+---
+
+## Level Directives — Hierarchy Transition Markers
+
+Level directives are bare `metric_level` tokens on their own line. They mark hierarchy transitions for an LLM consumer reading the source. They compile to nothing and the validator does not enforce them. See `SPEC_grammar.md §level_directive`.
+
+### 29. Macro-to-micro walk
+
+```
+KILO_REPOSITORY
+
+PARTY trugs_llc SHALL ADMINISTER ALL RESOURCE.
+
+MEGA_PORTFOLIO
+
+PARTY trugs_llc SHALL CONTAIN MULTIPLE RESOURCE repository.
+
+BASE_FUNCTION
+
+PARTY system SHALL FILTER ALL ACTIVE RECORD
+  THEN SORT RESULT
+  THEN WRITE RESULT TO ENDPOINT output.
+
+DECI_STATEMENT
+
+PARTY system SHALL VALIDATE EACH FIELD 'of RESULT.
+
+CENTI_TOKEN
+
+PARTY system SHALL ASSERT TYPE EQUALS STRING.
+```
+
+Five hierarchy levels declared in macro-to-micro order. Each directive announces "what follows is at this level." Sentences between directives operate at the most recently declared level. The graph carries `metric_level` properties on the corresponding nodes; the directives are not stored in the graph.
+
+### 30. metric_level as value
+
+```
+PARTY system SHALL VALIDATE INPUT AT BASE_FUNCTION.
+```
+
+Here `BASE_FUNCTION` is a value, not a directive — it sits inside an `object_phrase`. The compiler stores `properties.metric_level: "BASE_FUNCTION"` on the operation node. Distinguishable from directive position by syntax: a directive stands alone on a line; a value sits in the value position of an `object_phrase`.
 
 ---
 
