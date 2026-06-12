@@ -1,6 +1,7 @@
 # TRUGS Schema Reference
 
-**Version:** 1.0.0 (AAA_AARDVARK)
+**Schema version:** 1.0.0 (the JSON graph format is unchanged in TRUGS 2.0 — the language extension is additive at the vocabulary/grammar layer)
+**Document published with:** TRUGS_LANGUAGE 2.0.0
 **Status:** ✅ Stable
 **Purpose:** Complete schema definitions for all TRUG components
 
@@ -172,7 +173,9 @@ interface Edge {
 
 ## Metric Level Prefixes
 
-Valid SI prefixes for `metric_level` field:
+Valid SI prefixes for `metric_level` field. As of TRUGS 2.0, these 21 prefixes are also a closed part of speech in TRL — see [`TRUGS_LANGUAGE/SPEC_vocabulary.md` §9 Level Prefixes](../TRUGS_LANGUAGE/SPEC_vocabulary.md#9-level-prefixes--hierarchy-transition-markers-21) and [`TRUGS_LANGUAGE/SPEC_grammar.md` §`level_directive`](../TRUGS_LANGUAGE/SPEC_grammar.md#level_directive--hierarchy-transition-marker). The prefix list below is the canonical numeric encoding; the language reference adds the bare-line `level_directive` form for LLM-comprehension affordance.
+
+
 
 ```typescript
 const METRIC_VALUES = {
@@ -803,7 +806,7 @@ For JSON Schema validation tools:
 - 7 required node fields
 - 3 required edge fields
 - Open properties object
-- 21 SI metric prefixes
+- 21 SI metric prefixes (also a TRL part-of-speech as of TRUGS 2.0)
 
 **Branch Schemas:**
 - Web: Site and page structure

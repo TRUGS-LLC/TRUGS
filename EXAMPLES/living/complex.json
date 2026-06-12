@@ -23,7 +23,8 @@
         "entity_goog",
         "synthesis_1",
         "answer_1"
-      ]
+      ],
+      "dimension": "memory_flow"
     },
     {
       "id": "query_sub",
@@ -37,7 +38,8 @@
       },
       "contains": [
         "tool_earnings"
-      ]
+      ],
+      "dimension": "memory_flow"
     },
     {
       "id": "tool_financials",
@@ -57,7 +59,8 @@
         },
         "status": "completed"
       },
-      "contains": []
+      "contains": [],
+      "dimension": "memory_flow"
     },
     {
       "id": "tool_earnings",
@@ -77,7 +80,8 @@
         },
         "status": "completed"
       },
-      "contains": []
+      "contains": [],
+      "dimension": "memory_flow"
     },
     {
       "id": "entity_aapl",
@@ -93,7 +97,8 @@
         },
         "source": "sec_filings_api"
       },
-      "contains": []
+      "contains": [],
+      "dimension": "memory_flow"
     },
     {
       "id": "entity_msft",
@@ -109,7 +114,8 @@
         },
         "source": "sec_filings_api"
       },
-      "contains": []
+      "contains": [],
+      "dimension": "memory_flow"
     },
     {
       "id": "entity_goog",
@@ -125,7 +131,8 @@
         },
         "source": "sec_filings_api"
       },
-      "contains": []
+      "contains": [],
+      "dimension": "memory_flow"
     },
     {
       "id": "synthesis_1",
@@ -137,7 +144,8 @@
         "method": "comparative_table",
         "summary": "MSFT leads with 15.7% growth, followed by GOOG at 12.3% and AAPL at 8.1%"
       },
-      "contains": []
+      "contains": [],
+      "dimension": "memory_flow"
     },
     {
       "id": "answer_1",
@@ -149,7 +157,8 @@
         "text": "Microsoft leads revenue growth at 15.7%, driven by cloud services. Google follows at 12.3% with strong ad revenue. Apple trails at 8.1% but maintains the highest absolute revenue at $394B.",
         "confidence": 0.92
       },
-      "contains": []
+      "contains": [],
+      "dimension": "memory_flow"
     }
   ],
   "edges": [

@@ -21,7 +21,8 @@
         "entity_diabetes",
         "entity_arthritis",
         "instance_patient_a"
-      ]
+      ],
+      "dimension": "ontology_hierarchy"
     },
     {
       "id": "class_treatment",
@@ -36,7 +37,8 @@
       "contains": [
         "entity_metformin",
         "instance_rx_1"
-      ]
+      ],
+      "dimension": "ontology_hierarchy"
     },
     {
       "id": "concept_inflammation",
@@ -49,7 +51,8 @@
         "domain": "pathology",
         "abstract": true
       },
-      "contains": []
+      "contains": [],
+      "dimension": "ontology_hierarchy"
     },
     {
       "id": "entity_diabetes",
@@ -62,7 +65,8 @@
         "domain": "endocrinology",
         "icd_code": "E11"
       },
-      "contains": []
+      "contains": [],
+      "dimension": "ontology_hierarchy"
     },
     {
       "id": "entity_arthritis",
@@ -75,7 +79,8 @@
         "domain": "rheumatology",
         "icd_code": "M06.9"
       },
-      "contains": []
+      "contains": [],
+      "dimension": "ontology_hierarchy"
     },
     {
       "id": "entity_metformin",
@@ -88,7 +93,8 @@
         "domain": "pharmacology",
         "drug_class": "biguanide"
       },
-      "contains": []
+      "contains": [],
+      "dimension": "ontology_hierarchy"
     },
     {
       "id": "instance_patient_a",
@@ -103,7 +109,8 @@
           "severity": "moderate"
         }
       },
-      "contains": []
+      "contains": [],
+      "dimension": "ontology_hierarchy"
     },
     {
       "id": "instance_rx_1",
@@ -118,7 +125,8 @@
           "frequency": "BID"
         }
       },
-      "contains": []
+      "contains": [],
+      "dimension": "ontology_hierarchy"
     }
   ],
   "edges": [

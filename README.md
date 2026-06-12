@@ -20,7 +20,7 @@ TRUGS is a JSON graph specification for representing structured information. A T
 
 ```mermaid
 flowchart LR
-    S["TRUG/L sentence<br/>(190 words)"] <-->|compile/decompile| G["TRUG graph<br/>(nodes · edges · hierarchy)"]
+    S["TRUG/L sentence<br/>(233 words)"] <-->|compile/decompile| G["TRUG graph<br/>(nodes · edges · hierarchy)"]
     G -.validates against.-> C["CORE<br/>(7 boundaries · 16 rules)"]
     G -.extends.-> B["BRANCH<br/>(domain vocabulary)"]
 ```
@@ -33,7 +33,7 @@ The sentence IS the program. The graph IS the AST. Every valid TRUG/L sentence c
 pip install trugs
 ```
 
-**As of 2.0.0 (breaking), `trugs` ships the specification only — no CLIs.** Spec content (`CORE`, `TRL` vocabulary, reference papers) is packaged as data. For the `tg` CLI and all tooling, install the sibling package:
+**As of 2.0.0 (breaking), `trugs` ships the specification only — no CLIs.** Spec content (`CORE`, `TRL` vocabulary, reference papers) is packaged as data. The 2.0.0 release also adds 21 SI level prefixes (YOTTA…YOCTO) as a new part of speech for hierarchy transition markers — see [SPEC_vocabulary.md §9](TRUGS_LANGUAGE/SPEC_vocabulary.md#9-level-prefixes--hierarchy-transition-markers-21). For the `tg` CLI and all tooling, install the sibling package:
 
 ```bash
 pip install trugs-tools    # provides the `tg` binary (36 operations)
@@ -46,7 +46,7 @@ See [TRUGS-LLC/TRUGS-TOOLS](https://github.com/TRUGS-LLC/TRUGS-TOOLS) for the un
 
 ## TRUGS Language
 
-TRUGS includes a formalized subset of English — 190 words drawn from computation and law — where every valid sentence compiles to a TRUG graph and every graph decompiles back to a sentence. Losslessly.
+TRUGS includes a formalized subset of English — 233 words drawn from computation, law, and SI prefixes — where every valid sentence compiles to a TRUG graph and every graph decompiles back to a sentence. Losslessly.
 
 ```
 PARTY system SHALL FILTER ALL ACTIVE RECORD
@@ -73,7 +73,7 @@ See [TRUGS_LANGUAGE/](TRUGS_LANGUAGE/) for the complete specification.
 
 | Document | Description |
 |----------|-------------|
-| [SPEC_vocabulary.md](TRUGS_LANGUAGE/SPEC_vocabulary.md) | 190 words, 8 parts of speech, formal definitions |
+| [SPEC_vocabulary.md](TRUGS_LANGUAGE/SPEC_vocabulary.md) | 233 words, 9 parts of speech, formal definitions |
 | [SPEC_grammar.md](TRUGS_LANGUAGE/SPEC_grammar.md) | BNF grammar, composition rules, 12 validation rules |
 | [SPEC_examples.md](TRUGS_LANGUAGE/SPEC_examples.md) | 30 parsed examples across 13 patterns |
 | [language.trug.json](TRUGS_LANGUAGE/language.trug.json) | The opening TRUG — the language defining itself |
@@ -132,7 +132,7 @@ CI runs `tg check` on every PR — this README's section list, the spec index, t
 
 ## Building on TRUGS
 
-**CORE and Language** are maintained by TRUGS LLC. The 190-word vocabulary, grammar, and validation rules are the specification — they don't change without a spec revision.
+**CORE and Language** are maintained by TRUGS LLC. The 233-word vocabulary, grammar, and validation rules are the specification — they don't change without a spec revision.
 
 **Branches** are where the community builds. If your domain needs vocabulary that doesn't exist (medical, financial, legal, robotics, etc.), build a branch:
 

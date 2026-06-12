@@ -2,9 +2,7 @@
 
 > 30 examples parsed token-by-token against the grammar. Each example was written, parsed, and if it failed, the failure was diagnosed, the vocabulary/grammar was patched, and the sentence was rewritten.
 
-**Issue:** #1211 | **Version:** 1.0.1
-
-For full token-by-token parse tables, see the development workspace at `TRUGS_PROTOCOL/SPEC_language.md` Section 4.
+**Issue:** #1211, [TRUGS-DEVELOPMENT#1719](https://github.com/Xepayac/TRUGS-DEVELOPMENT/issues/1719) | **Version:** 2.0.0
 
 ---
 
@@ -72,7 +70,7 @@ PARTY scheduler SHALL AGGREGATE ALL ACTIVE RECORD ONCE WITHIN 24h
 ```
 Multiple adverb-value pairs (ONCE, WITHIN 24h). The temporal constraint is
 modelled as an INSTRUMENT (formal document) defined upfront — keeps the
-example inside the closed 190-word vocabulary.
+example inside the closed 233-word vocabulary.
 
 ---
 
@@ -357,7 +355,7 @@ With sugar:
 PARTY client SHALL REQUEST PARTY server.
 PARTY server SHALL RESPOND PROMPTLY WITHIN 30s
   OR PARTY client MAY 'also RETRY BOUNDED 3
-  THEN 'also HANDLE THE ERROR 'that 'has 'been RECEIVED.
+  THEN 'also HANDLE THE ERROR.
 ```
 
 ### Prohibition (Example 9)
@@ -373,7 +371,7 @@ With sugar:
 ```
 NO PARTY SHALL WRITE CONFIDENTIAL RESOURCE
   EXCEPT PARTY owner 'who MAY WRITE 'such CONFIDENTIAL RESOURCE
-    PROVIDED_THAT PARTY owner 'has 'been AUTHENTICATED 'at SERVICE auth.
+    PROVIDED_THAT PARTY owner 'who AUTHENTICATE TO SERVICE auth.
 ```
 
 ### ETL Pipeline (Example 28, excerpt)
@@ -400,6 +398,50 @@ PARTY loader 'postgres SHALL WRITE EACH RESULT TO ENDPOINT event-store.
 `'kafka` and `'postgres` compile to nothing — they annotate for human readers which system backs the actor.
 
 Sugar makes the language read like natural English. The compiler ignores it. The graph is identical. Humans get readability. Machines get precision.
+
+---
+
+## Level Directives — Hierarchy Transition Markers
+
+Level directives are bare `metric_level` tokens on their own line. They mark hierarchy transitions for an LLM consumer reading the source. They compile to nothing and the validator does not enforce them. See `SPEC_grammar.md §level_directive`.
+
+### 29. Macro-to-micro walk
+
+```
+KILO_REPOSITORY
+
+PARTY trugs_llc SHALL ADMINISTER ALL RESOURCE.
+
+MEGA_PORTFOLIO
+
+PARTY trugs_llc SHALL NEST MULTIPLE RESOURCE repository.
+
+BASE_FUNCTION
+
+PARTY system SHALL FILTER ALL ACTIVE RECORD
+  THEN SORT RESULT
+  THEN WRITE RESULT TO ENDPOINT output.
+
+DECI_STATEMENT
+
+PARTY system SHALL VALIDATE RESULT.
+
+CENTI_TOKEN
+
+PARTY system SHALL ASSERT STRING DATA.
+```
+
+Five hierarchy levels declared in macro-to-micro order. Each directive announces "what follows is at this level." Sentences between directives operate at the most recently declared level. The graph carries `metric_level` properties on the corresponding nodes; the directives are not stored in the graph.
+
+### 30. metric_level as value (reserved — parser path not yet implemented)
+
+```
+PARTY system SHALL VALIDATE INPUT AT BASE_FUNCTION.
+```
+
+> **Status: reserved.** The `value := metric_level` production in `SPEC_grammar.md §1` is declared but does not yet have a complete syntactic anchor — `AT` is not in the 233-word vocabulary and no existing preposition/adverb cleanly takes a `metric_level` value. Pass B (TRUGS-LLC/TRUGS-TOOLS-dev) implements the directive form but defers the value form. Resolution paths under consideration: (a) extend the vocabulary with `AT` as a position preposition, (b) make `metric_level` a noun-phrase suffix, (c) drop the `value := metric_level` claim and treat metric_level only as a directive. To be decided in a follow-up issue.
+
+Here `BASE_FUNCTION` is conceptually a value (not a directive) — it would sit inside an `object_phrase`. The compiler would store `properties.metric_level: "BASE_FUNCTION"` on the operation node. Distinguishable from directive position by syntax: a directive stands alone on a line; a value sits in the value position of an `object_phrase`. The example is preserved here as the reference case for the future grammar extension.
 
 ---
 

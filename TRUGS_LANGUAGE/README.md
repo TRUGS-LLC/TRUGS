@@ -2,7 +2,7 @@
 
 > Formalized English as an LLM-native executable language.
 
-**Issue:** #1211 | **Status:** DRAFT | **Version:** 1.0.1
+**Issue:** #1211, [TRUGS-DEVELOPMENT#1719](https://github.com/Xepayac/TRUGS-DEVELOPMENT/issues/1719) | **Status:** DRAFT | **Version:** 2.0.0
 
 ## What This Is
 
@@ -29,13 +29,13 @@ PARTY api SHALL FILTER ALL ACTIVE RECORD
   OR RETRY BOUNDED 3 WITHIN 60s.
 ```
 
-Every word is from the 190-word vocabulary. The sentence compiles to a graph with 6 nodes and 5 edges. The graph decompiles back to the same sentence.
+Every word is from the 233-word vocabulary. The sentence compiles to a graph with 6 nodes and 5 edges. The graph decompiles back to the same sentence.
 
 ## The Numbers
 
-- **190 executable words** + `'word` sugar pattern (human readability only)
-- **8 parts of speech** — sugar is a pattern (`'[a-z_]+`), not a word list
-- **67% computation**, 27% law, 5% shared (executable words)
+- **233 executable words** + `'word` sugar pattern (human readability only)
+- **9 parts of speech** — sugar is a pattern (`'[a-z_]+`), not a word list. Level prefixes (the 9th part of speech, added in 2.0.0) are SI-derived hierarchy markers shared across both domains.
+- **150 computation**, 52 law, 31 shared (executable words)
 - **12 validation rules** for compiled graphs
 - **No ambiguity** — verbs and prepositions are always distinct words
 - **30 examples** tested token-by-token against the grammar
@@ -44,7 +44,7 @@ Every word is from the 190-word vocabulary. The sentence compiles to a graph wit
 
 | File | Purpose |
 |------|---------|
-| [SPEC_vocabulary.md](SPEC_vocabulary.md) | Complete word list: 190 words, 8 parts of speech, definitions |
+| [SPEC_vocabulary.md](SPEC_vocabulary.md) | Complete word list: 233 words, 9 parts of speech, definitions |
 | [SPEC_grammar.md](SPEC_grammar.md) | BNF grammar, composition rules, validation rules |
 | [SPEC_examples.md](SPEC_examples.md) | 30 parsed examples with token-by-token analysis |
 | [language.trug.json](language.trug.json) | The opening TRUG — the language defining itself |
@@ -52,6 +52,6 @@ Every word is from the 190-word vocabulary. The sentence compiles to a graph wit
 ## Relationship to TRUGS
 
 - **TRUGS CORE** defines the 46 semantic primitives (graph vocabulary)
-- **TRUGS Language** uses CORE as its seed and adds 144 words to fill the gaps CORE doesn't cover (adjectives, adverbs, conjunctions, articles, pronouns)
+- **TRUGS Language** uses CORE as its seed and adds 187 words to fill the gaps CORE doesn't cover (verbs, adjectives, adverbs, conjunctions, articles, pronouns, level prefixes)
 - The language tests CORE; CORE tests the language. They educate each other.
 - CORE is the grammar invariant. Branches add domain vocabulary. Same architecture.

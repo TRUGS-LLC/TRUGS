@@ -2,7 +2,7 @@
 
 > Formal composition rules: what can combine with what, and what it compiles to.
 
-**Issue:** #1211 | **Version:** 1.0.1
+**Issue:** #1211, [TRUGS-DEVELOPMENT#1719](https://github.com/Xepayac/TRUGS-DEVELOPMENT/issues/1719) | **Version:** 2.0.0
 
 ---
 
@@ -11,16 +11,20 @@
 Every valid TRUGS Language program is one or more sentences. Every valid sentence matches this grammar. If it doesn't parse, it's not valid.
 
 ```
-program         := preamble* sentence+
+program         := preamble* (sentence | level_directive)+
 
 preamble        := WHEREAS clause "."
 
 sentence        := clause (CONJUNCTION clause)* "."
                  | definition "."
+                 | leading_keyword_directive "."
 
 clause          := subject verb_phrase (object_phrase)*
 
 definition      := DEFINE value AS noun_phrase
+
+leading_keyword_directive := ASSERTION_KEYWORD clause (CONJUNCTION clause)*
+ASSERTION_KEYWORD         := ASSERT | ASSERT_NOT | INVARIANT
 
 subject         := noun_phrase
                  | PRONOUN
@@ -44,11 +48,82 @@ modal           := SHALL | SHALL_NOT | MAY
 identifier      := lowercase_name
 
 value           := INTEGER_LITERAL | STRING_LITERAL | DURATION_LITERAL | DATE_LITERAL
+                 | metric_level
+
+level_directive := metric_level
+
+metric_level    := LEVEL_PREFIX "_" UPPERCASE_NAME
+
+LEVEL_PREFIX    := YOTTA | ZETTA | EXA  | PETA  | TERA  | GIGA | MEGA
+                 | KILO  | HECTO | DEKA | BASE  | DECI  | CENTI | MILLI
+                 | MICRO | NANO  | PICO | FEMTO | ATTO  | ZEPTO | YOCTO
+
+UPPERCASE_NAME  := [A-Z][A-Z0-9_]*
 
 sugar           := "'" lowercase_name
 
 lowercase_name  := [a-z_]+
 ```
+
+### `level_directive` — hierarchy transition marker
+
+A `level_directive` is a bare `metric_level` token appearing alone on its own line in TRL. It marks the transition into a new hierarchy level for an LLM consumer reading the source. Lexically, the parser recognises a directive when a line contains exactly one `metric_level` token followed by end-of-line and no other grammar production. Examples:
+
+```
+PARTY system SHALL FILTER ALL ACTIVE RECORD.
+
+DECI_STATEMENT
+
+PARTY system SHALL VALIDATE EACH FIELD 'of RESULT.
+```
+
+`DECI_STATEMENT` here is a directive: it announces "what follows is at the DECI_STATEMENT level."
+
+#### Compilation
+
+A `level_directive` compiles to **nothing**. No node, no edge, no property. It is a no-op in the graph. Decompilation may emit directives at every level transition for LLM-comprehension, but the graph itself does not store them.
+
+#### Distinction from `metric_level` as a value
+
+A `metric_level` token may also appear inside a sentence as the value of a hierarchy-aware property:
+
+```
+PARTY system SHALL VALIDATE INPUT AT BASE_FUNCTION.
+```
+
+Here `BASE_FUNCTION` is a value, not a directive. The grammar distinguishes them by position: a directive stands alone; a value sits in the value position of an `object_phrase`.
+
+#### Validation
+
+The validator does NOT enforce level directives. A TRL source with no directives is valid. A TRL source with directives that do not match the hierarchy on the underlying graph is also valid. Directives are an LLM-comprehension affordance, not a correctness gate. See [TRUGS-DEVELOPMENT#1719 ADR-002](https://github.com/Xepayac/TRUGS-DEVELOPMENT/issues/1719).
+
+### `leading_keyword_directive` — leading-keyword directives (`ASSERT` / `ASSERT_NOT` / `INVARIANT`)
+
+A `leading_keyword_directive` is a sentence whose head is one of three **assertion keywords** — `ASSERT`, `ASSERT_NOT`, or `INVARIANT` — placed *before* the subject, followed by an ordinary clause. The keyword names the proposition's modality; the clause states the proposition:
+
+```
+ASSERT       EACH RECORD release_candidate SHALL APPEAR 'in RESOURCE tracker.
+ASSERT_NOT   FUNCTION instance_open SHALL EXIST.
+INVARIANT    RESOURCE tracker SHALL REMAIN open.
+```
+
+The three keywords differ only in modality:
+
+| Keyword | Proposition modality |
+|---|---|
+| `ASSERT` | The clause must be **true** — a point-in-time condition checked at the assertion site. |
+| `ASSERT_NOT` | The clause must be **false** — the negative dual of `ASSERT` (used for OUT-OF-SCOPE / prohibition statements). |
+| `INVARIANT` | The clause must hold **across all time** — an always-true structural condition, not merely at one point. `INVARIANT` is the first-class temporal-universality keyword; it subsumes the older idiomatic phrasing `ASSERT … ACROSS ALL TIME`. |
+
+Grammatically, a `leading_keyword_directive` differs from an ordinary `clause` only in the leading keyword: everything after the keyword is a normal clause (subject + verb_phrase + objects) and may chain with conjunctions. The keyword position — *before* the subject — is what distinguishes a directive from a clause whose verb happens to be `ASSERT` (verb #61, which sits in the verb position after a subject).
+
+#### Compilation
+
+A `leading_keyword_directive` compiles to an assertion node carrying the proposition clause and the keyword's modality flag. (The exact node shape is defined by the compiler, not this grammar.)
+
+#### Parser support — pending #1976 Phase 5
+
+> **Forward declaration.** This production defines the *spec-level* grammar for leading-keyword directives. The v1 reference parser (`trugs-tools`) does **not** yet implement it — under v1, `ASSERT X SHALL Y.` does not parse, because `subject` must be a `noun_phrase` or `PRONOUN`. Per the validation-is-identity discipline, a sentence using this form is therefore not yet valid TRL until the parser lands the production. The parser implementation — and the corpus migration that retires the legacy `ACROSS ALL TIME` idiom in favor of `INVARIANT` — is scheduled for **AAA #1976 Phase 5** (TRUGS-TOOLS parser update). Until then, the `ACROSS ALL TIME` idiom remains the supported way to express temporal universality.
 
 ### Sugar preprocessing
 
@@ -246,13 +321,15 @@ Every sentence element compiles to exactly one TRUG graph element:
 | Value literal | Property value | `properties.value: literal` |
 | WHEREAS clause | Nodes + edges | Same as regular clause, but no obligation semantics |
 | DEFINE definition | DEFINED_TERM node | `{ id: term, type: noun, properties: { defined: true } }` |
+| `level_directive` | **Nothing** | Hierarchy-transition marker, no graph artifact (LLM-comprehension only) |
+| `metric_level` value | Property value | `properties.metric_level: "<PREFIX>_<NAME>"` |
 
 ### Round-Trip Guarantee
 
-- **Sentence to Graph:** Parse by grammar, emit nodes and edges. Every word maps to exactly one graph element.
-- **Graph to Sentence:** Walk in topological order, emit words by reversing the table. Every element maps to exactly one word.
+- **Sentence to Graph:** Parse by grammar, emit nodes and edges. Every executable word maps to exactly one graph element. Sugar tokens and `level_directive` markers compile to nothing.
+- **Graph to Sentence:** Walk in topological order, emit words by reversing the table. Every element maps to exactly one word. The canonical decompiler may insert `level_directive` lines at every metric-level transition encountered during the walk.
 
-If a sentence cannot round-trip, it is not valid.
+If a sentence cannot round-trip (after stripping sugar and directives), it is not valid. Directives and sugar are dropped on TRL→TRUG and may be re-emitted on TRUG→TRL by the canonical decompiler — graphs are equal across the round-trip; sources may not be byte-identical without canonicalisation.
 
 ---
 

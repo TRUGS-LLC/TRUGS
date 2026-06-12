@@ -20,7 +20,8 @@
         "source_1",
         "author_1",
         "paper_1"
-      ]
+      ],
+      "dimension": "research_structure"
     },
     {
       "id": "concept_1",
@@ -33,7 +34,8 @@
       },
       "contains": [
         "claim_1"
-      ]
+      ],
+      "dimension": "research_structure"
     },
     {
       "id": "project_1",
@@ -48,7 +50,8 @@
       },
       "contains": [
         "version_1"
-      ]
+      ],
+      "dimension": "research_structure"
     },
     {
       "id": "source_1",
@@ -60,7 +63,8 @@
         "title": "Neo4j Documentation",
         "accessed_date": "2026-02-10"
       },
-      "contains": []
+      "contains": [],
+      "dimension": "research_structure"
     },
     {
       "id": "author_1",
@@ -71,7 +75,8 @@
         "name": "Neo4j Inc.",
         "organization": "Neo4j Inc."
       },
-      "contains": []
+      "contains": [],
+      "dimension": "research_structure"
     },
     {
       "id": "paper_1",
@@ -83,7 +88,8 @@
         "published_date": "2020-06-01",
         "description": "Academic survey of graph database technologies"
       },
-      "contains": []
+      "contains": [],
+      "dimension": "research_structure"
     },
     {
       "id": "claim_1",
@@ -95,7 +101,8 @@
         "source_id": "source_1",
         "confidence": 0.95
       },
-      "contains": []
+      "contains": [],
+      "dimension": "research_structure"
     },
     {
       "id": "version_1",
@@ -107,7 +114,8 @@
         "release_date": "2022-10-27",
         "status": "active"
       },
-      "contains": []
+      "contains": [],
+      "dimension": "research_structure"
     }
   ],
   "edges": [

@@ -12,13 +12,13 @@ MODULE trugs_protocol GOVERNS DATA graph.
 This is the canonical TRUGS specification. It defines:
 
 - **TRUGS CORE** — 7 required node fields, 3 required edge fields. The universal foundation.
-- **TRUGS Language (TRL)** — 190 executable words. Every sentence compiles to a directed graph.
+- **TRUGS Language (TRL)** — 233 executable words across 9 parts of speech. Every sentence compiles to a directed graph.
 - **BRANCHES** — Domain-specific vocabularies layered on CORE.
 - **Validation** — 16 rules (9 structural, 7 compositional).
 
 <trl>
 NAMESPACE trugs_spec REFERENCES ENDPOINT "https://github.com/TRUGS-LLC/TRUGS".
-INTERFACE TRL CONTAINS 190 UNIQUE RECORD word.
+INTERFACE TRL CONTAINS 233 UNIQUE RECORD word.
 EACH RECORD word BELONGS_TO EXACTLY A RECORD part_of_speech.
 </trl>
 
@@ -31,12 +31,12 @@ EACH RECORD word BELONGS_TO EXACTLY A RECORD part_of_speech.
 | `REFERENCE/` | Dark Code paper, standard, how-to guide |
 | `EXAMPLES/` | Example TRUG JSON files |
 | `PAPER/` | Academic paper source (LaTeX) |
-| `tools/` | Validation tooling (will migrate to `trugs-tools` in `trugs` 2.0.0 release) |
+| `tools/` | `build_language_trug.py` only — regenerates `language.trug.json` from `SPEC_vocabulary.md`. All other tooling moved to `trugs-tools` at the 2.0.0 release. |
 | `folder.trug.json` | Structural truth for this repo |
 
 ## Companion package: `trugs-tools`
 
-As of `trugs` 2.0.0 (breaking, shipping post-soak on 2026-05-02), this repository will contain the spec only — no CLIs. All tooling lives at [TRUGS-LLC/TRUGS-TOOLS](https://github.com/TRUGS-LLC/TRUGS-TOOLS) and is installed separately:
+As of `trugs` 2.0.0 (breaking), this repository contains the spec only — no CLIs. All tooling lives at [TRUGS-LLC/TRUGS-TOOLS](https://github.com/TRUGS-LLC/TRUGS-TOOLS) and is installed separately:
 
 ```bash
 pip install trugs-tools    # provides the `tg` binary

@@ -1,4 +1,4 @@
-# TRL Cheat Sheet — 190 Words
+# TRL Cheat Sheet — 233 Words
 
 ## Nouns (26) — become graph nodes
 
@@ -14,17 +14,17 @@
 | ERROR | Outcome | EXCEPTION | Outcome | ENDPOINT | Boundary |
 | REMEDY | Outcome | | | JURISDICTION | Boundary |
 
-## Verbs (61) — become operations
+## Verbs (80) — become operations
 
 | Category | Words |
 |----------|-------|
-| Transform (14) | FILTER EXCLUDE MAP SORT MERGE SPLIT FLATTEN AGGREGATE GROUP RENAME BATCH DISTINCT TAKE SKIP |
-| Move (10) | READ WRITE SEND RECEIVE RETURN REQUEST RESPOND AUTHENTICATE DELIVER ASSIGN |
-| Obligate (4) | VALIDATE ASSERT REQUIRE SHALL |
-| Permit (5) | ALLOW APPROVE GRANT OVERRIDE MAY |
+| Transform (17) | FILTER EXCLUDE MAP SORT MERGE SPLIT FLATTEN AGGREGATE GROUP RENAME BATCH DISTINCT TAKE SKIP APPLY DERIVE UPDATE |
+| Move (16) | READ WRITE SEND RECEIVE RETURN REQUEST RESPOND AUTHENTICATE DELIVER ASSIGN LOAD POST EMIT PRODUCE APPEND DELEGATE |
+| Obligate (6) | VALIDATE ASSERT REQUIRE SHALL ASSERT_NOT INVARIANT |
+| Permit (7) | ALLOW APPROVE GRANT OVERRIDE MAY ACCEPT SUGGEST |
 | Prohibit (4) | DENY REJECT SHALL_NOT REVOKE |
-| Control (10) | BRANCH MATCH RETRY TIMEOUT THROW EXISTS EXPIRE EQUALS EXCEEDS PRECEDES |
-| Bind (9) | DEFINE DECLARE IMPLEMENT NEST AUGMENT REPLACE CITE ADMINISTER STIPULATE |
+| Control (15) | BRANCH MATCH RETRY TIMEOUT THROW EXISTS EXPIRE EQUALS EXCEEDS PRECEDES EXECUTE INVOKE HALT COMPLETE PASS |
+| Bind (10) | DEFINE DECLARE IMPLEMENT NEST AUGMENT REPLACE CITE ADMINISTER STIPULATE HAVE |
 | Resolve (5) | CATCH HANDLE RECOVER CURE INDEMNIFY |
 
 ## Modals (3) — obligation on Actor subjects
@@ -35,14 +35,14 @@
 | MAY | ALLOWED to do |
 | SHALL_NOT | MUST NOT do |
 
-## Adjectives (36) — become node properties
+## Adjectives (39) — become node properties
 
 | Category | Words |
 |----------|-------|
 | Type (5) | STRING INTEGER BOOLEAN ARRAY OBJECT |
 | Access (5) | PUBLIC PRIVATE PROTECTED READONLY CONFIDENTIAL |
 | State (14) | VALID INVALID NULL EMPTY PENDING ACTIVE FAILED MUTABLE IMMUTABLE BINDING VOID ENFORCEABLE EXPIRED PRECEDENT |
-| Quantity (6) | REQUIRED OPTIONAL UNIQUE MULTIPLE SOLE JOINT |
+| Quantity (9) | REQUIRED OPTIONAL UNIQUE MULTIPLE SOLE JOINT ONLY AT_LEAST EXACTLY |
 | Priority (6) | DEFAULT CRITICAL HIGH LOW MATERIAL SUBORDINATE |
 
 ## Adverbs (19) — become operation properties
@@ -83,6 +83,23 @@
 ## Pronouns (7) — back-references
 
 SELF | RESULT OUTPUT | INPUT SOURCE | TARGET | SAID
+
+## Level Prefixes (21) — hierarchy transition markers
+
+A `level_directive` (`<PREFIX>_<NAME>`, e.g. `KILO_REPOSITORY`) on its own line marks a metric-level transition for the LLM consumer. Compiles to nothing.
+
+| Macro (10) | Default (1) | Micro (10) |
+|---|---|---|
+| YOTTA (10²⁴) | BASE (10⁰) | DECI (10⁻¹) |
+| ZETTA (10²¹) | | CENTI (10⁻²) |
+| EXA (10¹⁸) | | MILLI (10⁻³) |
+| PETA (10¹⁵) | | MICRO (10⁻⁶) |
+| TERA (10¹²) | | NANO (10⁻⁹) |
+| GIGA (10⁹) | | PICO (10⁻¹²) |
+| MEGA (10⁶) | | FEMTO (10⁻¹⁵) |
+| KILO (10³) | | ATTO (10⁻¹⁸) |
+| HECTO (10²) | | ZEPTO (10⁻²¹) |
+| DEKA (10¹) | | YOCTO (10⁻²⁴) |
 
 ## Sugar — compiles to nothing
 

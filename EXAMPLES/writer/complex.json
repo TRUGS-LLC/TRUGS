@@ -22,7 +22,8 @@
         "sec_conc",
         "ref_neo4j",
         "ref_rdf"
-      ]
+      ],
+      "dimension": "document_structure"
     },
     {
       "id": "sec_abstract",
@@ -35,7 +36,8 @@
       },
       "contains": [
         "para_abs"
-      ]
+      ],
+      "dimension": "document_structure"
     },
     {
       "id": "para_abs",
@@ -45,7 +47,8 @@
       "properties": {
         "content": "A comprehensive survey of graph database technologies."
       },
-      "contains": []
+      "contains": [],
+      "dimension": "document_structure"
     },
     {
       "id": "sec_intro",
@@ -58,7 +61,8 @@
       },
       "contains": [
         "para_intro"
-      ]
+      ],
+      "dimension": "document_structure"
     },
     {
       "id": "para_intro",
@@ -68,7 +72,8 @@
       "properties": {
         "content": "Graph databases have become essential for connected data."
       },
-      "contains": []
+      "contains": [],
+      "dimension": "document_structure"
     },
     {
       "id": "sec_review",
@@ -84,7 +89,8 @@
         "cit_neo4j",
         "para_rev2",
         "cit_rdf"
-      ]
+      ],
+      "dimension": "document_structure"
     },
     {
       "id": "para_rev1",
@@ -94,7 +100,8 @@
       "properties": {
         "content": "Neo4j introduced the property graph model in 2007."
       },
-      "contains": []
+      "contains": [],
+      "dimension": "document_structure"
     },
     {
       "id": "cit_neo4j",
@@ -105,7 +112,8 @@
         "key": "neo4j2007",
         "text": "Neo4j, 2007"
       },
-      "contains": []
+      "contains": [],
+      "dimension": "document_structure"
     },
     {
       "id": "para_rev2",
@@ -115,7 +123,8 @@
       "properties": {
         "content": "RDF and SPARQL provide a standards-based approach."
       },
-      "contains": []
+      "contains": [],
+      "dimension": "document_structure"
     },
     {
       "id": "cit_rdf",
@@ -126,7 +135,8 @@
         "key": "w3c2004",
         "text": "W3C, 2004"
       },
-      "contains": []
+      "contains": [],
+      "dimension": "document_structure"
     },
     {
       "id": "sec_conc",
@@ -139,7 +149,8 @@
       },
       "contains": [
         "para_conc"
-      ]
+      ],
+      "dimension": "document_structure"
     },
     {
       "id": "para_conc",
@@ -149,7 +160,8 @@
       "properties": {
         "content": "Graph databases will continue to grow in importance."
       },
-      "contains": []
+      "contains": [],
+      "dimension": "document_structure"
     },
     {
       "id": "ref_neo4j",
@@ -161,7 +173,8 @@
         "title": "Neo4j: The Graph Database",
         "year": "2007"
       },
-      "contains": []
+      "contains": [],
+      "dimension": "document_structure"
     },
     {
       "id": "ref_rdf",
@@ -173,7 +186,8 @@
         "title": "RDF Primer",
         "year": "2004"
       },
-      "contains": []
+      "contains": [],
+      "dimension": "document_structure"
     }
   ],
   "edges": [

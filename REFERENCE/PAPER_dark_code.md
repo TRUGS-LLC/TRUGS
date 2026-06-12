@@ -162,7 +162,7 @@ Every edge has 3 required fields:
 
 ### 4.2 Corner 2: TRUG/L Inline Comments
 
-TRUGS Language (TRUG/L) is a formalized subset of English with 190 executable words. Every valid sentence compiles to a directed graph. Every word has exactly one meaning. The vocabulary is drawn from computation and law:
+TRUGS Language (TRUG/L) is a formalized subset of English with 211 executable words across 9 parts of speech. Every valid sentence compiles to a directed graph. Every word has exactly one meaning. The vocabulary is drawn from computation, law, and SI prefixes (the 9th part of speech, added in 2.0, supplies hierarchy transition markers):
 
 - **Nouns** (26): PROCESS, SERVICE, DATA, RECORD, ENDPOINT, ...
 - **Verbs** (61): FILTER, SORT, WRITE, VALIDATE, ASSERT, ...
@@ -649,9 +649,9 @@ TRUGS provides an audit trail: the TRUG specification (what was intended), the T
 
 **TRUGS reduces Dark Code; it does not eliminate it.** The implementation between TRUG/L comments can still be opaque. A complex algorithm is still complex. The four-corner square verifies structure and intent, not every line of logic. The claim is legibility of intent, not legibility of implementation.
 
-**TRUG/L has 190 words.** Some domains may need branch extensions. The vocabulary is a closed set; extending it requires formal specification. Counter: 190 words cover computation, data flow, obligations, permissions, and prohibitions — sufficient for most software systems.
+**TRUG/L has 211 words.** Some domains may need branch extensions. The vocabulary is a closed set; extending it requires formal specification. Counter: 211 words cover computation, data flow, obligations, permissions, and prohibitions — sufficient for most software systems.
 
-**Adoption has a cost.** Developers must learn TRUG/L (190 words) and TRUG structure (7 node fields, 3 edge fields). This is learnable in a day but is a nonzero cost. Counter: the alternative is unbounded Dark Code accumulation with escalating maintenance, security, and liability costs.
+**Adoption has a cost.** Developers must learn TRUG/L (211 words) and TRUG structure (7 node fields, 3 edge fields). This is learnable in a day but is a nonzero cost. Counter: the alternative is unbounded Dark Code accumulation with escalating maintenance, security, and liability costs.
 
 **The validator enforces structure, not semantics.** The validator can confirm that a TRUG/L comment compiles to a valid TRUG subgraph. It cannot confirm that the TRUG/L comment accurately describes the code's behavior. Semantic verification remains a human (or AI auditor) responsibility — but the TRUG/L comment gives them something formal to verify against, rather than nothing.
 
@@ -663,7 +663,7 @@ TRUGS provides an audit trail: the TRUG specification (what was intended), the T
 
 **Design by Contract** (Meyer, 1986). Preconditions, postconditions, and invariants specify function behavior formally. TRUGS extends this from the function level to the system level: the TRUG graph is a contract for the entire architecture, not just individual functions.
 
-**Controlled Natural Languages** (Kuhn, 2014). CNLs restrict natural language to enable formal interpretation. TRUG/L is a CNL optimized for graph compilation: its 190 words map to nodes, edges, and operations in a TRUG graph. Unlike Attempto or PENG, TRUG/L targets directed graphs rather than first-order logic.
+**Controlled Natural Languages** (Kuhn, 2014). CNLs restrict natural language to enable formal interpretation. TRUG/L is a CNL optimized for graph compilation: its 211 words map to nodes, edges, and operations in a TRUG graph. Unlike Attempto or PENG, TRUG/L targets directed graphs rather than first-order logic.
 
 **Model-Driven Development** (UML, SysML, Eclipse Modeling Framework). MDD uses visual models as the primary artifact. TRUGS replaces heavyweight visual modeling with lightweight JSON and formal English. No special tools are required — any text editor works. The TRUG is a text file, not a diagram.
 
@@ -687,7 +687,7 @@ When an LLM generates code without a TRUG, it works from a natural language prom
 
 When an LLM generates code with a TRUG, the situation is fundamentally different:
 
-**During initial development**, the TRUG constrains the LLM's output. The LLM is not generating code from a vague prompt — it is implementing a validated graph with formal TRUG/L specifications at every node. Each function has a stated purpose. Each invariant is explicit. The LLM's task shifts from "write code that probably does what the user means" to "implement this specific TRUG/L specification." The specification is unambiguous (190 words, each with one meaning), so the LLM's output is verifiable against a formal target rather than a fuzzy intent.
+**During initial development**, the TRUG constrains the LLM's output. The LLM is not generating code from a vague prompt — it is implementing a validated graph with formal TRUG/L specifications at every node. Each function has a stated purpose. Each invariant is explicit. The LLM's task shifts from "write code that probably does what the user means" to "implement this specific TRUG/L specification." The specification is unambiguous (211 words, each with one meaning), so the LLM's output is verifiable against a formal target rather than a fuzzy intent.
 
 **During future modifications**, the TRUG serves as the context that the LLM otherwise lacks. When a different LLM (or the same LLM in a new session) returns to modify the code, it reads:
 
@@ -713,7 +713,7 @@ The four-corner verification square works because all four corners are readable 
 
 ### 11.3 The Choice
 
-The cost of the TRUG approach is nonzero: a 190-word vocabulary, a 10-field node structure, and the discipline to write specifications before code. The cost of the alternative — unbounded Dark Code accumulation in every LLM-assisted codebase — is structural illegibility, unauditable security, unmaintainable systems, and unresolvable liability.
+The cost of the TRUG approach is nonzero: a 211-word vocabulary, a 10-field node structure, and the discipline to write specifications before code. The cost of the alternative — unbounded Dark Code accumulation in every LLM-assisted codebase — is structural illegibility, unauditable security, unmaintainable systems, and unresolvable liability.
 
 The four-corner verification square is the minimum viable framework for safe autonomous code generation. As LLMs write more of our code, we must choose: slow down generation, or make generation legible. TRUGS chooses the second path — and in doing so, it gives both the human and the LLM the structure they need to build, understand, and maintain software together.
 

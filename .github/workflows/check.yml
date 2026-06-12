@@ -1,0 +1,36 @@
+name: Tier-1 check
+
+# AAA #2136 — Tier-1 polish CI gate. Coexists with compliance.yml (Dark Code).
+#
+# This runs the SAME `make check` an evaluator runs locally, end-to-end, so CI is a
+# faithful mirror of the "one command reads GREEN" Tier-1 thesis. gitleaks is invoked
+# via the free CLI binary (not gitleaks/gitleaks-action@v2, whose wrapper requires a
+# paid GITLEAKS_LICENSE secret for organization repos — TRUGS-LLC is an org).
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    name: tier-1 gate (secrets / format / lint / types / tests / shipped-TRUGs)
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install gitleaks (free CLI; the Action wrapper needs an org license, the binary does not)
+        run: |
+          GITLEAKS_VERSION=8.18.4
+          curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" | tar -xz gitleaks
+          sudo install gitleaks /usr/local/bin/gitleaks
+          gitleaks version
+      - name: Install dev tooling + tg (for Layer-4 tg validate)
+        run: |
+          pip install -e '.[dev]'
+          pip install trugs-tools
+      - name: Tier-1 gate (Layers 1 + 4 — secrets / format / lint / types / tests / shipped-TRUGs)
+        run: make check

@@ -2,10 +2,10 @@
   "name": "TRUGS",
   "version": "1.0.0",
   "type": "PROJECT",
-  "description": "TRUGS specification \u2014 protocol, language, validator, 7 domain examples, academic paper",
+  "description": "TRUGS 2.0.0 specification — protocol, language (233 words / 9 parts of speech), validator, 7 domain examples, academic paper",
   "dimensions": {
     "folder_structure": {
-      "description": "Top-level repo structure \u2014 spec, language, examples, tools, paper",
+      "description": "Top-level repo structure — spec, language, examples, tools, paper",
       "base_level": "BASE"
     },
     "research": {
@@ -30,7 +30,7 @@
       "type": "FOLDER",
       "properties": {
         "name": "TRUGS",
-        "purpose": "TRUGS v1.0.0 specification \u2014 protocol (7 boundaries, 16 rules), language (190 words, BNF grammar), validator, examples, paper"
+        "purpose": "TRUGS v2.0.0 specification — protocol (7 boundaries, 16 rules), language (233 words across 9 parts of speech, BNF grammar), validator, examples, paper"
       },
       "parent_id": null,
       "contains": [
@@ -47,10 +47,10 @@
         "folder_studies",
         "doc_pyproject",
         "doc_changelog",
-        "doc_plan_1544_byte_roundtrip",
-        "doc_plan_1544_pr_b_formatting",
         "doc_contributing",
-        "doc_security"
+        "doc_security",
+        "doc_makefile",
+        "doc_getting_started"
       ],
       "metric_level": "KILO_FOLDER",
       "dimension": "folder_structure"
@@ -60,7 +60,7 @@
       "type": "DOCUMENT",
       "properties": {
         "name": "README.md",
-        "purpose": "Overview \u2014 what TRUGS is, specification index, tool reference, link to TRUGS-AGENT"
+        "purpose": "Overview — what TRUGS is, specification index, tool reference, link to TRUGS-AGENT"
       },
       "parent_id": "root",
       "contains": [],
@@ -72,7 +72,7 @@
       "type": "DOCUMENT",
       "properties": {
         "name": "LICENSE",
-        "purpose": "Apache 2.0 \u2014 TRUGS LLC"
+        "purpose": "Apache 2.0 — TRUGS LLC"
       },
       "parent_id": "root",
       "contains": [],
@@ -84,7 +84,7 @@
       "type": "DOCUMENT",
       "properties": {
         "name": "AGENT.md",
-        "purpose": "Agent instructions \u2014 TRL vocabulary primer, repo navigation, validation commands"
+        "purpose": "Agent instructions — TRL vocabulary primer, repo navigation, validation commands"
       },
       "parent_id": "root",
       "contains": [],
@@ -96,7 +96,7 @@
       "type": "DOCUMENT",
       "properties": {
         "name": "NOTICE",
-        "purpose": "Apache 2.0 attribution notice \u2014 TRUGS LLC copyright and license"
+        "purpose": "Apache 2.0 attribution notice — TRUGS LLC copyright and license"
       },
       "parent_id": "root",
       "contains": [],
@@ -108,7 +108,7 @@
       "type": "COMPONENT",
       "properties": {
         "name": "TRUGS_PROTOCOL",
-        "purpose": "The TRUGS specification \u2014 7 boundaries, 10 primitive classes, 16 validation rules, domain branches, JSON schema",
+        "purpose": "The TRUGS specification — 7 boundaries, 10 primitive classes, 16 validation rules, domain branches, JSON schema",
         "file_count": 5
       },
       "parent_id": "root",
@@ -127,7 +127,7 @@
       "type": "SPECIFICATION",
       "properties": {
         "name": "TRUGS_PROTOCOL/CORE.md",
-        "purpose": "The universal foundation \u2014 7 boundaries, 10 semantic primitive classes (~140 primitives), composition rules, 16 validation rules",
+        "purpose": "The universal foundation — 7 boundaries, 10 semantic primitive classes (~140 primitives), composition rules, 16 validation rules",
         "lines": 1580
       },
       "parent_id": "folder_protocol",
@@ -140,7 +140,7 @@
       "type": "SPECIFICATION",
       "properties": {
         "name": "TRUGS_PROTOCOL/BRANCHES.md",
-        "purpose": "Domain-specific vocabularies \u2014 Python, Web, Writer, Knowledge, Living, Nested, Research branches with node types and edge relations",
+        "purpose": "Domain-specific vocabularies — Python, Web, Writer, Knowledge, Living, Nested, Research branches with node types and edge relations",
         "lines": 1611
       },
       "parent_id": "folder_protocol",
@@ -153,7 +153,7 @@
       "type": "SPECIFICATION",
       "properties": {
         "name": "TRUGS_PROTOCOL/SCHEMA.md",
-        "purpose": "JSON schema reference \u2014 formal field definitions, types, constraints for nodes and edges",
+        "purpose": "JSON schema reference — formal field definitions, types, constraints for nodes and edges",
         "lines": 831
       },
       "parent_id": "folder_protocol",
@@ -166,7 +166,7 @@
       "type": "SPECIFICATION",
       "properties": {
         "name": "TRUGS_PROTOCOL/SPEC_fundamentals.md",
-        "purpose": "Gentle introduction to CORE concepts \u2014 minimal valid TRUG, required fields, hierarchy, dimensions",
+        "purpose": "Gentle introduction to CORE concepts — minimal valid TRUG, required fields, hierarchy, dimensions",
         "lines": 859
       },
       "parent_id": "folder_protocol",
@@ -179,7 +179,7 @@
       "type": "SPECIFICATION",
       "properties": {
         "name": "TRUGS_PROTOCOL/SPEC_validation.md",
-        "purpose": "All 16 validation rules with implementations \u2014 9 structural (always), 7 compositional (core_v1.0.0)",
+        "purpose": "All 16 validation rules with implementations — 9 structural (always), 7 compositional (core_v1.0.0)",
         "lines": 1229
       },
       "parent_id": "folder_protocol",
@@ -192,8 +192,8 @@
       "type": "COMPONENT",
       "properties": {
         "name": "TRUGS_LANGUAGE",
-        "purpose": "TRL specification \u2014 190-word vocabulary, BNF grammar, 30 parsed examples, self-defining TRUG",
-        "file_count": 5
+        "purpose": "TRL specification — 233-word vocabulary across 9 parts of speech, BNF grammar, 30 parsed examples, self-defining TRUG",
+        "file_count": 6
       },
       "parent_id": "root",
       "contains": [
@@ -211,7 +211,7 @@
       "type": "SPECIFICATION",
       "properties": {
         "name": "TRUGS_LANGUAGE/SPEC_vocabulary.md",
-        "purpose": "190 words across 8 parts of speech \u2014 every word defined with source (computation or law) and CORE status",
+        "purpose": "233 words across 9 parts of speech (8 from computation/law plus 21 SI level prefixes added in 2.0) — every word defined with source and CORE status",
         "lines": 552
       },
       "parent_id": "folder_language",
@@ -237,7 +237,7 @@
       "type": "SPECIFICATION",
       "properties": {
         "name": "TRUGS_LANGUAGE/SPEC_examples.md",
-        "purpose": "30 parsed examples across 13 patterns \u2014 each sentence decomposed into subject, modal, verb, object",
+        "purpose": "30 parsed examples across 13 patterns — each sentence decomposed into subject, modal, verb, object",
         "lines": 424
       },
       "parent_id": "folder_language",
@@ -250,7 +250,7 @@
       "type": "DOCUMENT",
       "properties": {
         "name": "TRUGS_LANGUAGE/language.trug.json",
-        "purpose": "The opening TRUG \u2014 the language defining itself as a graph"
+        "purpose": "The opening TRUG — the language defining itself as a graph"
       },
       "parent_id": "folder_language",
       "contains": [],
@@ -262,7 +262,7 @@
       "type": "DOCUMENT",
       "properties": {
         "name": "TRUGS_LANGUAGE/README.md",
-        "purpose": "Language overview \u2014 what TRL is, how sentences compile to graphs"
+        "purpose": "Language overview — what TRL is, how sentences compile to graphs"
       },
       "parent_id": "folder_language",
       "contains": [],
@@ -274,7 +274,7 @@
       "type": "COMPONENT",
       "properties": {
         "name": "EXAMPLES",
-        "purpose": "7 domain examples \u2014 knowledge, living, memory, nested, research, web, writer \u2014 all validate against CORE",
+        "purpose": "7 domain examples — knowledge, living, memory, nested, research, web, writer — all validate against CORE",
         "file_count": 13
       },
       "parent_id": "root",
@@ -287,114 +287,25 @@
       "type": "COMPONENT",
       "properties": {
         "name": "tools",
-        "purpose": "Reference toolchain \u2014 validator (16 rules), memory (remember/recall/forget), CRUD (tget, tupdate, tdelete, tunlink)",
-        "file_count": 8
+        "purpose": "Build tooling — language.trug.json generator + its test suite. Spec-only since 2.0; runtime tools (validator, memory, CRUD) moved to TRUGS-TOOLS.",
+        "file_count": 3
       },
       "parent_id": "root",
       "contains": [
-        "tools_validate",
-        "tools_test",
-        "tools_memory",
-        "tools_trl",
-        "tools_memory_render",
-        "tools_memory_audit",
-        "tools_memory_import",
+        "tools_init",
         "tools_build_language_trug",
-        "tools_tget",
-        "tools_tupdate",
-        "tools_tdelete",
-        "tools_tunlink",
-        "tools_compliance_check"
+        "tools_test_build_language_trug"
       ],
       "metric_level": "DEKA_COMPONENT",
       "dimension": "folder_structure"
     },
     {
-      "id": "tools_validate",
+      "id": "tools_init",
       "type": "SPECIFICATION",
       "properties": {
-        "name": "tools/validate.py",
-        "purpose": "TRUGS validator \u2014 16 CORE rules, CLI interface, batch mode",
-        "lines": 526
-      },
-      "parent_id": "folder_tools",
-      "contains": [],
-      "metric_level": "BASE_SPECIFICATION",
-      "dimension": "folder_structure"
-    },
-    {
-      "id": "tools_test",
-      "type": "TEST_SUITE",
-      "properties": {
-        "name": "tools/test_validate.py",
-        "purpose": "Validator test suite \u2014 47 tests covering all 16 rules plus integration",
-        "test_count": 47,
-        "lines": 541
-      },
-      "parent_id": "folder_tools",
-      "contains": [],
-      "metric_level": "BASE_TEST_SUITE",
-      "dimension": "folder_structure"
-    },
-    {
-      "id": "tools_memory",
-      "type": "SPECIFICATION",
-      "properties": {
-        "name": "tools/memory.py",
-        "purpose": "LLM memory as a TRUG graph \u2014 remember, recall, forget, associate commands",
-        "lines": 371
-      },
-      "parent_id": "folder_tools",
-      "contains": [],
-      "metric_level": "BASE_SPECIFICATION",
-      "dimension": "folder_structure"
-    },
-    {
-      "id": "tools_trl",
-      "type": "SPECIFICATION",
-      "properties": {
-        "name": "tools/trl.py",
-        "purpose": "TRUG/L compiler \u2014 deterministic TRUG/L \u2194 TRUG round-trip (tokenize, parse, compile, decompile, validate)",
-        "trl": "PROCESS compiler SHALL MAP STRING DATA source TO RECORD graph."
-      },
-      "parent_id": "folder_tools",
-      "contains": [],
-      "metric_level": "BASE_SPECIFICATION",
-      "dimension": "folder_structure"
-    },
-    {
-      "id": "tools_memory_render",
-      "type": "SPECIFICATION",
-      "properties": {
-        "name": "tools/memory_render.py",
-        "purpose": "Deterministic markdown render of memory TRUG graphs with budget enforcement",
-        "trl": "PROCESS render SHALL MAP RECORD graph TO STRING DATA output."
-      },
-      "parent_id": "folder_tools",
-      "contains": [],
-      "metric_level": "BASE_SPECIFICATION",
-      "dimension": "folder_structure"
-    },
-    {
-      "id": "tools_memory_audit",
-      "type": "SPECIFICATION",
-      "properties": {
-        "name": "tools/memory_audit.py",
-        "purpose": "Memory hygiene \u2014 dead-rule detection, hit tracking, reconcile candidates",
-        "trl": "PROCESS audit SHALL FILTER ALL RECORD memory THEN RETURN RECORD dead_rule."
-      },
-      "parent_id": "folder_tools",
-      "contains": [],
-      "metric_level": "BASE_SPECIFICATION",
-      "dimension": "folder_structure"
-    },
-    {
-      "id": "tools_memory_import",
-      "type": "SPECIFICATION",
-      "properties": {
-        "name": "tools/memory_import.py",
-        "purpose": "Bulk import flat markdown files with YAML frontmatter into a memory TRUG graph",
-        "trl": "PROCESS importer SHALL READ ALL FILE markdown THEN WRITE EACH RECORD memory TO RECORD graph."
+        "name": "tools/__init__.py",
+        "purpose": "Package marker for the tools/ build-script package.",
+        "lines": 1
       },
       "parent_id": "folder_tools",
       "contains": [],
@@ -406,8 +317,9 @@
       "type": "SPECIFICATION",
       "properties": {
         "name": "tools/build_language_trug.py",
-        "purpose": "Parse SPEC_vocabulary.md into language.trug.json \u2014 190 words, 242 nodes",
-        "trl": "PROCESS builder SHALL MAP ALL RECORD word TO RECORD graph."
+        "purpose": "Parse SPEC_vocabulary.md into language.trug.json — 233 words, 289 nodes.",
+        "trl": "PROCESS builder SHALL MAP ALL RECORD word TO RECORD graph.",
+        "lines": 287
       },
       "parent_id": "folder_tools",
       "contains": [],
@@ -415,55 +327,18 @@
       "dimension": "folder_structure"
     },
     {
-      "id": "tools_tget",
-      "type": "SPECIFICATION",
+      "id": "tools_test_build_language_trug",
+      "type": "TEST_SUITE",
       "properties": {
-        "name": "tools/tget.py",
-        "purpose": "Read a node by ID \u2014 JSON or formatted output, optional edge listing",
-        "lines": 109
+        "name": "tools/test_build_language_trug.py",
+        "purpose": "Tests for build_language_trug.py — 7 tests covering count math, contiguity, PoS distribution, definitions, keywords, ID uniqueness, and generated-file freshness.",
+        "trl": "PROCESS test SHALL VALIDATE PROCESS builder SUBJECT_TO DATA spec.",
+        "test_count": 7,
+        "lines": 98
       },
       "parent_id": "folder_tools",
       "contains": [],
-      "metric_level": "BASE_SPECIFICATION",
-      "dimension": "folder_structure"
-    },
-    {
-      "id": "tools_tupdate",
-      "type": "SPECIFICATION",
-      "properties": {
-        "name": "tools/tupdate.py",
-        "purpose": "Update a node's properties by ID",
-        "lines": 163
-      },
-      "parent_id": "folder_tools",
-      "contains": [],
-      "metric_level": "BASE_SPECIFICATION",
-      "dimension": "folder_structure"
-    },
-    {
-      "id": "tools_tdelete",
-      "type": "SPECIFICATION",
-      "properties": {
-        "name": "tools/tdelete.py",
-        "purpose": "Delete a node and all its edges by ID",
-        "lines": 106
-      },
-      "parent_id": "folder_tools",
-      "contains": [],
-      "metric_level": "BASE_SPECIFICATION",
-      "dimension": "folder_structure"
-    },
-    {
-      "id": "tools_tunlink",
-      "type": "SPECIFICATION",
-      "properties": {
-        "name": "tools/tunlink.py",
-        "purpose": "Remove an edge between two nodes",
-        "lines": 104
-      },
-      "parent_id": "folder_tools",
-      "contains": [],
-      "metric_level": "BASE_SPECIFICATION",
+      "metric_level": "BASE_TEST_SUITE",
       "dimension": "folder_structure"
     },
     {
@@ -471,7 +346,7 @@
       "type": "COMPONENT",
       "properties": {
         "name": "PAPER",
-        "purpose": "Academic paper \u2014 TRUGS specification, TRL compilation algorithm, graph-sentence equivalence",
+        "purpose": "Academic paper — TRUGS specification, TRL compilation algorithm, graph-sentence equivalence",
         "file_count": 6
       },
       "parent_id": "root",
@@ -484,7 +359,7 @@
       "type": "COMPONENT",
       "properties": {
         "name": "REFERENCE",
-        "purpose": "Canonical home for TRUGS papers, standards, and cross-cutting material \u2014 the document trinity: WHY, HOW, CHECK",
+        "purpose": "Canonical home for TRUGS papers, standards, and cross-cutting material — the document trinity: WHY, HOW, CHECK",
         "file_count": 4
       },
       "parent_id": "root",
@@ -502,7 +377,7 @@
       "type": "DOCUMENT",
       "properties": {
         "name": "REFERENCE/README.md",
-        "purpose": "Index of the REFERENCE library \u2014 trinity overview, layout, cross-links"
+        "purpose": "Index of the REFERENCE library — trinity overview, layout, cross-links"
       },
       "parent_id": "folder_reference",
       "contains": [],
@@ -514,7 +389,7 @@
       "type": "DOCUMENT",
       "properties": {
         "name": "REFERENCE/PAPER_dark_code.md",
-        "purpose": "The WHY paper \u2014 Dark Code problem and TRUGS four-corner verification square as the resolution. Moved from TRUGS-AGENT per #1548.",
+        "purpose": "The WHY paper — Dark Code problem and TRUGS four-corner verification square as the resolution. Moved from TRUGS-AGENT per #1548.",
         "trl": "PROCESS paper SHALL DEFINE RECORD dark_code THEN SHALL CITE A RECORD solution."
       },
       "parent_id": "folder_reference",
@@ -527,7 +402,7 @@
       "type": "DOCUMENT",
       "properties": {
         "name": "REFERENCE/PAPER_how_to_code_with_trugs.md",
-        "purpose": "The HOW paper \u2014 practitioner guide: greenfield process, refactoring, multi-file, AAA integration, memory, CI, patterns, Python conventions",
+        "purpose": "The HOW paper — practitioner guide: greenfield process, refactoring, multi-file, AAA integration, memory, CI, patterns, Python conventions",
         "trl": "PROCESS paper SHALL DEFINE RECORD practice THEN CITE A RECORD workflow."
       },
       "parent_id": "folder_reference",
@@ -540,23 +415,10 @@
       "type": "SPECIFICATION",
       "properties": {
         "name": "REFERENCE/STANDARD_dark_code_compliance.md",
-        "purpose": "The CHECK \u2014 auditable Dark Code compliance checklist. Operationalizes the four corners into C1-C7 mechanical checks.",
+        "purpose": "The CHECK — auditable Dark Code compliance checklist. Operationalizes the four corners into C1-C7 mechanical checks.",
         "trl": "PROCESS standard SHALL ADMINISTER EACH RESOURCE repo SUBJECT_TO DATA compliance."
       },
       "parent_id": "folder_reference",
-      "contains": [],
-      "metric_level": "BASE_SPECIFICATION",
-      "dimension": "folder_structure"
-    },
-    {
-      "id": "tools_compliance_check",
-      "type": "SPECIFICATION",
-      "properties": {
-        "name": "tools/compliance_check.py",
-        "purpose": "Mechanical Dark Code compliance verifier \u2014 implements C1-C7 from STANDARD_dark_code_compliance.md. Entrypoint: trugs-compliance-check.",
-        "trl": "PROCESS compliance SHALL VALIDATE ALL FILE SUBJECT_TO DATA standard THEN RETURN RECORD report."
-      },
-      "parent_id": "folder_tools",
       "contains": [],
       "metric_level": "BASE_SPECIFICATION",
       "dimension": "folder_structure"
@@ -570,7 +432,7 @@
       "dimension": "research",
       "properties": {
         "name": "STUDIES",
-        "purpose": "Long-form research studies authored against the TRUGS spec \u2014 current contents: STUDY_001 (medical evidence synthesis) and STUDY_002 (executable semantic graph genealogy).",
+        "purpose": "Long-form research studies authored against the TRUGS spec — current contents: STUDY_001 (medical evidence synthesis) and STUDY_002 (executable semantic graph genealogy).",
         "path": "STUDIES/"
       }
     },
@@ -583,7 +445,7 @@
       "dimension": "build",
       "properties": {
         "name": "pyproject.toml",
-        "purpose": "Python package metadata: name=trugs, version=1.2.0, console scripts (trugs-validate, trugs-memory, trugs-memory-render, trugs-memory-import, trugs-memory-audit, etc.), zero runtime dependencies.",
+        "purpose": "Python package metadata: name=trugs, version=2.0.0, spec-only package (no console scripts as of 2.0; install trugs-tools for the tg CLI), zero runtime dependencies.",
         "path": "pyproject.toml"
       }
     },
@@ -592,34 +454,8 @@
       "type": "DOCUMENT",
       "properties": {
         "name": "CHANGELOG.md",
-        "purpose": "Keep-a-Changelog format \u2014 all notable changes to TRUGS",
+        "purpose": "Keep-a-Changelog format — all notable changes to TRUGS",
         "path": "CHANGELOG.md"
-      },
-      "parent_id": "root",
-      "contains": [],
-      "metric_level": "BASE_DOCUMENT",
-      "dimension": "folder_structure"
-    },
-    {
-      "id": "doc_plan_1544_byte_roundtrip",
-      "type": "DOCUMENT",
-      "properties": {
-        "name": "PLAN_1544_byte_identical_round_trip.md",
-        "purpose": "Work-product plan for #1544 byte-identical round-trip",
-        "path": "PLAN_1544_byte_identical_round_trip.md"
-      },
-      "parent_id": "root",
-      "contains": [],
-      "metric_level": "BASE_DOCUMENT",
-      "dimension": "folder_structure"
-    },
-    {
-      "id": "doc_plan_1544_pr_b_formatting",
-      "type": "DOCUMENT",
-      "properties": {
-        "name": "PLAN_1544_pr_b_formatting.md",
-        "purpose": "Work-product plan for #1544 PR-B formatting",
-        "path": "PLAN_1544_pr_b_formatting.md"
       },
       "parent_id": "root",
       "contains": [],
@@ -631,7 +467,7 @@
       "type": "DOCUMENT",
       "properties": {
         "name": "CONTRIBUTING.md",
-        "purpose": "Contribution guide \u2014 branch naming, AAA protocol, compliance gates, HITM rule",
+        "purpose": "Contribution guide — branch naming, AAA protocol, compliance gates, HITM rule",
         "path": "CONTRIBUTING.md"
       },
       "parent_id": "root",
@@ -644,8 +480,34 @@
       "type": "DOCUMENT",
       "properties": {
         "name": "SECURITY.md",
-        "purpose": "Security policy \u2014 private vulnerability disclosure via GitHub Security Advisories",
+        "purpose": "Security policy — private vulnerability disclosure via GitHub Security Advisories",
         "path": "SECURITY.md"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "doc_makefile",
+      "type": "DOCUMENT",
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "build",
+      "properties": {
+        "name": "Makefile",
+        "purpose": "Single-command Layer-1 (industry baseline) gate: `make check` runs gitleaks/format/lint/types/tests — AAA #2136 SP1.",
+        "path": "Makefile"
+      }
+    },
+    {
+      "id": "doc_getting_started",
+      "type": "DOCUMENT",
+      "properties": {
+        "name": "GETTING_STARTED.md",
+        "path": "GETTING_STARTED.md",
+        "purpose": "The no-primer on-ramp (AAA #2416 SP3, ADR-005): read the spec without installing anything."
       },
       "parent_id": "root",
       "contains": [],
@@ -705,7 +567,7 @@
       "to_id": "spec_core",
       "relation": "implements",
       "properties": {
-        "scope": "190 words drawn from CORE primitives"
+        "scope": "233 words drawn from CORE primitives plus 21 SI level prefixes"
       }
     },
     {
@@ -749,25 +611,19 @@
       }
     },
     {
-      "from_id": "tools_validate",
-      "to_id": "spec_validation",
-      "relation": "implements",
+      "from_id": "tools_test_build_language_trug",
+      "to_id": "tools_build_language_trug",
+      "relation": "tests",
       "properties": {
-        "scope": "Python implementation of all 16 validation rules"
+        "scope": "Tests parse_spec + build_trug across SPEC_vocabulary.md as the source of truth."
       }
     },
     {
-      "from_id": "tools_test",
-      "to_id": "tools_validate",
-      "relation": "tests",
-      "properties": {}
-    },
-    {
-      "from_id": "tools_memory",
-      "to_id": "spec_core",
+      "from_id": "tools_build_language_trug",
+      "to_id": "folder_language",
       "relation": "implements",
       "properties": {
-        "scope": "Memory graphs validate against CORE"
+        "scope": "Generates TRUGS_LANGUAGE/language.trug.json from SPEC_vocabulary.md."
       }
     },
     {
@@ -809,23 +665,7 @@
       "to_id": "ref_paper_dark_code",
       "relation": "describes",
       "properties": {
-        "scope": "HOW paper derives from \u00a75 of the Dark Code paper"
-      }
-    },
-    {
-      "from_id": "tools_compliance_check",
-      "to_id": "ref_standard_dark_code",
-      "relation": "implements",
-      "properties": {
-        "scope": "CLI mechanically enforces C1-C7 from the STANDARD"
-      }
-    },
-    {
-      "from_id": "tools_compliance_check",
-      "to_id": "tools_validate",
-      "relation": "uses",
-      "properties": {
-        "scope": "Delegates C7 to trugs-folder-check via subprocess"
+        "scope": "HOW paper derives from §5 of the Dark Code paper"
       }
     },
     {
@@ -896,18 +736,6 @@
     },
     {
       "from_id": "root",
-      "to_id": "doc_plan_1544_byte_roundtrip",
-      "relation": "contains",
-      "properties": {}
-    },
-    {
-      "from_id": "root",
-      "to_id": "doc_plan_1544_pr_b_formatting",
-      "relation": "contains",
-      "properties": {}
-    },
-    {
-      "from_id": "root",
       "to_id": "doc_contributing",
       "relation": "contains",
       "properties": {}
@@ -917,6 +745,17 @@
       "to_id": "doc_security",
       "relation": "contains",
       "properties": {}
+    },
+    {
+      "from_id": "root",
+      "to_id": "doc_makefile",
+      "relation": "contains",
+      "properties": {}
+    },
+    {
+      "from_id": "root",
+      "to_id": "doc_getting_started",
+      "relation": "contains"
     }
   ]
 }
