@@ -22,7 +22,8 @@
         "task_validate",
         "subgraph_deploy",
         "result_pipeline"
-      ]
+      ],
+      "dimension": "execution_flow"
     },
     {
       "id": "subgraph_data_prep",
@@ -37,7 +38,8 @@
       "contains": [
         "subgraph_ingest",
         "subgraph_feature_eng"
-      ]
+      ],
+      "dimension": "execution_flow"
     },
     {
       "id": "subgraph_ingest",
@@ -49,7 +51,8 @@
         "subgraph_ref": "raw_ingest.trug.json",
         "description": "Nested child graph: raw data ingestion from multiple sources"
       },
-      "contains": []
+      "contains": [],
+      "dimension": "execution_flow"
     },
     {
       "id": "subgraph_feature_eng",
@@ -63,7 +66,8 @@
       },
       "contains": [
         "result_features"
-      ]
+      ],
+      "dimension": "execution_flow"
     },
     {
       "id": "result_features",
@@ -76,7 +80,8 @@
         "records_processed": 120000,
         "feature_count": 256
       },
-      "contains": []
+      "contains": [],
+      "dimension": "execution_flow"
     },
     {
       "id": "subgraph_training",
@@ -90,7 +95,8 @@
       },
       "contains": [
         "result_training"
-      ]
+      ],
+      "dimension": "execution_flow"
     },
     {
       "id": "subgraph_eval",
@@ -104,7 +110,8 @@
       },
       "contains": [
         "result_eval"
-      ]
+      ],
+      "dimension": "execution_flow"
     },
     {
       "id": "task_validate",
@@ -116,7 +123,8 @@
         "description": "Validate all pipeline outputs and model quality",
         "status": "pending"
       },
-      "contains": []
+      "contains": [],
+      "dimension": "execution_flow"
     },
     {
       "id": "subgraph_deploy",
@@ -128,7 +136,8 @@
         "subgraph_ref": "model_deployment.trug.json",
         "description": "External child graph: model packaging and deployment"
       },
-      "contains": []
+      "contains": [],
+      "dimension": "execution_flow"
     },
     {
       "id": "result_training",
@@ -141,7 +150,8 @@
         "accuracy": 0.94,
         "epochs": 50
       },
-      "contains": []
+      "contains": [],
+      "dimension": "execution_flow"
     },
     {
       "id": "result_eval",
@@ -153,7 +163,8 @@
         "status": "success",
         "f1_score": 0.91
       },
-      "contains": []
+      "contains": [],
+      "dimension": "execution_flow"
     },
     {
       "id": "result_pipeline",
@@ -163,9 +174,10 @@
       "properties": {
         "name": "Pipeline Result",
         "status": "success",
-        "summary": "All stages completed \u2014 model deployed"
+        "summary": "All stages completed — model deployed"
       },
-      "contains": []
+      "contains": [],
+      "dimension": "execution_flow"
     }
   ],
   "edges": [

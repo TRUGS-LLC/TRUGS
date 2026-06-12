@@ -1,6 +1,6 @@
 """Tests for the language TRUG generator.
 
-Verifies that SPEC_vocabulary.md parses into a complete 190-word language
+Verifies that SPEC_vocabulary.md parses into a complete 233-word language
 TRUG matching the specification's published counts.
 """
 
@@ -18,25 +18,26 @@ GEN = REPO_ROOT / "TRUGS_LANGUAGE" / "language.trug.json"
 # From SPEC_vocabulary.md section headers
 EXPECTED_COUNTS = {
     "noun": 26,
-    "verb": 61,
-    "adjective": 36,
+    "verb": 80,
+    "adjective": 39,
     "adverb": 19,
     "preposition": 18,
     "conjunction": 13,
     "article": 10,
     "pronoun": 7,
+    "level_prefix": 21,
 }
-EXPECTED_TOTAL = 190
+EXPECTED_TOTAL = 233
 
 
 # AGENT SHALL VALIDATE PROCESS parse_spec SUBJECT_TO FILE spec THEN ASSERT DATA word_count.
-def test_parse_spec_returns_190_words() -> None:
+def test_parse_spec_returns_233_words() -> None:
     records = parse_spec(SPEC.read_text())
     assert len(records) == EXPECTED_TOTAL
 
 
 # AGENT SHALL VALIDATE EACH RECORD number SUBJECT_TO PROCESS parse_spec.
-def test_numbers_are_contiguous_1_to_190() -> None:
+def test_numbers_are_contiguous_1_to_233() -> None:
     records = parse_spec(SPEC.read_text())
     numbers = sorted(r["number"] for r in records)
     assert numbers == list(range(1, EXPECTED_TOTAL + 1))
@@ -46,14 +47,28 @@ def test_numbers_are_contiguous_1_to_190() -> None:
 def test_part_of_speech_counts_match_spec() -> None:
     records = parse_spec(SPEC.read_text())
     from collections import Counter
+
     counts = Counter(r["part_of_speech"] for r in records)
     assert dict(counts) == EXPECTED_COUNTS
 
 
 # AGENT SHALL VALIDATE EACH RECORD word THEN ASSERT DATA definition.
 def test_every_word_has_definition() -> None:
+    """Every word node in the built TRUG has a non-empty definition.
+
+    Inspects the built TRUG rather than the raw parse: some spec tables
+    (level_prefix Macro/Micro) leave the Definition cell blank for rows
+    where the SI factor implies the description, and build_trug
+    synthesizes a uniform "SI prefix 10ⁿ" string for those rows.
+    """
     records = parse_spec(SPEC.read_text())
-    blank = [r["word"] for r in records if not r["definition"]]
+    trug = build_trug(records)
+    word_nodes = [n for n in trug["nodes"] if n.get("properties", {}).get("word")]
+    blank = [
+        n["properties"]["word"]
+        for n in word_nodes
+        if not n["properties"].get("definition")
+    ]
     assert blank == []
 
 
@@ -61,9 +76,43 @@ def test_every_word_has_definition() -> None:
 def test_critical_keywords_present() -> None:
     records = parse_spec(SPEC.read_text())
     words = {r["word"] for r in records}
-    for required in ["SHALL", "SHALL_NOT", "MAY", "DEFINE",
-                     "FILTER", "WRITE", "SUPERSEDES", "CONTAINS",
-                     "GOVERNS", "DEPENDS_ON", "PARTY", "AGENT"]:
+    for required in [
+        "SHALL",
+        "SHALL_NOT",
+        "MAY",
+        "DEFINE",
+        "FILTER",
+        "WRITE",
+        "SUPERSEDES",
+        "CONTAINS",
+        "GOVERNS",
+        "DEPENDS_ON",
+        "PARTY",
+        "AGENT",
+        # v2.0 additions (AAA #2048 / #2018 disposition)
+        "EXECUTE",
+        "EMIT",
+        "HAVE",
+        "INVARIANT",
+        "ASSERT_NOT",
+        "INVOKE",
+        "UPDATE",
+        "ACCEPT",
+        "COMPLETE",
+        "LOAD",
+        "ONLY",
+        "POST",
+        "AT_LEAST",
+        "HALT",
+        "APPLY",
+        "DERIVE",
+        "PASS",
+        "DELEGATE",
+        "EXACTLY",
+        "PRODUCE",
+        "SUGGEST",
+        "APPEND",
+    ]:
         assert required in words, f"missing {required}"
 
 

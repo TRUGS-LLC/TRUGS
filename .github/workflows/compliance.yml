@@ -9,7 +9,7 @@ on:
 jobs:
   compliance:
     runs-on: ubuntu-latest
-    name: trugs-compliance-check
+    name: trug compliance
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -19,15 +19,15 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install package
-        run: pip install -e .
+      - name: Install trugs-tools
+        run: pip install "trugs-tools>=2.0.0"
 
-      - name: Run trugs-compliance-check
-        run: trugs-compliance-check .
+      - name: Run trug compliance
+        run: trug compliance .
 
       - name: Upload detailed report
         if: failure()
-        run: trugs-compliance-check --json . > compliance-report.json
+        run: trug compliance --json . > compliance-report.json
         continue-on-error: true
 
       - name: Attach report artifact
@@ -50,9 +50,7 @@ jobs:
           python-version: '3.11'
 
       - name: Install
-        run: |
-          pip install -e .
-          pip install pytest
+        run: pip install pytest
 
-      - name: Run compliance_check tests
-        run: pytest tools/test_compliance_check.py -v
+      - name: Run build-tool tests
+        run: pytest tools/test_build_language_trug.py -v

@@ -228,7 +228,7 @@ A traditional review would likely place CoQ10 in the side effects section and mi
 
 TRUG stands for Traceable Recursive Universal Graph Specification. A TRUG is a JSON file with three components: nodes (things), edges (relationships between things), and hierarchy (organization via parent/child containment). Every node has a unique identifier, a type, a label, and a summary. Every edge has a source, a target, and a typed relation.
 
-The specification defines a 190-word formal vocabulary (TRUGS Language, or TRL) with exact definitions for every word. Edge relations use prepositions from this vocabulary: FEEDS, DEPENDS_ON, REFERENCES, SUPERSEDES, CONTAINS, IMPLEMENTS, EXTENDS. Node types use nouns: DOCUMENT, SECTION, REFERENCE, RECORD. The vocabulary is a closed set — no invented terms.
+The specification defines a 211-word formal vocabulary (TRUGS Language, or TRL) with exact definitions for every word. Edge relations use prepositions from this vocabulary: FEEDS, DEPENDS_ON, REFERENCES, SUPERSEDES, CONTAINS, IMPLEMENTS, EXTENDS. Node types use nouns: DOCUMENT, SECTION, REFERENCE, RECORD. The vocabulary is a closed set — no invented terms.
 
 ### Why Graphs for Evidence Synthesis?
 
