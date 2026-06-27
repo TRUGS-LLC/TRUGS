@@ -93,11 +93,11 @@ All operations below use the unified `tg` CLI from the sibling [`trugs-tools`](h
 
 See [`SPEC_cli.md`](https://github.com/TRUGS-LLC/TRUGS-TOOLS/blob/main/REFERENCE/SPEC_cli.md) in the trugs-tools repo for the full command surface.
 
-**Legacy (trugs 1.2.x only):** the same operations are available as `python tools/validate.py`, `python tools/tget.py`, etc. in this repo's `tools/` directory. That directory disappears at `trugs` 2.0.0.
+**Legacy (trugs 1.2.x only):** the same operations were available as `python tools/validate.py`, `python tools/tget.py`, etc. in the 1.x `tools/` directory; that directory was removed at `trugs` 2.0.0 — use the `tg` CLI from `trugs-tools` instead.
 
 ## Examples
 
-The [EXAMPLES/](EXAMPLES/) directory contains sample TRUGs for 6 domains at varying complexity levels. All 19 examples pass validation.
+The [EXAMPLES/](EXAMPLES/) directory contains sample TRUGs for 7 domains at varying complexity levels. All 7 examples pass validation.
 
 ## This repo, as a TRUG
 
@@ -105,16 +105,16 @@ This repository describes itself as a TRUG. [`folder.trug.json`](folder.trug.jso
 
 ```bash
 # What's in this repo?
-tg ls folder.trug.json
+tg ls .
 
-# What does the compliance checker depend on?
-tg get folder.trug.json tools_compliance_check --edges
+# What does the language-graph builder implement (and what tests it)?
+tg get folder.trug.json tools_build_language_trug --edges
 
 # Does the graph match the filesystem?
 tg check .
 ```
 
-CI runs `tg check` on every PR — this README's section list, the spec index, the tool table above all correspond to nodes you can traverse programmatically. When the TRUG drifts from the prose or the filesystem, CI fails. We dogfood our own dogfood.
+CI runs `make check` (formatting, lint, types, tests, and the TRUG checks via `tg`) plus `trug compliance .` on every push and PR — this README's section list, the spec index, the tool table above all correspond to nodes you can traverse programmatically. When the TRUG drifts from the prose or the filesystem, CI fails. We dogfood our own dogfood.
 
 ## Use It
 

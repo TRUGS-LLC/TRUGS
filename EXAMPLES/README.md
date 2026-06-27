@@ -19,8 +19,8 @@ One strong example per domain demonstrating the TRUGS v1.0.0 specification. All 
 ## Validate
 
 ```bash
-python tools/validate.py --all EXAMPLES/
-python tools/validate.py EXAMPLES/knowledge/complex.json
+tg validate --all EXAMPLES/
+tg validate EXAMPLES/knowledge/complex.json
 ```
 
 ## More Examples

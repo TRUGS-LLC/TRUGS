@@ -83,7 +83,7 @@ trug validate first.trug.json
 VALID  first.trug.json
 ```
 
-`VALID` means all twelve structural rules pass. Break something — change the
+`VALID` means all sixteen CORE rules pass. Break something — change the
 node's `"dimension": "system"` to a dimension the envelope never declared —
 and `trug validate` tells you exactly which rule failed and why:
 

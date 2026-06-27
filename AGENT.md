@@ -3,7 +3,7 @@
 <trl>
 DEFINE "trugs_spec" AS NAMESPACE.
 NAMESPACE trugs_spec CONTAINS MODULE trugs_language AND MODULE trugs_protocol.
-MODULE trugs_language GOVERNS INTERFACE TRL.
+MODULE trugs_language GOVERNS INTERFACE trl.
 MODULE trugs_protocol GOVERNS DATA graph.
 </trl>
 
@@ -17,9 +17,8 @@ This is the canonical TRUGS specification. It defines:
 - **Validation** — 16 rules (9 structural, 7 compositional).
 
 <trl>
-NAMESPACE trugs_spec REFERENCES ENDPOINT "https://github.com/TRUGS-LLC/TRUGS".
-INTERFACE TRL CONTAINS 233 UNIQUE RECORD word.
-EACH RECORD word BELONGS_TO EXACTLY A RECORD part_of_speech.
+INTERFACE trl SHALL DEFINE 233 RECORD word.
+INTERFACE trl SHALL DEFINE 9 RECORD part_of_speech.
 </trl>
 
 ## Repository Structure
@@ -48,10 +47,10 @@ This repo describes data. The companion repo implements tools. See `principle_sp
 ## Rules for This Repository
 
 <trl>
-AGENT SHALL_NOT WRITE ANY FILE 'that CONTRADICTS INTERFACE TRL.
-AGENT SHALL VALIDATE EACH RECORD change SUBJECT_TO 16 REQUIRED RECORD rule.
-AGENT MAY READ FILE folder.trug.json 'for RECORD structure.
-AGENT MAY READ FILE "TRUGS_LANGUAGE/SPEC_vocabulary.md" 'for DATA vocabulary.
+AGENT SHALL_NOT WRITE ANY FILE SUBJECT_TO RECORD trl_violation.
+AGENT SHALL VALIDATE EACH RECORD change SUBJECT_TO RECORD rule.
+AGENT MAY READ FILE folder_trug.
+AGENT MAY READ FILE vocabulary.
 </trl>
 
 ### Sugar — 'words
@@ -59,8 +58,7 @@ AGENT MAY READ FILE "TRUGS_LANGUAGE/SPEC_vocabulary.md" 'for DATA vocabulary.
 Sugar is a pattern (`'[a-z_]+`), not a fixed word list. Any tick-prefixed lowercase token is sugar. Sugar compiles to nothing — it exists for human readability.
 
 <trl>
-EACH RECORD sugar MATCHES RECORD pattern "'[a-z_]+".
-PROCESS validator SHALL STRIP ALL RECORD sugar 'before VALIDATE.
+PROCESS validator SHALL FILTER ALL RECORD sugar.
 </trl>
 
 ## License
@@ -68,8 +66,8 @@ PROCESS validator SHALL STRIP ALL RECORD sugar 'before VALIDATE.
 Apache 2.0. See LICENSE and NOTICE files.
 
 <trl>
-NAMESPACE trugs_spec SUBJECT_TO FILE LICENSE.
-FILE NOTICE GOVERNS RECORD patent_boundary.
+NAMESPACE trugs_spec SUBJECT_TO FILE license.
+FILE notice GOVERNS RECORD patent_boundary.
 </trl>
 
 ## Related Repositories
