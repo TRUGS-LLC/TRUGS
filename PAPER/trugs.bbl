@@ -1,9 +1,17 @@
-\begin{thebibliography}{25}
+\begin{thebibliography}{39}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
   \providecommand{\doi}[1]{doi: #1}\else
   \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Abadi et~al.(2016)Abadi, Barham, Chen, Chen, Davis, Dean, Devin,
+  Ghemawat, Irving, Isard, et~al.]{abadi2016tensorflow}
+Mart{\'i}n Abadi, Paul Barham, Jianmin Chen, Zhifeng Chen, Andy Davis, Jeffrey
+  Dean, Matthieu Devin, Sanjay Ghemawat, Geoffrey Irving, Michael Isard, et~al.
+\newblock {TensorFlow}: A system for large-scale machine learning.
+\newblock In \emph{12th USENIX Symposium on Operating Systems Design and
+  Implementation (OSDI)}, pages 265--283, 2016.
 
 \bibitem[{Anthropic}(2025)]{mcp2025}
 {Anthropic}.
@@ -12,8 +20,16 @@
 
 \bibitem[Backus(1959)]{backus1959syntax}
 John~W. Backus.
-\newblock The syntax and semantics of the proposed international algebraic language of the {Zurich ACM-GAMM} conference.
-\newblock \emph{Proceedings of the International Conference on Information Processing}, pages 125--131, 1959.
+\newblock The syntax and semantics of the proposed international algebraic
+  language of the {Zurich ACM-GAMM} conference.
+\newblock \emph{Proceedings of the International Conference on Information
+  Processing}, pages 125--131, 1959.
+
+\bibitem[Berners-Lee et~al.(2001)Berners-Lee, Hendler, and
+  Lassila]{berners2001semantic}
+Tim Berners-Lee, James Hendler, and Ora Lassila.
+\newblock The semantic web.
+\newblock \emph{Scientific American}, 284\penalty0 (5):\penalty0 34--43, 2001.
 
 \bibitem[Bian(2025)]{bian2025llm}
 Haonan Bian.
@@ -30,22 +46,33 @@ Scott Bradner.
 \bibitem[Chamberlin(2012)]{chamberlin2012early}
 Donald~D. Chamberlin.
 \newblock Early history of {SQL}.
-\newblock \emph{IEEE Annals of the History of Computing}, 34\penalty0 (4):\penalty0 78--82, 2012.
+\newblock \emph{IEEE Annals of the History of Computing}, 34\penalty0
+  (4):\penalty0 78--82, 2012.
 
 \bibitem[Chamberlin and Boyce(1974)]{chamberlin1974sequel}
 Donald~D. Chamberlin and Raymond~F. Boyce.
 \newblock {SEQUEL}: A structured {English} query language.
-\newblock In \emph{Proceedings of the 1974 ACM SIGFIDET Workshop on Data Description, Access and Control}, pages 249--264. ACM, 1974.
+\newblock In \emph{Proceedings of the 1974 ACM SIGFIDET Workshop on Data
+  Description, Access and Control}, pages 249--264. ACM, 1974.
 
-\bibitem[Clark et~al.(2005)Clark, Harrison, Jenkins, Thompson, and Wojcik]{clark2005class}
+\bibitem[Clark et~al.(2005)Clark, Harrison, Jenkins, Thompson, and
+  Wojcik]{clark2005class}
 Peter Clark, Phil Harrison, Tom Jenkins, John Thompson, and Richard Wojcik.
-\newblock Acquiring and using world knowledge using a restricted subset of english.
+\newblock Acquiring and using world knowledge using a restricted subset of
+  english.
 \newblock In \emph{Proceedings of FLAIRS}, 2005.
 
 \bibitem[Cregan et~al.(2007)Cregan, Schwitter, and Meyer]{cregan2007sydney}
 Anne Cregan, Rolf Schwitter, and Thomas Meyer.
-\newblock Sydney {OWL} syntax --- towards a controlled natural language syntax for {OWL} 1.1.
+\newblock Sydney {OWL} syntax --- towards a controlled natural language syntax
+  for {OWL} 1.1.
 \newblock In \emph{Proceedings of OWLED 2007}, 2007.
+
+\bibitem[Dennis and Misunas(1975)]{dennis1975preliminary}
+Jack~B. Dennis and David~P. Misunas.
+\newblock A preliminary architecture for a basic data-flow processor.
+\newblock In \emph{Proceedings of the 2nd Annual Symposium on Computer
+  Architecture (ISCA)}, pages 126--132, 1975.
 
 \bibitem[Fuchs et~al.(2008)Fuchs, Kaljurand, and Kuhn]{fuchs2008attempto}
 Norbert~E. Fuchs, Kaarel Kaljurand, and Tobias Kuhn.
@@ -55,29 +82,75 @@ Norbert~E. Fuchs, Kaarel Kaljurand, and Tobias Kuhn.
 \bibitem[Gruber(1993)]{gruber1993translation}
 Thomas~R. Gruber.
 \newblock A translation approach to portable ontology specifications.
-\newblock \emph{Knowledge Acquisition}, 5\penalty0 (2):\penalty0 199--220, 1993.
+\newblock \emph{Knowledge Acquisition}, 5\penalty0 (2):\penalty0 199--220,
+  1993.
+
+\bibitem[Harel(1987)]{harel1987statecharts}
+David Harel.
+\newblock Statecharts: A visual formalism for complex systems.
+\newblock \emph{Science of Computer Programming}, 8\penalty0 (3):\penalty0
+  231--274, 1987.
+
+\bibitem[Hewitt et~al.(1973)Hewitt, Bishop, and Steiger]{hewitt1973universal}
+Carl Hewitt, Peter Bishop, and Richard Steiger.
+\newblock A universal modular {ACTOR} formalism for artificial intelligence.
+\newblock In \emph{Proceedings of the 3rd International Joint Conference on
+  Artificial Intelligence (IJCAI)}, pages 235--245, 1973.
 
 \bibitem[Hohfeld(1919)]{hohfeld1919fundamental}
 Wesley~Newcomb Hohfeld.
-\newblock \emph{Fundamental Legal Conceptions as Applied in Judicial Reasoning}.
+\newblock \emph{Fundamental Legal Conceptions as Applied in Judicial
+  Reasoning}.
 \newblock Yale University Press, 1919.
 
 \bibitem[Hutton(2016)]{hutton2016programming}
 Graham Hutton.
 \newblock \emph{Programming in Haskell}.
 \newblock Cambridge University Press, 2nd edition, 2016.
-\newblock Defines map, filter, foldr as universal higher-order functions across functional languages.
+\newblock Defines map, filter, foldr as universal higher-order functions across
+  functional languages.
+
+\bibitem[Karp and Miller(1966)]{karp1966properties}
+Richard~M. Karp and Raymond~E. Miller.
+\newblock Properties of a model for parallel computations: Determinacy,
+  termination, queueing.
+\newblock \emph{SIAM Journal on Applied Mathematics}, 14\penalty0 (6):\penalty0
+  1390--1411, 1966.
+
+\bibitem[Khattab et~al.(2024)Khattab, Singhvi, Maheshwari, Zhang, Santhanam,
+  Vardhamanan, Haq, Sharma, Joshi, Moazam, Miller, Zaharia, and
+  Potts]{khattab2024dspy}
+Omar Khattab, Arnav Singhvi, Paridhi Maheshwari, Zhiyuan Zhang, Keshav
+  Santhanam, Sri Vardhamanan, Saiful Haq, Ashutosh Sharma, Thomas~T. Joshi,
+  Hanna Moazam, Heather Miller, Matei Zaharia, and Christopher Potts.
+\newblock {DSPy}: Compiling declarative language model calls into
+  self-improving pipelines.
+\newblock In \emph{The Twelfth International Conference on Learning
+  Representations (ICLR)}, 2024.
 
 \bibitem[Kuhn(2014)]{kuhn2014survey}
 Tobias Kuhn.
 \newblock A survey and classification of controlled natural languages.
-\newblock \emph{Computational Linguistics}, 40\penalty0 (1):\penalty0 121--170, 2014.
+\newblock \emph{Computational Linguistics}, 40\penalty0 (1):\penalty0 121--170,
+  2014.
 \newblock \doi{10.1162/COLI_a_00168}.
+
+\bibitem[{LangChain AI}(2024)]{langgraph2024}
+{LangChain AI}.
+\newblock {LangGraph}: Build stateful, multi-actor applications with {LLMs}.
+\newblock \url{https://github.com/langchain-ai/langgraph}, 2024.
 
 \bibitem[Montague(1973)]{montague1973proper}
 Richard Montague.
 \newblock The proper treatment of quantification in ordinary english.
-\newblock In Julius Hintikka, Julius Moravcsik, and Patrick Suppes, editors, \emph{Approaches to Natural Language}, pages 221--242. D. Reidel, 1973.
+\newblock In Julius Hintikka, Julius Moravcsik, and Patrick Suppes, editors,
+  \emph{Approaches to Natural Language}, pages 221--242. D. Reidel, 1973.
+
+\bibitem[Moura(2023)]{crewai2023}
+Jo{\~a}o Moura.
+\newblock {CrewAI}: Framework for orchestrating role-playing, autonomous {AI}
+  agents.
+\newblock \url{https://github.com/crewAIInc/crewAI}, 2023.
 
 \bibitem[{Neo4j, Inc.}(2024)]{neo4j}
 {Neo4j, Inc.}
@@ -93,7 +166,20 @@ Imran~Ahsan Nyazee.
 \bibitem[Pan et~al.(2024)Pan, Luo, Wang, Chen, Wang, and Wu]{pan2024unifying}
 Shirui Pan, Linhao Luo, Yufei Wang, Chen Chen, Jiapu Wang, and Xindong Wu.
 \newblock Unifying large language models and knowledge graphs: A roadmap.
-\newblock \emph{IEEE Transactions on Knowledge and Data Engineering}, 36\penalty0 (7):\penalty0 3580--3599, 2024.
+\newblock \emph{IEEE Transactions on Knowledge and Data Engineering},
+  36\penalty0 (7):\penalty0 3580--3599, 2024.
+
+\bibitem[Petri(1962)]{petri1962kommunikation}
+Carl~Adam Petri.
+\newblock \emph{Kommunikation mit {A}utomaten}.
+\newblock PhD thesis, Technische Universit{\"a}t Darmstadt, Bonn, 1962.
+\newblock English translation: Communication with Automata, 1966.
+
+\bibitem[Quillian(1968)]{quillian1968semantic}
+M.~Ross Quillian.
+\newblock Semantic memory.
+\newblock In Marvin Minsky, editor, \emph{Semantic Information Processing},
+  pages 216--270. MIT Press, Cambridge, MA, 1968.
 
 \bibitem[Schwitter(2002)]{schwitter2002english}
 Rolf Schwitter.
@@ -103,7 +189,9 @@ Rolf Schwitter.
 \bibitem[Sproat and Shih(1991)]{sproat1991crosslinguistic}
 Richard Sproat and Chilin Shih.
 \newblock The cross-linguistic distribution of adjective ordering restrictions.
-\newblock In Carol Georgopoulos and Roberta Ishihara, editors, \emph{Interdisciplinary Approaches to Language}, pages 565--593. Kluwer Academic Publishers, 1991.
+\newblock In Carol Georgopoulos and Roberta Ishihara, editors,
+  \emph{Interdisciplinary Approaches to Language}, pages 565--593. Kluwer
+  Academic Publishers, 1991.
 
 \bibitem[Tam et~al.(2025)]{tam2025slot}
 Adrian Tam et~al.
@@ -133,7 +221,35 @@ Georg~Henrik von Wright.
 \bibitem[Willard and Louf(2023)]{willard2023efficient}
 Brandon~T. Willard and R\'emi Louf.
 \newblock Efficient guided generation for large language models.
-\newblock In \emph{Proceedings of ICML 2024 Workshop on Structured Probabilistic Inference}, 2023.
+\newblock In \emph{Proceedings of ICML 2024 Workshop on Structured
+  Probabilistic Inference}, 2023.
 \newblock arXiv:2307.09702.
+
+\bibitem[Wu et~al.(2023)Wu, Bansal, Zhang, Wu, Li, Zhu, Jiang, Zhang, Zhang,
+  Liu, Awadallah, White, Burger, and Wang]{wu2023autogen}
+Qingyun Wu, Gagan Bansal, Jieyu Zhang, Yiran Wu, Beibin Li, Erkang Zhu,
+  Li~Jiang, Xiaoyun Zhang, Shaokun Zhang, Jiale Liu, Ahmed~Hassan Awadallah,
+  Ryen~W. White, Doug Burger, and Chi Wang.
+\newblock {AutoGen}: Enabling next-gen {LLM} applications via multi-agent
+  conversation.
+\newblock \emph{arXiv preprint arXiv:2308.08155}, 2023.
+
+\bibitem[Zaharia et~al.(2012)Zaharia, Chowdhury, Das, Dave, Ma, McCauley,
+  Franklin, Shenker, and Stoica]{zaharia2012resilient}
+Matei Zaharia, Mosharaf Chowdhury, Tathagata Das, Ankur Dave, Justin Ma, Murphy
+  McCauley, Michael~J. Franklin, Scott Shenker, and Ion Stoica.
+\newblock Resilient distributed datasets: A fault-tolerant abstraction for
+  in-memory cluster computing.
+\newblock In \emph{9th USENIX Symposium on Networked Systems Design and
+  Implementation (NSDI)}, pages 15--28, 2012.
+
+\bibitem[Zheng et~al.(2022)Zheng, Zhou, Zhou, Soylu, and
+  Kharlamov]{zheng2022executable}
+Zhuoxun Zheng, Baifan Zhou, Dongzhuoran Zhou, Ahmet Soylu, and Evgeny
+  Kharlamov.
+\newblock Executable knowledge graphs for machine learning: A {Bosch} case of
+  welding monitoring.
+\newblock In \emph{The Semantic Web -- ISWC 2022}, volume 13489 of
+  \emph{Lecture Notes in Computer Science}, pages 791--809. Springer, 2022.
 
 \end{thebibliography}
