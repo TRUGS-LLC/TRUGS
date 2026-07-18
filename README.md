@@ -33,16 +33,16 @@ The sentence IS the program. The graph IS the AST. Every valid TRUG/L sentence c
 pip install trugs
 ```
 
-**As of 2.0.0 (breaking), `trugs` ships the specification only — no CLIs.** Spec content (`CORE`, `TRL` vocabulary, reference papers) is packaged as data. The 2.0.0 release also adds 21 SI level prefixes (YOTTA…YOCTO) as a new part of speech for hierarchy transition markers — see [SPEC_vocabulary.md §9](TRUGS_LANGUAGE/SPEC_vocabulary.md#9-level-prefixes--hierarchy-transition-markers-21). For the `tg` CLI and all tooling, install the sibling package:
+**As of 2.0.0 (breaking), `trugs` ships the specification only — no CLIs.** Spec content (`CORE`, `TRL` vocabulary, reference papers) is packaged as data. The 2.0.0 release also adds 21 SI level prefixes (YOTTA…YOCTO) as a new part of speech for hierarchy transition markers — see [SPEC_vocabulary.md §9](TRUGS_LANGUAGE/SPEC_vocabulary.md#9-level-prefixes--hierarchy-transition-markers-21). For the `trug` CLI and all tooling, install the sibling package:
 
 ```bash
-pip install trugs-tools    # provides the `tg` binary (36 operations)
-tg --help
+pip install trugs-tools    # provides the `trug` binary — 8 language verbs
+trug --help
 ```
 
-See [TRUGS-LLC/TRUGS-TOOLS](https://github.com/TRUGS-LLC/TRUGS-TOOLS) for the unified `tg` CLI — validation, memory, compliance, AAA protocol, and more.
+See [TRUGS-LLC/TRUGS-TOOLS](https://github.com/TRUGS-LLC/TRUGS-TOOLS) for the `trug` CLI — validation, TRL compile/decompile, graph CRUD, and Dark Code compliance. Filesystem↔graph cartography (`check`, `ls`, `sync`, `render`) ships as the separate `trugs-folder` package's `trug-a-folder` binary.
 
-**Migrating from `trugs` 1.x?** The pre-2.0 package shipped `tg validate`, `tg memory`, etc. as entry points. In 2.0.0 those move to `trugs-tools`. Migration is one additional install: `pip install trugs-tools` and every `tg <op>` command works identically.
+**Migrating from `trugs` 1.x?** The pre-2.0 package shipped a `tg` binary (`tg validate`, `tg get`, etc.). As of `trugs-tools` 2.0.0 the console script is renamed **`tg` → `trug`**, and the language verbs are `trug validate`, `trug get`, `trug update`, `trug delete`, `trug unlink`, `trug trl`, `trug compliance`, `trug audit`. Filesystem cartography (`check`, `ls`, `sync`, `render`) moved out to the separate `trugs-folder` package — run it as `trug-a-folder <verb>`.
 
 ## TRUGS Language
 
@@ -78,22 +78,22 @@ See [TRUGS_LANGUAGE/](TRUGS_LANGUAGE/) for the complete specification.
 | [SPEC_examples.md](TRUGS_LANGUAGE/SPEC_examples.md) | 30 parsed examples across 13 patterns |
 | [language.trug.json](TRUGS_LANGUAGE/language.trug.json) | The opening TRUG — the language defining itself |
 
-## Tools — via `trugs-tools`
+## Tools — via `trugs-tools` + `trugs-folder`
 
-All operations below use the unified `tg` CLI from the sibling [`trugs-tools`](https://github.com/TRUGS-LLC/TRUGS-TOOLS) package (`pip install trugs-tools`). 36 operations under 21 top-level verbs + 3 sub-namespaces.
+The graph operations below use the `trug` CLI from the sibling [`trugs-tools`](https://github.com/TRUGS-LLC/TRUGS-TOOLS) package (`pip install trugs-tools`) — 8 language verbs. Repo cartography (`check`, `ls`, `sync`, `render`) is the `trug-a-folder` binary from the separate `trugs-folder` package (`pip install trugs-folder`).
 
 | Verb | Usage | Description |
 |------|-------|-------------|
-| `tg validate` | `tg validate <file>` | Enforces all 16 CORE rules |
-| `tg validate` | `tg validate --all <dir>` | Batch validation |
-| `tg get` | `tg get <file> <node_id>` | Read a node |
-| `tg update` | `tg update <file> <node_id> --set key=value` | Update a node |
-| `tg delete` | `tg delete <file> <node_id>` | Delete a node and its edges |
-| `tg unlink` | `tg unlink <file> --from X --to Y` | Remove an edge |
+| `trug validate` | `trug validate <file>` | Enforces all 16 CORE rules |
+| `trug validate` | `trug validate --all <dir>` | Batch validation |
+| `trug get` | `trug get <file> <node_id>` | Read a node |
+| `trug update` | `trug update <file> <node_id> --set key=value` | Update a node |
+| `trug delete` | `trug delete <file> <node_id>` | Delete a node and its edges |
+| `trug unlink` | `trug unlink <file> --from X --to Y` | Remove an edge |
 
 See [`SPEC_cli.md`](https://github.com/TRUGS-LLC/TRUGS-TOOLS/blob/main/REFERENCE/SPEC_cli.md) in the trugs-tools repo for the full command surface.
 
-**Legacy (trugs 1.2.x only):** the same operations were available as `python tools/validate.py`, `python tools/tget.py`, etc. in the 1.x `tools/` directory; that directory was removed at `trugs` 2.0.0 — use the `tg` CLI from `trugs-tools` instead.
+**Legacy (trugs 1.2.x only):** the same operations were available as `python tools/validate.py`, `python tools/tget.py`, etc. in the 1.x `tools/` directory; that directory was removed at `trugs` 2.0.0 — use the `trug` CLI from `trugs-tools` instead.
 
 ## Examples
 
@@ -105,16 +105,16 @@ This repository describes itself as a TRUG. [`folder.trug.json`](folder.trug.jso
 
 ```bash
 # What's in this repo?
-tg ls .
+trug-a-folder ls .
 
 # What does the language-graph builder implement (and what tests it)?
-tg get folder.trug.json tools_build_language_trug --edges
+trug get folder.trug.json tools_build_language_trug --edges
 
 # Does the graph match the filesystem?
-tg check .
+trug-a-folder check .
 ```
 
-CI runs `make check` (formatting, lint, types, tests, and the TRUG checks via `tg`) plus `trug compliance .` on every push and PR — this README's section list, the spec index, the tool table above all correspond to nodes you can traverse programmatically. When the TRUG drifts from the prose or the filesystem, CI fails. We dogfood our own dogfood.
+CI runs `make check` (formatting, lint, types, tests, and the TRUG checks via `trug-a-folder`) plus `trug compliance .` on every push and PR — this README's section list, the spec index, the tool table above all correspond to nodes you can traverse programmatically. When the TRUG drifts from the prose or the filesystem, CI fails. We dogfood our own dogfood.
 
 ## Use It
 
