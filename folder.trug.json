@@ -445,7 +445,7 @@
       "dimension": "build",
       "properties": {
         "name": "pyproject.toml",
-        "purpose": "Python package metadata: name=trugs, version=2.0.0, spec-only package (no console scripts as of 2.0; install trugs-tools for the tg CLI), zero runtime dependencies.",
+        "purpose": "Python package metadata: name=trugs, version=2.0.0, spec-only package (no console scripts as of 2.0; install trugs-tools for the trug CLI), zero runtime dependencies.",
         "path": "pyproject.toml"
       }
     },

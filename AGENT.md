@@ -38,8 +38,8 @@ INTERFACE trl SHALL DEFINE 9 RECORD part_of_speech.
 As of `trugs` 2.0.0 (breaking), this repository contains the spec only — no CLIs. All tooling lives at [TRUGS-LLC/TRUGS-TOOLS](https://github.com/TRUGS-LLC/TRUGS-TOOLS) and is installed separately:
 
 ```bash
-pip install trugs-tools    # provides the `tg` binary
-tg --help                  # 36 operations under 21 top-level verbs + 3 sub-namespaces
+pip install trugs-tools    # provides the `trug` binary
+trug --help                # 8 language verbs: validate, trl, get, update, delete, unlink, compliance, audit
 ```
 
 This repo describes data. The companion repo implements tools. See `principle_spec_is_data` in the portfolio EPIC.
