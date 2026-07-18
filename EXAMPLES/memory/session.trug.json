@@ -12,7 +12,7 @@
   "capabilities": {
     "extensions": [],
     "vocabularies": [
-      "core_v1.0.0"
+      "core_v2.0.0"
     ],
     "profiles": []
   },
