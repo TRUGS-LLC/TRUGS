@@ -1,7 +1,8 @@
 """Build language.trug.json from SPEC_vocabulary.md.
 
-Parses the canonical vocabulary spec (233 words across 9 parts of speech)
+Parses the canonical vocabulary spec (every word across every part of speech)
 and emits a fully-populated language TRUG that the TRL compiler can consume.
+The generated word/POS counts are derived from the spec, never hardcoded.
 
 Re-run this whenever SPEC_vocabulary.md changes. The output file is a
 deterministic function of the spec.
@@ -304,7 +305,14 @@ def build_trug(records: list[dict]) -> dict:
         "name": "TRUGS Language Vocabulary",
         "version": "2.0.0",
         "type": "NAMESPACE",
-        "description": "Canonical TRL vocabulary — 233 words across 9 parts of speech. Generated from SPEC_vocabulary.md by tools/build_language_trug.py. v2.0.0 adds 21 SI level prefixes for hierarchy transition markers (TRUGS-DEVELOPMENT#1719) and 22 corpus-evidenced words (AAA #2048 / #2018 disposition).",
+        "description": (
+            f"Canonical TRL vocabulary — {len(records)} words across "
+            f"{len(parts_order)} parts of speech. Generated from "
+            "SPEC_vocabulary.md by tools/build_language_trug.py. v2.0.0 adds "
+            "21 SI level prefixes for hierarchy transition markers "
+            "(TRUGS-DEVELOPMENT#1719) and 22 corpus-evidenced words "
+            "(AAA #2048 / #2018 disposition)."
+        ),
         "dimensions": {},
         "capabilities": {"vocabularies": ["trl_v2"]},
         "meta": {
