@@ -24,7 +24,7 @@ Bugs that are not security issues (just file a normal issue):
 
 ## Supported versions
 
-Only the latest published version on PyPI (`pip install trugs`) receives security fixes. TRUGS is pre-1.0 semantically; breaking changes can happen at any minor version.
+Only the latest published version of the reference tooling on PyPI (`pip install trugs-tools`) receives security fixes. The `trugs` package itself is a spec-only placeholder with no code surface. Breaking changes to the tooling can happen at any minor version.
 
 | Version | Supported |
 |---------|-----------|

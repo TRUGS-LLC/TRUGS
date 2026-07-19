@@ -11,8 +11,8 @@ body:
     id: version
     attributes:
       label: Version
-      description: Output of `trugs --version` (or the git commit if installed from source)
-      placeholder: e.g. trugs 1.2.0 (commit abc1234)
+      description: Output of `trug --version` (from trugs-tools), or the git commit if installed from source
+      placeholder: e.g. trug 2.0.0 (commit abc1234)
     validations:
       required: true
 
@@ -22,7 +22,7 @@ body:
       label: What happened?
       description: Describe the bug. What command did you run, what did you expect, what did you get?
       placeholder: |
-        Running `trugs-folder-check ./my-project` reports ...
+        Running `trug-a-folder check ./my-project` reports ...
         But I expected ...
     validations:
       required: true
