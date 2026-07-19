@@ -22,7 +22,7 @@ REFERENCE/
 | Papers (Dark Code, How To, future research) | `REFERENCE/` |
 | Compliance standards | `REFERENCE/STANDARD_*.md` |
 | TRUG CORE protocol spec (7 node fields, 3 edge fields, 16 validation rules) | `TRUGS_PROTOCOL/` |
-| TRUG/L language spec (211 words across 9 parts of speech, BNF, grammar) | `TRUGS_LANGUAGE/` |
+| TRUG/L language spec (233 words across 9 parts of speech, BNF, grammar) | `TRUGS_LANGUAGE/` |
 | Original foundational TRUGS paper (LaTeX) | `PAPER/` |
 | Python reference implementation | `tools/` |
 
