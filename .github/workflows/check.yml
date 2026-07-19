@@ -28,7 +28,7 @@ jobs:
           curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" | tar -xz gitleaks
           sudo install gitleaks /usr/local/bin/gitleaks
           gitleaks version
-      - name: Install dev tooling + tg (for Layer-4 tg validate)
+      - name: Install dev tooling + trug (for Layer-4 trug validate)
         run: |
           pip install -e '.[dev]'
           pip install trugs-tools

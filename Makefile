@@ -2,14 +2,14 @@
 # `make check` is the one command an evaluator runs to read GREEN:
 #   Layer 1 (SP1): secrets / format / lint / types / tests
 #   Layer 4 (SP4): the spec proves itself — shipped TRUGs validate against TRUGS's
-#                  own 16-rule CORE via `tg validate` (ADR-006)
+#                  own 16-rule CORE via `trug validate` (ADR-006)
 #
 #   make check    # run the full gate (each step prints PASS/FAIL)
 #   make dev      # install the dev tooling (ruff, mypy, pytest)
 #   make trugs    # Layer-4 only: validate the shipped TRUGs
 #
 # gitleaks is optional locally (not pip-installable; CI installs the free gitleaks
-# CLI binary and runs `make check` end-to-end). `tg` (trugs-tools) is optional locally
+# CLI binary and runs `make check` end-to-end). `trug` (trugs-tools) is optional locally
 # too — `make check` skips each with a notice if not on PATH, so the lint/type/test
 # core always runs.
 

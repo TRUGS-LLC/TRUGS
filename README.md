@@ -29,11 +29,11 @@ The sentence IS the program. The graph IS the AST. Every valid TRUG/L sentence c
 
 ## Install
 
-```bash
-pip install trugs
-```
+**The specification is this repository.** Read the Markdown specs and `.trug.json` files here directly — there is nothing to install to get the spec. (The `trugs` name on PyPI is a reserved, intentionally empty placeholder as of 2.0.0: it ships no CLI and no importable content. Do not depend on it.)
 
-**As of 2.0.0 (breaking), `trugs` ships the specification only — no CLIs.** Spec content (`CORE`, `TRL` vocabulary, reference papers) is packaged as data. The 2.0.0 release also adds 21 SI level prefixes (YOTTA…YOCTO) as a new part of speech for hierarchy transition markers — see [SPEC_vocabulary.md §9](TRUGS_LANGUAGE/SPEC_vocabulary.md#9-level-prefixes--hierarchy-transition-markers-21). For the `trug` CLI and all tooling, install the sibling package:
+The 2.0.0 spec revision adds 21 SI level prefixes (YOTTA…YOCTO) as a new part of speech for hierarchy transition markers — see [SPEC_vocabulary.md §9](TRUGS_LANGUAGE/SPEC_vocabulary.md#9-level-prefixes--hierarchy-transition-markers-21).
+
+For the `trug` CLI and all tooling, install the sibling package:
 
 ```bash
 pip install trugs-tools    # provides the `trug` binary — 8 language verbs

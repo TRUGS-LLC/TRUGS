@@ -1,6 +1,6 @@
 # TRUGS Examples
 
-One strong example per domain demonstrating the TRUGS v1.0.0 specification. All examples pass validation (16 rules, 0 errors).
+One strong example per domain demonstrating the TRUGS v2.0 specification. All examples pass validation (16 rules, 0 errors).
 
 **Total:** 7 validated JSON files across 7 domains.
 
@@ -19,8 +19,8 @@ One strong example per domain demonstrating the TRUGS v1.0.0 specification. All 
 ## Validate
 
 ```bash
-tg validate --all EXAMPLES/
-tg validate EXAMPLES/knowledge/complex.json
+trug validate --all EXAMPLES/
+trug validate EXAMPLES/knowledge/complex.json
 ```
 
 ## More Examples

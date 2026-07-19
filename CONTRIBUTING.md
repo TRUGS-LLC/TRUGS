@@ -30,9 +30,10 @@ If you're unsure, open an issue and ask. That is always cheaper than writing cod
 2. **Write a TRUG/L-commented test.** Every behavior change needs a test. Every test needs an `AGENT SHALL VALIDATE ...` comment naming what it verifies. See [`PAPER_how_to_code_with_trugs.md`](REFERENCE/PAPER_how_to_code_with_trugs.md) §2 Step 4.
 3. **Run compliance locally.**
    ```bash
-   pip install -e .
-   tg compliance .
-   tg check .
+   pip install -e '.[dev]'                 # this repo + dev tooling (ruff, mypy, pytest)
+   pip install trugs-tools trugs-folder    # the `trug` and `trug-a-folder` CLIs — the `trugs` spec pkg ships no CLI
+   trug compliance .
+   trug-a-folder check .
    pytest tools/
    ```
    All three must pass.
@@ -49,8 +50,8 @@ If you're unsure, open an issue and ask. That is always cheaper than writing cod
 Every PR runs three gates:
 
 - **Build** — package installs cleanly, pytest passes
-- **Compliance** — `tg compliance` may not decrease. Baseline is ratcheted only upward.
-- **Graph** — `tg check` reports zero errors on `folder.trug.json`
+- **Compliance** — `trug compliance` may not decrease. Baseline is ratcheted only upward.
+- **Graph** — `trug-a-folder check` reports zero errors on `folder.trug.json`
 
 A PR that fails any gate cannot merge. The gate output names the specific failing check.
 

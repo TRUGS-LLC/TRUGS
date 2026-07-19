@@ -1160,17 +1160,17 @@ pip install trugs-tools
 
 **Validate a TRUG file:**
 ```bash
-tg validate graph.json
+trug validate graph.json
 ```
 
 **Verbose output (show all checks):**
 ```bash
-tg validate -v graph.json
+trug validate -v graph.json
 ```
 
 **Quiet mode (CI/CD):**
 ```bash
-tg validate -q graph.json
+trug validate -q graph.json
 ```
 
 **Exit codes:**
@@ -1201,7 +1201,7 @@ else:
 - name: Validate TRUG
   run: |
     pip install trugs-tools
-    tg validate graph.json
+    trug validate graph.json
 ```
 
 ### Pre-commit Hook
@@ -1211,7 +1211,7 @@ else:
 # .git/hooks/pre-commit
 
 for file in $(git diff --cached --name-only --diff-filter=ACM | grep '\.json$'); do
-    tg validate "$file" || exit 1
+    trug validate "$file" || exit 1
 done
 ```
 
