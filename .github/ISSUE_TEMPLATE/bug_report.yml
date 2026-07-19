@@ -44,7 +44,7 @@ body:
       placeholder: |
         Python: 3.11.7
         OS: Ubuntu 22.04
-        Install: pip install trugs
+        Install: pip install trugs-tools
     validations:
       required: true
 
