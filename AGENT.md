@@ -73,4 +73,4 @@ FILE notice GOVERNS RECORD patent_boundary.
 ## Related Repositories
 
 - [TRUGS-AGENT](https://github.com/TRUGS-LLC/TRUGS-AGENT) — LLM development framework using TRL + AAA + EPIC + Memory
-- [TRUGS-SDK](https://github.com/TRUGS-LLC/TRUGS-SDK) — Installable Python toolchain
+- [TRUGS-TOOLS](https://github.com/TRUGS-LLC/TRUGS-TOOLS) — Installable Python toolchain

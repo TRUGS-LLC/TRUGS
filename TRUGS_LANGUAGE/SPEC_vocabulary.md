@@ -2,7 +2,7 @@
 
 > 233 words across 9 parts of speech. Computation primary, law fills gaps. SI prefixes mark hierarchy transitions.
 
-**Issue:** #1211, [TRUGS-DEVELOPMENT#1719](https://github.com/Xepayac/TRUGS-DEVELOPMENT/issues/1719) | **Version:** 2.0.0
+**Issue:** #1211, TRUGS-DEVELOPMENT#1719 (private) | **Version:** 2.0.0
 
 ---
 
@@ -686,4 +686,4 @@ No new keyword needed. See SPEC_examples.md example 24.
 3. **Is it a BRANCH concern?** Domain-specific vocabularies layer onto CORE. Legal-domain words like FILING, WITNESS, TESTIMONY belong in a LEGAL branch vocabulary, not in core TRL.
 4. **Only after 1-3 fail:** consider extending the vocabulary (as AAA #2048 did — 22 corpus-evidenced additions, 211 → 233).
 
-Resolved in [Xepayac/TRUGS-DEVELOPMENT#1542](https://github.com/Xepayac/TRUGS-DEVELOPMENT/issues/1542) (2026-04-18).
+Resolved in Xepayac/TRUGS-DEVELOPMENT#1542 (private) (2026-04-18).

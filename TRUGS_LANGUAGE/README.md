@@ -2,7 +2,7 @@
 
 > Formalized English as an LLM-native executable language.
 
-**Issue:** #1211, [TRUGS-DEVELOPMENT#1719](https://github.com/Xepayac/TRUGS-DEVELOPMENT/issues/1719) | **Status:** DRAFT | **Version:** 2.0.0
+**Issue:** #1211, TRUGS-DEVELOPMENT#1719 (private) | **Status:** DRAFT | **Version:** 2.0.0
 
 ## What This Is
 
