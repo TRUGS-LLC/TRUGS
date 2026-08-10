@@ -25,7 +25,6 @@ import json
 import re
 import sys
 from pathlib import Path
-from typing import Optional
 
 # Widened from `(\w+)` to `([\w ]+?)` (non-greedy) to match the multi-word
 # heading "Level Prefixes" added for TRUGS 2.0 (TRUGS-DEVELOPMENT#1719).
@@ -92,7 +91,7 @@ LEVEL_PREFIX_FACTOR = {
 }
 
 
-def _parse_row(line: str) -> Optional[tuple]:
+def _parse_row(line: str) -> tuple | None:
     """Return (number, word, source, definition, core_flag) for a word row.
 
     Handles three spec formats:
@@ -132,9 +131,9 @@ def parse_spec(spec_text: str) -> list[dict]:
     Each record: {number, word, part_of_speech, subcategory, source, definition, core}
     """
     records: list[dict] = []
-    current_part: Optional[str] = None
-    current_subcat: Optional[str] = None
-    current_subcat_desc: Optional[str] = None
+    current_part: str | None = None
+    current_subcat: str | None = None
+    current_subcat_desc: str | None = None
 
     for line in spec_text.splitlines():
         m = PART_HEADING_RE.match(line)
@@ -335,7 +334,7 @@ def build_trug(records: list[dict]) -> dict:
 # WHEN DATA argv SHALL_NOT EQUAL 2 RECORD argument THEN FUNCTION main SHALL RETURN 2.
 # FUNCTION main SHALL READ FILE spec THEN WRITE FILE out_json.
 # </trl>
-def main(argv: Optional[list] = None) -> int:
+def main(argv: list | None = None) -> int:
     argv = argv if argv is not None else sys.argv[1:]
     if len(argv) != 2:
         print("usage: build_language_trug.py SPEC.md OUT.json", file=sys.stderr)
