@@ -47,6 +47,14 @@ Changelog = "https://github.com/TRUGS-LLC/TRUGS/blob/main/CHANGELOG.md"
 packages = []
 
 [tool.ruff]
+# Ruff governs tools/, not the spec prose. From 0.16 ruff formats Python code
+# blocks embedded in Markdown, which puts the normative documents
+# (TRUGS_PROTOCOL/*.md, REFERENCE/PAPER_*.md) under a formatter's opinion —
+# `ruff format` on 0.16.2 rewrites 398 lines of example code across six of them.
+# How the spec writes its examples is an editorial decision, not a formatter's.
+# Removing this line is a deliberate choice to adopt that formatting, not a
+# cleanup; see the PR that added it for the measured diff.
+extend-exclude = ["*.md"]
 target-version = "py310"
 line-length = 88
 
