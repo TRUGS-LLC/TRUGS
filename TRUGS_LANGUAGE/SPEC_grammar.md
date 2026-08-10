@@ -2,7 +2,7 @@
 
 > Formal composition rules: what can combine with what, and what it compiles to.
 
-**Issue:** #1211, [TRUGS-DEVELOPMENT#1719](https://github.com/Xepayac/TRUGS-DEVELOPMENT/issues/1719) | **Version:** 2.0.0
+**Issue:** #1211, TRUGS-DEVELOPMENT#1719 (private) | **Version:** 2.0.0
 
 ---
 
@@ -95,7 +95,7 @@ Here `BASE_FUNCTION` is a value, not a directive. The grammar distinguishes them
 
 #### Validation
 
-The validator does NOT enforce level directives. A TRL source with no directives is valid. A TRL source with directives that do not match the hierarchy on the underlying graph is also valid. Directives are an LLM-comprehension affordance, not a correctness gate. See [TRUGS-DEVELOPMENT#1719 ADR-002](https://github.com/Xepayac/TRUGS-DEVELOPMENT/issues/1719).
+The validator does NOT enforce level directives. A TRL source with no directives is valid. A TRL source with directives that do not match the hierarchy on the underlying graph is also valid. Directives are an LLM-comprehension affordance, not a correctness gate. See TRUGS-DEVELOPMENT#1719 ADR-002 (private).
 
 ### `leading_keyword_directive` — leading-keyword directives (`ASSERT` / `ASSERT_NOT` / `INVARIANT`)
 

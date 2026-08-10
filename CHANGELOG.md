@@ -28,7 +28,7 @@ Brings the spec repo to the Tier-1 bar of `REFERENCE/STANDARD_trugs_release_poli
 
 ### Added — TRUGS 2.0 (corpus-driven vocabulary expansion · AAA #2048 / EPIC #1976 Phase 4)
 
-Vocabulary grows **211 → 233 words**. The 22 additions are corpus-evidenced: derived from the de-masked per-class TRL drift re-measurement ([`Xepayac/TRUGS-DEVELOPMENT#2018`](https://github.com/Xepayac/TRUGS-DEVELOPMENT/issues/2018), which overturned [#1996](https://github.com/Xepayac/TRUGS-DEVELOPMENT/issues/1996)'s null result), HITM-dispositioned as accepted, with swap-safety confirmed by the swap-capacity regression check ([#1998](https://github.com/Xepayac/TRUGS-DEVELOPMENT/issues/1998)).
+Vocabulary grows **211 → 233 words**. The 22 additions are corpus-evidenced: derived from the de-masked per-class TRL drift re-measurement (`Xepayac/TRUGS-DEVELOPMENT#2018` (private), which overturned #1996 (private)'s null result), HITM-dispositioned as accepted, with swap-safety confirmed by the swap-capacity regression check (#1998 (private)).
 
 - **22 vocabulary additions** in `TRUGS_LANGUAGE/SPEC_vocabulary.md` (per-POS counts + §11 Summary table reconciled):
   - **Verbs +19** (61 → 80): `EXECUTE`, `INVOKE`, `HALT`, `COMPLETE`, `PASS` (control); `EMIT`, `POST`, `LOAD`, `APPEND`, `PRODUCE`, `DELEGATE` (move); `APPLY`, `DERIVE`, `UPDATE` (transform); `ACCEPT`, `SUGGEST` (permit); `HAVE` (bind); `ASSERT_NOT`, `INVARIANT` (obligate keywords).
@@ -65,7 +65,7 @@ Vocabulary grows **211 → 233 words**. The 22 additions are corpus-evidenced: d
 - `TRUGS_LANGUAGE/SPEC_vocabulary.md`, `SPEC_grammar.md`, `SPEC_examples.md`, `language.trug.json` — version bumped 1.0.1 → 2.0.0 to reflect LEVEL_PREFIX vocabulary extension.
 
 ### Context
-- Implements [`TRUGS-DEVELOPMENT#1719`](https://github.com/Xepayac/TRUGS-DEVELOPMENT/issues/1719) — selective-loading foundation. Macro-to-micro hierarchy markers in TRL allow an LLM to consume a large TRUG selectively (top-down by level) without loading the whole graph upfront. The TRUG itself remains the source of truth; the directives are LLM affordance.
+- Implements `TRUGS-DEVELOPMENT#1719` (private) — selective-loading foundation. Macro-to-micro hierarchy markers in TRL allow an LLM to consume a large TRUG selectively (top-down by level) without loading the whole graph upfront. The TRUG itself remains the source of truth; the directives are LLM affordance.
 - Implements `TRUGS-LLC/TRUGS#48` (foundation) for `Xepayac/TRUGS-DEVELOPMENT#1548` EPIC — bring TRUGS-LLC public portfolio to Dark Code compliance.
 - Convention: TRUG/L (not "TRL") in all prose going forward.
 
