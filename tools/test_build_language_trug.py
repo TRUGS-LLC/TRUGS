@@ -9,7 +9,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from tools.build_language_trug import parse_spec, build_trug
+from tools.build_language_trug import build_trug, parse_spec
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SPEC = REPO_ROOT / "TRUGS_LANGUAGE" / "SPEC_vocabulary.md"
