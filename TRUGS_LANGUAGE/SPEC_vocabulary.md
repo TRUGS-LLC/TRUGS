@@ -623,7 +623,7 @@ PARTY admin 'trugs_llc SHALL ADMINISTER ALL RESOURCE.
 | Part of Speech | Computation | Law | Shared | Total | Compiles To |
 |---|---|---|---|---|---|
 | Nouns | 20 | 6 | — | 26 | Nodes |
-| Verbs | 61 | 19 | — | 80 | Operations |
+| Verbs | 67 | 13 | — | 80 | Operations |
 | Adjectives | 29 | 10 | — | 39 | Properties |
 | Adverbs | 12 | 7 | — | 19 | Op properties |
 | Prepositions | 14 | 4 | — | 18 | Edges |
@@ -632,7 +632,7 @@ PARTY admin 'trugs_llc SHALL ADMINISTER ALL RESOURCE.
 | Pronouns | 6 | 1 | — | 7 | References |
 | Level prefixes | — | — | 21 | 21 | Hierarchy markers (no-op in graph) |
 | Sugar | — | — | ∞ (pattern) | `'[a-z_]+` | **Nothing** |
-| **Total** | **150** | **52** | **31** | **233** | |
+| **Total** | **156** | **46** | **31** | **233** | |
 
 233 executable words + `'word` sugar pattern. Sugar is not counted as vocabulary — it is a syntactic pattern (`'[a-z_]+`) that compiles to nothing. Level prefixes are counted but produce no graph artifacts when used as bare-line directives; they DO contribute when used as the prefix of a `metric_level` value. The executable vocabulary is 233 words.
 

@@ -452,7 +452,7 @@ This section specifies the Python dialect of TRUGS compliance — the concrete r
 
 ### 9.1 Function-level comment placement
 
-Immediately above every public `def` or `class`, with nothing but blank lines between the comment block and the declaration. Multiple lines of `#`-prefixed comment; combined text must parse via `tools/trl.py`.
+Immediately above every public `def` or `class`, with nothing but blank lines between the comment block and the declaration. Multiple lines of `#`-prefixed comment; combined text must parse via `trug trl validate <file>`.
 
 ### 9.2 Inline comment placement
 

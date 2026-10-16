@@ -114,7 +114,7 @@ trug get folder.trug.json tools_build_language_trug --edges
 trug-a-folder check .
 ```
 
-CI runs `make check` (formatting, lint, types, tests, and the TRUG checks via `trug-a-folder`) plus `trug compliance .` on every push and PR — this README's section list, the spec index, the tool table above all correspond to nodes you can traverse programmatically. When the TRUG drifts from the prose or the filesystem, CI fails. We dogfood our own dogfood.
+For pushes to `main` and pull requests targeting `main`, CI runs `make check` (secrets, formatting, lint, types, tests, shipped-graph validation via `trug validate`, and the deterministic vocabulary rebuild) plus `trug compliance .` and a separate builder-test job. CI does not run `trug-a-folder check` or compare README prose with the filesystem; run the folder check above locally.
 
 ## Use It
 

@@ -2,7 +2,7 @@
 
 **Status:** Draft v0.1 — adopted by `TRUGS-LLC/TRUGS#48`
 **Applies to:** every TRUGS-LLC public repo
-**Enforced by:** `trug compliance` CLI + CI gates (this repo, `tools/compliance_check.py`)
+**Enforced by:** `trug compliance` CLI from the companion [TRUGS-TOOLS](https://github.com/TRUGS-LLC/TRUGS-TOOLS) repository + CI gates
 **See also:** [`PAPER_dark_code.md`](PAPER_dark_code.md) (the WHY), [`PAPER_how_to_code_with_trugs.md`](PAPER_how_to_code_with_trugs.md) (the HOW)
 
 ---
@@ -57,7 +57,7 @@ Every public `def` and `class` declaration must have a **function-level TRUG/L c
 
 A comment is "function-level TRUG/L" if:
 - Every line is a Python comment (`#` prefix)
-- The concatenated text (with `#` and leading whitespace stripped) parses successfully via `tools/trl.py`
+- The concatenated text (with `#` and leading whitespace stripped) parses successfully via `trug trl validate <file>`
 - The TRUG/L sentence begins with a Verb (`FILTER`, `VALIDATE`, `SHALL`, etc.) — describes what the function **does**, not what it **is**
 
 "Public" means:
@@ -111,7 +111,7 @@ def shuffle_shoe(shoe: list[Card], rng: random.Random | None = None) -> list[Car
 
 Every test function — i.e. every `def test_*` at module top-level, and every method of a `class Test*` — must have a function-level TRUG/L comment that:
 
-- Parses via `tools/trl.py`
+- Parses via `trug trl validate <file>`
 - Begins with `AGENT SHALL VALIDATE` (the canonical test-intent opener)
 - Names a specific invariant, property, or node being verified
 

@@ -12,7 +12,7 @@ One strong example per domain demonstrating the TRUGS v2.0 specification. All ex
 | [living/](living/) | complex.json | 9 | 21 | QUERY, ANSWER, ENTITY, TOOL_EXECUTION, SYNTHESIS |
 | [memory/](memory/) | session.trug.json | 3 | 1 | MODULE, DATA — LLM persistent memory |
 | [nested/](nested/) | complex.json | 12 | 20 | TASK, SUBGRAPH, RESULT |
-| [research/](research/) | complete.json | 8 | 10 | CONCEPT, CLAIM, SOURCE, PROJECT |
+| [research/](research/) | complete.json | 8 | 10 | RESEARCH_GRAPH, CONCEPT, PROJECT, WEB_SOURCE, AUTHOR, PAPER, CLAIM, VERSION |
 | [web/](web/) | complex.json | 9 | 13 | SITE, PAGE, SECTION |
 | [writer/](writer/) | complex.json | 14 | 20 | DOCUMENT, SECTION, PARAGRAPH, CITATION, REFERENCE |
 

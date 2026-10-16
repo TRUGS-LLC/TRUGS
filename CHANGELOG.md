@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Brings the spec repo to the Tier-1 bar of `REFERENCE/STANDARD_trugs_release_polish.md`.
 
+Correction, 2026-10-16: The referenced release-polish standard is not shipped in this repository; the implemented checks are defined in `Makefile` and `.github/workflows/check.yml`.
+
 - **Layer 1 (industry baseline, SP1):** `ruff` + `mypy` + `pytest` declared in `pyproject.toml [project.optional-dependencies] dev` with `[tool.*]` config; `Makefile` adds a single-command `make check` gate; `.github/workflows/check.yml` runs it in CI (coexists with `compliance.yml`); `.gitignore` covers `.mypy_cache/`/`.ruff_cache/`. Baseline was already lint/type/test-green; formatting applied.
 - **Layer 3 (TRL contracts, SP3):** `tools/build_language_trug.py` (the one production module) carries a module-level `<trl>` header, function-level `<trl>` contracts on its 3 public functions, and inline `<trl>` annotations on significant lines.
 - **Layer 2 (structural, SP2):** this changelog finalized from `CHANGELOG_TRUGS_2.0_pending.md` → `CHANGELOG.md` (resolving the `folder.trug.json` `doc_changelog` mispoint); `folder.trug.json` brought to a clean `tg check` (added nodes for `Makefile`, `PROPOSAL/`, `zzz_ARCHIVE/`).

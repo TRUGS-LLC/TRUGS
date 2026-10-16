@@ -10,14 +10,15 @@ Six papers (41,000 words) were decomposed into 403 paragraph-level nodes and con
 
 | File | Description |
 |------|-------------|
-| `heart_health_series.trug.json` | The TRUG — 90 nodes, 190 edges. The artifact. |
+| `heart_health_series.trug.json` | The TRUG — 91 nodes, 190 edges. The artifact. |
 | `PAPER_methodology.md` | How the TRUG was built and what it revealed. |
 
 ## How to Read the TRUG
 
-The TRUG contains three types of nodes:
-- **DOCUMENT** — the six source papers and the combined paper
-- **SECTION** — 73 sections across all papers with one-sentence summaries
+The shipped TRUG contains 4 types of nodes:
+- **FOLDER** — the study root (1 node)
+- **DOCUMENT** — the source papers and the combined paper (7 nodes)
+- **SECTION** — 67 sections across all papers with one-sentence summaries
 - **REFERENCE** — 16 high-connectivity studies (CTT, JUPITER, PREDIMED, etc.)
 
 And four types of edges:

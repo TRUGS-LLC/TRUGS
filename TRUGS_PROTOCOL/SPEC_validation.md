@@ -1163,15 +1163,12 @@ pip install trugs-tools
 trug validate graph.json
 ```
 
-**Verbose output (show all checks):**
+**Batch validation:**
 ```bash
-trug validate -v graph.json
+trug validate --all EXAMPLES/
 ```
 
-**Quiet mode (CI/CD):**
-```bash
-trug validate -q graph.json
-```
+**CI/CD:** Use the exit status of `trug validate graph.json`; the current CLI has no verbose or quiet option.
 
 **Exit codes:**
 - `0`: Valid TRUG
@@ -1221,8 +1218,6 @@ done
 
 - [CORE.md](CORE.md) - The 7 boundaries and field definitions
 - [BRANCHES.md](BRANCHES.md) - Domain-specific vocabularies
-- [SPEC_patterns.md](SPEC_patterns.md) - System patterns using validated TRUGs
-- [REFERENCE_communication.md](REFERENCE_communication.md) - JSON/JSONL/Pydantic standards
 
 ---
 

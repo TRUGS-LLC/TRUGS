@@ -67,7 +67,7 @@ Apache 2.0. See LICENSE and NOTICE files.
 
 <trl>
 NAMESPACE trugs_spec SUBJECT_TO FILE license.
-FILE notice GOVERNS RECORD patent_boundary.
+FILE readme GOVERNS RECORD patent_boundary.
 </trl>
 
 ## Related Repositories
