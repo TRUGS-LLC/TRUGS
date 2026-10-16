@@ -1,4 +1,4 @@
-]633;E;{   sed -n '1,168p' TRUGS_PROTOCOL/BRANCHES.md\x0ased -n '326,447p' TRUGS_PROTOCOL/BRANCHES.md\x3b   sed -n '863,1175p' TRUGS_PROTOCOL/BRANCHES.md\x3b   sed -n '1288,1543p' TRUGS_PROTOCOL/BRANCHES.md\x0ased -n '1571,1662p' TRUGS_PROTOCOL/BRANCHES.md\x3b } > /tmp/branches_new.md;f6115331-d0a5-417b-983d-f8667381b403]633;C# TRUGS Protocol Branches
+]633;E;{   sed -n '1,168p' TRUGS_PROTOCOL/BRANCHES.md\x0ased -n '326,447p' TRUGS_PROTOCOL/BRANCHES.md\x3b   sed -n '863,1175p' TRUGS_PROTOCOL/BRANCHES.md\x3b   sed -n '1288,1543p' TRUGS_PROTOCOL/BRANCHES.md\x0ased -n '1571,1662p' TRUGS_PROTOCOL/BRANCHES.md\x3b } > (private reference removed);f6115331-d0a5-417b-983d-f8667381b403]633;C# TRUGS Protocol Branches
 
 **Version:** 1.0.0 (AAA_AARDVARK)  
 **Status:** ✅ Stable  
@@ -811,7 +811,7 @@ The following advanced branches define specialized vocabularies for **Agentic Sy
 **Purpose:** Represents code structure — modules, packages, classes, structs, functions, and their relationships — independent of programming language. Language is a property on nodes, not a branch identifier.
 **Key Concepts:** Containment (packages contain modules contain definitions), Reference (functions call functions, modules import modules), Typing (entities have types, functions return types).
 
-> **History:** Replaces the former Python, Rust, and LLVM branches (extracted in #607) with a single language-agnostic vocabulary. See issue #621.
+> **History:** Replaces the former Python, Rust, and LLVM branches (extracted in (private reference removed)) with a single language-agnostic vocabulary. See issue (private reference removed).
 
 #### Node Vocabulary
 
@@ -881,7 +881,7 @@ The following advanced branches define specialized vocabularies for **Agentic Sy
 **Purpose:** Unified vocabulary for "what I know" — covers session persistence (Living), world modeling (Ontology), and bibliographic indexing (Research).
 **Key Concepts:** Accumulation (knowledge is added, never lost), Taxonomy (entities have types and relationships), Evidence (claims cite sources).
 
-> **History:** Merges the former Living, Knowledge, and Research branches into a single vocabulary. See issue #622. Also incorporates the DECISION node and rejection/invalidation edges from #620.
+> **History:** Merges the former Living, Knowledge, and Research branches into a single vocabulary. See issue (private reference removed). Also incorporates the DECISION node and rejection/invalidation edges from (private reference removed).
 
 #### Node Vocabulary
 
@@ -1085,7 +1085,7 @@ PIPELINE / STAGE node:
 
 **Validation Rules:** 6 additional rules (10–15) appended to CORE rules 1–9. All 9 CORE rules still apply.
 
-**Full specification:** `TRUGS_COMPUTATION/SPEC_computation.md`
+**Full specification:** `(private reference removed)/SPEC_computation.md`
 
 **Example:**
 ```json
@@ -1184,7 +1184,7 @@ PIPELINE / STAGE node:
 
 **When to Use:**
 - Expressing a GitHub Issue's 9-phase development specification as a typed graph
-- Agent-to-agent handoff of development work (PERAGO_CHAT → PORT_PERAGO)
+- Agent-to-agent handoff of development work ((private reference removed) → (private reference removed))
 - Rendering human-readable AAA.md from structured source of truth
 - Validating development specifications before execution
 
@@ -1362,7 +1362,7 @@ CODE → AUDIT:
 - When both `aaa_v1` and `compute_v1` are declared: TASK nodes with `operation` are validated against `compute_v1` schemas
 - When only `aaa_v1` is declared: TASK nodes with `operation` are accepted but not validated against `compute_v1`
 
-**Full specification:** `TRUGS_AAA/VISION_native_trug_aaa.md`
+**Full specification:** `(private reference removed)/VISION_native_trug_aaa.md`
 
 **Example:**
 ```json
@@ -1389,7 +1389,7 @@ CODE → AUDIT:
       "properties": {
         "name": "Calculator",
         "description": "Simple arithmetic module providing basic operations",
-        "folder": "PORT_PERAGO/docs/EXAMPLES/simple_function",
+        "folder": "(private reference removed)/docs/EXAMPLES/simple_function",
         "status": "IN_PROGRESS",
         "created": "2026-02-12",
         "labels": ["example"]

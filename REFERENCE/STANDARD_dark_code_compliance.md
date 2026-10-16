@@ -229,7 +229,7 @@ Certain violations fail CI regardless of overall percentage:
 
 ## 7. Hard rules
 
-Three hard gates apply to every TRUGS-LLC public repo (adopted in `Xepayac/TRUGS-DEVELOPMENT#1548`):
+Three hard gates apply to every TRUGS-LLC public repo (adopted in `(private reference removed)`):
 
 1. **No PR may decrease compliance %.** CI enforces.
 2. **No version bump without 100% compliance.** Tag/release workflows must check `compliance_percent == 100.0` before building wheels, publishing to PyPI, etc.

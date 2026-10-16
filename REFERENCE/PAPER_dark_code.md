@@ -3,7 +3,7 @@
 **Authors:** Xepayac
 **Date:** April 2026
 **Venue:** arXiv (cs.SE primary, cs.AI secondary)
-**Issue:** Xepayac/TRUGS-DEVELOPMENT#1509
+**Issue:** (private reference removed)
 
 ---
 

@@ -27,7 +27,7 @@ import sys
 from pathlib import Path
 
 # Widened from `(\w+)` to `([\w ]+?)` (non-greedy) to match the multi-word
-# heading "Level Prefixes" added for TRUGS 2.0 (TRUGS-DEVELOPMENT#1719).
+# heading "Level Prefixes" added for TRUGS 2.0 ((private reference removed)).
 PART_HEADING_RE = re.compile(
     r"^## (\d+)\.\s+([\w ]+?)(?:\s+—\s+([^()]+))?\s*\((\d+)\)\s*$"
 )

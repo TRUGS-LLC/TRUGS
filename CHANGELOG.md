@@ -11,7 +11,7 @@ Nothing yet.
 
 ## [2.0.0] — 2026-06-12
 
-### Added — Tier-1 release polish (AAA #2136 · EPIC #1976 Phase 7, Repo 1/4)
+### Added — Tier-1 release polish (AAA (private reference removed) · EPIC (private reference removed) Phase 7, Repo 1/4)
 
 Brings the spec repo to the Tier-1 bar of `REFERENCE/STANDARD_trugs_release_polish.md`.
 
@@ -24,22 +24,22 @@ Brings the spec repo to the Tier-1 bar of `REFERENCE/STANDARD_trugs_release_poli
   ```
   (or, all four layers at once: `make check`). Branch protection (PR-required, no force-push) is applied to the public `TRUGS-LLC/TRUGS` at the 2.0 release; the private dev mirror cannot carry it (GitHub plan limit).
 
-> **Reconciliation note (AAA #2136 ADR-003):** the "Added — Dark Code (under TRUGS 1.x line)" entry below references `tools/compliance_check.py` + a `trugs-compliance-check` entrypoint that are **not present in this 2.0 spec-only repo** (the tooling moved to `trugs-tools`); and it records the *initial* baseline **26.72%**, whereas `.github/compliance-baseline.json` currently reads **99.83%**. The historical entry is preserved as-is; this note flags the drift. The baseline number is not advanced here (out of scope).
+> **Reconciliation note (AAA (private reference removed) ADR-003):** the "Added — Dark Code (under TRUGS 1.x line)" entry below references `tools/compliance_check.py` + a `trugs-compliance-check` entrypoint that are **not present in this 2.0 spec-only repo** (the tooling moved to `trugs-tools`); and it records the *initial* baseline **26.72%**, whereas `.github/compliance-baseline.json` currently reads **99.83%**. The historical entry is preserved as-is; this note flags the drift. The baseline number is not advanced here (out of scope).
 
-### Added — TRUGS 2.0 (corpus-driven vocabulary expansion · AAA #2048 / EPIC #1976 Phase 4)
+### Added — TRUGS 2.0 (corpus-driven vocabulary expansion · AAA (private reference removed) / EPIC (private reference removed) Phase 4)
 
-Vocabulary grows **211 → 233 words**. The 22 additions are corpus-evidenced: derived from the de-masked per-class TRL drift re-measurement (`Xepayac/TRUGS-DEVELOPMENT#2018` (private), which overturned #1996 (private)'s null result), HITM-dispositioned as accepted, with swap-safety confirmed by the swap-capacity regression check (#1998 (private)).
+Vocabulary grows **211 → 233 words**. The 22 additions are corpus-evidenced: derived from the de-masked per-class TRL drift re-measurement (`(private reference removed)` (private), which overturned (private reference removed) (private)'s null result), HITM-dispositioned as accepted, with swap-safety confirmed by the swap-capacity regression check ((private reference removed) (private)).
 
 - **22 vocabulary additions** in `TRUGS_LANGUAGE/SPEC_vocabulary.md` (per-POS counts + §11 Summary table reconciled):
   - **Verbs +19** (61 → 80): `EXECUTE`, `INVOKE`, `HALT`, `COMPLETE`, `PASS` (control); `EMIT`, `POST`, `LOAD`, `APPEND`, `PRODUCE`, `DELEGATE` (move); `APPLY`, `DERIVE`, `UPDATE` (transform); `ACCEPT`, `SUGGEST` (permit); `HAVE` (bind); `ASSERT_NOT`, `INVARIANT` (obligate keywords).
   - **Adjectives +3** (36 → 39): `ONLY`, `AT_LEAST`, `EXACTLY` (quantity — the cardinality/exclusivity family; `AT_LEAST` fills the `>=` gap where only strict-`>` `EXCEEDS` existed).
 - **`leading_keyword_directive` grammar** in `TRUGS_LANGUAGE/SPEC_grammar.md` — `ASSERT` / `ASSERT_NOT` / `INVARIANT` may head a sentence (keyword before subject). `INVARIANT` is the first-class temporal-universality keyword subsuming the legacy `ASSERT … ACROSS ALL TIME` idiom.
-- **10 capacity-preserving swaps** (no vocabulary added — these drift forms are retired in favor of an existing word, confirmed capacity-preserving by #1998): `CONTAIN`→`CONTAINS`, `EXIST`→`EXISTS`, `EQUAL`→`EQUALS`, `BEFORE`→`PRECEDES`, `ASK`→`REQUEST`, `UNRESOLVED`→`PENDING`, `SUPERSEDED`→`SUPERSEDES`, `ONE`→`1` (integer literal), `FOR`→`'for` (sugar), `AT`→`'at` (sugar).
+- **10 capacity-preserving swaps** (no vocabulary added — these drift forms are retired in favor of an existing word, confirmed capacity-preserving by (private reference removed)): `CONTAIN`→`CONTAINS`, `EXIST`→`EXISTS`, `EQUAL`→`EQUALS`, `BEFORE`→`PRECEDES`, `ASK`→`REQUEST`, `UNRESOLVED`→`PENDING`, `SUPERSEDED`→`SUPERSEDES`, `ONE`→`1` (integer literal), `FOR`→`'for` (sugar), `AT`→`'at` (sugar).
 - `TRUGS_LANGUAGE/language.trug.json` — regenerated from the spec by `tools/build_language_trug.py` (22 new `BASE_WORD` nodes; total nodes 267 → 289; `meta.word_count` 211 → 233). `tools/test_build_language_trug.py` constants updated; all 7 generator tests pass.
 
-#### Deferred to EPIC #1976 Phase 5 (parser update)
+#### Deferred to EPIC (private reference removed) Phase 5 (parser update)
 - The `leading_keyword_directive` production is **spec-only** here; the v1 reference parser does not yet implement it. Parser support + the corpus migration retiring the `ACROSS ALL TIME` idiom land in Phase 5.
-- 2 of the 12 #2018 swaps — `ACROSS`→`INVARIANT` and `TIME`→`INVARIANT` — are **deferred**: #1998 flagged them capacity-NOT-confirmed because dropping the `ACROSS ALL TIME` idiom requires the parser to parse `INVARIANT` as a leading directive first. Until Phase 5, the idiom remains supported.
+- 2 of the 12 (private reference removed) swaps — `ACROSS`→`INVARIANT` and `TIME`→`INVARIANT` — are **deferred**: (private reference removed) flagged them capacity-NOT-confirmed because dropping the `ACROSS ALL TIME` idiom requires the parser to parse `INVARIANT` as a leading directive first. Until Phase 5, the idiom remains supported.
 
 ### Added — TRUGS 2.0 (selective loading foundation)
 
@@ -65,12 +65,12 @@ Vocabulary grows **211 → 233 words**. The 22 additions are corpus-evidenced: d
 - `TRUGS_LANGUAGE/SPEC_vocabulary.md`, `SPEC_grammar.md`, `SPEC_examples.md`, `language.trug.json` — version bumped 1.0.1 → 2.0.0 to reflect LEVEL_PREFIX vocabulary extension.
 
 ### Context
-- Implements `TRUGS-DEVELOPMENT#1719` (private) — selective-loading foundation. Macro-to-micro hierarchy markers in TRL allow an LLM to consume a large TRUG selectively (top-down by level) without loading the whole graph upfront. The TRUG itself remains the source of truth; the directives are LLM affordance.
-- Implements `TRUGS-LLC/TRUGS#48` (foundation) for `Xepayac/TRUGS-DEVELOPMENT#1548` EPIC — bring TRUGS-LLC public portfolio to Dark Code compliance.
+- Implements `(private reference removed)` (private) — selective-loading foundation. Macro-to-micro hierarchy markers in TRL allow an LLM to consume a large TRUG selectively (top-down by level) without loading the whole graph upfront. The TRUG itself remains the source of truth; the directives are LLM affordance.
+- Implements `TRUGS-LLC/TRUGS#48` (foundation) for `(private reference removed)` EPIC — bring TRUGS-LLC public portfolio to Dark Code compliance.
 - Convention: TRUG/L (not "TRL") in all prose going forward.
 
 ### Migration
-- This is the first release on the **TRUGS 2.0 line**. `trugs` 1.2.x and 1.0.x remain on PyPI for now and will be **yanked** at the end of the 6-week migration window for `#1719`. Any consumer outside the TRUGS-LLC portfolio should pin to `trugs>=2.0.0`. There are no breaking changes to existing CORE rules — only additive vocabulary and grammar.
+- This is the first release on the **TRUGS 2.0 line**. `trugs` 1.2.x and 1.0.x remain on PyPI for now and will be **yanked** at the end of the 6-week migration window for `(private reference removed)`. Any consumer outside the TRUGS-LLC portfolio should pin to `trugs>=2.0.0`. There are no breaking changes to existing CORE rules — only additive vocabulary and grammar.
 
 ## [1.2.1] - 2026-04-10
 

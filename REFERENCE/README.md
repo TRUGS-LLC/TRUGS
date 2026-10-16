@@ -38,5 +38,5 @@ The trinity flows: WHY you do it → HOW you do it → how you PROVE you did it.
 
 ## Related
 
-- Upstream EPIC: Xepayac/TRUGS-DEVELOPMENT#1548 (private) — Bring TRUGS-LLC public portfolio to Dark Code compliance
+- Upstream EPIC: (private reference removed) (private) — Bring TRUGS-LLC public portfolio to Dark Code compliance
 - Foundation issue: [TRUGS-LLC/TRUGS#48](https://github.com/TRUGS-LLC/TRUGS/issues/48) — REFERENCE/ foundation: Dark Code trinity + tg compliance CLI

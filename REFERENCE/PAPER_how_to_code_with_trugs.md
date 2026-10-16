@@ -352,7 +352,7 @@ Compliance that isn't gated is aspirational. CI is where the standard stops bein
 
 ### 7.1 The three gates
 
-Every TRUGS-LLC public repo enforces three CI gates (adopted in `Xepayac/TRUGS-DEVELOPMENT#1548`):
+Every TRUGS-LLC public repo enforces three CI gates (adopted in `(private reference removed)`):
 
 1. **PR gate** — `trug compliance --strict` must pass. Compliance % may not decrease.
 2. **Release gate** — compliance % must equal 100.0 before a version tag is cut or a package is published (PyPI, npm, crates.io, etc.).
