@@ -1,6 +1,6 @@
 # STANDARD: Dark Code Compliance
 
-**Status:** Draft v0.1 — adopted by `TRUGS-LLC/TRUGS#48`
+**Status:** Draft v0.1.1 — adopted by `TRUGS-LLC/TRUGS#48`
 **Applies to:** every TRUGS-LLC public repo
 **Enforced by:** `trug compliance` CLI from the companion [TRUGS-TOOLS](https://github.com/TRUGS-LLC/TRUGS-TOOLS) repository + CI gates
 **See also:** [`PAPER_dark_code.md`](PAPER_dark_code.md) (the WHY), [`PAPER_how_to_code_with_trugs.md`](PAPER_how_to_code_with_trugs.md) (the HOW)
@@ -38,14 +38,14 @@ The compliance standard has exactly four corners, each a mechanical validation:
 | **TRUG ↔ code** | Every public function has a TRUG node | check rule C2 |
 | **TRUG ↔ TRUG/L** | Every TRUG node with a `trl` property parses via `trl.py` | check rule C3 |
 | **TRUG/L ↔ tests** | Every test function has an `AGENT SHALL VALIDATE ...` comment that parses | check rule C4 |
-| **TRUG ↔ tests** | Every SPEC/FUNCTION node has ≥ 1 inbound `VALIDATES` edge from a TEST node | check rule C5 |
+| **TRUG ↔ tests** | Code implementation graphs use inbound `VALIDATES` edges from TEST to SPEC/FUNCTION nodes; this repository's folder graph uses suite-to-file `tests` edges | C5 convention; individual folder-function test edges are not verified |
 | **invariants** | Every `invariant_*` property has an assertion in code + a test | check rule C6 |
 | **TRUG validity** | Every `.trug.json` file passes validation | check rule C7 |
 | **code ↔ tests** | The test suite passes | existing `pytest` / language-native test runner |
 
-The check rules C1–C7 are defined below in §3–§6 and implemented in `trug compliance`:
+The check rules C1–C7 are defined below in §3–§6. Read `trug compliance` results with their reported check coverage: a passing report does not establish individual-function test traceability in this repository's folder graph.
 
-**Dark Code is code where any edge of this square is broken.** Compliance means every edge is intact and mechanically verified.
+**Dark Code is code where any edge of this square is broken.** The square is the verification goal; the shipped folder graph records file-level test relationships, without inbound test edges to its individual build-function nodes.
 
 ## 3. Python conventions
 
@@ -167,11 +167,11 @@ When a node has a `trl` property, that string is the **canonical TRUG/L specific
 
 ### 4.3 Cross-node edges
 
-The graph must encode these relations as edges:
+Code implementation graphs use the relations below. In this repository's `project_v1` folder graph, `TEST_SUITE` links to the builder file and tools component through lowercase `tests` edges. The individual `SPECIFICATION` function nodes have no inbound test edges; containment alone does not establish test coverage. The table is a code-graph convention, not an additional mandatory `VALIDATES` relation for those folder nodes:
 
 | Edge | Relation | From | To |
 |---|---|---|---|
-| A FUNCTION validates another | `VALIDATES` | TEST | FUNCTION / SPEC |
+| A test validates a function or spec | `VALIDATES` | TEST | FUNCTION / SPEC |
 | A FUNCTION implements a spec | `IMPLEMENTS` | FUNCTION | SPEC |
 | A FUNCTION depends on another | `DEPENDS_ON` | FUNCTION | FUNCTION / MODULE |
 | Containment | `contains` | parent | child |
@@ -194,16 +194,14 @@ These rules already exist via `trug-a-folder check`; the compliance standard inc
 
 ### 6.1 Every PR runs `trug compliance`
 
-A GitHub Actions workflow at `.github/workflows/compliance.yml` must run on every PR and every push to main:
+The shipped `.github/workflows/compliance.yml` runs on every PR and every push to main. Its compliance step runs the command below; it passes neither `--strict` nor `--baseline-update` and has no separate target-branch baseline comparison or update step. The baseline ratchet described in §6.2 is a proposed workflow design, not an implemented gate here:
 
 ```yaml
 - name: Dark Code compliance
-  run: trug compliance --strict
+  run: trug compliance .
 ```
 
-Exit codes:
-- `0` — compliance % is ≥ the baseline on the target branch
-- `1` — compliance % decreased, or a hard violation was introduced
+The workflow fails when the compliance command exits unsuccessfully. On failure it attempts a JSON report with `trug compliance --json .`; that reporting step is allowed to fail. A successful command is not evidence of a comparison with the target branch.
 
 ### 6.2 Baseline tracking
 
@@ -217,7 +215,7 @@ Each repo stores its current compliance baseline in `.github/compliance-baseline
 }
 ```
 
-PRs that raise compliance update the baseline (committed in the PR). PRs that merely maintain compliance do not need to touch it. PRs that decrease compliance fail CI.
+Under the proposed ratchet, PRs that raise compliance would update the baseline and decreases would fail CI. A `.github/compliance-baseline.json` snapshot is present, but the shipped workflow does not fetch a target-branch snapshot or update the stored baseline. The JSON above illustrates the design rather than the current snapshot.
 
 ### 6.3 Hard violations
 
@@ -231,7 +229,7 @@ Certain violations fail CI regardless of overall percentage:
 
 Three hard gates apply to every TRUGS-LLC public repo (adopted in `(private reference removed)`):
 
-1. **No PR may decrease compliance %.** CI enforces.
+1. **No PR may decrease compliance %.** This is a policy requirement; the shipped workflow runs `trug compliance .` without an explicit target-branch baseline comparison, so it does not establish enforcement of this ratchet.
 2. **No version bump without 100% compliance.** Tag/release workflows must check `compliance_percent == 100.0` before building wheels, publishing to PyPI, etc.
 3. **No `Xepayac → TRUGS-LLC` promotion without 100% compliance.** A private-to-public repo transfer must pass the standard first.
 
@@ -303,3 +301,5 @@ When the standard changes, downstream repos may see their compliance % shift wit
 | Version | Date | Change |
 |---|---|---|
 | 0.1 | 2026-04-16 | Initial draft — `TRUGS-LLC/TRUGS#48` |
+
+Correction, 2026-10-16: Draft v0.1.1 clarifies the folder graph's test-edge convention, distinguishes graph relations from TRUG/L prepositions, and corrects the compliance workflow and baseline claims to the shipped configuration. The initial draft entry above is retained.
