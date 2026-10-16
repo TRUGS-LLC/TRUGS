@@ -374,7 +374,7 @@ jobs:
         with:
           python-version: '3.11'
       - name: Install
-        run: pip install -e . -e 'git+https://github.com/TRUGS-LLC/TRUGS.git'
+        run: pip install -e . trugs-tools
       - name: Run compliance check
         run: trug compliance --strict
 ```

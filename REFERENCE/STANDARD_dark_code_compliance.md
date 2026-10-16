@@ -153,7 +153,7 @@ Compliance requires all three. An invariant in the TRUG with no assertion or no 
 
 ### 4.1 Node for every public code artifact
 
-Every public function / class / method in the implementation must have a corresponding node in the folder's `.trug.json`. This requirement is not yet met by this specification repository's file-level builder node: `parse_spec`, `build_trug` and `main` have no individual nodes. Node type is one of:
+Every public function / class / method in the implementation must have a corresponding node in the folder's `.trug.json`. In this specification repository's `project_v1` folder graph, repo-side build functions use individual `SPECIFICATION` nodes: `parse_spec`, `build_trug` and `main` are indexed beneath the file-level builder node. The cartography checker does not accept the code-artifact types below in a `project_v1` folder graph. In a code implementation graph, node type is one of:
 
 - `FUNCTION` — a public function
 - `PROCESS` — a long-running or multi-step process (preferred for pipeline stages)
@@ -177,7 +177,7 @@ The graph must encode these relations as edges:
 | Containment | `contains` | parent | child |
 | Flow | `FEEDS` | upstream stage | downstream stage |
 
-Edge relations must come from the TRUG/L preposition set (see `TRUGS_LANGUAGE/SPEC_vocabulary.md`). Inventing new relations is a violation.
+These are descriptive compliance-graph relation labels. They need not be TRUG/L prepositions: `VALIDATES`, for example, is a compliance relation rather than a TRUG/L preposition. See `TRUGS_LANGUAGE/SPEC_vocabulary.md` for the preposition vocabulary.
 
 ## 5. TRUG file conventions
 
@@ -186,7 +186,7 @@ Every `.trug.json` file in the repo (excluding `zzz_*` archives) must:
 - Pass `trug-a-folder check` (existing CORE validation — 16 rules)
 - Contain no dangling references (edges to nonexistent nodes, `contains` to missing children)
 - Match the filesystem: nodes with `properties.path` or `properties.file` must reference existing files (or be marked `stale: true` with a reason)
-- Use edge relations from the TRUG/L preposition set
+- Use descriptive relation labels for compliance graphs, including those in §4.3; a graph label does not add a TRUG/L preposition
 
 These rules already exist via `trug-a-folder check`; the compliance standard incorporates them rather than re-specifying.
 

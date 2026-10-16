@@ -345,6 +345,52 @@
         "file": "tools/build_language_trug.py"
       },
       "parent_id": "folder_tools",
+      "contains": [
+        "tools_build_language_trug_parse_spec",
+        "tools_build_language_trug_build_trug",
+        "tools_build_language_trug_main"
+      ],
+      "metric_level": "BASE_SPECIFICATION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_build_language_trug_parse_spec",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "tools/build_language_trug.py",
+        "purpose": "Parse vocabulary Markdown tables into ordered word records with their part of speech, subcategory, definition and core flag.",
+        "file": "tools/build_language_trug.py",
+        "function": "parse_spec"
+      },
+      "parent_id": "tools_build_language_trug",
+      "contains": [],
+      "metric_level": "BASE_SPECIFICATION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_build_language_trug_build_trug",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "tools/build_language_trug.py",
+        "purpose": "Assemble the language graph from parsed word records, preserving vocabulary order and grouping words by part of speech and subcategory.",
+        "file": "tools/build_language_trug.py",
+        "function": "build_trug"
+      },
+      "parent_id": "tools_build_language_trug",
+      "contains": [],
+      "metric_level": "BASE_SPECIFICATION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_build_language_trug_main",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "tools/build_language_trug.py",
+        "purpose": "Read command arguments, parse the vocabulary file and write the generated language graph; return a failure status when the arguments are invalid.",
+        "file": "tools/build_language_trug.py",
+        "function": "main"
+      },
+      "parent_id": "tools_build_language_trug",
       "contains": [],
       "metric_level": "BASE_SPECIFICATION",
       "dimension": "folder_structure"

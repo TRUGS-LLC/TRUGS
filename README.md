@@ -101,7 +101,7 @@ The [EXAMPLES/](EXAMPLES/) directory contains sample TRUGs for 7 domains at vary
 
 ## This repo, as a TRUG
 
-This repository describes itself as a TRUG. [`folder.trug.json`](folder.trug.json) at the repo root indexes selected folders, documents and tool files, with typed edges to the specs and standards they implement or describe. It omits `.github` and individual public-function nodes; the builder has a file-level node only.
+This repository describes itself as a TRUG. [`folder.trug.json`](folder.trug.json) at the repo root indexes selected folders, documents and tool files, with typed edges to the specs and standards they implement or describe. It omits `.github`; the builder's file-level node contains individual nodes for its public functions.
 
 ```bash
 # What's in this repo?
