@@ -145,6 +145,11 @@ You don't need permission. Build it, use it, share it. Once enough people are us
 
 **Implementations** are welcome. Build tools that read, write, validate, or execute TRUGs in any language. The spec is the contract — implement it however you want.
 
+## Scope
+
+This software does not include self-modifying TRUGS: graphs that change their
+own structure while they run.
+
 ## License
 
 The TRUGS specification and reference tools are released under the [Apache License 2.0](LICENSE). Anyone may implement the standard.
