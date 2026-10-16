@@ -2,7 +2,7 @@
 
 > 233 words across 9 parts of speech. Computation primary, law fills gaps. SI prefixes mark hierarchy transitions.
 
-**Issue:** #1211, TRUGS-DEVELOPMENT#1719 (private) | **Version:** 2.0.0
+**Issue:** (private reference removed), (private reference removed) (private) | **Version:** 2.0.0
 
 ---
 
@@ -684,6 +684,6 @@ No new keyword needed. See SPEC_examples.md example 24.
 1. **Is it already in the vocabulary in a different part of speech?** (PRECEDENT as adjective is different from PRECEDENT as noun — but the adjective form often covers the need.)
 2. **Can it be expressed as `DEFINE "name" AS CATEGORY`?** (INSTRUMENT, RECORD, RESOURCE — generic categories absorb domain-specific instances.)
 3. **Is it a BRANCH concern?** Domain-specific vocabularies layer onto CORE. Legal-domain words like FILING, WITNESS, TESTIMONY belong in a LEGAL branch vocabulary, not in core TRL.
-4. **Only after 1-3 fail:** consider extending the vocabulary (as AAA #2048 did — 22 corpus-evidenced additions, 211 → 233).
+4. **Only after 1-3 fail:** consider extending the vocabulary (as AAA (private reference removed) did — 22 corpus-evidenced additions, 211 → 233).
 
-Resolved in Xepayac/TRUGS-DEVELOPMENT#1542 (private) (2026-04-18).
+Resolved in (private reference removed) (private) (2026-04-18).

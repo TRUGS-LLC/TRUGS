@@ -2,7 +2,7 @@
 
 > Formal composition rules: what can combine with what, and what it compiles to.
 
-**Issue:** #1211, TRUGS-DEVELOPMENT#1719 (private) | **Version:** 2.0.0
+**Issue:** (private reference removed), (private reference removed) (private) | **Version:** 2.0.0
 
 ---
 
@@ -95,7 +95,7 @@ Here `BASE_FUNCTION` is a value, not a directive. The grammar distinguishes them
 
 #### Validation
 
-The validator does NOT enforce level directives. A TRL source with no directives is valid. A TRL source with directives that do not match the hierarchy on the underlying graph is also valid. Directives are an LLM-comprehension affordance, not a correctness gate. See TRUGS-DEVELOPMENT#1719 ADR-002 (private).
+The validator does NOT enforce level directives. A TRL source with no directives is valid. A TRL source with directives that do not match the hierarchy on the underlying graph is also valid. Directives are an LLM-comprehension affordance, not a correctness gate. See (private reference removed) ADR-002 (private).
 
 ### `leading_keyword_directive` — leading-keyword directives (`ASSERT` / `ASSERT_NOT` / `INVARIANT`)
 
@@ -121,9 +121,9 @@ Grammatically, a `leading_keyword_directive` differs from an ordinary `clause` o
 
 A `leading_keyword_directive` compiles to an assertion node carrying the proposition clause and the keyword's modality flag. (The exact node shape is defined by the compiler, not this grammar.)
 
-#### Parser support — pending #1976 Phase 5
+#### Parser support — pending (private reference removed) Phase 5
 
-> **Forward declaration.** This production defines the *spec-level* grammar for leading-keyword directives. The v1 reference parser (`trugs-tools`) does **not** yet implement it — under v1, `ASSERT X SHALL Y.` does not parse, because `subject` must be a `noun_phrase` or `PRONOUN`. Per the validation-is-identity discipline, a sentence using this form is therefore not yet valid TRL until the parser lands the production. The parser implementation — and the corpus migration that retires the legacy `ACROSS ALL TIME` idiom in favor of `INVARIANT` — is scheduled for **AAA #1976 Phase 5** (TRUGS-TOOLS parser update). Until then, the `ACROSS ALL TIME` idiom remains the supported way to express temporal universality.
+> **Forward declaration.** This production defines the *spec-level* grammar for leading-keyword directives. The v1 reference parser (`trugs-tools`) does **not** yet implement it — under v1, `ASSERT X SHALL Y.` does not parse, because `subject` must be a `noun_phrase` or `PRONOUN`. Per the validation-is-identity discipline, a sentence using this form is therefore not yet valid TRL until the parser lands the production. The parser implementation — and the corpus migration that retires the legacy `ACROSS ALL TIME` idiom in favor of `INVARIANT` — is scheduled for **AAA (private reference removed) Phase 5** (TRUGS-TOOLS parser update). Until then, the `ACROSS ALL TIME` idiom remains the supported way to express temporal universality.
 
 ### Sugar preprocessing
 

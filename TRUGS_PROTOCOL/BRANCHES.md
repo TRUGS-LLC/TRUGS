@@ -811,7 +811,7 @@ The following advanced branches define specialized vocabularies for **Agentic Sy
 **Purpose:** Represents code structure — modules, packages, classes, structs, functions, and their relationships — independent of programming language. Language is a property on nodes, not a branch identifier.
 **Key Concepts:** Containment (packages contain modules contain definitions), Reference (functions call functions, modules import modules), Typing (entities have types, functions return types).
 
-> **History:** Replaces the former Python, Rust, and LLVM branches (extracted in #607) with a single language-agnostic vocabulary. See issue #621.
+> **History:** Replaces the former Python, Rust, and LLVM branches (extracted in (private reference removed)) with a single language-agnostic vocabulary. See issue (private reference removed).
 
 #### Node Vocabulary
 
@@ -881,7 +881,7 @@ The following advanced branches define specialized vocabularies for **Agentic Sy
 **Purpose:** Unified vocabulary for "what I know" — covers session persistence (Living), world modeling (Ontology), and bibliographic indexing (Research).
 **Key Concepts:** Accumulation (knowledge is added, never lost), Taxonomy (entities have types and relationships), Evidence (claims cite sources).
 
-> **History:** Merges the former Living, Knowledge, and Research branches into a single vocabulary. See issue #622. Also incorporates the DECISION node and rejection/invalidation edges from #620.
+> **History:** Merges the former Living, Knowledge, and Research branches into a single vocabulary. See issue (private reference removed). Also incorporates the DECISION node and rejection/invalidation edges from (private reference removed).
 
 #### Node Vocabulary
 

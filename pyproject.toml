@@ -10,7 +10,7 @@ readme = "README.md"
 license = {text = "Apache-2.0"}
 keywords = ["trugs", "trl", "graph", "specification", "spec"]
 classifiers = [
-    # 2.0 launches as Beta (house style — AAA #2416, HITM 2026-06-11).
+    # 2.0 launches as Beta (house style — AAA (private reference removed), HITM 2026-06-11).
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: Apache Software License",
@@ -25,7 +25,7 @@ requires-python = ">=3.10"
 dependencies = []
 
 [project.optional-dependencies]
-# Layer-1 (industry baseline) tooling — AAA #2136 SP1. Spec-only repo: the only
+# Layer-1 (industry baseline) tooling — AAA (private reference removed) SP1. Spec-only repo: the only
 # runtime code is tools/build_language_trug.py, so the dev set is the lint/type/test stack.
 dev = [
     "ruff>=0.15",
@@ -42,7 +42,7 @@ Changelog = "https://github.com/TRUGS-LLC/TRUGS/blob/main/CHANGELOG.md"
 
 # Spec-only distribution: the wheel ships metadata + spec pointers, no Python
 # packages. tools/build_language_trug.py is a repo-side build utility, not
-# consumer API (AAA #2472 Phase 9 R1-F2 — top-level `tools` collision hazard).
+# consumer API (AAA (private reference removed) Phase 9 R1-F2 — top-level `tools` collision hazard).
 [tool.setuptools]
 packages = []
 

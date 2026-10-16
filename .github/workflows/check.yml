@@ -1,6 +1,6 @@
 name: Tier-1 check
 
-# AAA #2136 — Tier-1 polish CI gate. Coexists with compliance.yml (Dark Code).
+# AAA (private reference removed) — Tier-1 polish CI gate. Coexists with compliance.yml (Dark Code).
 #
 # This runs the SAME `make check` an evaluator runs locally, end-to-end, so CI is a
 # faithful mirror of the "one command reads GREEN" Tier-1 thesis. gitleaks is invoked

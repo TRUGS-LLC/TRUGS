@@ -2,7 +2,7 @@
 
 > 30 examples parsed token-by-token against the grammar. Each example was written, parsed, and if it failed, the failure was diagnosed, the vocabulary/grammar was patched, and the sentence was rewritten.
 
-**Issue:** #1211, TRUGS-DEVELOPMENT#1719 (private) | **Version:** 2.0.0
+**Issue:** (private reference removed), (private reference removed) (private) | **Version:** 2.0.0
 
 ---
 
