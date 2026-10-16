@@ -183,12 +183,12 @@ These are descriptive compliance-graph relation labels. They need not be TRUG/L 
 
 Every `.trug.json` file in the repo (excluding `zzz_*` archives) must:
 
-- Pass `trug-a-folder check` (existing CORE validation — 16 rules)
+- Pass `trug validate` (general CORE graph validation)
 - Contain no dangling references (edges to nonexistent nodes, `contains` to missing children)
 - Match the filesystem: nodes with `properties.path` or `properties.file` must reference existing files (or be marked `stale: true` with a reason)
 - Use descriptive relation labels for compliance graphs, including those in §4.3; a graph label does not add a TRUG/L preposition
 
-These rules already exist via `trug-a-folder check`; the compliance standard incorporates them rather than re-specifying.
+General CORE validation uses `trug validate`. Folder governance is a separate contract: run `trug-a-folder check .` for the root `folder.trug.json`, not for arbitrary graph documents. These commands do not establish enforcement of every convention listed above.
 
 ## 6. CI gate
 
@@ -219,10 +219,10 @@ Under the proposed ratchet, PRs that raise compliance would update the baseline 
 
 ### 6.3 Hard violations
 
-Certain violations fail CI regardless of overall percentage:
+The list below states hard-violation policy. The shipped CI runs the commands in §6.1 and `make check`; it contains no explicit `trug-a-folder check` step and does not establish enforcement of every policy item:
 
 - A TRUG node with an invalid `trl` property that does not parse
-- A `.trug.json` file that fails `trug-a-folder check`
+- A shipped graph that fails `trug validate` (enforced by `make trugs`, within `make check`)
 - A test function with no TRUG/L comment at all (total darkness)
 
 ## 7. Hard rules
