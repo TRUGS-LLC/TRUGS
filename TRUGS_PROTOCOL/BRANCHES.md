@@ -1184,7 +1184,7 @@ PIPELINE / STAGE node:
 
 **When to Use:**
 - Expressing a GitHub Issue's 9-phase development specification as a typed graph
-- Agent-to-agent handoff of development work (PERAGO_CHAT → PORT_PERAGO)
+- Agent-to-agent handoff of development work ((private reference removed) → (private reference removed))
 - Rendering human-readable AAA.md from structured source of truth
 - Validating development specifications before execution
 
@@ -1362,7 +1362,7 @@ CODE → AUDIT:
 - When both `aaa_v1` and `compute_v1` are declared: TASK nodes with `operation` are validated against `compute_v1` schemas
 - When only `aaa_v1` is declared: TASK nodes with `operation` are accepted but not validated against `compute_v1`
 
-**Full specification:** `TRUGS_AAA/VISION_native_trug_aaa.md`
+**Full specification:** `(private reference removed)/VISION_native_trug_aaa.md`
 
 **Example:**
 ```json
@@ -1389,7 +1389,7 @@ CODE → AUDIT:
       "properties": {
         "name": "Calculator",
         "description": "Simple arithmetic module providing basic operations",
-        "folder": "PORT_PERAGO/docs/EXAMPLES/simple_function",
+        "folder": "(private reference removed)/docs/EXAMPLES/simple_function",
         "status": "IN_PROGRESS",
         "created": "2026-02-12",
         "labels": ["example"]
