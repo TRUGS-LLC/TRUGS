@@ -1,4 +1,4 @@
-]633;E;{   sed -n '1,168p' TRUGS_PROTOCOL/BRANCHES.md\x0ased -n '326,447p' TRUGS_PROTOCOL/BRANCHES.md\x3b   sed -n '863,1175p' TRUGS_PROTOCOL/BRANCHES.md\x3b   sed -n '1288,1543p' TRUGS_PROTOCOL/BRANCHES.md\x0ased -n '1571,1662p' TRUGS_PROTOCOL/BRANCHES.md\x3b } > /tmp/branches_new.md;f6115331-d0a5-417b-983d-f8667381b403]633;C# TRUGS Protocol Branches
+]633;E;{   sed -n '1,168p' TRUGS_PROTOCOL/BRANCHES.md\x0ased -n '326,447p' TRUGS_PROTOCOL/BRANCHES.md\x3b   sed -n '863,1175p' TRUGS_PROTOCOL/BRANCHES.md\x3b   sed -n '1288,1543p' TRUGS_PROTOCOL/BRANCHES.md\x0ased -n '1571,1662p' TRUGS_PROTOCOL/BRANCHES.md\x3b } > (private reference removed);f6115331-d0a5-417b-983d-f8667381b403]633;C# TRUGS Protocol Branches
 
 **Version:** 1.0.0 (AAA_AARDVARK)  
 **Status:** ✅ Stable  
@@ -1085,7 +1085,7 @@ PIPELINE / STAGE node:
 
 **Validation Rules:** 6 additional rules (10–15) appended to CORE rules 1–9. All 9 CORE rules still apply.
 
-**Full specification:** `TRUGS_COMPUTATION/SPEC_computation.md`
+**Full specification:** `(private reference removed)/SPEC_computation.md`
 
 **Example:**
 ```json
