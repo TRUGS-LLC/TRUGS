@@ -64,7 +64,7 @@ See [TRUGS_LANGUAGE/](TRUGS_LANGUAGE/) for the complete specification.
 | Document | Description |
 |----------|-------------|
 | [CORE.md](TRUGS_PROTOCOL/CORE.md) | 7 boundaries, 10 primitive classes (~131 primitives), 16 validation rules, composition type system |
-| [BRANCHES.md](TRUGS_PROTOCOL/BRANCHES.md) | Domain-specific vocabularies (Python, Web, Writer, Knowledge, etc.) |
+| [BRANCHES.md](TRUGS_PROTOCOL/BRANCHES.md) | Domain-specific vocabularies (Code, Web, Writer, Knowledge, etc.) |
 | [SPEC_fundamentals.md](TRUGS_PROTOCOL/SPEC_fundamentals.md) | Core concepts and structure |
 | [SPEC_validation.md](TRUGS_PROTOCOL/SPEC_validation.md) | Validation rules with implementations |
 | [SCHEMA.md](TRUGS_PROTOCOL/SCHEMA.md) | JSON schema reference |
@@ -101,7 +101,7 @@ The [EXAMPLES/](EXAMPLES/) directory contains sample TRUGs for 7 domains at vary
 
 ## This repo, as a TRUG
 
-This repository describes itself as a TRUG. [`folder.trug.json`](folder.trug.json) at the repo root is the machine-readable index — every top-level folder, every reference document, every public tool has a node, with typed edges to the specs and standards it implements or describes.
+This repository describes itself as a TRUG. [`folder.trug.json`](folder.trug.json) at the repo root indexes selected folders, documents and tool files, with typed edges to the specs and standards they implement or describe. It omits `.github` and individual public-function nodes; the builder has a file-level node only.
 
 ```bash
 # What's in this repo?

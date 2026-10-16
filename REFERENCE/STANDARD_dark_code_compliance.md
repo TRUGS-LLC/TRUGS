@@ -153,7 +153,7 @@ Compliance requires all three. An invariant in the TRUG with no assertion or no 
 
 ### 4.1 Node for every public code artifact
 
-Every public function / class / method in the implementation must have a corresponding node in the folder's `.trug.json`. Node type is one of:
+Every public function / class / method in the implementation must have a corresponding node in the folder's `.trug.json`. This requirement is not yet met by this specification repository's file-level builder node: `parse_spec`, `build_trug` and `main` have no individual nodes. Node type is one of:
 
 - `FUNCTION` — a public function
 - `PROCESS` — a long-running or multi-step process (preferred for pipeline stages)
