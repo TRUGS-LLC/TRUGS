@@ -185,7 +185,7 @@ Every `.trug.json` file in the repo (excluding `zzz_*` archives) must:
 
 - Pass `trug validate` (general CORE graph validation)
 - Contain no dangling references (edges to nonexistent nodes, `contains` to missing children)
-- Match the filesystem: nodes with `properties.path` or `properties.file` must reference existing files (or be marked `stale: true` with a reason)
+- Match the filesystem for repository filesystem-index references: nodes with `properties.path` or `properties.file` must reference existing files (or be marked `stale: true` with a reason). External research-source references need not resolve to files in this repository.
 - Use descriptive relation labels for compliance graphs, including those in §4.3; a graph label does not add a TRUG/L preposition
 
 General CORE validation uses `trug validate`. Folder governance is a separate contract: run `trug-a-folder check .` for the root `folder.trug.json`, not for arbitrary graph documents. These commands do not establish enforcement of every convention listed above.
