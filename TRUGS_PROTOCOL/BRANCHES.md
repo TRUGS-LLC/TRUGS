@@ -1,4 +1,4 @@
-]633;E;{   sed -n '1,168p' TRUGS_PROTOCOL/BRANCHES.md\x0ased -n '326,447p' TRUGS_PROTOCOL/BRANCHES.md\x3b   sed -n '863,1175p' TRUGS_PROTOCOL/BRANCHES.md\x3b   sed -n '1288,1543p' TRUGS_PROTOCOL/BRANCHES.md\x0ased -n '1571,1662p' TRUGS_PROTOCOL/BRANCHES.md\x3b } > (private reference removed);f6115331-d0a5-417b-983d-f8667381b403]633;C# TRUGS Protocol Branches
+# TRUGS Protocol Branches
 
 **Version:** 1.0.0 (AAA_AARDVARK)  
 **Status:** ✅ Stable  
@@ -1603,8 +1603,6 @@ TRUG = CORE + BRANCH
 ---
 
 **Next steps:**
-- Read ARCHITECTURE.md to understand how CORE creates patterns
-- Read SPEC_patterns.md to see the three fundamental patterns
 - See EXAMPLES/ for complete working TRUGs
 - See individual branch documentation for detailed specifications
 

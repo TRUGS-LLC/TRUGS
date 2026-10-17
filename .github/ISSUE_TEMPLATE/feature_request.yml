@@ -44,7 +44,7 @@ body:
     attributes:
       label: Compliance awareness
       options:
-        - label: I understand this change must pass `trugs-compliance-check` before it can merge
+        - label: I understand this change must pass `trug compliance .` before it can merge
           required: true
         - label: I understand only humans merge PRs; agents open them and stop
           required: true

@@ -352,9 +352,9 @@ Compliance that isn't gated is aspirational. CI is where the standard stops bein
 
 ### 7.1 The three gates
 
-Every TRUGS-LLC public repo enforces three CI gates (adopted in `(private reference removed)`):
+The compliance policy defines three gates (adopted in `(private reference removed)`); the current PR workflow and its limits are described below:
 
-1. **PR gate** — `trug compliance --strict` must pass. Compliance % may not decrease.
+1. **PR gate** — the shipped workflow runs `trug compliance .` and fails if that command fails. It passes neither `--strict` nor `--baseline-update` and has no separate target-branch baseline comparison or update step. The baseline behavior described in §7.2–§7.4 is a proposed ratchet design, not behavior established by this workflow; a baseline snapshot alone does not implement it.
 2. **Release gate** — compliance % must equal 100.0 before a version tag is cut or a package is published (PyPI, npm, crates.io, etc.).
 3. **Promotion gate** — a private `Xepayac/*` repo cannot be transferred to `TRUGS-LLC/*` until it meets 100% compliance.
 
@@ -374,9 +374,9 @@ jobs:
         with:
           python-version: '3.11'
       - name: Install
-        run: pip install -e . -e 'git+https://github.com/TRUGS-LLC/TRUGS.git'
+        run: pip install -e . trugs-tools
       - name: Run compliance check
-        run: trug compliance --strict
+        run: trug compliance .
 ```
 
 On PR, CI runs the check against the PR branch and compares to the baseline on the target branch. On push to `main`, it updates the baseline.
@@ -452,7 +452,7 @@ This section specifies the Python dialect of TRUGS compliance — the concrete r
 
 ### 9.1 Function-level comment placement
 
-Immediately above every public `def` or `class`, with nothing but blank lines between the comment block and the declaration. Multiple lines of `#`-prefixed comment; combined text must parse via `tools/trl.py`.
+Immediately above every public `def` or `class`, with nothing but blank lines between the comment block and the declaration. Multiple lines of `#`-prefixed comment; combined text, with `#` and leading whitespace stripped and saved as `comments.trl`, must compile via `trug trl compile comments.trl > comments.json`; `trug trl validate comments.json` checks the compiled JSON graph.
 
 ### 9.2 Inline comment placement
 

@@ -24,7 +24,7 @@ REFERENCE/
 | TRUG CORE protocol spec (7 node fields, 3 edge fields, 16 validation rules) | `TRUGS_PROTOCOL/` |
 | TRUG/L language spec (233 words across 9 parts of speech, BNF, grammar) | `TRUGS_LANGUAGE/` |
 | Original foundational TRUGS paper (LaTeX) | `PAPER/` |
-| Python reference implementation | `tools/` |
+| Language CLI and reference tooling | Companion [TRUGS-TOOLS](https://github.com/TRUGS-LLC/TRUGS-TOOLS) repository (`trug`); `tools/` here contains only the vocabulary builder and its tests |
 
 ## The document trinity
 
@@ -32,7 +32,7 @@ The three documents in `REFERENCE/` form a trinity:
 
 - **`PAPER_dark_code.md`** — the WHY. Defines the Dark Code problem and TRUGS as the resolution. Starts every reader who has never seen TRUGS.
 - **`PAPER_how_to_code_with_trugs.md`** — the HOW. Practitioner guide derived from §5 of the Dark Code paper, expanded with refactoring, multi-file, AAA, CI, and patterns material.
-- **`STANDARD_dark_code_compliance.md`** — the CHECK. Auditable, mechanical compliance checklist + `tg compliance` CLI specification. Every TRUGS-LLC public repo is graded against this.
+- **`STANDARD_dark_code_compliance.md`** — the CHECK. Auditable, mechanical compliance checklist + `trug compliance` CLI specification. Every TRUGS-LLC public repo is graded against this.
 
 The trinity flows: WHY you do it → HOW you do it → how you PROVE you did it.
 

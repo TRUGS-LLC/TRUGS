@@ -1,8 +1,8 @@
 # STANDARD: Dark Code Compliance
 
-**Status:** Draft v0.1 — adopted by `TRUGS-LLC/TRUGS#48`
+**Status:** Draft v0.1.1 — adopted by `TRUGS-LLC/TRUGS#48`
 **Applies to:** every TRUGS-LLC public repo
-**Enforced by:** `trug compliance` CLI + CI gates (this repo, `tools/compliance_check.py`)
+**Enforced by:** `trug compliance` CLI from the companion [TRUGS-TOOLS](https://github.com/TRUGS-LLC/TRUGS-TOOLS) repository + CI gates
 **See also:** [`PAPER_dark_code.md`](PAPER_dark_code.md) (the WHY), [`PAPER_how_to_code_with_trugs.md`](PAPER_how_to_code_with_trugs.md) (the HOW)
 
 ---
@@ -38,14 +38,14 @@ The compliance standard has exactly four corners, each a mechanical validation:
 | **TRUG ↔ code** | Every public function has a TRUG node | check rule C2 |
 | **TRUG ↔ TRUG/L** | Every TRUG node with a `trl` property parses via `trl.py` | check rule C3 |
 | **TRUG/L ↔ tests** | Every test function has an `AGENT SHALL VALIDATE ...` comment that parses | check rule C4 |
-| **TRUG ↔ tests** | Every SPEC/FUNCTION node has ≥ 1 inbound `VALIDATES` edge from a TEST node | check rule C5 |
+| **TRUG ↔ tests** | Code implementation graphs use inbound `VALIDATES` edges from TEST to SPEC/FUNCTION nodes; this repository's folder graph uses suite-to-file `tests` edges | C5 convention; individual folder-function test edges are not verified |
 | **invariants** | Every `invariant_*` property has an assertion in code + a test | check rule C6 |
 | **TRUG validity** | Every `.trug.json` file passes validation | check rule C7 |
 | **code ↔ tests** | The test suite passes | existing `pytest` / language-native test runner |
 
-The check rules C1–C7 are defined below in §3–§6 and implemented in `trug compliance`:
+The check rules C1–C7 are defined below in §3–§6. Read `trug compliance` results with their reported check coverage: a passing report does not establish individual-function test traceability in this repository's folder graph.
 
-**Dark Code is code where any edge of this square is broken.** Compliance means every edge is intact and mechanically verified.
+**Dark Code is code where any edge of this square is broken.** The square is the verification goal; the shipped folder graph records file-level test relationships, without inbound test edges to its individual build-function nodes.
 
 ## 3. Python conventions
 
@@ -57,8 +57,8 @@ Every public `def` and `class` declaration must have a **function-level TRUG/L c
 
 A comment is "function-level TRUG/L" if:
 - Every line is a Python comment (`#` prefix)
-- The concatenated text (with `#` and leading whitespace stripped) parses successfully via `tools/trl.py`
-- The TRUG/L sentence begins with a Verb (`FILTER`, `VALIDATE`, `SHALL`, etc.) — describes what the function **does**, not what it **is**
+- The concatenated text (with `#` and leading whitespace stripped), saved as `comments.trl`, compiles successfully via `trug trl compile comments.trl > comments.json`; `trug trl validate comments.json` checks the compiled JSON graph
+- The TRUG/L sentence describes what the function **does** using subject-first clauses: a noun phrase or pronoun, followed by a verb phrase (optional modal, then verb)
 
 "Public" means:
 - Not prefixed with `_` (single-underscore conventions are module-private)
@@ -91,6 +91,8 @@ The inline comment is either:
 - On the same line after the code (`x = foo()  # MAP RECORD input TO DATA output`)
 - On the line immediately above (for long comments or multi-line logic)
 
+These are policy requirements. The builder `tools/build_language_trug.py` currently has only partial inline annotations in `parse_spec`, `build_trug` and `main`: loops, branches and assignments with calls lack the required same-line or immediately preceding TRUG/L comments. The builder therefore falls short of this policy. The current passing `trug compliance .` report checks no functions in this repository and does not verify these inline annotations.
+
 **Example:**
 
 ```python
@@ -111,7 +113,7 @@ def shuffle_shoe(shoe: list[Card], rng: random.Random | None = None) -> list[Car
 
 Every test function — i.e. every `def test_*` at module top-level, and every method of a `class Test*` — must have a function-level TRUG/L comment that:
 
-- Parses via `tools/trl.py`
+- Compiles from stripped comment text via `trug trl compile comments.trl > comments.json`; `trug trl validate comments.json` checks the compiled JSON graph
 - Begins with `AGENT SHALL VALIDATE` (the canonical test-intent opener)
 - Names a specific invariant, property, or node being verified
 
@@ -153,7 +155,7 @@ Compliance requires all three. An invariant in the TRUG with no assertion or no 
 
 ### 4.1 Node for every public code artifact
 
-Every public function / class / method in the implementation must have a corresponding node in the folder's `.trug.json`. Node type is one of:
+Every public function / class / method in the implementation must have a corresponding node in the folder's `.trug.json`. In this specification repository's `project_v1` folder graph, repo-side build functions use individual `SPECIFICATION` nodes: `parse_spec`, `build_trug` and `main` are indexed beneath the file-level builder node. The cartography checker does not accept the code-artifact types below in a `project_v1` folder graph. In a code implementation graph, node type is one of:
 
 - `FUNCTION` — a public function
 - `PROCESS` — a long-running or multi-step process (preferred for pipeline stages)
@@ -167,43 +169,41 @@ When a node has a `trl` property, that string is the **canonical TRUG/L specific
 
 ### 4.3 Cross-node edges
 
-The graph must encode these relations as edges:
+Code implementation graphs use the relations below. In this repository's `project_v1` folder graph, `TEST_SUITE` links to the builder file and tools component through lowercase `tests` edges. The individual `SPECIFICATION` function nodes have no inbound test edges; containment alone does not establish test coverage. The table is a code-graph convention, not an additional mandatory `VALIDATES` relation for those folder nodes:
 
 | Edge | Relation | From | To |
 |---|---|---|---|
-| A FUNCTION validates another | `VALIDATES` | TEST | FUNCTION / SPEC |
+| A test validates a function or spec | `VALIDATES` | TEST | FUNCTION / SPEC |
 | A FUNCTION implements a spec | `IMPLEMENTS` | FUNCTION | SPEC |
 | A FUNCTION depends on another | `DEPENDS_ON` | FUNCTION | FUNCTION / MODULE |
 | Containment | `contains` | parent | child |
 | Flow | `FEEDS` | upstream stage | downstream stage |
 
-Edge relations must come from the TRUG/L preposition set (see `TRUGS_LANGUAGE/SPEC_vocabulary.md`). Inventing new relations is a violation.
+These are descriptive compliance-graph relation labels. They need not be TRUG/L prepositions: `VALIDATES`, for example, is a compliance relation rather than a TRUG/L preposition. See `TRUGS_LANGUAGE/SPEC_vocabulary.md` for the preposition vocabulary.
 
 ## 5. TRUG file conventions
 
 Every `.trug.json` file in the repo (excluding `zzz_*` archives) must:
 
-- Pass `trug-a-folder check` (existing CORE validation — 16 rules)
+- Pass `trug validate` (general CORE graph validation)
 - Contain no dangling references (edges to nonexistent nodes, `contains` to missing children)
-- Match the filesystem: nodes with `properties.path` or `properties.file` must reference existing files (or be marked `stale: true` with a reason)
-- Use edge relations from the TRUG/L preposition set
+- Match the filesystem for repository filesystem-index references: nodes with `properties.path` or `properties.file` must reference existing files (or be marked `stale: true` with a reason). External research-source references need not resolve to files in this repository.
+- Use descriptive relation labels for compliance graphs, including those in §4.3; a graph label does not add a TRUG/L preposition
 
-These rules already exist via `trug-a-folder check`; the compliance standard incorporates them rather than re-specifying.
+General CORE validation uses `trug validate`. Folder governance is a separate contract: run `trug-a-folder check .` for the root `folder.trug.json`, not for arbitrary graph documents. These commands do not establish enforcement of every convention listed above.
 
 ## 6. CI gate
 
-### 6.1 Every PR runs `trug compliance`
+### 6.1 Every PR targeting main runs `trug compliance`
 
-A GitHub Actions workflow at `.github/workflows/compliance.yml` must run on every PR and every push to main:
+The shipped `.github/workflows/compliance.yml` runs on every PR targeting main and every push to main. Its compliance step runs the command below; it passes neither `--strict` nor `--baseline-update` and has no separate target-branch baseline comparison or update step. The baseline ratchet described in §6.2 is a proposed workflow design, not an implemented gate here:
 
 ```yaml
 - name: Dark Code compliance
-  run: trug compliance --strict
+  run: trug compliance .
 ```
 
-Exit codes:
-- `0` — compliance % is ≥ the baseline on the target branch
-- `1` — compliance % decreased, or a hard violation was introduced
+The workflow fails when the compliance command exits unsuccessfully. On failure it attempts a JSON report with `trug compliance --json .`; that reporting step is allowed to fail. A successful command is not evidence of a comparison with the target branch.
 
 ### 6.2 Baseline tracking
 
@@ -217,21 +217,21 @@ Each repo stores its current compliance baseline in `.github/compliance-baseline
 }
 ```
 
-PRs that raise compliance update the baseline (committed in the PR). PRs that merely maintain compliance do not need to touch it. PRs that decrease compliance fail CI.
+Under the proposed ratchet, PRs that raise compliance would update the baseline and decreases would fail CI. A `.github/compliance-baseline.json` snapshot is present, but the shipped workflow does not fetch a target-branch snapshot or update the stored baseline. The JSON above illustrates the design rather than the current snapshot.
 
 ### 6.3 Hard violations
 
-Certain violations fail CI regardless of overall percentage:
+The list below states hard-violation policy. The shipped CI runs the commands in §6.1 and `make check`; it contains no explicit `trug-a-folder check` step and does not establish enforcement of every policy item:
 
 - A TRUG node with an invalid `trl` property that does not parse
-- A `.trug.json` file that fails `trug-a-folder check`
+- A shipped graph that fails `trug validate` (enforced by `make trugs`, within `make check`)
 - A test function with no TRUG/L comment at all (total darkness)
 
 ## 7. Hard rules
 
 Three hard gates apply to every TRUGS-LLC public repo (adopted in `(private reference removed)`):
 
-1. **No PR may decrease compliance %.** CI enforces.
+1. **No PR may decrease compliance %.** This is a policy requirement; the shipped workflow runs `trug compliance .` without an explicit target-branch baseline comparison, so it does not establish enforcement of this ratchet.
 2. **No version bump without 100% compliance.** Tag/release workflows must check `compliance_percent == 100.0` before building wheels, publishing to PyPI, etc.
 3. **No `Xepayac → TRUGS-LLC` promotion without 100% compliance.** A private-to-public repo transfer must pass the standard first.
 
@@ -303,3 +303,5 @@ When the standard changes, downstream repos may see their compliance % shift wit
 | Version | Date | Change |
 |---|---|---|
 | 0.1 | 2026-04-16 | Initial draft — `TRUGS-LLC/TRUGS#48` |
+
+Correction, 2026-10-16: Draft v0.1.1 clarifies the folder graph's test-edge convention, distinguishes graph relations from TRUG/L prepositions, and corrects the compliance workflow and baseline claims to the shipped configuration. The initial draft entry above is retained.

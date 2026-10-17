@@ -64,7 +64,7 @@ See [TRUGS_LANGUAGE/](TRUGS_LANGUAGE/) for the complete specification.
 | Document | Description |
 |----------|-------------|
 | [CORE.md](TRUGS_PROTOCOL/CORE.md) | 7 boundaries, 10 primitive classes (~131 primitives), 16 validation rules, composition type system |
-| [BRANCHES.md](TRUGS_PROTOCOL/BRANCHES.md) | Domain-specific vocabularies (Python, Web, Writer, Knowledge, etc.) |
+| [BRANCHES.md](TRUGS_PROTOCOL/BRANCHES.md) | Domain-specific vocabularies (Code, Web, Writer, Knowledge, etc.) |
 | [SPEC_fundamentals.md](TRUGS_PROTOCOL/SPEC_fundamentals.md) | Core concepts and structure |
 | [SPEC_validation.md](TRUGS_PROTOCOL/SPEC_validation.md) | Validation rules with implementations |
 | [SCHEMA.md](TRUGS_PROTOCOL/SCHEMA.md) | JSON schema reference |
@@ -101,7 +101,7 @@ The [EXAMPLES/](EXAMPLES/) directory contains sample TRUGs for 7 domains at vary
 
 ## This repo, as a TRUG
 
-This repository describes itself as a TRUG. [`folder.trug.json`](folder.trug.json) at the repo root is the machine-readable index — every top-level folder, every reference document, every public tool has a node, with typed edges to the specs and standards it implements or describes.
+This repository describes itself as a TRUG. [`folder.trug.json`](folder.trug.json) at the repo root indexes selected folders, documents and tool files, with typed edges to the specs and standards they implement or describe. It omits `.github`; the builder's file-level node contains individual nodes for its public functions.
 
 ```bash
 # What's in this repo?
@@ -114,7 +114,7 @@ trug get folder.trug.json tools_build_language_trug --edges
 trug-a-folder check .
 ```
 
-CI runs `make check` (formatting, lint, types, tests, and the TRUG checks via `trug-a-folder`) plus `trug compliance .` on every push and PR — this README's section list, the spec index, the tool table above all correspond to nodes you can traverse programmatically. When the TRUG drifts from the prose or the filesystem, CI fails. We dogfood our own dogfood.
+For pushes to `main` and pull requests targeting `main`, CI runs `make check` (secrets, formatting, lint, types, tests, shipped-graph validation via `trug validate`, and the deterministic vocabulary rebuild) plus `trug compliance .` and a separate builder-test job. CI does not run `trug-a-folder check` or compare README prose with the filesystem; run the folder check above locally.
 
 ## Use It
 
@@ -144,6 +144,11 @@ CI runs `make check` (formatting, lint, types, tests, and the TRUG checks via `t
 You don't need permission. Build it, use it, share it. Once enough people are using a branch in the same domain, we'll work with the community to formalize it into the specification.
 
 **Implementations** are welcome. Build tools that read, write, validate, or execute TRUGs in any language. The spec is the contract — implement it however you want.
+
+## Scope
+
+This software does not include self-modifying TRUGS: graphs that change their
+own structure while they run.
 
 ## License
 
