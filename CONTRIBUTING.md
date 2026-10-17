@@ -47,13 +47,13 @@ If you're unsure, open an issue and ask. That is always cheaper than writing cod
 
 ## Quality gates (what CI enforces)
 
-Every PR runs three gates:
+For pushes to `main` and pull requests targeting `main`, CI runs:
 
-- **Build** — package installs cleanly, pytest passes
-- **Compliance** — `trug compliance` may not decrease. Baseline is ratcheted only upward.
-- **Graph** — `trug-a-folder check` reports zero errors on `folder.trug.json`
+- **Tier-1** — installs the package and dev tooling, then runs `make check`: secrets, formatting, lint, types, tests, shipped-graph validation via `trug validate`, and a deterministic vocabulary rebuild.
+- **Compliance** — runs `trug compliance .`.
+- **Tests** — runs the vocabulary-builder test module separately.
 
-A PR that fails any gate cannot merge. The gate output names the specific failing check.
+CI does not run `trug-a-folder check` or compare prose against filesystem contents. Run the folder check locally as described above. The workflow output names each failing check.
 
 ## Human-in-the-middle
 

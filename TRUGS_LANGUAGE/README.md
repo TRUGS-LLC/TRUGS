@@ -29,13 +29,13 @@ PARTY api SHALL FILTER ALL ACTIVE RECORD
   OR RETRY BOUNDED 3 WITHIN 60s.
 ```
 
-Every word is from the 233-word vocabulary. The sentence compiles to a graph with 6 nodes and 5 edges. The graph decompiles back to the same sentence.
+Every word is from the 233-word vocabulary. The sentence compiles to a graph with 9 nodes and 14 edges. The graph decompiles back to the same sentence.
 
 ## The Numbers
 
 - **233 executable words** + `'word` sugar pattern (human readability only)
 - **9 parts of speech** — sugar is a pattern (`'[a-z_]+`), not a word list. Level prefixes (the 9th part of speech, added in 2.0.0) are SI-derived hierarchy markers shared across both domains.
-- **150 computation**, 52 law, 31 shared (executable words)
+- **156 computation**, 46 law, 31 shared (executable words)
 - **12 validation rules** for compiled graphs
 - **No ambiguity** — verbs and prepositions are always distinct words
 - **30 examples** tested token-by-token against the grammar
@@ -51,7 +51,7 @@ Every word is from the 233-word vocabulary. The sentence compiles to a graph wit
 
 ## Relationship to TRUGS
 
-- **TRUGS CORE** defines the 46 semantic primitives (graph vocabulary)
-- **TRUGS Language** uses CORE as its seed and adds 187 words to fill the gaps CORE doesn't cover (verbs, adjectives, adverbs, conjunctions, articles, pronouns, level prefixes)
+- **TRUGS CORE** supplies 43 vocabulary entries marked `core: true` in `language.trug.json`; this is the language graph's seed count
+- **TRUGS Language** uses CORE as its seed and adds 190 words to fill the gaps CORE doesn't cover (verbs, adjectives, adverbs, conjunctions, articles, pronouns, level prefixes)
 - The language tests CORE; CORE tests the language. They educate each other.
 - CORE is the grammar invariant. Branches add domain vocabulary. Same architecture.

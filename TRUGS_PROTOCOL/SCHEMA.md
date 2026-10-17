@@ -26,12 +26,12 @@ This document provides the complete schema reference for TRUGS v1.0, including:
 2. [Branch Schemas](#branch-schemas)
    - [Web Branch](#web-branch-schema)
    - [Writer Branch](#writer-branch-schema)
-3. [Extension Schemas](#extension-schemas)
+3. Extension property schemas
    - [typed Extension](#typed-extension-schema)
    - [scoped Extension](#scoped-extension-schema)
    - [ownership Extension](#ownership-extension-schema)
 4. [Complete Examples](#complete-examples)
-5. [Schema Validation](#schema-validation)
+5. [Validation Rules](#validation-rules)
 
 ---
 
@@ -825,9 +825,7 @@ For JSON Schema validation tools:
 
 - [CORE.md](CORE.md) - The 7 boundaries
 - [BRANCHES.md](BRANCHES.md) - Complete branch specifications
-- [SPEC_extensions.md](SPEC_extensions.md) - Complete extension specifications
 - [SPEC_validation.md](SPEC_validation.md) - The 9 validation rules
-- [SPEC_patterns.md](SPEC_patterns.md) - System patterns
 
 ---
 

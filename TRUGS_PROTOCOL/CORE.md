@@ -8,7 +8,7 @@
 
 ## What is TRUGS?
 
-**TRUGS** — Traversable, Recursive, Universal, Graph, Specification — is a structured graph format for **data storage** and **inter-agent communication**.
+**TRUGS** — Traceable Recursive Universal Graph Specification — is a structured graph format for **data storage** and **inter-agent communication**.
 
 A TRUG is a JSON document with a distinct structure that separates it from other computational languages. Agents read and write TRUGs to store structured information and to communicate it to other agents.
 
@@ -1423,7 +1423,7 @@ The opening TRUG pattern is recursive: the TRUGS Language definition is itself a
 
 ### Semantic Meanings
 
-- What `FUNCTION` means (that's Python branch)
+- What `FUNCTION` means (that's CODE branch)
 - What `BASE_FUNCTION` means semantically (that's domain)
 - What transformations do (that's tools)
 
@@ -1489,11 +1489,11 @@ The canonical Core validator is in `trugs_tools`:
 # Validate CORE compliance
 python -m trugs_tools.validate my_graph.json
 
-# Check specific rules
-python -m trugs_tools.validate --core-only my_graph.json
+# Equivalent CLI command
+trug validate my_graph.json
 ```
 
-**Source:** `packages/trugs/src/trugs/core/`  
+**Source:** Companion [TRUGS-TOOLS](https://github.com/TRUGS-LLC/TRUGS-TOOLS) repository; run `trug validate my_graph.json`
 **Test coverage:** 193 tests, 80% coverage
 
 ---
@@ -1554,7 +1554,7 @@ python -m trugs_tools.validate --core-only my_graph.json
 
 | Term | Definition |
 |------|------------|
-| **TRUGS** | Traversable, Recursive, Universal, Graph, Specification. The specification and standard. When all letters are capitalized, TRUGS refers to the specification itself. |
+| **TRUGS** | Traceable Recursive Universal Graph Specification. The specification and standard. When all letters are capitalized, TRUGS refers to the specification itself. |
 | **TRUG** | A single JSON document conforming to the TRUGS specification. |
 | **TRUGs** | Multiple TRUG documents. In this document, distinguished from TRUGS (the specification) by the lowercase 's'. In common usage, TRUGS may refer to either the specification or multiple documents — context determines meaning. |
 | **CORE** | Short for TRUGS CORE. This specification — the structural boundaries, semantic primitives, composition rules, and validation rules that every TRUG must satisfy. |

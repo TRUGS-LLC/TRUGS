@@ -8,8 +8,6 @@
 2. Fill in the details: the bug, its impact, how to reproduce it
 3. We'll respond within 5 business days
 
-If you cannot use GitHub Security Advisories, email `xepayac@gmail.com` with `[TRUGS SECURITY]` in the subject line.
-
 ## What counts as a security issue
 
 - Code injection, path traversal, or arbitrary file read/write in the reference tools (`tools/*.py`)

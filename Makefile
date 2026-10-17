@@ -46,8 +46,8 @@ test:
 trugs:
 	@if command -v trug >/dev/null 2>&1; then \
 		echo "==> trug validate (shipped TRUGs)"; \
-		for t in TRUGS_LANGUAGE/language.trug.json $$(find EXAMPLES STUDIES -name '*.json'); do \
-			trug validate "$$t" | tail -1 | grep -q VALID && echo "  VALID  $$t" || { echo "  FAIL   $$t"; exit 1; }; \
+		for t in folder.trug.json TRUGS_LANGUAGE/language.trug.json $$(find EXAMPLES STUDIES -name '*.json'); do \
+			trug validate "$$t" && echo "  VALID  $$t" || { echo "  FAIL   $$t"; exit 1; }; \
 		done; \
 		echo "==> deterministic rebuild check"; \
 		tmp=$$(mktemp); python3 tools/build_language_trug.py TRUGS_LANGUAGE/SPEC_vocabulary.md "$$tmp" >/dev/null; \
