@@ -91,6 +91,8 @@ The inline comment is either:
 - On the same line after the code (`x = foo()  # MAP RECORD input TO DATA output`)
 - On the line immediately above (for long comments or multi-line logic)
 
+These are policy requirements. The builder `tools/build_language_trug.py` currently has only partial inline annotations in `parse_spec`, `build_trug` and `main`: loops, branches and assignments with calls lack the required same-line or immediately preceding TRUG/L comments. The builder therefore falls short of this policy. The current passing `trug compliance .` report checks no functions in this repository and does not verify these inline annotations.
+
 **Example:**
 
 ```python
@@ -192,9 +194,9 @@ General CORE validation uses `trug validate`. Folder governance is a separate co
 
 ## 6. CI gate
 
-### 6.1 Every PR runs `trug compliance`
+### 6.1 Every PR targeting main runs `trug compliance`
 
-The shipped `.github/workflows/compliance.yml` runs on every PR and every push to main. Its compliance step runs the command below; it passes neither `--strict` nor `--baseline-update` and has no separate target-branch baseline comparison or update step. The baseline ratchet described in §6.2 is a proposed workflow design, not an implemented gate here:
+The shipped `.github/workflows/compliance.yml` runs on every PR targeting main and every push to main. Its compliance step runs the command below; it passes neither `--strict` nor `--baseline-update` and has no separate target-branch baseline comparison or update step. The baseline ratchet described in §6.2 is a proposed workflow design, not an implemented gate here:
 
 ```yaml
 - name: Dark Code compliance
