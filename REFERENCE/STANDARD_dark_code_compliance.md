@@ -57,8 +57,8 @@ Every public `def` and `class` declaration must have a **function-level TRUG/L c
 
 A comment is "function-level TRUG/L" if:
 - Every line is a Python comment (`#` prefix)
-- The concatenated text (with `#` and leading whitespace stripped) parses successfully via `trug trl validate <file>`
-- The TRUG/L sentence begins with a Verb (`FILTER`, `VALIDATE`, `SHALL`, etc.) — describes what the function **does**, not what it **is**
+- The concatenated text (with `#` and leading whitespace stripped), saved as `comments.trl`, compiles successfully via `trug trl compile comments.trl > comments.json`; `trug trl validate comments.json` checks the compiled JSON graph
+- The TRUG/L sentence describes what the function **does** using subject-first clauses: a noun phrase or pronoun, followed by a verb phrase (optional modal, then verb)
 
 "Public" means:
 - Not prefixed with `_` (single-underscore conventions are module-private)
@@ -111,7 +111,7 @@ def shuffle_shoe(shoe: list[Card], rng: random.Random | None = None) -> list[Car
 
 Every test function — i.e. every `def test_*` at module top-level, and every method of a `class Test*` — must have a function-level TRUG/L comment that:
 
-- Parses via `trug trl validate <file>`
+- Compiles from stripped comment text via `trug trl compile comments.trl > comments.json`; `trug trl validate comments.json` checks the compiled JSON graph
 - Begins with `AGENT SHALL VALIDATE` (the canonical test-intent opener)
 - Names a specific invariant, property, or node being verified
 
