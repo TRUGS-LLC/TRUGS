@@ -1,0 +1,325 @@
+{
+  "name": "tools",
+  "version": "1.0.0",
+  "type": "PROJECT",
+  "dimension": "folder_structure",
+  "dimensions": {
+    "folder_structure": {
+      "description": "Public declarations in the paper tools and their test fixtures.",
+      "base_level": "BASE"
+    }
+  },
+  "capabilities": {
+    "extensions": [],
+    "vocabularies": [
+      "core_v2.0.0"
+    ],
+    "profiles": []
+  },
+  "nodes": [
+    {
+      "id": "root",
+      "type": "FOLDER",
+      "properties": {
+        "name": "tools",
+        "purpose": "Describe sixteen public functions and two dataclasses in the paper tools and their test fixtures.",
+        "file": "tools",
+        "declaration_count": 18
+      },
+      "parent_id": null,
+      "contains": [
+        "tools_check_paper_trl_case",
+        "tools_check_paper_trl_result",
+        "tools_check_paper_trl_extract_listings",
+        "tools_check_paper_trl_extract_graphs",
+        "tools_check_paper_trl_extract_annotations",
+        "tools_check_paper_trl_strip_trl_tags",
+        "tools_check_paper_trl_extract_examples",
+        "tools_check_paper_trl_run_command",
+        "tools_check_paper_trl_tool_version",
+        "tools_check_paper_trl_check_case",
+        "tools_check_paper_trl_check_graph",
+        "tools_check_paper_trl_count_macros",
+        "tools_check_paper_trl_main",
+        "tools_paper_vocab_counts_vocabulary_macros",
+        "tools_paper_vocab_counts_render_macros",
+        "tools_paper_vocab_counts_main",
+        "tools_test_check_paper_trl_fake_trug",
+        "tools_test_paper_vocab_counts_fixture_language"
+      ],
+      "metric_level": "KILO_FOLDER",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_check_paper_trl_case",
+      "type": "CLASS",
+      "properties": {
+        "name": "Case",
+        "purpose": "Store a label, source bytes and whether an exact round trip is required in a frozen data record.",
+        "file": "tools/check_paper_trl.py",
+        "class": "Case",
+        "trl": "RECORD case CONTAINS DATA label AND DATA text AND DATA exact_round_trip."
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_CLASS",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_check_paper_trl_result",
+      "type": "CLASS",
+      "properties": {
+        "name": "Result",
+        "purpose": "Store compilation, validation and byte comparison outcomes in a frozen data record.",
+        "file": "tools/check_paper_trl.py",
+        "class": "Result",
+        "trl": "RECORD result CONTAINS DATA accepted AND DATA valid AND DATA round_trip."
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_CLASS",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_check_paper_trl_extract_listings",
+      "type": "FUNCTION",
+      "properties": {
+        "name": "extract_listings",
+        "purpose": "Extract trugs-style listing bodies in order, preserving their bytes and assigning sequential labels.",
+        "file": "tools/check_paper_trl.py",
+        "function": "extract_listings",
+        "trl": "FUNCTION extract_listings SHALL FILTER DATA text THEN RETURN ALL RECORD listing."
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_FUNCTION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_check_paper_trl_extract_graphs",
+      "type": "FUNCTION",
+      "properties": {
+        "name": "extract_graphs",
+        "purpose": "Extract json-style listing bodies as whole graph cases in document order.",
+        "file": "tools/check_paper_trl.py",
+        "function": "extract_graphs",
+        "trl": "FUNCTION extract_graphs SHALL FILTER DATA text THEN RETURN ALL RECORD graph."
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_FUNCTION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_check_paper_trl_extract_annotations",
+      "type": "FUNCTION",
+      "properties": {
+        "name": "extract_annotations",
+        "purpose": "Extract tagged listing annotations, reject unpaired or nested tags, strip recognized comment leaders and mark inline annotations for exact comparison.",
+        "file": "tools/check_paper_trl.py",
+        "function": "extract_annotations",
+        "trl": "FUNCTION extract_annotations SHALL FILTER DATA text THEN RETURN ALL RECORD annotation."
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_FUNCTION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_check_paper_trl_strip_trl_tags",
+      "type": "FUNCTION",
+      "properties": {
+        "name": "strip_trl_tags",
+        "purpose": "Remove opening and closing TRL tag lines at the fence boundaries while preserving the other payload bytes.",
+        "file": "tools/check_paper_trl.py",
+        "function": "strip_trl_tags",
+        "trl": "FUNCTION strip_trl_tags SHALL FILTER DATA payload THEN RETURN DATA text."
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_FUNCTION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_check_paper_trl_extract_examples",
+      "type": "FUNCTION",
+      "properties": {
+        "name": "extract_examples",
+        "purpose": "Extract one fence per numbered heading, remove boundary TRL tags, preserve labels and reject missing or multiple fences and duplicate numbers.",
+        "file": "tools/check_paper_trl.py",
+        "function": "extract_examples",
+        "trl": "FUNCTION extract_examples SHALL FILTER DATA text THEN RETURN ALL RECORD example."
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_FUNCTION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_check_paper_trl_run_command",
+      "type": "FUNCTION",
+      "properties": {
+        "name": "run_command",
+        "purpose": "Run a command with captured output and bytecode writing disabled, returning its completed process without requiring a zero exit status.",
+        "file": "tools/check_paper_trl.py",
+        "function": "run_command",
+        "trl": "FUNCTION run_command SHALL EXECUTE PROCESS command THEN RETURN RECORD result."
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_FUNCTION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_check_paper_trl_tool_version",
+      "type": "FUNCTION",
+      "properties": {
+        "name": "tool_version",
+        "purpose": "Read the selected console script interpreter from its shebang and query that interpreter for the installed package version.",
+        "file": "tools/check_paper_trl.py",
+        "function": "tool_version",
+        "trl": "FUNCTION tool_version SHALL READ FILE executable THEN RETURN DATA version."
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_FUNCTION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_check_paper_trl_check_case",
+      "type": "FUNCTION",
+      "properties": {
+        "name": "check_case",
+        "purpose": "Compile source bytes, validate the resulting graph and compare decompiled bytes with the source; return the three outcomes and raise on decompilation failure.",
+        "file": "tools/check_paper_trl.py",
+        "function": "check_case",
+        "trl": "FUNCTION check_case SHALL EXECUTE PROCESS compilation THEN VALIDATE RECORD graph AND RETURN RECORD result."
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_FUNCTION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_check_paper_trl_check_graph",
+      "type": "FUNCTION",
+      "properties": {
+        "name": "check_graph",
+        "purpose": "Write a whole graph listing unchanged, invoke graph validation and report whether it exits successfully and prints VALID.",
+        "file": "tools/check_paper_trl.py",
+        "function": "check_graph",
+        "trl": "FUNCTION check_graph SHALL VALIDATE RECORD graph THEN RETURN DATA valid."
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_FUNCTION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_check_paper_trl_count_macros",
+      "type": "FUNCTION",
+      "properties": {
+        "name": "count_macros",
+        "purpose": "Aggregate extracted examples and tool outcomes into string macro values; reject mismatched example and result lengths.",
+        "file": "tools/check_paper_trl.py",
+        "function": "count_macros",
+        "trl": "FUNCTION count_macros SHALL MAP ALL RECORD result TO DATA macros THEN RETURN DATA macros."
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_FUNCTION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_check_paper_trl_main",
+      "type": "FUNCTION",
+      "properties": {
+        "name": "main",
+        "purpose": "Measure required paper inputs with the selected trug executable, print outcomes, write TeX counts and return a status derived from the measured failures.",
+        "file": "tools/check_paper_trl.py",
+        "function": "main",
+        "trl": "FUNCTION main SHALL READ FILE paper AND FILE examples THEN WRITE FILE counts AND RETURN DATA exit_code."
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_FUNCTION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_paper_vocab_counts_vocabulary_macros",
+      "type": "FUNCTION",
+      "properties": {
+        "name": "vocabulary_macros",
+        "purpose": "Count word-key presence in root category order, treating empty sources as shared, rounding source percentages half up and marking empty category-source cells with dashes.",
+        "file": "tools/paper_vocab_counts.py",
+        "function": "vocabulary_macros",
+        "trl": "FUNCTION vocabulary_macros SHALL MAP RECORD language TO DATA macros THEN RETURN DATA macros."
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_FUNCTION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_paper_vocab_counts_render_macros",
+      "type": "FUNCTION",
+      "properties": {
+        "name": "render_macros",
+        "purpose": "Render the supplied macro mapping as TeX commands in mapping order with a generated-file header.",
+        "file": "tools/paper_vocab_counts.py",
+        "function": "render_macros",
+        "trl": "FUNCTION render_macros SHALL MAP DATA macros TO DATA text THEN RETURN DATA text."
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_FUNCTION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_paper_vocab_counts_main",
+      "type": "FUNCTION",
+      "properties": {
+        "name": "main",
+        "purpose": "Read the language graph, derive vocabulary macros, write the generated TeX file and print the values.",
+        "file": "tools/paper_vocab_counts.py",
+        "function": "main",
+        "trl": "FUNCTION main SHALL READ FILE language_trug THEN WRITE FILE vocab_counts."
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_FUNCTION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_test_check_paper_trl_fake_trug",
+      "type": "FUNCTION",
+      "properties": {
+        "name": "fake_trug",
+        "purpose": "Create an executable subprocess fixture that simulates compilation, graph validation and decompilation outcomes.",
+        "file": "tools/test_check_paper_trl.py",
+        "function": "fake_trug",
+        "trl": "FUNCTION fake_trug SHALL WRITE FILE executable THEN RETURN DATA path."
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_FUNCTION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_test_paper_vocab_counts_fixture_language",
+      "type": "FUNCTION",
+      "properties": {
+        "name": "fixture_language",
+        "purpose": "Build a synthetic language graph with deliberately misleading stored counts and eight word-property records.",
+        "file": "tools/test_paper_vocab_counts.py",
+        "function": "fixture_language",
+        "trl": "FUNCTION fixture_language SHALL PRODUCE RECORD language THEN RETURN RECORD language."
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_FUNCTION",
+      "dimension": "folder_structure"
+    }
+  ],
+  "edges": []
+}

@@ -1,4 +1,4 @@
-\begin{thebibliography}{39}
+\begin{thebibliography}{44}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
@@ -74,6 +74,13 @@ Jack~B. Dennis and David~P. Misunas.
 \newblock In \emph{Proceedings of the 2nd Annual Symposium on Computer
   Architecture (ISCA)}, pages 126--132, 1975.
 
+\bibitem[Dori et~al.(2003)Dori, Reinhartz-Berger, and Sturm]{dori2003opcat}
+D.~Dori, I.~Reinhartz-Berger, and A.~Sturm.
+\newblock {OPCAT}---a bimodal {CASE} tool for object-process based system
+  development.
+\newblock In \emph{Proceedings of the 5th International Conference on
+  Enterprise Information Systems (ICEIS 2003)}, pages 286--291, 2003.
+
 \bibitem[Fuchs et~al.(2008)Fuchs, Kaljurand, and Kuhn]{fuchs2008attempto}
 Norbert~E. Fuchs, Kaarel Kaljurand, and Tobias Kuhn.
 \newblock Attempto controlled english for knowledge representation.
@@ -140,6 +147,16 @@ Tobias Kuhn.
 \newblock {LangGraph}: Build stateful, multi-actor applications with {LLMs}.
 \newblock \url{https://github.com/langchain-ai/langgraph}, 2024.
 
+\bibitem[Martin et~al.(2004)Martin, Burstein, Hobbs, Lassila, McDermott,
+  McIlraith, Narayanan, Paolucci, Parsia, Payne, Sirin, Srinivasan, and
+  Sycara]{owls2004}
+David Martin, Mark Burstein, Jerry Hobbs, Ora Lassila, Drew McDermott, Sheila
+  McIlraith, Srini Narayanan, Massimo Paolucci, Bijan Parsia, Terry Payne,
+  Evren Sirin, Naveen Srinivasan, and Katia Sycara.
+\newblock {OWL-S}: Semantic markup for web services.
+\newblock W3C Member Submission, 22 November 2004, 2004.
+\newblock URL \url{https://www.w3.org/submissions/2004/SUBM-OWL-S-20041122/}.
+
 \bibitem[Montague(1973)]{montague1973proper}
 Richard Montague.
 \newblock The proper treatment of quantification in ordinary english.
@@ -185,6 +202,23 @@ M.~Ross Quillian.
 Rolf Schwitter.
 \newblock English as a formal specification language.
 \newblock In \emph{Proceedings of DEXA Workshops}, pages 228--232. IEEE, 2002.
+
+\bibitem[Schwitter(2018)]{schwitter2018asp}
+Rolf Schwitter.
+\newblock Specifying and verbalising answer set programs in controlled natural
+  language.
+\newblock arXiv:1804.10765, 2018.
+\newblock URL \url{https://arxiv.org/abs/1804.10765}.
+\newblock Presented at the 34th International Conference on Logic Programming
+  (ICLP 2018), Oxford.
+
+\bibitem[Schwitter and Fuchs(1996)]{schwitter1996attempto}
+Rolf Schwitter and Norbert~E. Fuchs.
+\newblock Attempto --- from specifications in controlled natural language
+  towards executable specifications.
+\newblock arXiv:cmp-lg/9603004, 1996.
+\newblock URL \url{https://arxiv.org/abs/cmp-lg/9603004}.
+\newblock Presented at the EMISA Workshop, Tutzing, May 1996.
 
 \bibitem[Sproat and Shih(1991)]{sproat1991crosslinguistic}
 Richard Sproat and Chilin Shih.
@@ -234,6 +268,13 @@ Qingyun Wu, Gagan Bansal, Jieyu Zhang, Yiran Wu, Beibin Li, Erkang Zhu,
   conversation.
 \newblock \emph{arXiv preprint arXiv:2308.08155}, 2023.
 
+\bibitem[Yaroker et~al.(2013)Yaroker, Perelman, and Dori]{yaroker2013opm}
+Yevgeny Yaroker, Valeriya Perelman, and Dov Dori.
+\newblock An {OPM} conceptual model-based executable simulation environment:
+  Implementation and evaluation.
+\newblock \emph{Systems Engineering}, 16\penalty0 (4):\penalty0 381--390, 2013.
+\newblock \doi{10.1002/sys.21235}.
+
 \bibitem[Zaharia et~al.(2012)Zaharia, Chowdhury, Das, Dave, Ma, McCauley,
   Franklin, Shenker, and Stoica]{zaharia2012resilient}
 Matei Zaharia, Mosharaf Chowdhury, Tathagata Das, Ankur Dave, Justin Ma, Murphy
@@ -243,13 +284,15 @@ Matei Zaharia, Mosharaf Chowdhury, Tathagata Das, Ankur Dave, Justin Ma, Murphy
 \newblock In \emph{9th USENIX Symposium on Networked Systems Design and
   Implementation (NSDI)}, pages 15--28, 2012.
 
-\bibitem[Zheng et~al.(2022)Zheng, Zhou, Zhou, Soylu, and
+\bibitem[Zheng et~al.(2022)Zheng, Zhou, Zhou, Zheng, Cheng, Soylu, and
   Kharlamov]{zheng2022executable}
-Zhuoxun Zheng, Baifan Zhou, Dongzhuoran Zhou, Ahmet Soylu, and Evgeny
-  Kharlamov.
+Zhuoxun Zheng, Baifan Zhou, Dongzhuoran Zhou, Xianda Zheng, Gong Cheng, Ahmet
+  Soylu, and Evgeny Kharlamov.
 \newblock Executable knowledge graphs for machine learning: A {Bosch} case of
   welding monitoring.
-\newblock In \emph{The Semantic Web -- ISWC 2022}, volume 13489 of
-  \emph{Lecture Notes in Computer Science}, pages 791--809. Springer, 2022.
+\newblock In U.~Sattler et~al., editors, \emph{The Semantic Web -- ISWC 2022},
+  volume 13489 of \emph{Lecture Notes in Computer Science}, pages 791--809.
+  Springer, 2022.
+\newblock \doi{10.1007/978-3-031-19433-7_45}.
 
 \end{thebibliography}

@@ -307,17 +307,36 @@
       "type": "COMPONENT",
       "properties": {
         "name": "tools",
-        "purpose": "Build tooling — language.trug.json generator + its test suite. Spec-only since 2.0; runtime tools (validator, memory, CRUD) moved to TRUGS-TOOLS.",
-        "file_count": 3,
+        "purpose": "Build the language graph and generate paper counts, with test suites for the generators.",
+        "file_count": 8,
         "file": "tools"
       },
       "parent_id": "root",
       "contains": [
         "tools_init",
         "tools_build_language_trug",
-        "tools_test_build_language_trug"
+        "tools_test_build_language_trug",
+        "tools_check_paper_trl",
+        "tools_paper_vocab_counts",
+        "tools_test_check_paper_trl",
+        "tools_test_paper_vocab_counts",
+        "tools_folder_trug"
       ],
       "metric_level": "DEKA_COMPONENT",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_folder_trug",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "tools/folder.trug.json",
+        "purpose": "Describe sixteen public functions and two dataclasses in the paper tools and their test fixtures.",
+        "lines": 325,
+        "file": "tools/folder.trug.json"
+      },
+      "parent_id": "folder_tools",
+      "contains": [],
+      "metric_level": "BASE_SPECIFICATION",
       "dimension": "folder_structure"
     },
     {
@@ -409,6 +428,584 @@
       "parent_id": "folder_tools",
       "contains": [],
       "metric_level": "BASE_TEST_SUITE",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_check_paper_trl",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "tools/check_paper_trl.py",
+        "purpose": "Measure paper listings, whole graphs, tagged annotations and numbered examples through the selected trug executable; write their counts as TeX macros.",
+        "trl": "PROCESS paper_measurement SHALL READ FILE paper AND FILE examples THEN PRODUCE DATA counts.",
+        "lines": 355,
+        "file": "tools/check_paper_trl.py"
+      },
+      "parent_id": "folder_tools",
+      "contains": [
+        "tools_check_paper_trl_case",
+        "tools_check_paper_trl_result",
+        "tools_check_paper_trl_extract_listings",
+        "tools_check_paper_trl_extract_graphs",
+        "tools_check_paper_trl_extract_annotations",
+        "tools_check_paper_trl_strip_trl_tags",
+        "tools_check_paper_trl_extract_examples",
+        "tools_check_paper_trl_run_command",
+        "tools_check_paper_trl_tool_version",
+        "tools_check_paper_trl_check_case",
+        "tools_check_paper_trl_check_graph",
+        "tools_check_paper_trl_count_macros",
+        "tools_check_paper_trl_main"
+      ],
+      "metric_level": "BASE_SPECIFICATION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_check_paper_trl_case",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "tools/check_paper_trl.py",
+        "purpose": "Store a label, source bytes and whether an exact round trip is required in a frozen data record.",
+        "file": "tools/check_paper_trl.py",
+        "class": "Case",
+        "trl": "RECORD case CONTAINS DATA label AND DATA text AND DATA exact_round_trip."
+      },
+      "parent_id": "tools_check_paper_trl",
+      "contains": [],
+      "metric_level": "BASE_SPECIFICATION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_check_paper_trl_result",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "tools/check_paper_trl.py",
+        "purpose": "Store compilation, validation and byte comparison outcomes in a frozen data record.",
+        "file": "tools/check_paper_trl.py",
+        "class": "Result",
+        "trl": "RECORD result CONTAINS DATA accepted AND DATA valid AND DATA round_trip."
+      },
+      "parent_id": "tools_check_paper_trl",
+      "contains": [],
+      "metric_level": "BASE_SPECIFICATION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_check_paper_trl_extract_listings",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "tools/check_paper_trl.py",
+        "purpose": "Extract trugs-style listing bodies in order, preserving their bytes and assigning sequential labels.",
+        "file": "tools/check_paper_trl.py",
+        "function": "extract_listings",
+        "trl": "FUNCTION extract_listings SHALL FILTER DATA text THEN RETURN ALL RECORD listing."
+      },
+      "parent_id": "tools_check_paper_trl",
+      "contains": [],
+      "metric_level": "BASE_SPECIFICATION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_check_paper_trl_extract_graphs",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "tools/check_paper_trl.py",
+        "purpose": "Extract json-style listing bodies as whole graph cases in document order.",
+        "file": "tools/check_paper_trl.py",
+        "function": "extract_graphs",
+        "trl": "FUNCTION extract_graphs SHALL FILTER DATA text THEN RETURN ALL RECORD graph."
+      },
+      "parent_id": "tools_check_paper_trl",
+      "contains": [],
+      "metric_level": "BASE_SPECIFICATION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_check_paper_trl_extract_annotations",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "tools/check_paper_trl.py",
+        "purpose": "Extract tagged listing annotations, reject unpaired or nested tags, strip recognized comment leaders and mark inline annotations for exact comparison.",
+        "file": "tools/check_paper_trl.py",
+        "function": "extract_annotations",
+        "trl": "FUNCTION extract_annotations SHALL FILTER DATA text THEN RETURN ALL RECORD annotation."
+      },
+      "parent_id": "tools_check_paper_trl",
+      "contains": [],
+      "metric_level": "BASE_SPECIFICATION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_check_paper_trl_strip_trl_tags",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "tools/check_paper_trl.py",
+        "purpose": "Remove opening and closing TRL tag lines at the fence boundaries while preserving the other payload bytes.",
+        "file": "tools/check_paper_trl.py",
+        "function": "strip_trl_tags",
+        "trl": "FUNCTION strip_trl_tags SHALL FILTER DATA payload THEN RETURN DATA text."
+      },
+      "parent_id": "tools_check_paper_trl",
+      "contains": [],
+      "metric_level": "BASE_SPECIFICATION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_check_paper_trl_extract_examples",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "tools/check_paper_trl.py",
+        "purpose": "Extract one fence per numbered heading, remove boundary TRL tags, preserve labels and reject missing or multiple fences and duplicate numbers.",
+        "file": "tools/check_paper_trl.py",
+        "function": "extract_examples",
+        "trl": "FUNCTION extract_examples SHALL FILTER DATA text THEN RETURN ALL RECORD example."
+      },
+      "parent_id": "tools_check_paper_trl",
+      "contains": [],
+      "metric_level": "BASE_SPECIFICATION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_check_paper_trl_run_command",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "tools/check_paper_trl.py",
+        "purpose": "Run a command with captured output and bytecode writing disabled, returning its completed process without requiring a zero exit status.",
+        "file": "tools/check_paper_trl.py",
+        "function": "run_command",
+        "trl": "FUNCTION run_command SHALL EXECUTE PROCESS command THEN RETURN RECORD result."
+      },
+      "parent_id": "tools_check_paper_trl",
+      "contains": [],
+      "metric_level": "BASE_SPECIFICATION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_check_paper_trl_tool_version",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "tools/check_paper_trl.py",
+        "purpose": "Read the selected console script interpreter from its shebang and query that interpreter for the installed package version.",
+        "file": "tools/check_paper_trl.py",
+        "function": "tool_version",
+        "trl": "FUNCTION tool_version SHALL READ FILE executable THEN RETURN DATA version."
+      },
+      "parent_id": "tools_check_paper_trl",
+      "contains": [],
+      "metric_level": "BASE_SPECIFICATION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_check_paper_trl_check_case",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "tools/check_paper_trl.py",
+        "purpose": "Compile source bytes, validate the resulting graph and compare decompiled bytes with the source; return the three outcomes and raise on decompilation failure.",
+        "file": "tools/check_paper_trl.py",
+        "function": "check_case",
+        "trl": "FUNCTION check_case SHALL EXECUTE PROCESS compilation THEN VALIDATE RECORD graph AND RETURN RECORD result."
+      },
+      "parent_id": "tools_check_paper_trl",
+      "contains": [],
+      "metric_level": "BASE_SPECIFICATION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_check_paper_trl_check_graph",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "tools/check_paper_trl.py",
+        "purpose": "Write a whole graph listing unchanged, invoke graph validation and report whether it exits successfully and prints VALID.",
+        "file": "tools/check_paper_trl.py",
+        "function": "check_graph",
+        "trl": "FUNCTION check_graph SHALL VALIDATE RECORD graph THEN RETURN DATA valid."
+      },
+      "parent_id": "tools_check_paper_trl",
+      "contains": [],
+      "metric_level": "BASE_SPECIFICATION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_check_paper_trl_count_macros",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "tools/check_paper_trl.py",
+        "purpose": "Aggregate extracted examples and tool outcomes into string macro values; reject mismatched example and result lengths.",
+        "file": "tools/check_paper_trl.py",
+        "function": "count_macros",
+        "trl": "FUNCTION count_macros SHALL MAP ALL RECORD result TO DATA macros THEN RETURN DATA macros."
+      },
+      "parent_id": "tools_check_paper_trl",
+      "contains": [],
+      "metric_level": "BASE_SPECIFICATION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_check_paper_trl_main",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "tools/check_paper_trl.py",
+        "purpose": "Measure required paper inputs with the selected trug executable, print outcomes, write TeX counts and return a status derived from the measured failures.",
+        "file": "tools/check_paper_trl.py",
+        "function": "main",
+        "trl": "FUNCTION main SHALL READ FILE paper AND FILE examples THEN WRITE FILE counts AND RETURN DATA exit_code."
+      },
+      "parent_id": "tools_check_paper_trl",
+      "contains": [],
+      "metric_level": "BASE_SPECIFICATION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_paper_vocab_counts",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "tools/paper_vocab_counts.py",
+        "purpose": "Count vocabulary word properties from the language graph and write the paper vocabulary macros.",
+        "trl": "PROCESS vocabulary_counting SHALL READ FILE language_trug THEN PRODUCE DATA macros.",
+        "lines": 123,
+        "file": "tools/paper_vocab_counts.py"
+      },
+      "parent_id": "folder_tools",
+      "contains": [
+        "tools_paper_vocab_counts_vocabulary_macros",
+        "tools_paper_vocab_counts_render_macros",
+        "tools_paper_vocab_counts_main"
+      ],
+      "metric_level": "BASE_SPECIFICATION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_paper_vocab_counts_vocabulary_macros",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "tools/paper_vocab_counts.py",
+        "purpose": "Count word-key presence in root category order, treating empty sources as shared, rounding source percentages half up and marking empty category-source cells with dashes.",
+        "file": "tools/paper_vocab_counts.py",
+        "function": "vocabulary_macros",
+        "trl": "FUNCTION vocabulary_macros SHALL MAP RECORD language TO DATA macros THEN RETURN DATA macros."
+      },
+      "parent_id": "tools_paper_vocab_counts",
+      "contains": [],
+      "metric_level": "BASE_SPECIFICATION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_paper_vocab_counts_render_macros",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "tools/paper_vocab_counts.py",
+        "purpose": "Render the supplied macro mapping as TeX commands in mapping order with a generated-file header.",
+        "file": "tools/paper_vocab_counts.py",
+        "function": "render_macros",
+        "trl": "FUNCTION render_macros SHALL MAP DATA macros TO DATA text THEN RETURN DATA text."
+      },
+      "parent_id": "tools_paper_vocab_counts",
+      "contains": [],
+      "metric_level": "BASE_SPECIFICATION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_paper_vocab_counts_main",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "tools/paper_vocab_counts.py",
+        "purpose": "Read the language graph, derive vocabulary macros, write the generated TeX file and print the values.",
+        "file": "tools/paper_vocab_counts.py",
+        "function": "main",
+        "trl": "FUNCTION main SHALL READ FILE language_trug THEN WRITE FILE vocab_counts."
+      },
+      "parent_id": "tools_paper_vocab_counts",
+      "contains": [],
+      "metric_level": "BASE_SPECIFICATION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_test_check_paper_trl",
+      "type": "TEST_SUITE",
+      "properties": {
+        "name": "tools/test_check_paper_trl.py",
+        "purpose": "Test extraction, subprocess outcomes, selected interpreter metadata and generated counts using synthetic inputs.",
+        "trl": "AGENT SHALL VALIDATE MODULE check_paper_trl.",
+        "test_count": 10,
+        "lines": 343,
+        "file": "tools/test_check_paper_trl.py"
+      },
+      "parent_id": "folder_tools",
+      "contains": [
+        "tools_test_check_paper_trl_fake_trug",
+        "tools_test_check_paper_trl_test_extract_only_measured_styles_preserving_bytes",
+        "tools_test_check_paper_trl_test_numbered_examples_ignore_other_fences_and_keep_numbers",
+        "tools_test_check_paper_trl_test_extract_annotations_from_all_listing_languages",
+        "tools_test_check_paper_trl_test_compile_validate_and_byte_comparison",
+        "tools_test_check_paper_trl_test_version_uses_selected_console_script_interpreter",
+        "tools_test_check_paper_trl_test_main_counts_examples_and_fails_bad_listings",
+        "tools_test_check_paper_trl_test_main_validates_whole_graphs_and_excludes_fragments",
+        "tools_test_check_paper_trl_test_no_rejections_is_reported_as_none",
+        "tools_test_check_paper_trl_test_main_measures_annotations_and_propagates_failures",
+        "tools_test_check_paper_trl_test_numbered_examples_strip_trl_tag_lines"
+      ],
+      "metric_level": "BASE_TEST_SUITE",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_test_check_paper_trl_fake_trug",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "tools/test_check_paper_trl.py",
+        "purpose": "Create an executable subprocess fixture that simulates compilation, graph validation and decompilation outcomes.",
+        "file": "tools/test_check_paper_trl.py",
+        "function": "fake_trug",
+        "trl": "FUNCTION fake_trug SHALL WRITE FILE executable THEN RETURN DATA path."
+      },
+      "parent_id": "tools_test_check_paper_trl",
+      "contains": [],
+      "metric_level": "BASE_SPECIFICATION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_test_check_paper_trl_test_extract_only_measured_styles_preserving_bytes",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "tools/test_check_paper_trl.py",
+        "purpose": "Check that only trugs-style listings are extracted with body bytes and ordering preserved.",
+        "file": "tools/test_check_paper_trl.py",
+        "function": "test_extract_only_measured_styles_preserving_bytes",
+        "trl": "AGENT SHALL VALIDATE DATA listing_styles_and_body_bytes."
+      },
+      "parent_id": "tools_test_check_paper_trl",
+      "contains": [],
+      "metric_level": "BASE_SPECIFICATION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_test_check_paper_trl_test_numbered_examples_ignore_other_fences_and_keep_numbers",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "tools/test_check_paper_trl.py",
+        "purpose": "Check numbered example labels, unrelated fence exclusion and missing-fence and duplicate-number errors.",
+        "file": "tools/test_check_paper_trl.py",
+        "function": "test_numbered_examples_ignore_other_fences_and_keep_numbers",
+        "trl": "AGENT SHALL VALIDATE DATA numbered_examples_and_fence_errors."
+      },
+      "parent_id": "tools_test_check_paper_trl",
+      "contains": [],
+      "metric_level": "BASE_SPECIFICATION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_test_check_paper_trl_test_extract_annotations_from_all_listing_languages",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "tools/test_check_paper_trl.py",
+        "purpose": "Check annotation payloads, comment leader removal, inline comparison flags and malformed tag errors across listing languages.",
+        "file": "tools/test_check_paper_trl.py",
+        "function": "test_extract_annotations_from_all_listing_languages",
+        "trl": "AGENT SHALL VALIDATE DATA annotation_payloads_and_tag_errors."
+      },
+      "parent_id": "tools_test_check_paper_trl",
+      "contains": [],
+      "metric_level": "BASE_SPECIFICATION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_test_check_paper_trl_test_compile_validate_and_byte_comparison",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "tools/test_check_paper_trl.py",
+        "purpose": "Check compilation rejection, graph invalidity, byte comparison differences and decompilation errors with the subprocess fixture.",
+        "file": "tools/test_check_paper_trl.py",
+        "function": "test_compile_validate_and_byte_comparison",
+        "trl": "AGENT SHALL VALIDATE DATA compilation_validation_and_byte_comparison."
+      },
+      "parent_id": "tools_test_check_paper_trl",
+      "contains": [],
+      "metric_level": "BASE_SPECIFICATION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_test_check_paper_trl_test_version_uses_selected_console_script_interpreter",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "tools/test_check_paper_trl.py",
+        "purpose": "Check that the version query invokes the selected console script interpreter.",
+        "file": "tools/test_check_paper_trl.py",
+        "function": "test_version_uses_selected_console_script_interpreter",
+        "trl": "AGENT SHALL VALIDATE DATA selected_interpreter_version_query."
+      },
+      "parent_id": "tools_test_check_paper_trl",
+      "contains": [],
+      "metric_level": "BASE_SPECIFICATION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_test_check_paper_trl_test_main_counts_examples_and_fails_bad_listings",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "tools/test_check_paper_trl.py",
+        "purpose": "Check example, listing and graph macro counts and the exit status for accepted, invalid and changed listing inputs.",
+        "file": "tools/test_check_paper_trl.py",
+        "function": "test_main_counts_examples_and_fails_bad_listings",
+        "trl": "AGENT SHALL VALIDATE DATA listing_counts_and_exit_status."
+      },
+      "parent_id": "tools_test_check_paper_trl",
+      "contains": [],
+      "metric_level": "BASE_SPECIFICATION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_test_check_paper_trl_test_main_validates_whole_graphs_and_excludes_fragments",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "tools/test_check_paper_trl.py",
+        "purpose": "Check whole graph extraction, fragment exclusion, validity counts and the resulting exit status.",
+        "file": "tools/test_check_paper_trl.py",
+        "function": "test_main_validates_whole_graphs_and_excludes_fragments",
+        "trl": "AGENT SHALL VALIDATE DATA whole_graph_counts_and_exit_status."
+      },
+      "parent_id": "tools_test_check_paper_trl",
+      "contains": [],
+      "metric_level": "BASE_SPECIFICATION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_test_check_paper_trl_test_no_rejections_is_reported_as_none",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "tools/test_check_paper_trl.py",
+        "purpose": "Check that an empty rejected-example list is rendered as none.",
+        "file": "tools/test_check_paper_trl.py",
+        "function": "test_no_rejections_is_reported_as_none",
+        "trl": "AGENT SHALL VALIDATE DATA empty_rejection_list."
+      },
+      "parent_id": "tools_test_check_paper_trl",
+      "contains": [],
+      "metric_level": "BASE_SPECIFICATION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_test_check_paper_trl_test_main_measures_annotations_and_propagates_failures",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "tools/test_check_paper_trl.py",
+        "purpose": "Check annotation counts, inline comparison requirements, difference reporting and exit statuses for simulated tool outcomes.",
+        "file": "tools/test_check_paper_trl.py",
+        "function": "test_main_measures_annotations_and_propagates_failures",
+        "trl": "AGENT SHALL VALIDATE DATA annotation_counts_and_exit_status."
+      },
+      "parent_id": "tools_test_check_paper_trl",
+      "contains": [],
+      "metric_level": "BASE_SPECIFICATION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_test_check_paper_trl_test_numbered_examples_strip_trl_tag_lines",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "tools/test_check_paper_trl.py",
+        "purpose": "Check boundary TRL tag removal and preservation of untagged payloads.",
+        "file": "tools/test_check_paper_trl.py",
+        "function": "test_numbered_examples_strip_trl_tag_lines",
+        "trl": "AGENT SHALL VALIDATE DATA example_tag_removal."
+      },
+      "parent_id": "tools_test_check_paper_trl",
+      "contains": [],
+      "metric_level": "BASE_SPECIFICATION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_test_paper_vocab_counts",
+      "type": "TEST_SUITE",
+      "properties": {
+        "name": "tools/test_paper_vocab_counts.py",
+        "purpose": "Test vocabulary counting, rounding, empty-input rejection and repeatable TeX generation on synthetic language graphs.",
+        "trl": "AGENT SHALL VALIDATE MODULE paper_vocab_counts.",
+        "test_count": 4,
+        "lines": 138,
+        "file": "tools/test_paper_vocab_counts.py"
+      },
+      "parent_id": "folder_tools",
+      "contains": [
+        "tools_test_paper_vocab_counts_fixture_language",
+        "tools_test_paper_vocab_counts_test_counts_use_word_properties_and_root_order",
+        "tools_test_paper_vocab_counts_test_shared_empty_source_zero_cells_and_half_up_rounding",
+        "tools_test_paper_vocab_counts_test_empty_vocabulary_is_rejected",
+        "tools_test_paper_vocab_counts_test_generation_is_deterministic_on_fixture"
+      ],
+      "metric_level": "BASE_TEST_SUITE",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_test_paper_vocab_counts_fixture_language",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "tools/test_paper_vocab_counts.py",
+        "purpose": "Build a synthetic language graph with deliberately misleading stored counts and eight word-property records.",
+        "file": "tools/test_paper_vocab_counts.py",
+        "function": "fixture_language",
+        "trl": "FUNCTION fixture_language SHALL PRODUCE RECORD language THEN RETURN RECORD language."
+      },
+      "parent_id": "tools_test_paper_vocab_counts",
+      "contains": [],
+      "metric_level": "BASE_SPECIFICATION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_test_paper_vocab_counts_test_counts_use_word_properties_and_root_order",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "tools/test_paper_vocab_counts.py",
+        "purpose": "Check totals, version, verb groups and macro ordering from word properties and root categories.",
+        "file": "tools/test_paper_vocab_counts.py",
+        "function": "test_counts_use_word_properties_and_root_order",
+        "trl": "AGENT SHALL VALIDATE DATA word_counts_and_category_order."
+      },
+      "parent_id": "tools_test_paper_vocab_counts",
+      "contains": [],
+      "metric_level": "BASE_SPECIFICATION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_test_paper_vocab_counts_test_shared_empty_source_zero_cells_and_half_up_rounding",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "tools/test_paper_vocab_counts.py",
+        "purpose": "Check shared and empty sources, dash values for empty cells and half-up percentage rounding.",
+        "file": "tools/test_paper_vocab_counts.py",
+        "function": "test_shared_empty_source_zero_cells_and_half_up_rounding",
+        "trl": "AGENT SHALL VALIDATE DATA shared_sources_empty_cells_and_rounding."
+      },
+      "parent_id": "tools_test_paper_vocab_counts",
+      "contains": [],
+      "metric_level": "BASE_SPECIFICATION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_test_paper_vocab_counts_test_empty_vocabulary_is_rejected",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "tools/test_paper_vocab_counts.py",
+        "purpose": "Check that a graph without word records raises the expected error.",
+        "file": "tools/test_paper_vocab_counts.py",
+        "function": "test_empty_vocabulary_is_rejected",
+        "trl": "AGENT SHALL VALIDATE DATA empty_vocabulary_error."
+      },
+      "parent_id": "tools_test_paper_vocab_counts",
+      "contains": [],
+      "metric_level": "BASE_SPECIFICATION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_test_paper_vocab_counts_test_generation_is_deterministic_on_fixture",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "tools/test_paper_vocab_counts.py",
+        "purpose": "Check repeatable generated bytes, selected macro values and output messages across two runs.",
+        "file": "tools/test_paper_vocab_counts.py",
+        "function": "test_generation_is_deterministic_on_fixture",
+        "trl": "AGENT SHALL VALIDATE DATA repeated_generation_bytes_and_messages."
+      },
+      "parent_id": "tools_test_paper_vocab_counts",
+      "contains": [],
+      "metric_level": "BASE_SPECIFICATION",
       "dimension": "folder_structure"
     },
     {
@@ -603,8 +1200,8 @@
       "properties": {
         "name": "tools",
         "purpose": "Tools component",
-        "file_count": 3,
-        "loc": 436
+        "file_count": 8,
+        "loc": 1449
       },
       "parent_id": "root",
       "contains": [],
@@ -886,6 +1483,42 @@
       "to_id": "example_set",
       "relation": "contains",
       "weight": 1.0,
+      "properties": {}
+    },
+    {
+      "from_id": "tools_check_paper_trl",
+      "to_id": "folder_paper",
+      "relation": "implements",
+      "properties": {}
+    },
+    {
+      "from_id": "tools_paper_vocab_counts",
+      "to_id": "folder_paper",
+      "relation": "implements",
+      "properties": {}
+    },
+    {
+      "from_id": "tools_test_check_paper_trl",
+      "to_id": "tools_check_paper_trl",
+      "relation": "tests",
+      "properties": {}
+    },
+    {
+      "from_id": "tools_test_check_paper_trl",
+      "to_id": "comp_tools",
+      "relation": "tests",
+      "properties": {}
+    },
+    {
+      "from_id": "tools_test_paper_vocab_counts",
+      "to_id": "tools_paper_vocab_counts",
+      "relation": "tests",
+      "properties": {}
+    },
+    {
+      "from_id": "tools_test_paper_vocab_counts",
+      "to_id": "comp_tools",
+      "relation": "tests",
       "properties": {}
     }
   ]
