@@ -86,7 +86,7 @@ SELF | RESULT OUTPUT | INPUT SOURCE | TARGET | SAID
 
 ## Level Prefixes (21) — hierarchy transition markers
 
-A `level_directive` (`<PREFIX>_<NAME>`, e.g. `KILO_REPOSITORY`) on its own line marks a metric-level transition for the LLM consumer. Compiles to no node or edge; it sets `metric_level` on the next sentence's operation node.
+A `level_directive` (`<PREFIX>_<NAME>`, e.g. `KILO_REPOSITORY`) on its own line marks a metric-level transition for the LLM consumer. Compiles to no node or edge; it sets `metric_level` on the next operation node the compiler emits.
 
 | Macro (10) | Default (1) | Micro (10) |
 |---|---|---|

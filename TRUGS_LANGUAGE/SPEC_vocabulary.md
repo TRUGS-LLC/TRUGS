@@ -485,7 +485,7 @@ A pronoun refers to a previously named noun. Must have an unambiguous antecedent
 
 A level prefix names a metric level in the TRUG hierarchy. The 21 SI prefixes (plus `BASE` for the default level) form a closed scale from macro (10²⁴) to micro (10⁻²⁴). Combined with a semantic name they form a `metric_level` identifier, e.g. `KILO_REPOSITORY`, `BASE_FUNCTION`, `DECI_LINE`.
 
-In TRL, a level prefix joined with an UPPERCASE semantic name appears as a bare token on its own line — a **level directive** — to mark a transition between hierarchy levels for an LLM consumer reading the source. Level directives are an LLM-comprehension affordance: they produce no node or edge (the compiler records the level as `metric_level` on the next sentence's operation node), and the validator does not enforce them. See `SPEC_grammar.md §level_directive`.
+In TRL, a level prefix joined with an UPPERCASE semantic name appears as a bare token on its own line — a **level directive** — to mark a transition between hierarchy levels for an LLM consumer reading the source. Level directives are an LLM-comprehension affordance: they produce no node or edge (the compiler records the level as `metric_level` on the next operation node it emits; a sentence with no verb keeps no level), and the validator does not enforce them. See `SPEC_grammar.md §level_directive`.
 
 `BASE` (10⁰, no scaling factor) names the default consumption level — the "ground zero" plane of every TRUG, the most information-dense and the level a fresh consumer should reach first.
 
@@ -553,7 +553,7 @@ PARTY system SHALL ASSERT STRING DATA.
 </trl>
 ```
 
-Each directive marks the start of work at that level. Directives compile to no node and no edge; the reference compiler records the level as the `metric_level` property of the next sentence's operation node. Unlike `'sugar` they are executable vocabulary, and the grammar reserves them a second position, as a `metric_level` value inside a sentence (e.g. `... AT BASE_FUNCTION`), which trugs-tools 2.4.0 does not yet accept. See `SPEC_grammar.md` for the BNF rule.
+Each directive marks the start of work at that level. Directives compile to no node and no edge; the reference compiler records the level as the `metric_level` property of the next operation node it emits (a sentence with no verb keeps no level). Unlike `'sugar` they are executable vocabulary, and the grammar reserves them a second position, as a `metric_level` value inside a sentence (e.g. `... AT BASE_FUNCTION`), which trugs-tools 2.4.0 does not yet accept. See `SPEC_grammar.md` for the BNF rule.
 
 ---
 
@@ -638,7 +638,7 @@ PARTY admin 'trugs_llc SHALL ADMINISTER ALL RESOURCE.
 | Sugar | — | — | ∞ (pattern) | `'[a-z_]+` | **Nothing** |
 | **Total** | **156** | **46** | **31** | **233** | |
 
-233 executable words + `'word` sugar pattern. Sugar is not counted as vocabulary — it is a syntactic pattern (`'[a-z_]+`) that compiles to nothing. Level prefixes are counted; as bare-line directives they produce no node or edge and set `metric_level` on the next sentence's operation node; the `metric_level` value form inside a sentence is reserved. The executable vocabulary is 233 words.
+233 executable words + `'word` sugar pattern. Sugar is not counted as vocabulary — it is a syntactic pattern (`'[a-z_]+`) that compiles to nothing. Level prefixes are counted; as bare-line directives they produce no node or edge and set `metric_level` on the next operation node the compiler emits; the `metric_level` value form inside a sentence is reserved. The executable vocabulary is 233 words.
 
 ### Modals (subset of verbs)
 

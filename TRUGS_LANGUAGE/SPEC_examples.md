@@ -477,7 +477,7 @@ Sugar makes the language read like natural English. The compiler ignores it. The
 
 ## Level Directives — Hierarchy Transition Markers
 
-Level directives are bare `metric_level` tokens on their own line. They mark hierarchy transitions for an LLM consumer reading the source. They compile to no node and no edge (the compiler records the level as `metric_level` on the next sentence's operation node), and the validator does not enforce them. See `SPEC_grammar.md §level_directive`.
+Level directives are bare `metric_level` tokens on their own line. They mark hierarchy transitions for an LLM consumer reading the source. They compile to no node and no edge (the compiler records the level as `metric_level` on the next sentence's operation node; a sentence with no verb keeps no level, and the level goes to the first operation node a later sentence supplies), and the validator does not enforce them. See `SPEC_grammar.md §level_directive`.
 
 ### 29. Macro-to-micro walk
 

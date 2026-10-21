@@ -83,7 +83,7 @@ PARTY system SHALL VALIDATE EACH DATA field.
 
 #### Compilation
 
-A `level_directive` compiles to no node and no edge. The reference compiler (trugs-tools 2.4.0) records the level as the `metric_level` property of the next sentence's operation node; the directive itself is not stored. Decompilation may emit directives at every level transition for LLM-comprehension.
+A `level_directive` compiles to no node and no edge. The reference compiler (trugs-tools 2.4.0) records the level as the `metric_level` property of the next sentence's operation node; a sentence with no verb (a subject, a preposition and an object, or a `DEFINE`) has no operation node and keeps no level, and the level then goes to the first operation node a later sentence supplies. The directive itself is not stored. Decompilation may emit directives at every level transition for LLM-comprehension.
 
 #### Distinction from `metric_level` as a value (reserved)
 
@@ -178,7 +178,7 @@ Preamble + subject with article/adjective + modal + verb with adverb + multiple 
 
 ## 2. Composition Rules
 
-**What the reference tools enforce.** trugs-tools 2.4.0 rejects, from TRL, a modal on a non-Actor subject (§2.3, CORE validation rule 14) and a pronoun with no prior clause to reference. It compiles and validates sentences that break the other tables of this section (§2.1, §2.2, §2.4, §2.6 and §2.7): its compiled graph carries verbs as operation nodes, adjectives and articles as the `np_shape` of an edge, and adverbs as a list, which validation rules 10–13 do not read. Those tables state the language's composition rules; until the tools enforce them, a sentence that breaks one compiles. This is a known gap in the tools, not a licence to break the rules.
+**What the reference tools enforce.** trugs-tools 2.4.0 rejects, from TRL, a modal on a non-Actor subject (§2.3, CORE validation rule 14) and, after a verb, a pronoun with no prior clause to reference. It compiles and validates sentences that break the other tables of this section: for §2.1, §2.2, §2.4 and §2.6, because their CORE rules 10 to 13 read operation words on edges and modifiers in node properties, where the compiled graph puts no verb, adjective, article or adverb (verbs become operation nodes, adjectives and articles the `np_shape` of an edge, adverbs a list); for §2.7, because no CORE rule checks a preposition's endpoints. Those tables state the language's composition rules; until the tools enforce them, a sentence that breaks one compiles. This is a known gap in the tools, not a licence to break the rules.
 
 ### 2.1 Subject-Verb Compatibility
 
@@ -320,27 +320,31 @@ Every word belongs to exactly one part of speech. Where a concept has both an ac
 
 ## 3. Sentence-to-Graph Compilation
 
-Each sentence element compiles to the graph element or property below (as trugs-tools 2.4.0 writes it):
+Each sentence element of a clause with a verb compiles to the graph element or property below (as trugs-tools 2.4.0 writes it); a clause with no verb is described after the table:
 
 | Sentence Element | Compiles To | Graph Element |
 |---|---|---|
 | NOUN + identifier | Node | `{ id: identifier, type: NOUN }`; a noun without an identifier gets a generated id such as `record-1` |
-| ADJECTIVE on a noun | Edge property | `properties.np_shape.{ subcategory: ADJECTIVE }` on the edge that reaches the node, for example `type: "STRING"`; a list when a category has more than one adjective, such as `state: ["ACTIVE", "VALID"]` |
-| ARTICLE on a noun | Edge property | `properties.np_shape.article: ARTICLE` on that edge |
+| ADJECTIVE on a noun | Edge property | `np_shape.{ subcategory: ADJECTIVE }` in the properties of the edge that carries the noun phrase: for an object, the edge from the operation to it; for the subject, the edge from it to its operation; for example `type: "STRING"`; a list when a category has more than one adjective, such as `state: ["ACTIVE", "VALID"]` |
+| ARTICLE on a noun | Edge property | `article: ARTICLE` in that same `np_shape` |
 | VERB | Operation node | `{ type: "TRANSFORM", properties: { operation: VERB, verb_subcategory: … } }` |
-| Modal on a verb | Edge from the subject to the operation | `relation: modal`; a clause with no modal uses `relation: "EXECUTES"` |
+| Modal on a verb | Edge from the subject to the operation | `relation: modal`; a verb with no modal gets `relation: "EXECUTES"` |
 | ADVERB on a verb | Operation property | an entry `{ adverb: ADVERB }` in `properties.adverbs` |
 | ADVERB value | Operation property | `{ adverb: ADVERB, value: literal }` in that list |
 | Bare value after the object | Operation property | `properties.value_arg: literal` |
-| Object noun phrase | Edge from the operation to the object | `relation: "ACTS_ON"` |
+| Object noun phrase after the verb | Edge from the operation to the object | `relation: "ACTS_ON"` |
 | PREPOSITION | Edge | `{ from_id, to_id, relation: PREPOSITION }`: from the operation after a verb, from the subject in a clause with no verb |
-| CONJUNCTION | Edge between clauses | `relation: CONJUNCTION` (THEN, AND, UNLESS, …) from the first clause's operation node to the next clause's, or from a clause's subject when it has no verb; a conjunction that opens a sentence (IF, WHEN) is `properties.leading_conjunction` on the first operation |
+| CONJUNCTION | Edge between clauses | `relation: CONJUNCTION` (THEN, AND, OR, UNLESS, FINALLY) from the first clause's operation node to the next clause's; a conjunction that opens a sentence (IF, WHEN) is `properties.leading_conjunction` on the first clause's operation node |
 | PRONOUN | Edge to the antecedent | `properties.pronoun: PRONOUN` on an edge from the operation to the antecedent: `relation: "ACTS_ON"` for a bare object, the preposition's name after a preposition; the antecedent is the prior clause's operation for RESULT and the subject for SELF |
 | WHEREAS clause | Nodes and edges | as a clause, with `preamble: true` on its operation node, or on its edge when it has no verb |
-| DEFINE definition | Node | `{ id: term, type: noun, properties: { defined: true, name: term } }` |
+| DEFINE definition | Node | `{ id: term, type: noun, properties: { defined: true, name: term } }`; adjectives of the definition go to `properties.defined_attributes` |
 | ASSERT / ASSERT_NOT / INVARIANT | Operation property | `properties.modality: KEYWORD` on the clause's first operation node; a clause with no verb keeps no record of the keyword |
-| `level_directive` | Operation property | no node and no edge; `properties.metric_level: "<PREFIX>_<NAME>"` on the next sentence's operation node |
+| `level_directive` | Operation property | no node and no edge; `properties.metric_level: "<PREFIX>_<NAME>"` on the next operation node the compiler emits, which a sentence with no verb does not supply |
 | `metric_level` value | Reserved | not yet accepted by the reference parser (§1) |
+
+### Clauses with no verb
+
+A clause of a subject, a preposition and an object (`RESOURCE a CONTAINS RECORD x.`) compiles to its two nodes and one edge `{ from_id: subject, to_id: object, relation: PREPOSITION }`, whose properties carry the subject's shape as `subject_np_shape` and the object's as `np_shape`. Such a clause has no operation node, so trugs-tools 2.4.0 keeps nothing the table stores on one: a leading keyword, a leading IF or WHEN, or a level directive before it (the level goes to the first operation node a later sentence supplies). A conjunction edge that leaves or reaches such a clause uses its subject in place of an operation node (`a -> b THEN`, `a -> op-1 THEN`, `op-1 -> b UNLESS`); `AND` before such a clause is read as part of a noun list, not as a conjunction. A pronoun as its object is neither resolved nor rejected: the compiler emits a node with id `-1` and an empty type, and the graph validates.
 
 ### Round-Trip Guarantee
 
@@ -353,9 +357,9 @@ If a sentence cannot round-trip (after stripping sugar and directives), it is no
 
 ## 4. Validation Rules
 
-A compiled graph is valid when it passes the 16 CORE rules of `TRUGS_PROTOCOL/CORE.md` (ruleset `core_v2.0.0`: 9 structural, 7 compositional), which `trug trl compile` applies to every graph it emits. Before that, the parser rejects a sentence that uses a word outside the vocabulary, one its grammar does not parse, and a pronoun with no prior clause to reference. The parser's grammar is wider than the BNF of §1 in one respect: it accepts a clause of a subject, a preposition and an object with no verb (`RESOURCE tracker CONTAINS RECORD x.`), which compiles to that edge alone.
+A compiled graph is valid when it passes the 16 CORE rules of `TRUGS_PROTOCOL/CORE.md` (ruleset `core_v2.0.0`: 9 structural, 7 compositional), which `trug trl compile` applies to every graph it emits. Before that, the parser rejects a sentence that uses a word outside the vocabulary, one its grammar does not parse, and, after a verb, a pronoun with no prior clause to reference. The parser's grammar is wider than the BNF of §1 in one respect: it accepts a clause of a subject, a preposition and an object with no verb (`RESOURCE tracker CONTAINS RECORD x.`), which compiles to that edge alone.
 
-The composition tables of §2.1, §2.2, §2.4, §2.6 and §2.7 and the rule against double negation (a negative article with SHALL_NOT) are CORE rules 10 to 13 and 15, which `trug validate` applies to the operation words on a graph's edges and to the modifiers in its node properties. The compiler of trugs-tools 2.4.0 writes verbs, adjectives, articles and adverbs where those rules do not read, so a sentence that breaks them compiles and validates (the note at §2). Pronoun scope within one sentence is not a CORE rule, and the compiler resolves a pronoun across sentences.
+The composition tables of §2.1, §2.2, §2.4 and §2.6 and the rule against double negation (a negative article with SHALL_NOT) are CORE rules 10 to 13 and 15, which `trug validate` applies to the operation words on a graph's edges and to the modifiers in its node properties. The compiler of trugs-tools 2.4.0 writes verbs, adjectives, articles and adverbs where those rules do not read, so a sentence that breaks them compiles and validates (the note at §2). The preposition table of §2.7 and pronoun scope within one sentence are not CORE rules: no rule checks a preposition's endpoints (`RECORD a SUPERSEDES PARTY b.` validates), and the compiler resolves a pronoun across sentences.
 
 ---
 
