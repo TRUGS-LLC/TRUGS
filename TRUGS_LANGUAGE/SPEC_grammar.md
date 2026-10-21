@@ -87,7 +87,7 @@ A `level_directive` compiles to no node and no edge. The reference compiler (tru
 
 #### Distinction from `metric_level` as a value (reserved)
 
-The grammar reserves a second position for a `metric_level` token: as the value of a hierarchy-aware property inside a sentence, distinguished from a directive by position (a directive stands alone; a value sits in the value position of an `object_phrase`):
+The grammar reserves a second position for a `metric_level` token, as the value of a hierarchy-aware property inside a sentence, distinguished from a directive by position (a directive stands alone; a value sits in the value position of an `object_phrase`):
 
 ```
 PARTY system SHALL VALIDATE INPUT AT BASE_FUNCTION.
@@ -123,7 +123,7 @@ Grammatically, a `leading_keyword_directive` differs from an ordinary `clause` o
 
 #### Compilation
 
-A `leading_keyword_directive` compiles as its clause does, with the keyword recorded as `properties.modality` on the sentence's first operation node.
+A `leading_keyword_directive` compiles as its clause does, with the keyword recorded as `properties.modality` on the sentence's first operation node when the clause has a verb (the second and third examples above). A clause with no verb — a subject, a preposition and an object, as in the first example — compiles to its edge alone, and trugs-tools 2.4.0 keeps no record of the keyword: the decompiler writes the clause without it.
 
 #### Parser support
 
@@ -243,7 +243,7 @@ REQUIRED CRITICAL VALID PUBLIC STRING data     canonical
 VALID REQUIRED STRING data                     accepted; the decompiler writes REQUIRED VALID STRING data
 ```
 
-The parser accepts adjectives in any order and compiles them to the same graph; the decompiler writes the canonical order.
+The parser accepts adjectives in any order and compiles them to the same graph; the decompiler writes the canonical order. One exception: two adjectives of one category keep the order written, so `ACTIVE VALID RECORD x` and `VALID ACTIVE RECORD x` compile to different graphs, and the decompiler keeps each as written.
 
 ### 2.6 Adverb-Verb Compatibility
 
@@ -325,7 +325,7 @@ Each sentence element compiles to the graph element or property below (as trugs-
 | Sentence Element | Compiles To | Graph Element |
 |---|---|---|
 | NOUN + identifier | Node | `{ id: identifier, type: NOUN }`; a noun without an identifier gets a generated id such as `record-1` |
-| ADJECTIVE on a noun | Edge property | `properties.np_shape.{ subcategory: ADJECTIVE }` on the edge that reaches the node, for example `type: "STRING"` |
+| ADJECTIVE on a noun | Edge property | `properties.np_shape.{ subcategory: ADJECTIVE }` on the edge that reaches the node, for example `type: "STRING"`; a list when a category has more than one adjective, such as `state: ["ACTIVE", "VALID"]` |
 | ARTICLE on a noun | Edge property | `properties.np_shape.article: ARTICLE` on that edge |
 | VERB | Operation node | `{ type: "TRANSFORM", properties: { operation: VERB, verb_subcategory: … } }` |
 | Modal on a verb | Edge from the subject to the operation | `relation: modal`; a clause with no modal uses `relation: "EXECUTES"` |
@@ -334,11 +334,11 @@ Each sentence element compiles to the graph element or property below (as trugs-
 | Bare value after the object | Operation property | `properties.value_arg: literal` |
 | Object noun phrase | Edge from the operation to the object | `relation: "ACTS_ON"` |
 | PREPOSITION | Edge | `{ from_id, to_id, relation: PREPOSITION }`: from the operation after a verb, from the subject in a clause with no verb |
-| CONJUNCTION | Edge between operations | `relation: CONJUNCTION` (THEN, AND, UNLESS, …); a conjunction that opens a sentence (IF, WHEN) is `properties.leading_conjunction` on the first operation |
-| PRONOUN | Edge to the antecedent's operation | `relation: "ACTS_ON"` with `properties.pronoun: PRONOUN` |
+| CONJUNCTION | Edge between clauses | `relation: CONJUNCTION` (THEN, AND, UNLESS, …) from the first clause's operation node to the next clause's, or from a clause's subject when it has no verb; a conjunction that opens a sentence (IF, WHEN) is `properties.leading_conjunction` on the first operation |
+| PRONOUN | Edge to the antecedent | `properties.pronoun: PRONOUN` on an edge from the operation to the antecedent: `relation: "ACTS_ON"` for a bare object, the preposition's name after a preposition; the antecedent is the prior clause's operation for RESULT and the subject for SELF |
 | WHEREAS clause | Nodes and edges | as a clause, with `preamble: true` on its operation node, or on its edge when it has no verb |
 | DEFINE definition | Node | `{ id: term, type: noun, properties: { defined: true, name: term } }` |
-| ASSERT / ASSERT_NOT / INVARIANT | Operation property | `properties.modality: KEYWORD` on the sentence's first operation |
+| ASSERT / ASSERT_NOT / INVARIANT | Operation property | `properties.modality: KEYWORD` on the clause's first operation node; a clause with no verb keeps no record of the keyword |
 | `level_directive` | Operation property | no node and no edge; `properties.metric_level: "<PREFIX>_<NAME>"` on the next sentence's operation node |
 | `metric_level` value | Reserved | not yet accepted by the reference parser (§1) |
 
@@ -353,9 +353,9 @@ If a sentence cannot round-trip (after stripping sugar and directives), it is no
 
 ## 4. Validation Rules
 
-A compiled graph is valid when it passes the 16 CORE rules of `TRUGS_PROTOCOL/CORE.md` (ruleset `core_v2.0.0`: 9 structural, 7 compositional), which `trug trl compile` applies to every graph it emits. Before that, the parser rejects a sentence that uses a word outside the vocabulary, one that does not match the grammar of §1, and a pronoun with no prior clause to reference.
+A compiled graph is valid when it passes the 16 CORE rules of `TRUGS_PROTOCOL/CORE.md` (ruleset `core_v2.0.0`: 9 structural, 7 compositional), which `trug trl compile` applies to every graph it emits. Before that, the parser rejects a sentence that uses a word outside the vocabulary, one its grammar does not parse, and a pronoun with no prior clause to reference. The parser's grammar is wider than the BNF of §1 in one respect: it accepts a clause of a subject, a preposition and an object with no verb (`RESOURCE tracker CONTAINS RECORD x.`), which compiles to that edge alone.
 
-The constraints this page states beyond CORE — the composition tables of §2.1, §2.2, §2.4, §2.6 and §2.7, no double negation (a negative article with SHALL_NOT) and pronoun scope within one sentence — are not CORE rules; trugs-tools 2.4.0 does not check them and compiles and validates sentences that break them.
+The composition tables of §2.1, §2.2, §2.4, §2.6 and §2.7 and the rule against double negation (a negative article with SHALL_NOT) are CORE rules 10 to 13 and 15, which `trug validate` applies to the operation words on a graph's edges and to the modifiers in its node properties. The compiler of trugs-tools 2.4.0 writes verbs, adjectives, articles and adverbs where those rules do not read, so a sentence that breaks them compiles and validates (the note at §2). Pronoun scope within one sentence is not a CORE rule, and the compiler resolves a pronoun across sentences.
 
 ---
 
