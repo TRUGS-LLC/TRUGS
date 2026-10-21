@@ -1,5 +1,8 @@
 """Extraction, CLI failures and round-trip accounting on synthetic inputs."""
 
+# <trl>
+# AGENT SHALL VALIDATE MODULE check_paper_trl.
+# </trl>
 from __future__ import annotations
 
 import subprocess
@@ -11,7 +14,12 @@ import pytest
 from tools import check_paper_trl as checker
 
 
+# <trl>
+# FUNCTION fake_trug SHALL WRITE FILE executable THEN RETURN DATA path.
+# </trl>
+# ---
 @pytest.fixture
+# FUNCTION fake_trug SHALL WRITE FILE executable THEN RETURN DATA path.
 def fake_trug(tmp_path: Path) -> str:
     """A real subprocess fixture, independent of any installed language tool."""
     tool = tmp_path / "trug"
@@ -47,6 +55,11 @@ def fake_trug(tmp_path: Path) -> str:
     return str(tool)
 
 
+# <trl>
+# AGENT SHALL VALIDATE DATA listing_styles_and_body_bytes.
+# </trl>
+# ---
+# AGENT SHALL VALIDATE DATA listing_styles_and_body_bytes.
 def test_extract_only_measured_styles_preserving_bytes() -> None:
     text = (
         b"\\begin{lstlisting}[style=grammar]\nBNF\n\\end{lstlisting}\n"
@@ -61,6 +74,11 @@ def test_extract_only_measured_styles_preserving_bytes() -> None:
     ]
 
 
+# <trl>
+# AGENT SHALL VALIDATE DATA numbered_examples_and_fence_errors.
+# </trl>
+# ---
+# AGENT SHALL VALIDATE DATA numbered_examples_and_fence_errors.
 def test_numbered_examples_ignore_other_fences_and_keep_numbers() -> None:
     text = (
         b"## Notes\n```\nignored\n```\n"
@@ -78,6 +96,11 @@ def test_numbered_examples_ignore_other_fences_and_keep_numbers() -> None:
         checker.extract_examples(b"### 1. A\n```\nA\n```\n" * 2)
 
 
+# <trl>
+# AGENT SHALL VALIDATE DATA annotation_payloads_and_tag_errors.
+# </trl>
+# ---
+# AGENT SHALL VALIDATE DATA annotation_payloads_and_tag_errors.
 def test_extract_annotations_from_all_listing_languages() -> None:
     paper = (
         b"Prose <tr>ignored</tr>\n"
@@ -125,6 +148,11 @@ def test_extract_annotations_from_all_listing_languages() -> None:
             )
 
 
+# <trl>
+# AGENT SHALL VALIDATE DATA compilation_validation_and_byte_comparison.
+# </trl>
+# ---
+# AGENT SHALL VALIDATE DATA compilation_validation_and_byte_comparison.
 def test_compile_validate_and_byte_comparison(tmp_path: Path, fake_trug: str) -> None:
     for source, expected in [
         (b"OK\n  same\n", checker.Result(True, True, True)),
@@ -140,6 +168,11 @@ def test_compile_validate_and_byte_comparison(tmp_path: Path, fake_trug: str) ->
         checker.check_case(checker.Case("1", b"DECOMPILE_ERROR\n"), tmp_path, fake_trug)
 
 
+# <trl>
+# AGENT SHALL VALIDATE DATA selected_interpreter_version_query.
+# </trl>
+# ---
+# AGENT SHALL VALIDATE DATA selected_interpreter_version_query.
 def test_version_uses_selected_console_script_interpreter(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -156,7 +189,12 @@ def test_version_uses_selected_console_script_interpreter(
     assert calls[0][:2] == ["/fixture/python", "-c"]
 
 
+# <trl>
+# AGENT SHALL VALIDATE DATA listing_counts_and_exit_status.
+# </trl>
+# ---
 @pytest.mark.parametrize("listing", [b"OK\n", b"INVALID\n", b"DIFFERENT  layout\n"])
+# AGENT SHALL VALIDATE DATA listing_counts_and_exit_status.
 def test_main_counts_examples_and_fails_bad_listings(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, fake_trug: str, listing: bytes
 ) -> None:
@@ -187,9 +225,14 @@ def test_main_counts_examples_and_fails_bad_listings(
     assert "\\newcommand{\\GraphsValid}{1}" in macros
 
 
+# <trl>
+# AGENT SHALL VALIDATE DATA whole_graph_counts_and_exit_status.
+# </trl>
+# ---
 @pytest.mark.parametrize(
     "graph", [b'{"text": "OK"}\n', b'{"text": "INVALID"}\n', b"{...}\n"]
 )
+# AGENT SHALL VALIDATE DATA whole_graph_counts_and_exit_status.
 def test_main_validates_whole_graphs_and_excludes_fragments(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, fake_trug: str, graph: bytes
 ) -> None:
@@ -218,6 +261,11 @@ def test_main_validates_whole_graphs_and_excludes_fragments(
     assert f"\\newcommand{{\\GraphsValid}}{{{2 if valid else 1}}}" in macros
 
 
+# <trl>
+# AGENT SHALL VALIDATE DATA empty_rejection_list.
+# </trl>
+# ---
+# AGENT SHALL VALIDATE DATA empty_rejection_list.
 def test_no_rejections_is_reported_as_none() -> None:
     macros = checker.count_macros(
         [checker.Case("2", b"A\n")], [checker.Result(True, True, True)], [], [], []
@@ -225,10 +273,15 @@ def test_no_rejections_is_reported_as_none() -> None:
     assert macros["ExamplesRejectedList"] == "none"
 
 
+# <trl>
+# AGENT SHALL VALIDATE DATA annotation_counts_and_exit_status.
+# </trl>
+# ---
 @pytest.mark.parametrize(
     "annotation", [b"OK", b"REJECT", b"INVALID", b"DIFFERENT  layout"]
 )
 @pytest.mark.parametrize("inline", [True, False])
+# AGENT SHALL VALIDATE DATA annotation_counts_and_exit_status.
 def test_main_measures_annotations_and_propagates_failures(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -276,6 +329,11 @@ def test_main_measures_annotations_and_propagates_failures(
         assert f"\\newcommand{{\\{key}}}{{{value}}}" in macros
 
 
+# <trl>
+# AGENT SHALL VALIDATE DATA example_tag_removal.
+# </trl>
+# ---
+# AGENT SHALL VALIDATE DATA example_tag_removal.
 def test_numbered_examples_strip_trl_tag_lines() -> None:
     tagged = b"### 1. A\n```\n<trl>\nPARTY a VALIDATE.\n</trl>\n```\n"
     plain = b"### 1. A\n```\nPARTY a VALIDATE.\n```\n"

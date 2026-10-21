@@ -1,5 +1,8 @@
 """Vocabulary counting rules on small graphs independent of the live vocabulary."""
 
+# <trl>
+# AGENT SHALL VALIDATE MODULE paper_vocab_counts.
+# </trl>
 from __future__ import annotations
 
 import json
@@ -11,6 +14,11 @@ import pytest
 from tools import paper_vocab_counts as counts
 
 
+# <trl>
+# FUNCTION fixture_language SHALL PRODUCE RECORD language THEN RETURN RECORD language.
+# </trl>
+# ---
+# FUNCTION fixture_language SHALL PRODUCE RECORD language THEN RETURN RECORD language.
 def fixture_language() -> dict[str, Any]:
     categories = ["verb", "noun", "article", "level_prefix"]
     nodes: list[dict[str, Any]] = [
@@ -57,6 +65,11 @@ def fixture_language() -> dict[str, Any]:
     return {"version": "fixture-version", "nodes": nodes}
 
 
+# <trl>
+# AGENT SHALL VALIDATE DATA word_counts_and_category_order.
+# </trl>
+# ---
+# AGENT SHALL VALIDATE DATA word_counts_and_category_order.
 def test_counts_use_word_properties_and_root_order() -> None:
     macros = counts.vocabulary_macros(fixture_language())
     assert macros["VocabTotal"] == "8"
@@ -72,6 +85,11 @@ def test_counts_use_word_properties_and_root_order() -> None:
     assert keys.index("VocabNouns") < keys.index("VocabArticles")
 
 
+# <trl>
+# AGENT SHALL VALIDATE DATA shared_sources_empty_cells_and_rounding.
+# </trl>
+# ---
+# AGENT SHALL VALIDATE DATA shared_sources_empty_cells_and_rounding.
 def test_shared_empty_source_zero_cells_and_half_up_rounding() -> None:
     graph = fixture_language()
     macros = counts.vocabulary_macros(graph)
@@ -86,6 +104,11 @@ def test_shared_empty_source_zero_cells_and_half_up_rounding() -> None:
     assert counts.vocabulary_macros(graph)["VocabComputationPct"] == "13"
 
 
+# <trl>
+# AGENT SHALL VALIDATE DATA empty_vocabulary_error.
+# </trl>
+# ---
+# AGENT SHALL VALIDATE DATA empty_vocabulary_error.
 def test_empty_vocabulary_is_rejected() -> None:
     graph = fixture_language()
     graph["nodes"] = graph["nodes"][:5]
@@ -93,6 +116,11 @@ def test_empty_vocabulary_is_rejected() -> None:
         counts.vocabulary_macros(graph)
 
 
+# <trl>
+# AGENT SHALL VALIDATE DATA repeated_generation_bytes_and_messages.
+# </trl>
+# ---
+# AGENT SHALL VALIDATE DATA repeated_generation_bytes_and_messages.
 def test_generation_is_deterministic_on_fixture(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:

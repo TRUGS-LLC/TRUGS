@@ -1,5 +1,8 @@
 """Measure paper TRL, whole graphs and numbered examples with the trug CLI."""
 
+# <trl>
+# PROCESS paper_measurement SHALL READ FILE paper AND FILE examples THEN PRODUCE DATA counts.
+# </trl>
 from __future__ import annotations
 
 import os
@@ -43,30 +46,55 @@ NUMBERED = re.compile(rb"^### (\d+)\. ")
 FENCE = re.compile(rb"^```(?:trl)?\r?\n(.*?)^```[ \t]*\r?$", re.MULTILINE | re.DOTALL)
 
 
+# <trl>
+# RECORD case CONTAINS DATA label AND DATA text AND DATA exact_round_trip.
+# </trl>
+# ---
 @dataclass(frozen=True)
+# RECORD case CONTAINS DATA label AND DATA text AND DATA exact_round_trip.
 class Case:
     label: str
     text: bytes
     exact_round_trip: bool = True
 
 
+# <trl>
+# RECORD result CONTAINS DATA accepted AND DATA valid AND DATA round_trip.
+# </trl>
+# ---
 @dataclass(frozen=True)
+# RECORD result CONTAINS DATA accepted AND DATA valid AND DATA round_trip.
 class Result:
     accepted: bool
     valid: bool
     round_trip: bool
 
 
+# <trl>
+# FUNCTION extract_listings SHALL FILTER DATA text THEN RETURN ALL RECORD listing.
+# </trl>
+# ---
+# FUNCTION extract_listings SHALL FILTER DATA text THEN RETURN ALL RECORD listing.
 def extract_listings(text: bytes) -> list[Case]:
     """Keep all body bytes, including indentation and the final newline."""
     return [Case(str(i), m[1]) for i, m in enumerate(LISTING.finditer(text), 1)]
 
 
+# <trl>
+# FUNCTION extract_graphs SHALL FILTER DATA text THEN RETURN ALL RECORD graph.
+# </trl>
+# ---
+# FUNCTION extract_graphs SHALL FILTER DATA text THEN RETURN ALL RECORD graph.
 def extract_graphs(text: bytes) -> list[Case]:
     """Every json-style listing is a whole graph; fragments have their own style."""
     return [Case(str(i), m[1]) for i, m in enumerate(GRAPH_LISTING.finditer(text), 1)]
 
 
+# <trl>
+# FUNCTION extract_annotations SHALL FILTER DATA text THEN RETURN ALL RECORD annotation.
+# </trl>
+# ---
+# FUNCTION extract_annotations SHALL FILTER DATA text THEN RETURN ALL RECORD annotation.
 def extract_annotations(text: bytes) -> list[Case]:
     """Preserve every tag payload; require exact round trips for inline code tags."""
     cases: list[Case] = []
@@ -91,6 +119,11 @@ def extract_annotations(text: bytes) -> list[Case]:
     return cases
 
 
+# <trl>
+# FUNCTION strip_trl_tags SHALL FILTER DATA payload THEN RETURN DATA text.
+# </trl>
+# ---
+# FUNCTION strip_trl_tags SHALL FILTER DATA payload THEN RETURN DATA text.
 def strip_trl_tags(payload: bytes) -> bytes:
     """Drop a fence's <trl> and </trl> lines; keep every other byte."""
     lines = payload.split(b"\n")
@@ -101,6 +134,11 @@ def strip_trl_tags(payload: bytes) -> bytes:
     return b"\n".join(lines)
 
 
+# <trl>
+# FUNCTION extract_examples SHALL FILTER DATA text THEN RETURN ALL RECORD example.
+# </trl>
+# ---
+# FUNCTION extract_examples SHALL FILTER DATA text THEN RETURN ALL RECORD example.
 def extract_examples(text: bytes) -> list[Case]:
     """Require exactly one example fence per numbered heading.
 
@@ -123,6 +161,11 @@ def extract_examples(text: bytes) -> list[Case]:
     return cases
 
 
+# <trl>
+# FUNCTION run_command SHALL EXECUTE PROCESS command THEN RETURN RECORD result.
+# </trl>
+# ---
+# FUNCTION run_command SHALL EXECUTE PROCESS command THEN RETURN RECORD result.
 def run_command(args: list[str]) -> subprocess.CompletedProcess[bytes]:
     """Keep child Python invocations from writing bytecode."""
     return subprocess.run(
@@ -133,6 +176,11 @@ def run_command(args: list[str]) -> subprocess.CompletedProcess[bytes]:
     )
 
 
+# <trl>
+# FUNCTION tool_version SHALL READ FILE executable THEN RETURN DATA version.
+# </trl>
+# ---
+# FUNCTION tool_version SHALL READ FILE executable THEN RETURN DATA version.
 def tool_version(executable: str) -> str:
     """Ask the Python console script's interpreter for its package metadata.
 
@@ -156,6 +204,11 @@ def tool_version(executable: str) -> str:
     return result.stdout.decode("utf-8").strip()
 
 
+# <trl>
+# FUNCTION check_case SHALL EXECUTE PROCESS compilation THEN VALIDATE RECORD graph AND RETURN RECORD result.
+# </trl>
+# ---
+# FUNCTION check_case SHALL EXECUTE PROCESS compilation THEN VALIDATE RECORD graph AND RETURN RECORD result.
 def check_case(case: Case, directory: Path, executable: str) -> Result:
     source = directory / f"case-{case.label}.trl"
     graph = source.with_suffix(".json")
@@ -182,6 +235,11 @@ def check_case(case: Case, directory: Path, executable: str) -> Result:
     return Result(True, valid, equal)
 
 
+# <trl>
+# FUNCTION check_graph SHALL VALIDATE RECORD graph THEN RETURN DATA valid.
+# </trl>
+# ---
+# FUNCTION check_graph SHALL VALIDATE RECORD graph THEN RETURN DATA valid.
 def check_graph(case: Case, directory: Path, executable: str) -> bool:
     """Validate the exact listing bytes, including any malformed JSON."""
     graph = directory / f"graph-{case.label}.json"
@@ -196,6 +254,11 @@ def check_graph(case: Case, directory: Path, executable: str) -> bool:
     return valid
 
 
+# <trl>
+# FUNCTION count_macros SHALL MAP ALL RECORD result TO DATA macros THEN RETURN DATA macros.
+# </trl>
+# ---
+# FUNCTION count_macros SHALL MAP ALL RECORD result TO DATA macros THEN RETURN DATA macros.
 def count_macros(
     examples: list[Case],
     example_results: list[Result],
@@ -227,6 +290,11 @@ def count_macros(
     }
 
 
+# <trl>
+# FUNCTION main SHALL READ FILE paper AND FILE examples THEN WRITE FILE counts AND RETURN DATA exit_code.
+# </trl>
+# ---
+# FUNCTION main SHALL READ FILE paper AND FILE examples THEN WRITE FILE counts AND RETURN DATA exit_code.
 def main() -> int:
     executable = shutil.which("trug")
     if executable is None:
