@@ -10,41 +10,51 @@
 
 ### 1. Simple obligation
 ```
+<trl>
 PARTY system SHALL VALIDATE ALL PENDING RECORD.
+</trl>
 ```
 Actor + modal + verb + article + adjective + artifact.
 
 ### 2. Conditional pipeline
 ```
+<trl>
 PARTY api SHALL FILTER ALL ACTIVE RECORD
   THEN SORT RESULT
   UNLESS NO VALID RECORD REQUIRE SELF.
+</trl>
 ```
 Sequential chain (THEN) with exception (UNLESS). Pronoun RESULT back-references FILTER output. REQUIRE replaces DEPENDS_ON as verb. SELF references the subject.
 
 ### 3. Multi-party request-response
 ```
+<trl>
 PARTY client SHALL REQUEST PARTY server.
 PARTY server SHALL RESPOND PROMPTLY WITHIN 30s
   OR PARTY client MAY RETRY BOUNDED 3
   THEN HANDLE THE ERROR.
+</trl>
 ```
 Two sentences, two actors. Adverb-value pair (WITHIN 30s). Alternative (OR). Pronoun (THE ERROR).
 
 ### 4. Data transformation pipeline
 ```
+<trl>
 PARTY system SHALL MAP EACH PENDING RECORD TO VALID DATA
   THEN MERGE RESULT TO STREAM output
   THEN WRITE RESULT TO ENDPOINT destination.
+</trl>
 ```
 Three-step pipeline. TO preposition for direction. RESULT chains between steps.
 
 ### 5. Scope and authority
 ```
+<trl>
 PARTY administrator SHALL ADMINISTER ALL PRIVATE RESOURCE
   CONTAINS NAMESPACE production.
 NO PARTY SHALL WRITE READONLY RESOURCE
   NOTWITHSTANDING PARTY administrator MAY OVERRIDE.
+</trl>
 ```
 ADMINISTER as verb (establishes authority). NOTWITHSTANDING exception overrides prohibition.
 
@@ -54,19 +64,23 @@ ADMINISTER as verb (establishes authority). NOTWITHSTANDING exception overrides 
 
 ### 6. Authentication flow
 ```
+<trl>
 PARTY user SHALL AUTHENTICATE TO SERVICE gateway.
 PARTY gateway MAY GRANT AGENT worker ON_BEHALF_OF PARTY user.
 PARTY gateway SHALL ADMINISTER AGENT worker.
 AGENT worker SHALL READ ALL PRIVATE RESOURCE.
+</trl>
 ```
 Four sentences. ON_BEHALF_OF delegation. ADMINISTER establishes authority chain.
 
 ### 7. Scheduled operation with deadline
 ```
+<trl>
 DEFINE "deadline" AS INSTRUMENT.
 PARTY scheduler SHALL AGGREGATE ALL ACTIVE RECORD ONCE WITHIN 24h
   THEN WRITE RESULT TO ENDPOINT report
   SUBJECT_TO INSTRUMENT deadline.
+</trl>
 ```
 Multiple adverb-value pairs (ONCE, WITHIN 24h). The temporal constraint is
 modelled as an INSTRUMENT (formal document) defined upfront — keeps the
@@ -78,21 +92,25 @@ example inside the closed 233-word vocabulary.
 
 ### 8. Error recovery with escalation
 ```
+<trl>
 PARTY processor SHALL VALIDATE EACH REQUIRED RECORD.
 IF PARTY processor THROW EXCEPTION
   THEN PARTY processor SHALL CATCH THE EXCEPTION
   THEN HANDLE THE ERROR
   OR PARTY processor SHALL SEND MESSAGE TO PARTY admin.
+</trl>
 ```
 IF conditional. THROW (Control verb). CATCH + HANDLE resolve chain. OR escalation.
 
 ### 9. Prohibition with exception and remedy
 ```
+<trl>
 NO PARTY SHALL WRITE CONFIDENTIAL RESOURCE
   EXCEPT PARTY owner MAY WRITE CONFIDENTIAL RESOURCE
     PROVIDED_THAT PARTY owner AUTHENTICATE TO SERVICE auth.
 IF ANY PARTY WRITE CONFIDENTIAL RESOURCE
   THEN THE REMEDY DEPENDS_ON PARTY owner.
+</trl>
 ```
 Three-level nesting: EXCEPT → PROVIDED_THAT. REMEDY as outcome node. DEPENDS_ON as preposition (edge).
 
@@ -102,28 +120,34 @@ Three-level nesting: EXCEPT → PROVIDED_THAT. REMEDY as outcome node. DEPENDS_O
 
 ### 10. Definition of terms
 ```
+<trl>
 DEFINE "curator" AS PARTY.
 PARTY curator SHALL VALIDATE ALL RECORD
   AND PARTY curator SHALL_NOT WRITE INVALID RECORD.
+</trl>
 ```
 Subjectless DEFINE sentence. AND parallel conjunction.
 
 ### 11. Loop with termination
 ```
+<trl>
 PARTY worker SHALL READ RECORD FROM STREAM input
   WHILE ACTIVE RECORD EXISTS
   THEN WRITE RESULT TO ENDPOINT output
   FINALLY PARTY worker SHALL SEND MESSAGE TO PARTY supervisor.
+</trl>
 ```
 WHILE loop with EXISTS control verb. FINALLY guaranteed cleanup.
 
 ### 12. Chained transforms with schema binding
 ```
+<trl>
 PARTY pipeline SHALL FILTER ALL ACTIVE RECORD
   THEN SORT RESULT
   THEN TAKE RESULT 10
   THEN MAP RESULT TO VALID DATA
   SUBJECT_TO INTERFACE schema.
+</trl>
 ```
 Four-step chain. TAKE with integer value. SUBJECT_TO constraint at end.
 
@@ -133,30 +157,36 @@ Four-step chain. TAKE with integer value. SUBJECT_TO constraint at end.
 
 ### 13. Agent delegation chain
 ```
+<trl>
 PARTY user SHALL REQUEST PARTY orchestrator.
 PARTY orchestrator MAY SPLIT THE MESSAGE TO AGENT worker-a AND AGENT worker-b.
 EACH AGENT SHALL HANDLE INPUT PARALLEL
   THEN MERGE RESULT TO PARTY orchestrator.
 PARTY orchestrator SHALL RESPOND TO PARTY user.
+</trl>
 ```
 Noun conjunction (AND between noun_phrases). PARALLEL adverb. Fan-out/fan-in.
 
 ### 14. Immutable record with versioning
 ```
+<trl>
 DEFINE "ledger" AS IMMUTABLE RECORD.
 PARTY system SHALL WRITE EACH VALID DATA TO RECORD ledger.
 NO PARTY MAY WRITE RECORD ledger
   EXCEPT PARTY system.
 PARTY system SHALL REPLACE THE RECORD ledger FROM SAID RECORD.
+</trl>
 ```
 IMMUTABLE adjective in definition. REPLACE as verb (action of superseding). SAID pronoun.
 
 ### 15. Conditional permission with time constraint
 ```
+<trl>
 PARTY reviewer MAY APPROVE THE PENDING RECORD WITHIN 48h
   PROVIDED_THAT PARTY reviewer VALIDATE THE RECORD.
 IF NO PARTY APPROVE THE RECORD WITHIN 48h
   THEN PARTY system SHALL EXPIRE THE RECORD.
+</trl>
 ```
 Time-bounded permission. APPROVE and EXPIRE verbs. Forced active voice ("system expires record" not "record expires").
 
@@ -166,99 +196,120 @@ Time-bounded permission. APPROVE and EXPIRE verbs. Forced active voice ("system 
 
 ### 16. Nested conditions (three-deep)
 ```
+<trl>
 PARTY api SHALL FILTER ALL RECORD
   UNLESS PARTY admin OVERRIDE
     PROVIDED_THAT PARTY admin AUTHENTICATE TO SERVICE auth
       EXCEPT PARTY admin ADMINISTER SERVICE auth.
+</trl>
 ```
 UNLESS → PROVIDED_THAT → EXCEPT (depth 3). ADMINISTER as verb.
 
 ### 17. Event-driven reactive pattern
 ```
+<trl>
 WHEN PARTY client SEND MESSAGE TO SERVICE queue
   THEN SERVICE queue SHALL VALIDATE THE MESSAGE
   THEN SEND RESULT TO PARTY handler
   OR REJECT THE MESSAGE.
+</trl>
 ```
 WHEN event trigger. Subject inheritance across THEN chain.
 
 ### 18. WHEREAS preamble
 ```
+<trl>
 WHEREAS PARTY system ADMINISTER ALL RESOURCE.
 WHEREAS ALL RECORD REQUIRE MODULE storage.
 PARTY system SHALL VALIDATE EACH RECORD ONCE
   THEN WRITE RESULT TO ENDPOINT output.
+</trl>
 ```
 Preambles establish context. ADMINISTER and REQUIRE as verbs. Operative sentence follows.
 
 ### 19. Cross-sentence reference
 ```
+<trl>
 PARTY ingester SHALL READ ALL RECORD FROM STREAM raw-input.
 PARTY transformer SHALL FILTER THE RECORD
   THEN MAP RESULT TO VALID DATA.
 PARTY loader SHALL WRITE THE DATA TO ENDPOINT warehouse.
+</trl>
 ```
 THE + NOUN for cross-sentence reference (not pronouns). Multi-actor pipeline across three sentences.
 
 ### 20. Concurrent actors with synchronization
 ```
+<trl>
 PARTY worker-a SHALL FILTER ALL RECORD PARALLEL.
 PARTY worker-b SHALL SORT ALL RECORD PARALLEL.
 PARTY coordinator SHALL MERGE THE RECORD FROM PARTY worker-a AND THE RECORD FROM PARTY worker-b
   THEN WRITE RESULT TO ENDPOINT output.
+</trl>
 ```
 Prepositional phrase conjunction (FROM X AND FROM Y). PARALLEL on separate actors. MERGE synchronization.
 
 ### 21. GROUP BY + AGGREGATE
 ```
+<trl>
 PARTY analyst SHALL GROUP ALL RECORD BY FILE type
   THEN AGGREGATE EACH RESULT TO INTEGER DATA count
   THEN SORT RESULT
   THEN TAKE RESULT 10.
+</trl>
 ```
 BY binding preposition. EACH RESULT iterates groups. Type adjective on output.
 
 ### 22. FLATTEN + MAP (flatMap)
 ```
+<trl>
 PARTY processor SHALL MAP EACH RECORD TO ARRAY DATA
   THEN FLATTEN RESULT
   THEN DISTINCT RESULT
   THEN WRITE RESULT TO ENDPOINT output.
+</trl>
 ```
 Four-step functional pipeline. Clean first-attempt parse.
 
 ### 23. Multi-level containment
 ```
+<trl>
 DEFINE "api-system" AS NAMESPACE.
 PARTY system SHALL NEST MODULE auth AND MODULE data AND MODULE search TO NAMESPACE api-system.
 PARTY system SHALL NEST FUNCTION login AND FUNCTION logout TO MODULE auth.
 PARTY system SHALL NEST FUNCTION read-record AND FUNCTION write-record TO MODULE data.
 FUNCTION read-record REQUIRE MODULE auth.
 FUNCTION write-record REQUIRE MODULE auth.
+</trl>
 ```
 NEST as verb (action of containment). REQUIRE as verb (action of dependency). Explicit actor for structural actions.
 
 ### 24. PRECEDENT usage
 ```
+<trl>
 WHEREAS THE RECORD history REFERENCES RECORD current.
 PARTY system SHALL VALIDATE THE RECORD current
   SUBJECT_TO PRECEDENT RECORD history.
+</trl>
 ```
 PRECEDENT as adjective (State). REFERENCES as preposition (edge). Advisory but not binding.
 
 ### 25. Batch processing with bounded retry
 ```
+<trl>
 PARTY loader SHALL READ ALL RECORD FROM ENDPOINT source
   THEN BATCH RESULT 100
   THEN MAP EACH RESULT TO VALID DATA
     SUBJECT_TO INTERFACE schema
   THEN WRITE RESULT TO ENDPOINT destination
   OR RETRY BOUNDED 3 WITHIN 60s.
+</trl>
 ```
 Multiple adverb_phrases on RETRY (BOUNDED 3 + WITHIN 60s). OR for retry fallback.
 
 ### 26. API rate limiting
 ```
+<trl>
 DEFINE "rate-limit" AS REQUIRED INTEGER DATA.
 PARTY client SHALL REQUEST PARTY api
   SUBJECT_TO DATA rate-limit
@@ -267,11 +318,13 @@ IF PARTY client REQUEST PARTY api
   AND DATA rate-limit EXCEEDS 100
   THEN PARTY api SHALL REJECT THE MESSAGE
   THEN PARTY api SHALL SEND ERROR TO PARTY client.
+</trl>
 ```
 Comparison verb EXCEEDS. Artifact as subject of Control verb. Compound IF condition (AND).
 
 ### 27. Self-describing language
 ```
+<trl>
 DEFINE "word" AS DATA.
 DEFINE "grammar-rule" AS DATA.
 DEFINE "constraint" AS DATA.
@@ -285,11 +338,13 @@ PARTY language SHALL VALIDATE EACH DATA word
 
 NO PARTY SHALL AUGMENT PARTY language
   UNLESS PARTY language MAY APPROVE.
+</trl>
 ```
 The language describes its own structure — words, grammar, constraints, authority. NEST, ADMINISTER, AUGMENT as verbs. Self-referential and valid.
 
 ### 28. Complete ETL pipeline (real-world)
 ```
+<trl>
 DEFINE "raw-event" AS STRING DATA.
 DEFINE "clean-event" AS VALID OBJECT DATA.
 DEFINE "event-store" AS IMMUTABLE ENDPOINT.
@@ -319,6 +374,7 @@ NO PARTY SHALL WRITE ENDPOINT event-store
     PROVIDED_THAT PARTY loader AUTHENTICATE TO SERVICE auth.
 
 PARTY monitor SHALL ADMINISTER PARTY ingester AND PARTY transformer AND PARTY loader.
+</trl>
 ```
 11 sentences. 3 definitions. 2 preambles. 4 actors. Retry, timeout, error handling, authentication, authority. ADMINISTER and REQUIRE as verbs. Complete real-world ETL in the language.
 
@@ -332,67 +388,85 @@ The same sentences with and without sugar tokens. Both compile to identical grap
 
 Without sugar:
 ```
+<trl>
 PARTY system SHALL VALIDATE ALL PENDING RECORD.
+</trl>
 ```
 
 With sugar:
 ```
+<trl>
 PARTY system SHALL 'please VALIDATE ALL 'of 'the PENDING RECORD.
+</trl>
 ```
 
 ### Multi-party (Example 3)
 
 Without sugar:
 ```
+<trl>
 PARTY client SHALL REQUEST PARTY server.
 PARTY server SHALL RESPOND PROMPTLY WITHIN 30s
   OR PARTY client MAY RETRY BOUNDED 3
   THEN HANDLE THE ERROR.
+</trl>
 ```
 
 With sugar:
 ```
+<trl>
 PARTY client SHALL REQUEST PARTY server.
 PARTY server SHALL RESPOND PROMPTLY WITHIN 30s
   OR PARTY client MAY 'also RETRY BOUNDED 3
   THEN 'also HANDLE THE ERROR.
+</trl>
 ```
 
 ### Prohibition (Example 9)
 
 Without sugar:
 ```
+<trl>
 NO PARTY SHALL WRITE CONFIDENTIAL RESOURCE
   EXCEPT PARTY owner MAY WRITE CONFIDENTIAL RESOURCE
     PROVIDED_THAT PARTY owner AUTHENTICATE TO SERVICE auth.
+</trl>
 ```
 
 With sugar:
 ```
+<trl>
 NO PARTY SHALL WRITE CONFIDENTIAL RESOURCE
   EXCEPT PARTY owner 'who MAY WRITE 'such CONFIDENTIAL RESOURCE
     PROVIDED_THAT PARTY owner 'who AUTHENTICATE TO SERVICE auth.
+</trl>
 ```
 
 ### ETL Pipeline (Example 28, excerpt)
 
 Without sugar:
 ```
+<trl>
 PARTY monitor SHALL ADMINISTER PARTY ingester
   AND PARTY transformer AND PARTY loader.
+</trl>
 ```
 
 With sugar:
 ```
+<trl>
 PARTY monitor SHALL ADMINISTER PARTY ingester
   AND 'also PARTY transformer AND 'also PARTY loader.
+</trl>
 ```
 
 ### Custom sugar (domain annotation)
 
 ```
+<trl>
 PARTY ingester 'kafka SHALL READ EACH DATA raw-event FROM STREAM raw-events.
 PARTY loader 'postgres SHALL WRITE EACH RESULT TO ENDPOINT event-store.
+</trl>
 ```
 
 `'kafka` and `'postgres` compile to nothing — they annotate for human readers which system backs the actor.
@@ -403,11 +477,12 @@ Sugar makes the language read like natural English. The compiler ignores it. The
 
 ## Level Directives — Hierarchy Transition Markers
 
-Level directives are bare `metric_level` tokens on their own line. They mark hierarchy transitions for an LLM consumer reading the source. They compile to nothing and the validator does not enforce them. See `SPEC_grammar.md §level_directive`.
+Level directives are bare `metric_level` tokens on their own line. They mark hierarchy transitions for an LLM consumer reading the source. They compile to no node and no edge (the compiler records the level as `metric_level` on the next sentence's operation node; a sentence with no verb keeps no level, and the level goes to the first operation node a later sentence supplies), and the validator does not enforce them. See `SPEC_grammar.md §level_directive`.
 
 ### 29. Macro-to-micro walk
 
 ```
+<trl>
 KILO_REPOSITORY
 
 PARTY trugs_llc SHALL ADMINISTER ALL RESOURCE.
@@ -429,6 +504,7 @@ PARTY system SHALL VALIDATE RESULT.
 CENTI_TOKEN
 
 PARTY system SHALL ASSERT STRING DATA.
+</trl>
 ```
 
 Five hierarchy levels declared in macro-to-micro order. Each directive announces "what follows is at this level." Sentences between directives operate at the most recently declared level. The graph carries `metric_level` properties on the corresponding nodes; the directives are not stored in the graph.

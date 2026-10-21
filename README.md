@@ -49,10 +49,12 @@ See [TRUGS-LLC/TRUGS-TOOLS](https://github.com/TRUGS-LLC/TRUGS-TOOLS) for the `t
 TRUGS includes a formalized subset of English — 233 words drawn from computation, law, and SI prefixes — where every valid sentence compiles to a TRUG graph and every graph decompiles back to a sentence. Losslessly.
 
 ```
+<trl>
 PARTY system SHALL FILTER ALL ACTIVE RECORD
   THEN SORT RESULT
   THEN WRITE RESULT TO ENDPOINT output
   OR RETRY BOUNDED 3 WITHIN 60s.
+</trl>
 ```
 
 Every word is from the vocabulary. The sentence IS the program. The graph IS the AST.

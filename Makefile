@@ -42,7 +42,8 @@ test:
 
 # Self-description: the spec proves itself — every TRUG the spec ships validates
 # against TRUGS's own 16-rule CORE validator. language.trug.json must also be a
-# deterministic rebuild of SPEC_vocabulary.md.
+# deterministic rebuild of SPEC_vocabulary.md, and every <trl> block in the
+# repository's Markdown must compile with trugs-tools.
 trugs:
 	@if command -v trug >/dev/null 2>&1; then \
 		echo "==> trug validate (shipped TRUGs)"; \
@@ -52,7 +53,10 @@ trugs:
 		echo "==> deterministic rebuild check"; \
 		tmp=$$(mktemp); python3 tools/build_language_trug.py TRUGS_LANGUAGE/SPEC_vocabulary.md "$$tmp" >/dev/null; \
 		diff "$$tmp" TRUGS_LANGUAGE/language.trug.json >/dev/null && echo "  PASS: language.trug.json is a deterministic rebuild" || { echo "  FAIL: rebuild differs"; rm -f "$$tmp"; exit 1; }; \
-		rm -f "$$tmp"; echo "PASS: Layer-4 spec-proves-itself"; \
+		rm -f "$$tmp"; \
+		echo "==> trug audit markdown (every <trl> block compiles)"; \
+		trug audit markdown . && echo "  PASS: every <trl> block compiles" || { echo "  FAIL: a <trl> block does not compile"; exit 1; }; \
+		echo "PASS: Layer-4 spec-proves-itself"; \
 	else \
 		echo "SKIP: trug (trugs-tools) not installed — Layer-4 shipped-TRUG validation skipped (run: pip install trugs-tools)"; \
 	fi

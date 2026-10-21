@@ -17,6 +17,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Clarify that compliance rule C2 accepts `STAGE` only from code to graph and excludes it from graph to code.
 - `LICENSE` is the official Apache License 2.0 text; `NOTICE` carries the attribution only, its patent
   paragraph removed; the README gains a Scope section.
+- `TRUGS_PROTOCOL/CORE.md` names the current ruleset `core_v2.0.0` where it said `core_v1.0.0`, which the
+  validator rejects as retired.
+- The TRL examples of the language pages, the README and the cheat sheet sit inside `<trl>` tags, and
+  `make check` compiles every `<trl>` block in the repository with `trug audit markdown`; five examples are
+  rewritten, in eight sentences, to what trugs-tools 2.4.0 accepts.
+- `SPEC_grammar.md` states what trugs-tools 2.4.0 enforces from TRL (§2, §4), describes the compiled graph as
+  the compiler writes it (§3, level directives), marks the `metric_level` value form reserved, and gives the
+  adjective order as canonical rather than required; `SPEC_vocabulary.md`, `SPEC_examples.md` and the cheat
+  sheet follow.
+- `TRUGS_LANGUAGE/README.md` counts the 16 CORE validation rules.
 
 ## [2.0.0] — 2026-06-12
 
