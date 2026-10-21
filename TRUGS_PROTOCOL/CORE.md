@@ -625,7 +625,7 @@ Tool-specific metadata
 
 ## Validation Rules
 
-Every TRUG must pass these 16 checks (rules 1-9 are structural; rules 10-16 are compositional and only enforced when `capabilities.vocabularies` includes `"core_v1.0.0"`):
+Every TRUG must pass these 16 checks (rules 1-9 are structural; rules 10-16 are compositional and only enforced when `capabilities.vocabularies` includes `"core_v2.0.0"`, the identifier of the current ruleset; the earlier `core_v1.0.0` is retired, and the validator rejects a graph that declares it):
 
 ### Rule 1: Node ID Uniqueness
 
@@ -805,7 +805,7 @@ def validate_metric_level(level_name):
 
 ### Rule 10: Subject-Operation Compatibility
 
-When a TRUG uses semantic primitives (core_v1.0.0), the subject entity of an operation must be compatible with the operation class.
+When a TRUG uses semantic primitives (core_v2.0.0), the subject entity of an operation must be compatible with the operation class.
 
 | Subject Entity | Transform | Move | Obligate | Permit | Prohibit | Control | Bind | Resolve |
 |---|---|---|---|---|---|---|---|---|
@@ -1355,7 +1355,7 @@ Every primitive belongs to exactly one class. No ambiguity.
 
 # Part 3: Composition Rules
 
-Composition rules define which primitives can combine with which. These are the type system for the graph. When `capabilities.vocabularies` includes `"core_v1.0.0"`, these rules are enforced as validation rules 10-16 (defined above in the Validation Rules section).
+Composition rules define which primitives can combine with which. These are the type system for the graph. When `capabilities.vocabularies` includes `"core_v2.0.0"`, these rules are enforced as validation rules 10-16 (defined above in the Validation Rules section).
 
 For the complete compatibility matrices, see:
 - **Validation Rule 10:** Subject-Operation compatibility
@@ -1523,7 +1523,7 @@ trug validate my_graph.json
 
 **The 16 Validation Rules:**
 - Rules 1-9: structural (always enforced)
-- Rules 10-16: compositional (enforced when core_v1.0.0 declared)
+- Rules 10-16: compositional (enforced when core_v2.0.0 is declared; core_v1.0.0 is retired and rejected)
 
 **What this enables:**
 - Universal validation (16 mechanical rules)

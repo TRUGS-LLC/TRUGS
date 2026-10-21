@@ -86,7 +86,7 @@ SELF | RESULT OUTPUT | INPUT SOURCE | TARGET | SAID
 
 ## Level Prefixes (21) — hierarchy transition markers
 
-A `level_directive` (`<PREFIX>_<NAME>`, e.g. `KILO_REPOSITORY`) on its own line marks a metric-level transition for the LLM consumer. Compiles to nothing.
+A `level_directive` (`<PREFIX>_<NAME>`, e.g. `KILO_REPOSITORY`) on its own line marks a metric-level transition for the LLM consumer. Compiles to no node or edge; it sets `metric_level` on the next sentence's operation node.
 
 | Macro (10) | Default (1) | Micro (10) |
 |---|---|---|
@@ -110,18 +110,17 @@ Pattern: `'[a-z_]+` — e.g. `'of`, `'is`, `'the`, `'please`. Human readability 
 ## Common Patterns
 
 ```
+<trl>
 PARTY x SHALL FILTER ALL ACTIVE RECORD THEN WRITE RESULT TO ENDPOINT out.
-  Actor + obligation + transform + scope + object + sequence + move + target
-
 AGENT a SHALL_NOT MERGE ANY RESOURCE TO ENDPOINT main.
-  Actor + prohibition + action + scope + object + destination
-
 EACH FUNCTION skill SHALL PRODUCE RECORD output THEN RESPOND TO PARTY human.
-  Quantifier + actor + obligation + artifact + sequence + move + target
-
 IF DATA input EXISTS THEN PARTY system SHALL VALIDATE RESULT SUBJECT_TO RECORD rule.
-  Condition + check + sequence + obligation + validate + constraint
-
 STAGE audit CONTAINS DATA code_quality AND DATA plan_compliance.
-  Container + containment + parallel artifacts
+</trl>
 ```
+
+1. Actor + obligation + transform + scope + object + sequence + move + target
+2. Actor + prohibition + action + scope + object + destination
+3. Quantifier + actor + obligation + artifact + sequence + move + target
+4. Condition + check + sequence + obligation + validate + constraint
+5. Container + containment + parallel artifacts

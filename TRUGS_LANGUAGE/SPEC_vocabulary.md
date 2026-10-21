@@ -485,7 +485,7 @@ A pronoun refers to a previously named noun. Must have an unambiguous antecedent
 
 A level prefix names a metric level in the TRUG hierarchy. The 21 SI prefixes (plus `BASE` for the default level) form a closed scale from macro (10²⁴) to micro (10⁻²⁴). Combined with a semantic name they form a `metric_level` identifier, e.g. `KILO_REPOSITORY`, `BASE_FUNCTION`, `DECI_LINE`.
 
-In TRL, a level prefix joined with an UPPERCASE semantic name appears as a bare token on its own line — a **level directive** — to mark a transition between hierarchy levels for an LLM consumer reading the source. Level directives are an LLM-comprehension affordance: they compile to nothing, produce no node or edge, and the validator does not enforce them. See `SPEC_grammar.md §level_directive`.
+In TRL, a level prefix joined with an UPPERCASE semantic name appears as a bare token on its own line — a **level directive** — to mark a transition between hierarchy levels for an LLM consumer reading the source. Level directives are an LLM-comprehension affordance: they produce no node or edge (the compiler records the level as `metric_level` on the next sentence's operation node), and the validator does not enforce them. See `SPEC_grammar.md §level_directive`.
 
 `BASE` (10⁰, no scaling factor) names the default consumption level — the "ground zero" plane of every TRUG, the most information-dense and the level a fresh consumer should reach first.
 
@@ -539,19 +539,21 @@ DECI_STATEMENT       CENTI_TOKEN          MICRO_BIT
 When a TRL source crosses from one metric level to another, the new level's name appears alone on a line. Example:
 
 ```
+<trl>
 PARTY system SHALL FILTER ALL ACTIVE RECORD
   THEN SORT RESULT.
 
 DECI_STATEMENT
 
-PARTY system SHALL VALIDATE EACH FIELD 'of RESULT.
+PARTY system SHALL VALIDATE EACH DATA field.
 
 CENTI_TOKEN
 
-PARTY system SHALL ASSERT TYPE EQUALS STRING.
+PARTY system SHALL ASSERT STRING DATA.
+</trl>
 ```
 
-Each directive marks the start of work at that level. Directives are sugar-equivalent: they compile to nothing, but unlike `'sugar` they retain their executable-vocabulary identity and can be referenced inside a sentence as a `metric_level` value (e.g. `... AT BASE_FUNCTION`). See `SPEC_grammar.md` for the BNF rule.
+Each directive marks the start of work at that level. Directives compile to no node and no edge; the reference compiler records the level as the `metric_level` property of the next sentence's operation node. Unlike `'sugar` they are executable vocabulary, and the grammar reserves them a second position, as a `metric_level` value inside a sentence (e.g. `... AT BASE_FUNCTION`), which trugs-tools 2.4.0 does not yet accept. See `SPEC_grammar.md` for the BNF rule.
 
 ---
 
@@ -608,8 +610,10 @@ These are the most frequently used sugar words. They correspond to English funct
 Any `'word` works. Custom sugar lets authors annotate sentences with domain context that the compiler ignores:
 
 ```
-PARTY system SHALL WRITE DATA 'to 'the 'postgres ENDPOINT store.
+<trl>
+PARTY system SHALL WRITE DATA TO 'the 'postgres ENDPOINT store.
 PARTY admin 'trugs_llc SHALL ADMINISTER ALL RESOURCE.
+</trl>
 ```
 
 `'postgres` and `'trugs_llc` are sugar — they compile to nothing but tell the human reader what system or entity is involved.
@@ -630,11 +634,11 @@ PARTY admin 'trugs_llc SHALL ADMINISTER ALL RESOURCE.
 | Conjunctions | 8 | 5 | — | 13 | Structure |
 | Articles | — | — | 10 | 10 | Scope |
 | Pronouns | 6 | 1 | — | 7 | References |
-| Level prefixes | — | — | 21 | 21 | Hierarchy markers (no-op in graph) |
+| Level prefixes | — | — | 21 | 21 | Hierarchy markers (set `metric_level`) |
 | Sugar | — | — | ∞ (pattern) | `'[a-z_]+` | **Nothing** |
 | **Total** | **156** | **46** | **31** | **233** | |
 
-233 executable words + `'word` sugar pattern. Sugar is not counted as vocabulary — it is a syntactic pattern (`'[a-z_]+`) that compiles to nothing. Level prefixes are counted but produce no graph artifacts when used as bare-line directives; they DO contribute when used as the prefix of a `metric_level` value. The executable vocabulary is 233 words.
+233 executable words + `'word` sugar pattern. Sugar is not counted as vocabulary — it is a syntactic pattern (`'[a-z_]+`) that compiles to nothing. Level prefixes are counted; as bare-line directives they produce no node or edge and set `metric_level` on the next sentence's operation node; the `metric_level` value form inside a sentence is reserved. The executable vocabulary is 233 words.
 
 ### Modals (subset of verbs)
 
@@ -659,10 +663,12 @@ The 233-word vocabulary is **closed by design**. When a domain concept seems to 
 A scheduled operation with a time limit uses existing vocabulary:
 
 ```
+<trl>
 DEFINE "deadline" AS INSTRUMENT.
 PARTY scheduler SHALL AGGREGATE ALL ACTIVE RECORD ONCE WITHIN 24h
   THEN WRITE RESULT TO ENDPOINT report
   SUBJECT_TO INSTRUMENT deadline.
+</trl>
 ```
 
 The temporal constraint is modelled as an `INSTRUMENT` (#14, a formal document) defined upfront with `DEFINE ... AS`. Adverb-value pairs (`ONCE`, `WITHIN 24h`) carry the timing. `DEADLINE` is not a keyword — it's an identifier inside quotes. The closed 233-word vocabulary suffices. See SPEC_examples.md example 7.
@@ -672,9 +678,11 @@ The temporal constraint is modelled as an `INSTRUMENT` (#14, a formal document) 
 `PRECEDENT` (#130, an adjective / state) is already in the vocabulary under Adjectives → Legal state. `REFERENCES` (#176) is the edge. Combined:
 
 ```
+<trl>
 WHEREAS THE RECORD history REFERENCES RECORD current.
 PARTY system SHALL VALIDATE THE RECORD current
   SUBJECT_TO PRECEDENT RECORD history.
+</trl>
 ```
 
 No new keyword needed. See SPEC_examples.md example 24.

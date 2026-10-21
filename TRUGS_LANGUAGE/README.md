@@ -22,11 +22,13 @@ The language definition IS a TRUG. TRUGs all the way down.
 ## Quick Example
 
 ```
+<trl>
 PARTY api SHALL FILTER ALL ACTIVE RECORD
   THEN SORT RESULT
   THEN TAKE RESULT 10
   THEN WRITE RESULT TO ENDPOINT output
   OR RETRY BOUNDED 3 WITHIN 60s.
+</trl>
 ```
 
 Every word is from the 233-word vocabulary. The sentence compiles to a graph with 9 nodes and 14 edges. The graph decompiles back to the same sentence.
@@ -36,7 +38,7 @@ Every word is from the 233-word vocabulary. The sentence compiles to a graph wit
 - **233 executable words** + `'word` sugar pattern (human readability only)
 - **9 parts of speech** — sugar is a pattern (`'[a-z_]+`), not a word list. Level prefixes (the 9th part of speech, added in 2.0.0) are SI-derived hierarchy markers shared across both domains.
 - **156 computation**, 46 law, 31 shared (executable words)
-- **12 validation rules** for compiled graphs
+- **16 validation rules** for compiled graphs — the CORE ruleset `core_v2.0.0` of `TRUGS_PROTOCOL/CORE.md`
 - **No ambiguity** — verbs and prepositions are always distinct words
 - **30 examples** tested token-by-token against the grammar
 
