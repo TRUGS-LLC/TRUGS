@@ -27,7 +27,7 @@ import sys
 from pathlib import Path
 
 # Widened from `(\w+)` to `([\w ]+?)` (non-greedy) to match the multi-word
-# heading "Level Prefixes" added for TRUGS 2.0 ((private reference removed)).
+# heading "Level Prefixes" added for TRUGS 2.0.
 PART_HEADING_RE = re.compile(
     r"^## (\d+)\.\s+([\w ]+?)(?:\s+—\s+([^()]+))?\s*\((\d+)\)\s*$"
 )
@@ -309,8 +309,7 @@ def build_trug(records: list[dict]) -> dict:
             f"{len(parts_order)} parts of speech. Generated from "
             "SPEC_vocabulary.md by tools/build_language_trug.py. v2.0.0 adds "
             "21 SI level prefixes for hierarchy transition markers "
-            "(private reference removed) and 22 corpus-evidenced words "
-            "(AAA #2048 / #2018 disposition)."
+            "and 22 corpus-evidenced words."
         ),
         "dimensions": {},
         "capabilities": {"vocabularies": ["trl_v2"]},

@@ -14,7 +14,7 @@ Thanks for your interest in contributing to TRUGS — the Traceable Recursive Un
 | Change | Path |
 |---|---|
 | **Typo, doc clarity, single-line fix** | Branch → PR. No issue required. |
-| **Spec / vocabulary / branch addition** | Issue first. The AAA protocol applies — see [`PAPER_how_to_code_with_trugs.md`](REFERENCE/PAPER_how_to_code_with_trugs.md) §5. |
+| **Spec / vocabulary / branch addition** | Issue first. Describe the proposed specification change and how it can be checked. |
 | **New tool or feature** | Issue first. Requires human validation at the planning gate before coding. |
 | **Bug fix with non-obvious cause** | Issue first. Tests required. |
 
@@ -49,7 +49,7 @@ If you're unsure, open an issue and ask. That is always cheaper than writing cod
 
 For pushes to `main` and pull requests targeting `main`, CI runs:
 
-- **Tier-1** — installs the package and dev tooling, then runs `make check`: secrets, formatting, lint, types, tests, shipped-graph validation via `trug validate`, and a deterministic vocabulary rebuild.
+- **Specification check** — installs the package and dev tooling, then runs `make check`: secrets, formatting, lint, types, tests, shipped-graph validation via `trug validate`, and a deterministic vocabulary rebuild.
 - **Compliance** — runs `trug compliance .`.
 - **Tests** — runs the vocabulary-builder test module separately.
 

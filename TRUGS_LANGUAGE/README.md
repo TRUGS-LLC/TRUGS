@@ -2,7 +2,7 @@
 
 > Formalized English as an LLM-native executable language.
 
-**Issue:** (private reference removed), (private reference removed) (private) | **Status:** DRAFT | **Version:** 2.0.0
+**Status:** DRAFT | **Version:** 2.0.0
 
 ## What This Is
 

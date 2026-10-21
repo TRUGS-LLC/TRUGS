@@ -3,7 +3,6 @@
 **Authors:** Xepayac
 **Date:** April 2026
 **Venue:** arXiv (cs.SE primary, cs.AI secondary)
-**Issue:** (private reference removed)
 
 ---
 
@@ -641,7 +640,7 @@ The TRUG does not eliminate security vulnerabilities. But it makes the attack su
 
 Legal liability for Dark Code is an unresolved question. When autonomously generated code causes harm, the liability chain is unclear. The human approved the PR — but they didn't understand the code. The LLM generated it — but LLM providers disclaim liability for outputs. The company ships it — but no employee wrote it.
 
-TRUGS provides an audit trail: the TRUG specification (what was intended), the TRUG/L comments (what was specified), the validator results (whether specification matched implementation), and the HITM approval records (who approved what, when). This does not resolve the legal question, but it provides the evidence that any resolution would require.
+TRUGS provides an audit trail: the TRUG specification (what was intended), the TRUG/L comments (what was specified), the validator results (whether specification matched implementation), and the human approval records (who approved what, when). This does not resolve the legal question, but it provides the evidence that any resolution would require.
 
 ---
 

@@ -89,7 +89,7 @@ def test_critical_keywords_present() -> None:
         "DEPENDS_ON",
         "PARTY",
         "AGENT",
-        # v2.0 additions (AAA (private reference removed) / (private reference removed) disposition)
+        # v2.0 corpus-evidenced additions
         "EXECUTE",
         "EMIT",
         "HAVE",

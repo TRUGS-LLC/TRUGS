@@ -9,7 +9,7 @@
 
 ## Abstract
 
-`PAPER_dark_code.md` established the problem — LLM-generated code accumulates as Dark Code: correct, tested, opaque — and proposed TRUGS (Traceable Recursive Universal Graph Specification) as the structural fix. That paper argues the theory. This paper teaches the practice. It covers how to start a project TRUG-first, how to refactor existing dark code into compliance, how compliance composes across files and modules, how the AAA development protocol wraps the day-to-day work, how memory captures intent over time, how CI enforces the gates, and what patterns and anti-patterns practitioners encounter. It then specifies the Python dialect conventions that the `trug compliance` tool audits against.
+`PAPER_dark_code.md` established the problem — LLM-generated code accumulates as Dark Code: correct, tested, opaque — and proposed TRUGS (Traceable Recursive Universal Graph Specification) as the structural fix. That paper argues the theory. This paper teaches the practice. It covers how to start a project TRUG-first, how to refactor existing dark code into compliance, how compliance composes across files and modules, how memory captures intent over time, how CI enforces the gates, and what patterns and anti-patterns practitioners encounter. It then specifies the Python dialect conventions that the `trug compliance` tool audits against.
 
 Readers who have not read `PAPER_dark_code.md` will miss the *why*. Readers who have read it and now want to write TRUGS code start here.
 
@@ -21,7 +21,7 @@ TRUGS-compliant development has one simple principle: **intent precedes implemen
 
 Code is written to satisfy intent that has already been recorded. This reverses the usual direction — where code exists first and documentation (if it comes at all) describes what happened — and is the essential move that keeps TRUGS code legible.
 
-The rest of this paper is the how-to: greenfield first, then refactoring, then the composition rules that let the approach scale, then the operational wrapper (AAA + memory + CI), then the patterns and anti-patterns we've found along the way, and finally the Python dialect conventions.
+The rest of this paper is the how-to: greenfield first, then refactoring, then the composition rules that let the approach scale, then memory and CI, then the patterns and anti-patterns we've found along the way, and finally the Python dialect conventions.
 
 ---
 
@@ -259,60 +259,18 @@ A repo is compliant if every folder is compliant. A folder is compliant if every
 Certain folders/files are out of scope by design:
 
 - `zzz_*` archives — marked archive, not audited
-- Auto-generated files (`ARCHITECTURE.md`, `AAA.md`, `CLAUDE.md`) — produced by `trug-a-folder render`, compliance is the responsibility of the source TRUG
+- Auto-generated files (such as `ARCHITECTURE.md`) — compliance is the responsibility of the source TRUG
 - Third-party vendored code — requires a waiver (Standard §8)
 
 The boundary must be explicit. Silent exclusion is a hole.
 
 ---
 
-## 5. AAA protocol integration
-
-TRUGS development isn't just a coding style — it's a full lifecycle. The AAA (Author-Audit-Action) protocol is the process wrapper: nine phases, two HITM gates, deterministic.
-
-### 5.1 The nine phases
-
-| # | Phase | Type |
-|---|---|---|
-| 1 | VISION | Human states what they want |
-| 2 | FEASIBILITY | Quick GO/NO-GO |
-| 3 | SPECIFICATIONS | Detailed enough to build |
-| 4 | ARCHITECTURE | System design + ADRs |
-| 5 | VALIDATION | **HITM Gate 1** — human approves the plan |
-| 6 | CODING | Build — this is where TRUGS code gets written |
-| 7 | TESTING | Tests pass |
-| 8 | AUDIT | **HITM Gate 2** — independent audit, cyclic until clean |
-| 9 | DEPLOYMENT | PR → human merges |
-
-Phases 1–5 are the PLANNING cycle. Phases 6–9 are the EXECUTION cycle.
-
-### 5.2 TRUGS work in each phase
-
-- **Phase 1 (VISION)** — prose from the human. No TRUGS formality yet.
-- **Phase 2 (FEASIBILITY)** — no artifact; just a judgment.
-- **Phase 3 (SPECIFICATIONS)** — the macro TRUG appears here. Stages, data types, invariants. Step 1 + Step 2 of §2.
-- **Phase 4 (ARCHITECTURE)** — the detailed TRUG. File layout, node breakdown, cross-module edges. This is the outline before the code.
-- **Phase 5 (VALIDATION, HITM)** — human reads the Spec + Architecture TRUGs. Must be able to understand the system without code. If they can't, the TRUG is incomplete.
-- **Phase 6 (CODING)** — Step 3 of §2. Code written top-down from the TRUG. Every `def` has a TRUG/L comment from day one; no "add docs later."
-- **Phase 7 (TESTING)** — Step 4 of §2. Tests with TRUG/L comments. `trug compliance` passes locally.
-- **Phase 8 (AUDIT, HITM)** — independent reviewer (human or a different agent) runs the compliance check, reads the TRUG, reads the code, checks alignment.
-- **Phase 9 (DEPLOYMENT)** — PR with the changes. The PR body links the TRUG. The human merges.
-
-### 5.3 Why this matters
-
-Without AAA, TRUGS-compliance becomes a post-hoc annotation exercise — dangerous because it creates pressure to rationalize what already exists rather than design what should. With AAA, the TRUG is a **required input** to coding; there's no way to skip the outline.
-
-### 5.4 CHORE exception
-
-Not every change deserves the full AAA. Trivial fixes (typos, formatting, one-line bug fixes) follow the CHORE path: branch → PR → merge, no issue, no formal AAA. The rule of thumb: if it would need an issue, it needs an AAA. If not, it's a chore.
-
----
-
-## 6. Memory system usage
+## 5. Memory system usage
 
 TRUGS code captures intent in the graph. TRUGS **decisions** — the reasoning behind the graph, the tradeoffs considered, the alternatives rejected — get captured separately, in the memory system.
 
-### 6.1 Memory as a TRUG
+### 5.1 Memory as a TRUG
 
 Agent memory is itself a TRUG graph. Each memory is a node; each association is an edge. Types are constrained: `user`, `feedback`, `project`, `reference`.
 
@@ -326,39 +284,39 @@ Capture and recall are driven by the private agent-OS substrate, not by any publ
 `trug` / `trug-a-folder` verb — the memory store is a TRUG graph the substrate maintains
 on the agent's behalf.
 
-### 6.2 What belongs in memory
+### 5.2 What belongs in memory
 
 - **Why decisions were made** (not what was decided — that's in the TRUG and the code)
 - **Context a future agent needs** to judge whether the decision still applies
 - **Feedback the agent received** about how to approach work
 - **Facts about the user** that shape how help is given
 
-### 6.3 What does NOT belong in memory
+### 5.3 What does NOT belong in memory
 
 - Code patterns — readable from the code
 - Architecture — readable from the TRUG
 - Recent git history — readable from `git log`
 - Ephemeral task state — use plan/todo instead
 
-### 6.4 Memory in the compliance picture
+### 5.4 Memory in the compliance picture
 
 Memory is not part of `trug compliance` (yet). But it's part of the broader TRUGS story: the code is legible, and the **decisions that shaped the code** are captured elsewhere in a similarly structured form. Future work may extend compliance to include memory hygiene (e.g., every architectural decision has a memory node).
 
 ---
 
-## 7. CI enforcement
+## 6. CI enforcement
 
 Compliance that isn't gated is aspirational. CI is where the standard stops being a suggestion.
 
-### 7.1 The three gates
+### 6.1 The three gates
 
-The compliance policy defines three gates (adopted in `(private reference removed)`); the current PR workflow and its limits are described below:
+The compliance policy defines three gates; the current PR workflow and its limits are described below:
 
-1. **PR gate** — the shipped workflow runs `trug compliance .` and fails if that command fails. It passes neither `--strict` nor `--baseline-update` and has no separate target-branch baseline comparison or update step. The baseline behavior described in §7.2–§7.4 is a proposed ratchet design, not behavior established by this workflow; a baseline snapshot alone does not implement it.
+1. **PR gate** — the shipped workflow runs `trug compliance .` and fails if that command fails. It passes neither `--strict` nor `--baseline-update` and has no separate target-branch baseline comparison or update step. The baseline behavior described in §6.2–§6.4 is a proposed ratchet design, not behavior established by this workflow; a baseline snapshot alone does not implement it.
 2. **Release gate** — compliance % must equal 100.0 before a version tag is cut or a package is published (PyPI, npm, crates.io, etc.).
 3. **Promotion gate** — a private `Xepayac/*` repo cannot be transferred to `TRUGS-LLC/*` until it meets 100% compliance.
 
-### 7.2 Workflow skeleton
+### 6.2 Workflow skeleton
 
 `.github/workflows/compliance.yml`:
 
@@ -381,7 +339,7 @@ jobs:
 
 On PR, CI runs the check against the PR branch and compares to the baseline on the target branch. On push to `main`, it updates the baseline.
 
-### 7.3 Failure modes
+### 6.3 Failure modes
 
 When the gate fails, CI output tells the PR author exactly what's missing — file, line, rule number (C1–C7). The author fixes the specific finding, re-runs locally, and iterates.
 
@@ -393,7 +351,7 @@ Common failure modes:
 - **TRUG file has a dangling reference.** Either add the missing node or remove the edge.
 - **Baseline decreased.** Means the PR introduced dark code. Either fix it in the PR or roll back.
 
-### 7.4 Baselines and ratchets
+### 6.4 Baselines and ratchets
 
 The compliance baseline is a ratchet. Once set, it only goes up. This is intentional — it prevents the gradual erosion that happens when "we'll fix it later" becomes "we never fix it."
 
@@ -401,7 +359,7 @@ A PR that fixes 10 violations raises the baseline. A PR that introduces 5 new vi
 
 ---
 
-## 8. Patterns & anti-patterns
+## 7. Patterns & anti-patterns
 
 ### Pattern: one TRUG node per public surface
 
@@ -446,37 +404,37 @@ A compliance PR annotates; it doesn't refactor. A refactor PR changes code; its 
 
 ---
 
-## 9. Python conventions
+## 8. Python conventions
 
 This section specifies the Python dialect of TRUGS compliance — the concrete rules that `trug compliance` enforces. It is the Python appendix of `STANDARD_dark_code_compliance.md`; readers seeking the normative text should refer to the Standard directly.
 
-### 9.1 Function-level comment placement
+### 8.1 Function-level comment placement
 
 Immediately above every public `def` or `class`, with nothing but blank lines between the comment block and the declaration. Multiple lines of `#`-prefixed comment; combined text, with `#` and leading whitespace stripped and saved as `comments.trl`, must compile via `trug trl compile comments.trl > comments.json`; `trug trl validate comments.json` checks the compiled JSON graph.
 
-### 9.2 Inline comment placement
+### 8.2 Inline comment placement
 
 On the same line after the code, or on the line immediately above (for long annotations). `# TRUG/L SENTENCE.` form. Trivial lines are exempt.
 
-### 9.3 Test function intent
+### 8.3 Test function intent
 
 Test functions are `def test_*` at module scope or methods of `class Test*`. Every test function's comment block begins with `AGENT SHALL VALIDATE`.
 
-### 9.4 Invariant assertions
+### 8.4 Invariant assertions
 
 Invariants in the TRUG surface as `assert` statements in code at the point the invariant must hold. The assertion message (if provided) should reference the invariant name: `assert len(shoe) == 416, "invariant_card_count"`.
 
-### 9.5 Public vs private
+### 8.5 Public vs private
 
 Public: not prefixed with `_`, not a dunder. Private: prefixed with `_` or dunder. Only public members require TRUG nodes + function-level TRUG/L.
 
-### 9.6 What the CLI actually checks
+### 8.6 What the CLI actually checks
 
 Refer to `STANDARD_dark_code_compliance.md` §3 and §6 for the C1–C7 check specifications. The `--help` output of `trug compliance` is the runtime reference.
 
 ---
 
-## 10. Closing
+## 9. Closing
 
 TRUGS-compliance is not a documentation exercise. It is a development discipline. The graph, the TRUG/L comments, the invariants, the tests, and the CI gates together make code legible — so the human reviewer can understand what an LLM produced without reading every line, and so a future agent modifying the code has formal specifications to satisfy rather than rediscover.
 

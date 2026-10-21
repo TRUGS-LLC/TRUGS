@@ -17,8 +17,8 @@ This is the canonical TRUGS specification. It defines:
 - **Validation** — 16 rules (9 structural, 7 compositional).
 
 <trl>
-INTERFACE trl SHALL DEFINE 233 RECORD word.
-INTERFACE trl SHALL DEFINE 9 RECORD part_of_speech.
+PARTY trugs_llc SHALL DEFINE 233 RECORD word.
+PARTY trugs_llc SHALL DEFINE 9 RECORD part_of_speech.
 </trl>
 
 ## Repository Structure
@@ -42,7 +42,7 @@ pip install trugs-tools    # provides the `trug` binary
 trug --help                # 8 language verbs: validate, trl, get, update, delete, unlink, compliance, audit
 ```
 
-This repo describes data. The companion repo implements tools. See `principle_spec_is_data` in the portfolio EPIC.
+This repo describes data. The companion repo implements tools.
 
 ## Rules for This Repository
 
@@ -72,5 +72,5 @@ FILE readme GOVERNS RECORD patent_boundary.
 
 ## Related Repositories
 
-- [TRUGS-AGENT](https://github.com/TRUGS-LLC/TRUGS-AGENT) — LLM development framework using TRL + AAA + EPIC + Memory
+- [TRUGS-AGENT](https://github.com/TRUGS-LLC/TRUGS-AGENT) — companion resources for working with TRL
 - [TRUGS-TOOLS](https://github.com/TRUGS-LLC/TRUGS-TOOLS) — Installable Python toolchain
