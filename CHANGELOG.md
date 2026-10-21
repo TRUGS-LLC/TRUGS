@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   adjective order as canonical rather than required; `SPEC_vocabulary.md`, `SPEC_examples.md` and the cheat
   sheet follow.
 - `TRUGS_LANGUAGE/README.md` counts the 16 CORE validation rules.
+- Paper: the novelty claim qualified and the five earlier systems cited and distinguished (TRUGS-LLC/TRUGS#81); every TRL listing checked with the released trugs-tools; vocabulary counts generated from the language file.
 
 ## [2.0.0] — 2026-06-12
 
