@@ -11,7 +11,7 @@ Thanks for the PR. Fill in the sections below. Delete any that don't apply.
 
 ## Linked issue
 
-Fixes #<!-- issue number, if applicable. For trivial chore/docs PRs, write "none (chore)". -->
+Issue number: <!-- if applicable; otherwise write "none". -->
 
 ## Test plan
 
@@ -22,15 +22,6 @@ Fixes #<!-- issue number, if applicable. For trivial chore/docs PRs, write "none
 - [ ] `pytest tools/` passes
 - [ ] Added/updated tests with `AGENT SHALL VALIDATE ...` TRUG/L comments
 - [ ] Manual check: <!-- describe -->
-
-## AAA stage
-
-<!-- Delete if this is a pure chore/docs PR. Otherwise check the stage this PR completes. -->
-
-- [ ] CODING (phase 6)
-- [ ] TESTING (phase 7)
-- [ ] AUDIT fixes (phase 8)
-- [ ] Chore (skip AAA)
 
 ## Notes for reviewers
 

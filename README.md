@@ -91,7 +91,7 @@ The graph operations below use the `trug` CLI from the sibling [`trugs-tools`](h
 | `trug delete` | `trug delete <file> <node_id>` | Delete a node and its edges |
 | `trug unlink` | `trug unlink <file> --from X --to Y` | Remove an edge |
 
-See [`SPEC_cli.md`](https://github.com/TRUGS-LLC/TRUGS-TOOLS/blob/main/REFERENCE/SPEC_cli.md) in the trugs-tools repo for the full command surface.
+Run `trug --help` for the command surface; see the [trugs-tools repository](https://github.com/TRUGS-LLC/TRUGS-TOOLS) for the tooling.
 
 **Legacy (trugs 1.2.x only):** the same operations were available as `python tools/validate.py`, `python tools/tget.py`, etc. in the 1.x `tools/` directory; that directory was removed at `trugs` 2.0.0 — use the `trug` CLI from `trugs-tools` instead.
 
@@ -118,17 +118,7 @@ For pushes to `main` and pull requests targeting `main`, CI runs `make check` (s
 
 ## Use It
 
-**[TRUGS-AGENT](https://github.com/TRUGS-LLC/TRUGS-AGENT)** — copy one file into your project and your LLM speaks TRL, follows a 9-phase development protocol, tracks projects as graphs, and maintains persistent memory. Seven standalone components:
-
-| Component | What It Does |
-|-----------|-------------|
-| FOLDER | Machine-readable filesystem index — one JSON graph per folder |
-| AAA | 9-phase development protocol — plan before code, audit before ship |
-| EPIC | Portfolio tracker as a traversable graph |
-| MEMORY | Persistent context across sessions |
-| TRUGGING | Methodology for describing a codebase with TRUGs and TRL |
-| WEB_HUB | Curated web resource graph |
-| NDA | Complete example — all systems applied to a mutual NDA |
+Start with the [language specification](TRUGS_LANGUAGE/) and [example graphs](EXAMPLES/). See [TRUGS-AGENT](https://github.com/TRUGS-LLC/TRUGS-AGENT) for companion resources.
 
 ## Building on TRUGS
 

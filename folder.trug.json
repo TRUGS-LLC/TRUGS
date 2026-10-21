@@ -462,7 +462,7 @@
       "type": "DOCUMENT",
       "properties": {
         "name": "REFERENCE/PAPER_dark_code.md",
-        "purpose": "The WHY paper — Dark Code problem and TRUGS four-corner verification square as the resolution. Moved from TRUGS-AGENT per #1548.",
+        "purpose": "The WHY paper — Dark Code problem and TRUGS four-corner verification square as the resolution. Moved from TRUGS-AGENT.",
         "trl": "PROCESS paper SHALL DEFINE RECORD dark_code THEN SHALL CITE A RECORD solution.",
         "file": "REFERENCE/PAPER_dark_code.md"
       },
@@ -476,7 +476,7 @@
       "type": "DOCUMENT",
       "properties": {
         "name": "REFERENCE/PAPER_how_to_code_with_trugs.md",
-        "purpose": "The HOW paper — practitioner guide: greenfield process, refactoring, multi-file, AAA integration, memory, CI, patterns, Python conventions",
+        "purpose": "The HOW paper — practitioner guide: greenfield process, refactoring, multi-file, memory, CI, patterns, Python conventions",
         "trl": "PROCESS paper SHALL DEFINE RECORD practice THEN CITE A RECORD workflow.",
         "file": "REFERENCE/PAPER_how_to_code_with_trugs.md"
       },
@@ -508,7 +508,7 @@
       "dimension": "research",
       "properties": {
         "name": "STUDIES",
-        "purpose": "Long-form research studies authored against the TRUGS spec — current contents: STUDY_001 (medical evidence synthesis) and STUDY_002 (executable semantic graph genealogy).",
+        "purpose": "Long-form research studies authored against the TRUGS spec — current contents: STUDY_002 (executable semantic graph genealogy).",
         "path": "STUDIES/",
         "file": "STUDIES"
       }
@@ -546,7 +546,7 @@
       "type": "DOCUMENT",
       "properties": {
         "name": "CONTRIBUTING.md",
-        "purpose": "Contribution guide — branch naming, AAA protocol, compliance gates, HITM rule",
+        "purpose": "Contribution guide — branch naming, compliance gates, human review and merging",
         "path": "CONTRIBUTING.md",
         "file": "CONTRIBUTING.md"
       },
@@ -578,7 +578,7 @@
       "dimension": "build",
       "properties": {
         "name": "Makefile",
-        "purpose": "Single-command Layer-1 (industry baseline) gate: `make check` runs gitleaks/format/lint/types/tests — AAA #2136 SP1.",
+        "purpose": "Single-command industry baseline gate: `make check` runs gitleaks/format/lint/types/tests.",
         "path": "Makefile",
         "file": "Makefile"
       }

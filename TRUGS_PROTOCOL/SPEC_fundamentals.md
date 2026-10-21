@@ -1,6 +1,6 @@
 # **TRUGS Fundamentals**
 
-**Version:** 1.0.0 (AAA\_AARDVARK)  
+**Version:** 1.0.0  
  **Purpose:** Core concepts for LLM understanding of TRUGS  
  **Read time:** 8 minutes
 
@@ -851,7 +851,7 @@ You now understand the foundation. The rest builds on what you've learned here.
 
 ---
 
-**End of TRUGS Fundamentals v1.0.0 (AAA\_AARDVARK)**
+**End of TRUGS Fundamentals v1.0.0**
 
 ---
 

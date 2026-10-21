@@ -829,4 +829,4 @@ For JSON Schema validation tools:
 
 ---
 
-**TRUGS Schema v1.0.0 (AAA_AARDVARK)**
+**TRUGS Schema v1.0.0**

@@ -1,8 +1,8 @@
-# TRUGS spec repo — single-command Tier-1 release-polish gate.
-# `make check` is the one command an evaluator runs to read GREEN:
-#   Layer 1 (SP1): secrets / format / lint / types / tests
-#   Layer 4 (SP4): the spec proves itself — shipped TRUGs validate against TRUGS's
-#                  own 16-rule CORE via `trug validate` (ADR-006)
+# TRUGS spec repo — single-command specification checks.
+# `make check` runs the following checks:
+#   Industry baseline: secrets / format / lint / types / tests
+#   Self-description: shipped TRUGs validate against TRUGS's
+#                     own 16-rule CORE via `trug validate`
 #
 #   make check    # run the full gate (each step prints PASS/FAIL)
 #   make dev      # install the dev tooling (ruff, mypy, pytest)
@@ -16,7 +16,7 @@
 .PHONY: check dev gitleaks fmt-check lint types test trugs
 
 check: gitleaks fmt-check lint types test trugs
-	@echo "=== Tier-1 GREEN: all checks passed ==="
+	@echo "=== GREEN: all checks passed ==="
 
 dev:
 	pip install -e '.[dev]'
@@ -40,7 +40,7 @@ types:
 test:
 	@echo "==> pytest"; pytest -q && echo "PASS: tests"
 
-# Layer 4 (ADR-006): the spec proves itself — every TRUG the spec ships validates
+# Self-description: the spec proves itself — every TRUG the spec ships validates
 # against TRUGS's own 16-rule CORE validator. language.trug.json must also be a
 # deterministic rebuild of SPEC_vocabulary.md.
 trugs:

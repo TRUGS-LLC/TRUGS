@@ -15,7 +15,7 @@ This standard operationalizes the four-corner verification square from `PAPER_da
 
 **Covers:** source code, tests, TRUG graph files (`.trug.json`), and prose documents (`.md`).
 
-**Does not cover:** third-party vendored code (call it out with a waiver — see §8), auto-generated files (`ARCHITECTURE.md`, `AAA.md`, `CLAUDE.md` — produced by `trug-a-folder render`), build artifacts.
+**Does not cover:** third-party vendored code (call it out with a waiver — see §8), auto-generated files (such as `ARCHITECTURE.md`), build artifacts.
 
 ## 2. The four-corner square
 
@@ -160,7 +160,7 @@ Every public function / class / method in the implementation must have a corresp
 - `FUNCTION` — a public function
 - `PROCESS` — a long-running or multi-step process (preferred for pipeline stages)
 - `CLASS` — a public class
-- `STAGE` — a pipeline stage (subset of PROCESS with ordered position)
+- `STAGE` — a pipeline stage (subset of PROCESS with ordered position); C2 accepts it only in the code-to-graph direction and excludes it from the graph-to-code direction.
 - `METHOD` — a public method of a class (optional — can roll up to the CLASS node)
 
 ### 4.2 The `trl` property is canonical
@@ -229,7 +229,7 @@ The list below states hard-violation policy. The shipped CI runs the commands in
 
 ## 7. Hard rules
 
-Three hard gates apply to every TRUGS-LLC public repo (adopted in `(private reference removed)`):
+Three hard gates apply to every TRUGS-LLC public repo:
 
 1. **No PR may decrease compliance %.** This is a policy requirement; the shipped workflow runs `trug compliance .` without an explicit target-branch baseline comparison, so it does not establish enforcement of this ratchet.
 2. **No version bump without 100% compliance.** Tag/release workflows must check `compliance_percent == 100.0` before building wheels, publishing to PyPI, etc.
@@ -293,7 +293,7 @@ This standard is a normative document. Changes require:
 
 - A PR to `TRUGS-LLC/TRUGS` against `REFERENCE/STANDARD_dark_code_compliance.md`
 - Discussion in an issue linked from the PR
-- Human approval (HITM)
+- Human approval
 - A version bump of the standard (semantic: major for breaking changes to what counts as compliant; minor for new required checks; patch for clarifications)
 
 When the standard changes, downstream repos may see their compliance % shift without any code change. CI at those repos will correctly flag the new state.
