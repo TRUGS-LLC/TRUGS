@@ -89,7 +89,7 @@ TRUGS draws its \VocabTotal-word vocabulary from computation (\VocabComputationP
 
 The system is language-agnostic by design: legal concepts such as obligation (\textit{shall}/\begin{CJK}{UTF8}{gbsn}应当\end{CJK}/\textit{deber\'a}) and computational operations such as \textit{filter} and \textit{validate} exist independently across major human languages. Loading a different vocabulary definition---itself a TRUG---switches the surface language while preserving the grammar and graph structure.
 
-We release the complete specification, the language's self-describing definition (itself a TRUG), and worked examples under the Apache 2.0 license, together with a published reference toolchain: \texttt{trugs-tools} (the \texttt{trug} CLI---validation, TRL compilation, corpus audit) and \texttt{trugs-folder} (\texttt{trug-a-folder}, filesystem$\leftrightarrow$graph cartography).
+We release the complete specification, the language's self-describing definition (itself a TRUG), and worked examples under the Apache 2.0 license, together with a published reference toolchain, \texttt{trugs-tools} (the \texttt{trug} CLI---validation, TRL compilation, corpus audit).
 \end{abstract}
 
 %=============================================================================
@@ -123,7 +123,7 @@ TRUGS applies the same principle to human-LLM communication. We curated \VocabTo
 
     \item The \textbf{opening TRUG} pattern, where the language definition itself is a TRUG---enabling domain extensibility and self-description.
 
-    \item A published \textbf{reference toolchain}: \texttt{trugs-tools} (the \texttt{trug} CLI---validator, TRL compiler, corpus audit) and \texttt{trugs-folder} (\texttt{trug-a-folder}, filesystem cartography), both installable from PyPI.
+    \item A published \textbf{reference toolchain}: \texttt{trugs-tools} (the \texttt{trug} CLI---validator, TRL compiler, corpus audit), installable from PyPI.
 
     \item The complete specification, the self-describing language definition, and examples released under Apache 2.0 at \url{https://github.com/TRUGS-LLC/TRUGS}.
 \end{enumerate}
@@ -881,7 +881,7 @@ FUNCTION authorize REQUIRE FUNCTION authenticate.
 PARTY security-team SHALL ADMINISTER MODULE api.
 \end{lstlisting}
 
-The graph encodes what exists (modules, functions), how they depend on each other (\texttt{REQUIRE}), who is responsible (\texttt{ADMINISTER}), and what the structure contains (\texttt{CONTAINS}). An LLM navigating a new codebase reads this graph in milliseconds---versus minutes scanning documentation that may be out of date. This pattern is implemented by the published \texttt{trugs-folder} package: \texttt{trug-a-folder} renders a repository's filesystem into a \texttt{folder.trug.json} map, checks it against the tree, and keeps the two synchronized.
+The graph encodes what exists (modules, functions), how they depend on each other (\texttt{REQUIRE}), who is responsible (\texttt{ADMINISTER}), and what the structure contains (\texttt{CONTAINS}). An LLM navigating a new codebase reads this graph in milliseconds---versus minutes scanning documentation that may be out of date. This repository carries such a map, \texttt{folder.trug.json}, validated with its other shipped graphs by its CI.
 
 %=============================================================================
 \section{Discussion}
@@ -925,7 +925,7 @@ We have presented TRUGS, a formalized language in which constrained human-langua
 
 Several directions remain open. A mechanized proof of the round-trip property would strengthen the formal foundation. User studies measuring comprehension, writing speed, and error rates against natural language and JSON would quantify the practical benefit. Extending the vocabulary to additional domains (medicine, finance, manufacturing) through the opening TRUG mechanism would test the extensibility claim at scale.
 
-TRUGS does not aim to replace natural language for human communication or structured formats for machine storage. Rather, it addresses the gap between them: providing a representation precise enough for machine validation, readable enough for human authoring, and formal enough to compile. The specification and all examples are released under the Apache 2.0 license, and the reference toolchain is published as installable packages (\texttt{trugs-tools}, \texttt{trugs-folder}), to facilitate independent evaluation and adoption.
+TRUGS does not aim to replace natural language for human communication or structured formats for machine storage. Rather, it addresses the gap between them: providing a representation precise enough for machine validation, readable enough for human authoring, and formal enough to compile. The specification and all examples are released under the Apache 2.0 license, and the reference toolchain is published as an installable package (\texttt{trugs-tools}), to facilitate independent evaluation and adoption.
 
 \subsection*{A Note on the Name}
 

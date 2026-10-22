@@ -1,7 +1,5 @@
 # TRUGS — Traceable Recursive Universal Graph Specification
 
-[![PyPI](https://img.shields.io/pypi/v/trugs.svg)](https://pypi.org/project/trugs/)
-[![Python](https://img.shields.io/pypi/pyversions/trugs.svg)](https://pypi.org/project/trugs/)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![CI](https://github.com/TRUGS-LLC/TRUGS/actions/workflows/compliance.yml/badge.svg)](https://github.com/TRUGS-LLC/TRUGS/actions/workflows/compliance.yml)
 [![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.19379454-blue.svg)](https://doi.org/10.5281/zenodo.19379454)
@@ -27,9 +25,27 @@ flowchart LR
 
 The sentence IS the program. The graph IS the AST. Every valid TRUG/L sentence compiles to a graph losslessly, and every graph decompiles back to a sentence.
 
+## Four types of TRUGS
+
+### Describe
+
+Describe builds a graph from sources so that their entities and relationships can be queried. [TRUGS-WEB](https://github.com/TRUGS-LLC/TRUGS-WEB), available as [trugs-web 2.0.0](https://pypi.org/project/trugs-web/), builds a TRUGS graph from web sources and queries it; local-folder input and the viewer TRUGS-VIEWER are coming.
+
+### Say
+
+Say expresses a graph as a sentence in TRUG/L, the language of this specification. [trugs-tools 2.4.0](https://pypi.org/project/trugs-tools/) compiles and decompiles the [specification's examples](TRUGS_LANGUAGE/SPEC_examples.md) with `trug trl`; TRUGS-TRL and TRUGS-LAW are coming.
+
+### Compute
+
+Compute represents calculations as graphs. [TRUGS-ACCOUNTING-CALCULATOR](https://github.com/TRUGS-LLC/TRUGS-ACCOUNTING-CALCULATOR) is a public accounting calculator repository in which every calculation is a TRUGS graph.
+
+### Govern
+
+Govern uses a graph to govern how work runs. The runner is coming.
+
 ## Install
 
-**The specification is this repository.** Read the Markdown specs and `.trug.json` files here directly — there is nothing to install to get the spec. (The `trugs` name on PyPI is a reserved, intentionally empty placeholder as of 2.0.0: it ships no CLI and no importable content. Do not depend on it.)
+**The specification is this repository.** Read the Markdown specs and `.trug.json` files here directly — there is nothing to install to get the spec.
 
 The 2.0.0 spec revision adds 21 SI level prefixes (YOTTA…YOCTO) as a new part of speech for hierarchy transition markers — see [SPEC_vocabulary.md §9](TRUGS_LANGUAGE/SPEC_vocabulary.md#9-level-prefixes--hierarchy-transition-markers-21).
 
@@ -40,9 +56,7 @@ pip install trugs-tools    # provides the `trug` binary — 8 language verbs
 trug --help
 ```
 
-See [TRUGS-LLC/TRUGS-TOOLS](https://github.com/TRUGS-LLC/TRUGS-TOOLS) for the `trug` CLI — validation, TRL compile/decompile, graph CRUD, and Dark Code compliance. Filesystem↔graph cartography (`check`, `ls`, `sync`, `render`) ships as the separate `trugs-folder` package's `trug-a-folder` binary.
-
-**Migrating from `trugs` 1.x?** The pre-2.0 package shipped a `tg` binary (`tg validate`, `tg get`, etc.). As of `trugs-tools` 2.0.0 the console script is renamed **`tg` → `trug`**, and the language verbs are `trug validate`, `trug get`, `trug update`, `trug delete`, `trug unlink`, `trug trl`, `trug compliance`, `trug audit`. Filesystem cartography (`check`, `ls`, `sync`, `render`) moved out to the separate `trugs-folder` package — run it as `trug-a-folder <verb>`.
+See [TRUGS-LLC/TRUGS-TOOLS](https://github.com/TRUGS-LLC/TRUGS-TOOLS) for the `trug` CLI — validation, TRL compile/decompile, graph CRUD, and Dark Code compliance.
 
 ## TRUGS Language
 
@@ -80,9 +94,9 @@ See [TRUGS_LANGUAGE/](TRUGS_LANGUAGE/) for the complete specification.
 | [SPEC_examples.md](TRUGS_LANGUAGE/SPEC_examples.md) | 30 parsed examples across 13 patterns |
 | [language.trug.json](TRUGS_LANGUAGE/language.trug.json) | The opening TRUG — the language defining itself |
 
-## Tools — via `trugs-tools` + `trugs-folder`
+## Tools — via `trugs-tools`
 
-The graph operations below use the `trug` CLI from the sibling [`trugs-tools`](https://github.com/TRUGS-LLC/TRUGS-TOOLS) package (`pip install trugs-tools`) — 8 language verbs. Repo cartography (`check`, `ls`, `sync`, `render`) is the `trug-a-folder` binary from the separate `trugs-folder` package (`pip install trugs-folder`).
+The graph operations below use the `trug` CLI from the sibling [`trugs-tools`](https://github.com/TRUGS-LLC/TRUGS-TOOLS) package (`pip install trugs-tools`) — 8 language verbs.
 
 | Verb | Usage | Description |
 |------|-------|-------------|
@@ -95,8 +109,6 @@ The graph operations below use the `trug` CLI from the sibling [`trugs-tools`](h
 
 Run `trug --help` for the command surface; see the [trugs-tools repository](https://github.com/TRUGS-LLC/TRUGS-TOOLS) for the tooling.
 
-**Legacy (trugs 1.2.x only):** the same operations were available as `python tools/validate.py`, `python tools/tget.py`, etc. in the 1.x `tools/` directory; that directory was removed at `trugs` 2.0.0 — use the `trug` CLI from `trugs-tools` instead.
-
 ## Examples
 
 The [EXAMPLES/](EXAMPLES/) directory contains sample TRUGs for 7 domains at varying complexity levels. All 7 examples pass validation.
@@ -106,21 +118,21 @@ The [EXAMPLES/](EXAMPLES/) directory contains sample TRUGs for 7 domains at vary
 This repository describes itself as a TRUG. [`folder.trug.json`](folder.trug.json) at the repo root indexes selected folders, documents and tool files, with typed edges to the specs and standards they implement or describe. It omits `.github`; the builder's file-level node contains individual nodes for its public functions.
 
 ```bash
-# What's in this repo?
-trug-a-folder ls .
+# Validate the repository's graph
+trug validate folder.trug.json
 
 # What does the language-graph builder implement (and what tests it)?
 trug get folder.trug.json tools_build_language_trug --edges
 
-# Does the graph match the filesystem?
-trug-a-folder check .
+# Check Dark Code compliance
+trug compliance .
 ```
 
-For pushes to `main` and pull requests targeting `main`, CI runs `make check` (secrets, formatting, lint, types, tests, shipped-graph validation via `trug validate`, and the deterministic vocabulary rebuild) plus `trug compliance .` and a separate builder-test job. CI does not run `trug-a-folder check` or compare README prose with the filesystem; run the folder check above locally.
+For pushes to `main` and pull requests targeting `main`, CI runs `make check` (secrets, formatting, lint, types, tests, shipped-graph validation via `trug validate`, the deterministic vocabulary rebuild, and `trug audit markdown`) in [.github/workflows/check.yml](.github/workflows/check.yml); [.github/workflows/compliance.yml](.github/workflows/compliance.yml) runs `trug compliance .` and `pytest tools/test_build_language_trug.py -v` in separate jobs.
 
 ## Use It
 
-Start with the [language specification](TRUGS_LANGUAGE/) and [example graphs](EXAMPLES/). See [TRUGS-AGENT](https://github.com/TRUGS-LLC/TRUGS-AGENT) for companion resources.
+Start with the [language specification](TRUGS_LANGUAGE/) and [example graphs](EXAMPLES/). [TRUGS-AGENT](https://github.com/TRUGS-LLC/TRUGS-AGENT) is under reconstruction as the onboarding kit for AI agents.
 
 ## Building on TRUGS
 

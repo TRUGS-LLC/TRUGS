@@ -28,6 +28,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   sheet follow.
 - `TRUGS_LANGUAGE/README.md` counts the 16 CORE validation rules.
 - Paper: the novelty claim qualified and the five earlier systems cited and distinguished (TRUGS-LLC/TRUGS#81); every TRL listing checked with the released trugs-tools; vocabulary counts generated from the language file.
+- The README is organised around the four types of TRUGS (describe, say, compute, govern), naming what is
+  released for each and what is coming.
+- The folder tool withdrawn from the toolchain is no longer mentioned: the getting-started guide's folder
+  section is removed, and the README, the contributing guide, the templates, the standard, the how-to paper
+  and the paper name `trugs-tools` alone.
 
 ## [2.0.0] — 2026-06-12
 

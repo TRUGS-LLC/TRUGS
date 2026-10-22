@@ -18,7 +18,6 @@ Issue number: <!-- if applicable; otherwise write "none". -->
 <!-- What did you do to convince yourself this works? -->
 
 - [ ] `trug compliance .` passes, % did not decrease
-- [ ] `trug-a-folder check .` reports 0 errors
 - [ ] `pytest tools/` passes
 - [ ] Added/updated tests with `AGENT SHALL VALIDATE ...` TRUG/L comments
 - [ ] Manual check: <!-- describe -->
