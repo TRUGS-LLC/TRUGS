@@ -281,7 +281,7 @@ any card shuffle"*) and a rationale (*"uniform random is a correctness requireme
 an optimization"*).
 
 Capture and recall are driven by the private agent-OS substrate, not by any public
-`trug` / `trug-a-folder` verb — the memory store is a TRUG graph the substrate maintains
+`trug` verb — the memory store is a TRUG graph the substrate maintains
 on the agent's behalf.
 
 ### 5.2 What belongs in memory

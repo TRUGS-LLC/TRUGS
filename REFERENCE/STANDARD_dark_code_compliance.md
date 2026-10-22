@@ -155,7 +155,7 @@ Compliance requires all three. An invariant in the TRUG with no assertion or no 
 
 ### 4.1 Node for every public code artifact
 
-Every public function / class / method in the implementation must have a corresponding node in the folder's `.trug.json`. In this specification repository's `project_v1` folder graph, repo-side build functions use individual `SPECIFICATION` nodes: `parse_spec`, `build_trug` and `main` are indexed beneath the file-level builder node. The cartography checker does not accept the code-artifact types below in a `project_v1` folder graph. In a code implementation graph, node type is one of:
+Every public function / class / method in the implementation must have a corresponding node in the folder's `.trug.json`. In this specification repository's `project_v1` folder graph, repo-side build functions use individual `SPECIFICATION` nodes: `parse_spec`, `build_trug` and `main` are indexed beneath the file-level builder node. In a code implementation graph, node type is one of:
 
 - `FUNCTION` — a public function
 - `PROCESS` — a long-running or multi-step process (preferred for pipeline stages)
@@ -190,7 +190,7 @@ Every `.trug.json` file in the repo (excluding `zzz_*` archives) must:
 - Match the filesystem for repository filesystem-index references: nodes with `properties.path` or `properties.file` must reference existing files (or be marked `stale: true` with a reason). External research-source references need not resolve to files in this repository.
 - Use descriptive relation labels for compliance graphs, including those in §4.3; a graph label does not add a TRUG/L preposition
 
-General CORE validation uses `trug validate`. Folder governance is a separate contract: run `trug-a-folder check .` for the root `folder.trug.json`, not for arbitrary graph documents. These commands do not establish enforcement of every convention listed above.
+General CORE validation uses `trug validate`; `make trugs` validates the root `folder.trug.json` with the other shipped graphs. These commands do not establish enforcement of every convention listed above.
 
 ## 6. CI gate
 
@@ -221,7 +221,7 @@ Under the proposed ratchet, PRs that raise compliance would update the baseline 
 
 ### 6.3 Hard violations
 
-The list below states hard-violation policy. The shipped CI runs the commands in §6.1 and `make check`; it contains no explicit `trug-a-folder check` step and does not establish enforcement of every policy item:
+The list below states hard-violation policy. The shipped CI runs the commands in §6.1 and `make check`; it does not establish enforcement of every policy item:
 
 - A TRUG node with an invalid `trl` property that does not parse
 - A shipped graph that fails `trug validate` (enforced by `make trugs`, within `make check`)

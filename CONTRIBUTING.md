@@ -31,12 +31,11 @@ If you're unsure, open an issue and ask. That is always cheaper than writing cod
 3. **Run compliance locally.**
    ```bash
    pip install -e '.[dev]'                 # this repo + dev tooling (ruff, mypy, pytest)
-   pip install trugs-tools trugs-folder    # the `trug` and `trug-a-folder` CLIs — the `trugs` spec pkg ships no CLI
+   pip install trugs-tools                 # the `trug` CLI — the `trugs` spec pkg ships no CLI
    trug compliance .
-   trug-a-folder check .
    pytest tools/
    ```
-   All three must pass.
+   Both must pass.
 4. **Commit.** Use Conventional Commits format:
    ```
    <type>(<scope>): <imperative summary>
@@ -53,7 +52,7 @@ For pushes to `main` and pull requests targeting `main`, CI runs:
 - **Compliance** — runs `trug compliance .`.
 - **Tests** — runs the vocabulary-builder test module separately.
 
-CI does not run `trug-a-folder check` or compare prose against filesystem contents. Run the folder check locally as described above. The workflow output names each failing check.
+CI does not compare prose against filesystem contents. The workflow output names each failing check.
 
 ## Human-in-the-middle
 

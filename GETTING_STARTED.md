@@ -12,13 +12,10 @@ five minutes. No prior TRUGS knowledge is assumed.
 ## 1. Install
 
 ```bash
-pip install trugs-tools trugs-folder
+pip install trugs-tools
 ```
 
-This gives you two commands:
-
-- `trug` — the language CLI: validate TRUG graphs, compile and decompile TRL.
-- `trug-a-folder` — the cartography tool: keep a directory and its graph in sync.
+This gives you one command, `trug` — the language CLI: validate TRUG graphs, compile and decompile TRL.
 
 ## 2. Your first sentence
 
@@ -94,30 +91,7 @@ INVALID  first.trug.json
 
 Validation is how TRUGS keeps graphs trustworthy enough to act on.
 
-## 4. Map a real folder
-
-The cartography tool applies the same idea to a directory tree: the folder
-*is* a graph. Point it at any project:
-
-```bash
-mkdir -p myproject/docs
-echo '# My Project'   > myproject/README.md
-echo 'notes'          > myproject/docs/notes.md
-echo 'print("hi")'    > myproject/app.py
-
-trug-a-folder init myproject --scan -d "My first mapped folder"
-trug-a-folder check myproject
-trug-a-folder render architecture myproject
-```
-
-`init --scan` writes `myproject/folder.trug.json` — one node per file, typed
-by the folder governance vocabulary (code is `COMPONENT`, prose is
-`DOCUMENT`). `check` validates the graph against that vocabulary and the
-filesystem. `render architecture` turns the graph into a human-readable
-`ARCHITECTURE.md`. When files change, `trug-a-folder sync` reconciles the
-graph instead of you editing JSON by hand.
-
-## 5. Where to go next
+## 4. Where to go next
 
 - **The cheatsheet:** [TRUGS_LANGUAGE/CHEATSHEET.md](TRUGS_LANGUAGE/CHEATSHEET.md) — the whole language on one page.
 - **The vocabulary:** [TRUGS_LANGUAGE/SPEC_vocabulary.md](TRUGS_LANGUAGE/SPEC_vocabulary.md) — all 233 executable words across 9 parts of speech.
