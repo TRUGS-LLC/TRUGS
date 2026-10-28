@@ -22,9 +22,9 @@
       "type": "FOLDER",
       "properties": {
         "name": "tools",
-        "purpose": "Describe sixteen public functions and two dataclasses in the paper tools and their test fixtures.",
+        "purpose": "Describe public declarations in the paper and compatibility tools and their tests.",
         "file": "tools",
-        "declaration_count": 18
+        "declaration_count": 65
       },
       "parent_id": null,
       "contains": [
@@ -45,7 +45,54 @@
         "tools_paper_vocab_counts_render_macros",
         "tools_paper_vocab_counts_main",
         "tools_test_check_paper_trl_fake_trug",
-        "tools_test_paper_vocab_counts_fixture_language"
+        "tools_test_paper_vocab_counts_fixture_language",
+        "tools_check_compatibility_inputerror_class",
+        "tools_check_compatibility_row_class",
+        "tools_check_compatibility_table_class",
+        "tools_check_compatibility_version",
+        "tools_check_compatibility_agrees",
+        "tools_check_compatibility_clause_set",
+        "tools_check_compatibility_admits",
+        "tools_check_compatibility_requirement",
+        "tools_check_compatibility_read_table",
+        "tools_check_compatibility_text_class",
+        "tools_check_compatibility_markdown",
+        "tools_check_compatibility_page_class",
+        "tools_check_compatibility_names",
+        "tools_check_compatibility_address",
+        "tools_check_compatibility_clauses",
+        "tools_check_compatibility_inspect_text",
+        "tools_check_compatibility_files",
+        "tools_check_compatibility_package_data",
+        "tools_check_compatibility_metadata_findings",
+        "tools_check_compatibility_metadata_line",
+        "tools_check_compatibility_linked_page",
+        "tools_check_compatibility_check",
+        "tools_check_compatibility_main",
+        "tools_test_check_compatibility_block_sockets",
+        "tools_test_check_compatibility_test_text_rules",
+        "tools_test_check_compatibility_metadata",
+        "tools_test_check_compatibility_test_metadata_rules",
+        "tools_test_check_compatibility_write_metadata",
+        "tools_test_check_compatibility_tree_class",
+        "tools_test_check_compatibility_tree",
+        "tools_test_check_compatibility_test_complete_and_unpackaged_inputs",
+        "tools_test_check_compatibility_test_incomplete_input",
+        "tools_test_check_compatibility_test_every_surface_is_read",
+        "tools_test_check_compatibility_test_excluded_directories",
+        "tools_test_check_compatibility_test_clause_order",
+        "tools_test_check_compatibility_test_exact_metadata_precedes_range_exemption",
+        "tools_test_check_compatibility_test_page_links",
+        "tools_test_check_compatibility_test_html",
+        "tools_test_check_compatibility_test_clause_boundaries",
+        "tools_test_check_compatibility_test_wrapped_clause_and_source_line",
+        "tools_test_check_compatibility_test_no_network_imports",
+        "tools_test_check_compatibility_test_text_fixture_exit",
+        "tools_test_check_compatibility_test_metadata_fixture_exit",
+        "tools_test_check_compatibility_test_phrase_whitespace_and_locations",
+        "tools_test_check_compatibility_test_reverse_spec_phrase_whitespace",
+        "tools_test_check_compatibility_test_phrase_respects_clause_boundaries",
+        "tools_test_check_compatibility_test_wrapped_spec_html_block_boundary_and_history"
       ],
       "metric_level": "KILO_FOLDER",
       "dimension": "folder_structure"
@@ -319,7 +366,686 @@
       "contains": [],
       "metric_level": "BASE_FUNCTION",
       "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_check_compatibility_inputerror_class",
+      "type": "CLASS",
+      "properties": {
+        "name": "InputError",
+        "purpose": "Compare local compatibility inputs.",
+        "file": "tools/check_compatibility.py",
+        "class": "InputError"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_CLASS",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_check_compatibility_row_class",
+      "type": "CLASS",
+      "properties": {
+        "name": "Row",
+        "purpose": "Compare local compatibility inputs.",
+        "file": "tools/check_compatibility.py",
+        "class": "Row"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_CLASS",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_check_compatibility_table_class",
+      "type": "CLASS",
+      "properties": {
+        "name": "Table",
+        "purpose": "Compare local compatibility inputs.",
+        "file": "tools/check_compatibility.py",
+        "class": "Table"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_CLASS",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_check_compatibility_version",
+      "type": "FUNCTION",
+      "properties": {
+        "name": "version",
+        "purpose": "Compare local compatibility inputs.",
+        "file": "tools/check_compatibility.py",
+        "function": "version"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_FUNCTION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_check_compatibility_agrees",
+      "type": "FUNCTION",
+      "properties": {
+        "name": "agrees",
+        "purpose": "Compare local compatibility inputs.",
+        "file": "tools/check_compatibility.py",
+        "function": "agrees"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_FUNCTION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_check_compatibility_clause_set",
+      "type": "FUNCTION",
+      "properties": {
+        "name": "clause_set",
+        "purpose": "Compare local compatibility inputs.",
+        "file": "tools/check_compatibility.py",
+        "function": "clause_set"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_FUNCTION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_check_compatibility_admits",
+      "type": "FUNCTION",
+      "properties": {
+        "name": "admits",
+        "purpose": "Compare local compatibility inputs.",
+        "file": "tools/check_compatibility.py",
+        "function": "admits"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_FUNCTION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_check_compatibility_requirement",
+      "type": "FUNCTION",
+      "properties": {
+        "name": "requirement",
+        "purpose": "Compare local compatibility inputs.",
+        "file": "tools/check_compatibility.py",
+        "function": "requirement"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_FUNCTION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_check_compatibility_read_table",
+      "type": "FUNCTION",
+      "properties": {
+        "name": "read_table",
+        "purpose": "Compare local compatibility inputs.",
+        "file": "tools/check_compatibility.py",
+        "function": "read_table"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_FUNCTION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_check_compatibility_text_class",
+      "type": "CLASS",
+      "properties": {
+        "name": "Text",
+        "purpose": "Compare local compatibility inputs.",
+        "file": "tools/check_compatibility.py",
+        "class": "Text"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_CLASS",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_check_compatibility_markdown",
+      "type": "FUNCTION",
+      "properties": {
+        "name": "markdown",
+        "purpose": "Compare local compatibility inputs.",
+        "file": "tools/check_compatibility.py",
+        "function": "markdown"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_FUNCTION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_check_compatibility_page_class",
+      "type": "CLASS",
+      "properties": {
+        "name": "Page",
+        "purpose": "Compare local compatibility inputs.",
+        "file": "tools/check_compatibility.py",
+        "class": "Page"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_CLASS",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_check_compatibility_names",
+      "type": "FUNCTION",
+      "properties": {
+        "name": "names",
+        "purpose": "Compare local compatibility inputs.",
+        "file": "tools/check_compatibility.py",
+        "function": "names"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_FUNCTION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_check_compatibility_address",
+      "type": "FUNCTION",
+      "properties": {
+        "name": "address",
+        "purpose": "Compare local compatibility inputs.",
+        "file": "tools/check_compatibility.py",
+        "function": "address"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_FUNCTION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_check_compatibility_clauses",
+      "type": "FUNCTION",
+      "properties": {
+        "name": "clauses",
+        "purpose": "Compare local compatibility inputs.",
+        "file": "tools/check_compatibility.py",
+        "function": "clauses"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_FUNCTION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_check_compatibility_inspect_text",
+      "type": "FUNCTION",
+      "properties": {
+        "name": "inspect_text",
+        "purpose": "Compare local compatibility inputs.",
+        "file": "tools/check_compatibility.py",
+        "function": "inspect_text"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_FUNCTION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_check_compatibility_files",
+      "type": "FUNCTION",
+      "properties": {
+        "name": "files",
+        "purpose": "Compare local compatibility inputs.",
+        "file": "tools/check_compatibility.py",
+        "function": "files"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_FUNCTION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_check_compatibility_package_data",
+      "type": "FUNCTION",
+      "properties": {
+        "name": "package_data",
+        "purpose": "Compare local compatibility inputs.",
+        "file": "tools/check_compatibility.py",
+        "function": "package_data"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_FUNCTION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_check_compatibility_metadata_findings",
+      "type": "FUNCTION",
+      "properties": {
+        "name": "metadata_findings",
+        "purpose": "Compare local compatibility inputs.",
+        "file": "tools/check_compatibility.py",
+        "function": "metadata_findings"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_FUNCTION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_check_compatibility_metadata_line",
+      "type": "FUNCTION",
+      "properties": {
+        "name": "metadata_line",
+        "purpose": "Compare local compatibility inputs.",
+        "file": "tools/check_compatibility.py",
+        "function": "metadata_line"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_FUNCTION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_check_compatibility_linked_page",
+      "type": "FUNCTION",
+      "properties": {
+        "name": "linked_page",
+        "purpose": "Compare local compatibility inputs.",
+        "file": "tools/check_compatibility.py",
+        "function": "linked_page"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_FUNCTION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_check_compatibility_check",
+      "type": "FUNCTION",
+      "properties": {
+        "name": "check",
+        "purpose": "Compare local compatibility inputs.",
+        "file": "tools/check_compatibility.py",
+        "function": "check"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_FUNCTION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_check_compatibility_main",
+      "type": "FUNCTION",
+      "properties": {
+        "name": "main",
+        "purpose": "Compare local compatibility inputs.",
+        "file": "tools/check_compatibility.py",
+        "function": "main"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_FUNCTION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_test_check_compatibility_block_sockets",
+      "type": "FUNCTION",
+      "properties": {
+        "name": "block_sockets",
+        "purpose": "Check compatibility rules and input coverage.",
+        "file": "tools/test_check_compatibility.py",
+        "function": "block_sockets"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_FUNCTION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_test_check_compatibility_test_text_rules",
+      "type": "FUNCTION",
+      "properties": {
+        "name": "test_text_rules",
+        "purpose": "Check compatibility rules and input coverage.",
+        "file": "tools/test_check_compatibility.py",
+        "function": "test_text_rules"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_FUNCTION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_test_check_compatibility_metadata",
+      "type": "FUNCTION",
+      "properties": {
+        "name": "metadata",
+        "purpose": "Check compatibility rules and input coverage.",
+        "file": "tools/test_check_compatibility.py",
+        "function": "metadata"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_FUNCTION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_test_check_compatibility_test_metadata_rules",
+      "type": "FUNCTION",
+      "properties": {
+        "name": "test_metadata_rules",
+        "purpose": "Check compatibility rules and input coverage.",
+        "file": "tools/test_check_compatibility.py",
+        "function": "test_metadata_rules"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_FUNCTION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_test_check_compatibility_write_metadata",
+      "type": "FUNCTION",
+      "properties": {
+        "name": "write_metadata",
+        "purpose": "Check compatibility rules and input coverage.",
+        "file": "tools/test_check_compatibility.py",
+        "function": "write_metadata"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_FUNCTION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_test_check_compatibility_tree_class",
+      "type": "CLASS",
+      "properties": {
+        "name": "Tree",
+        "purpose": "Check compatibility rules and input coverage.",
+        "file": "tools/test_check_compatibility.py",
+        "class": "Tree"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_CLASS",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_test_check_compatibility_tree",
+      "type": "FUNCTION",
+      "properties": {
+        "name": "tree",
+        "purpose": "Check compatibility rules and input coverage.",
+        "file": "tools/test_check_compatibility.py",
+        "function": "tree"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_FUNCTION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_test_check_compatibility_test_complete_and_unpackaged_inputs",
+      "type": "FUNCTION",
+      "properties": {
+        "name": "test_complete_and_unpackaged_inputs",
+        "purpose": "Check compatibility rules and input coverage.",
+        "file": "tools/test_check_compatibility.py",
+        "function": "test_complete_and_unpackaged_inputs"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_FUNCTION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_test_check_compatibility_test_incomplete_input",
+      "type": "FUNCTION",
+      "properties": {
+        "name": "test_incomplete_input",
+        "purpose": "Check compatibility rules and input coverage.",
+        "file": "tools/test_check_compatibility.py",
+        "function": "test_incomplete_input"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_FUNCTION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_test_check_compatibility_test_every_surface_is_read",
+      "type": "FUNCTION",
+      "properties": {
+        "name": "test_every_surface_is_read",
+        "purpose": "Check compatibility rules and input coverage.",
+        "file": "tools/test_check_compatibility.py",
+        "function": "test_every_surface_is_read"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_FUNCTION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_test_check_compatibility_test_excluded_directories",
+      "type": "FUNCTION",
+      "properties": {
+        "name": "test_excluded_directories",
+        "purpose": "Check compatibility rules and input coverage.",
+        "file": "tools/test_check_compatibility.py",
+        "function": "test_excluded_directories"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_FUNCTION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_test_check_compatibility_test_clause_order",
+      "type": "FUNCTION",
+      "properties": {
+        "name": "test_clause_order",
+        "purpose": "Check compatibility rules and input coverage.",
+        "file": "tools/test_check_compatibility.py",
+        "function": "test_clause_order"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_FUNCTION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_test_check_compatibility_test_exact_metadata_precedes_range_exemption",
+      "type": "FUNCTION",
+      "properties": {
+        "name": "test_exact_metadata_precedes_range_exemption",
+        "purpose": "Check compatibility rules and input coverage.",
+        "file": "tools/test_check_compatibility.py",
+        "function": "test_exact_metadata_precedes_range_exemption"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_FUNCTION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_test_check_compatibility_test_page_links",
+      "type": "FUNCTION",
+      "properties": {
+        "name": "test_page_links",
+        "purpose": "Check compatibility rules and input coverage.",
+        "file": "tools/test_check_compatibility.py",
+        "function": "test_page_links"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_FUNCTION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_test_check_compatibility_test_html",
+      "type": "FUNCTION",
+      "properties": {
+        "name": "test_html",
+        "purpose": "Check compatibility rules and input coverage.",
+        "file": "tools/test_check_compatibility.py",
+        "function": "test_html"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_FUNCTION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_test_check_compatibility_test_clause_boundaries",
+      "type": "FUNCTION",
+      "properties": {
+        "name": "test_clause_boundaries",
+        "purpose": "Check compatibility rules and input coverage.",
+        "file": "tools/test_check_compatibility.py",
+        "function": "test_clause_boundaries"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_FUNCTION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_test_check_compatibility_test_wrapped_clause_and_source_line",
+      "type": "FUNCTION",
+      "properties": {
+        "name": "test_wrapped_clause_and_source_line",
+        "purpose": "Check compatibility rules and input coverage.",
+        "file": "tools/test_check_compatibility.py",
+        "function": "test_wrapped_clause_and_source_line"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_FUNCTION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_test_check_compatibility_test_no_network_imports",
+      "type": "FUNCTION",
+      "properties": {
+        "name": "test_no_network_imports",
+        "purpose": "Check compatibility rules and input coverage.",
+        "file": "tools/test_check_compatibility.py",
+        "function": "test_no_network_imports"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_FUNCTION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_test_check_compatibility_test_text_fixture_exit",
+      "type": "FUNCTION",
+      "properties": {
+        "name": "test_text_fixture_exit",
+        "purpose": "Check compatibility rules and input coverage.",
+        "file": "tools/test_check_compatibility.py",
+        "function": "test_text_fixture_exit"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_FUNCTION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_test_check_compatibility_test_metadata_fixture_exit",
+      "type": "FUNCTION",
+      "properties": {
+        "name": "test_metadata_fixture_exit",
+        "purpose": "Check compatibility rules and input coverage.",
+        "file": "tools/test_check_compatibility.py",
+        "function": "test_metadata_fixture_exit"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_FUNCTION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_test_check_compatibility_test_phrase_whitespace_and_locations",
+      "type": "FUNCTION",
+      "properties": {
+        "name": "test_phrase_whitespace_and_locations",
+        "purpose": "Check compatibility rules and input coverage.",
+        "file": "tools/test_check_compatibility.py",
+        "function": "test_phrase_whitespace_and_locations"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_FUNCTION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_test_check_compatibility_test_reverse_spec_phrase_whitespace",
+      "type": "FUNCTION",
+      "properties": {
+        "name": "test_reverse_spec_phrase_whitespace",
+        "purpose": "Check compatibility rules and input coverage.",
+        "file": "tools/test_check_compatibility.py",
+        "function": "test_reverse_spec_phrase_whitespace"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_FUNCTION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_test_check_compatibility_test_phrase_respects_clause_boundaries",
+      "type": "FUNCTION",
+      "properties": {
+        "name": "test_phrase_respects_clause_boundaries",
+        "purpose": "Check compatibility rules and input coverage.",
+        "file": "tools/test_check_compatibility.py",
+        "function": "test_phrase_respects_clause_boundaries"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_FUNCTION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_test_check_compatibility_test_wrapped_spec_html_block_boundary_and_history",
+      "type": "FUNCTION",
+      "properties": {
+        "name": "test_wrapped_spec_html_block_boundary_and_history",
+        "purpose": "Check compatibility rules and input coverage.",
+        "file": "tools/test_check_compatibility.py",
+        "function": "test_wrapped_spec_html_block_boundary_and_history"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_FUNCTION",
+      "dimension": "folder_structure"
     }
   ],
-  "edges": []
+  "edges": [
+    {
+      "from_id": "root",
+      "to_id": "tools_test_check_compatibility_test_phrase_whitespace_and_locations",
+      "relation": "CONTAINS"
+    },
+    {
+      "from_id": "root",
+      "to_id": "tools_test_check_compatibility_test_reverse_spec_phrase_whitespace",
+      "relation": "CONTAINS"
+    },
+    {
+      "from_id": "root",
+      "to_id": "tools_test_check_compatibility_test_phrase_respects_clause_boundaries",
+      "relation": "CONTAINS"
+    },
+    {
+      "from_id": "root",
+      "to_id": "tools_test_check_compatibility_test_wrapped_spec_html_block_boundary_and_history",
+      "relation": "CONTAINS"
+    }
+  ]
 }
