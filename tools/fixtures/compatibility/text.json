@@ -1,0 +1,705 @@
+[
+  {
+    "case": "C1 name disagree",
+    "own": "TRUGS-WEB",
+    "text": "trugs-web v2.0.0",
+    "rules": [
+      "C1"
+    ]
+  },
+  {
+    "case": "C1 name agree",
+    "own": "TRUGS-WEB",
+    "text": "trugs-web v2.1",
+    "rules": []
+  },
+  {
+    "case": "C1 index URL disagree",
+    "own": "TRUGS-WEB",
+    "text": "https://pypi.org/project/trugs-web/2.0.0/",
+    "rules": [
+      "C1"
+    ]
+  },
+  {
+    "case": "C1 index URL agree",
+    "own": "TRUGS-WEB",
+    "text": "https://pypi.org/project/trugs-web/2.1.0/",
+    "rules": []
+  },
+  {
+    "case": "C1 own version disagree",
+    "own": "TRUGS-WEB",
+    "text": "Version: 2.0.0",
+    "rules": [
+      "C1"
+    ]
+  },
+  {
+    "case": "C1 own version agree",
+    "own": "TRUGS-WEB",
+    "text": "Version: 2.1.0",
+    "rules": []
+  },
+  {
+    "case": "C1 own package version disagree",
+    "own": "TRUGS-WEB",
+    "text": "package version 2.0",
+    "rules": [
+      "C1"
+    ]
+  },
+  {
+    "case": "C1 own package version agree",
+    "own": "TRUGS-WEB",
+    "text": "package version 2.1",
+    "rules": []
+  },
+  {
+    "case": "C2 forward disagree",
+    "own": "TRUGS",
+    "text": "specification 1.0",
+    "rules": [
+      "C2"
+    ]
+  },
+  {
+    "case": "C2 forward agree",
+    "own": "TRUGS",
+    "text": "specification 2.0",
+    "rules": []
+  },
+  {
+    "case": "C2 reverse disagree",
+    "own": "TRUGS",
+    "text": "The 1.0.0 spec revision",
+    "rules": [
+      "C2"
+    ]
+  },
+  {
+    "case": "C2 reverse agree",
+    "own": "TRUGS",
+    "text": "The 2.0.0 spec revision",
+    "rules": []
+  },
+  {
+    "case": "C3 prose range disagree",
+    "own": "TRUGS-WEB",
+    "text": "trugs-tools>=2.5.0,<3",
+    "rules": [
+      "C3"
+    ]
+  },
+  {
+    "case": "C3 prose range agree",
+    "own": "TRUGS-WEB",
+    "text": "trugs-tools>=2.0.0,<3",
+    "rules": []
+  },
+  {
+    "case": "C4 own disagree",
+    "own": "TRUGS-WEB",
+    "text": "Python 3.10",
+    "rules": [
+      "C4"
+    ]
+  },
+  {
+    "case": "C4 own agree",
+    "own": "TRUGS-WEB",
+    "text": "Python 3.11",
+    "rules": []
+  },
+  {
+    "case": "C4 named disagree",
+    "own": "TRUGS-WEB",
+    "text": "trugs: Python 3.11",
+    "rules": [
+      "C4"
+    ]
+  },
+  {
+    "case": "C4 named agree",
+    "own": "TRUGS-WEB",
+    "text": "trugs: Python 3.10",
+    "rules": []
+  },
+  {
+    "case": "C4 fallback disagree",
+    "own": null,
+    "text": "Python 3.10",
+    "rules": [
+      "C4"
+    ]
+  },
+  {
+    "case": "C4 fallback agree",
+    "own": null,
+    "text": "Python 3.11",
+    "rules": []
+  },
+  {
+    "case": "C5 named disagree",
+    "own": "TRUGS",
+    "text": "TRUGS-VIEWER is coming",
+    "rules": [
+      "C5"
+    ]
+  },
+  {
+    "case": "C5 named agree",
+    "own": "TRUGS",
+    "text": "TRUGS-VIEWER is live",
+    "rules": []
+  },
+  {
+    "case": "C5 address disagree",
+    "own": "TRUGS",
+    "text": "https://trugs.ai/onboard/ is unpublished",
+    "rules": [
+      "C5"
+    ]
+  },
+  {
+    "case": "C5 address agree",
+    "own": "TRUGS",
+    "text": "https://trugs.ai/onboard/ is served",
+    "rules": []
+  },
+  {
+    "case": "C5 coming disagree",
+    "own": "TRUGS",
+    "text": "TRUGS-LAW is available",
+    "rules": [
+      "C5"
+    ]
+  },
+  {
+    "case": "C5 coming agree",
+    "own": "TRUGS",
+    "text": "TRUGS-LAW is coming",
+    "rules": []
+  },
+  {
+    "case": "C5 withdrawn disagree",
+    "own": "TRUGS",
+    "text": "trugs-folder is published",
+    "rules": [
+      "C5"
+    ]
+  },
+  {
+    "case": "C5 withdrawn agree",
+    "own": "TRUGS",
+    "text": "trugs-folder is withdrawn",
+    "rules": []
+  },
+  {
+    "case": "C5 negation disagree",
+    "own": "TRUGS",
+    "text": "TRUGS-AGENT is not released",
+    "rules": [
+      "C5"
+    ]
+  },
+  {
+    "case": "C5 negation agree",
+    "own": "TRUGS",
+    "text": "TRUGS-AGENT is released",
+    "rules": []
+  },
+  {
+    "case": "C5 served disagree",
+    "own": "TRUGS",
+    "text": "This text does not assert that trugs.ai/onboard is served.",
+    "rules": [
+      "C5"
+    ]
+  },
+  {
+    "case": "C5 served agree",
+    "own": "TRUGS",
+    "text": "This kit's onboarding page is served at https://trugs.ai/onboard/.",
+    "rules": []
+  },
+  {
+    "case": "E1 as of exempt",
+    "own": "TRUGS",
+    "text": "as of trugs-web 1.0",
+    "rules": []
+  },
+  {
+    "case": "E1 as of unmarked twin",
+    "own": "TRUGS",
+    "text": "trugs-web 1.0",
+    "rules": [
+      "C1"
+    ]
+  },
+  {
+    "case": "E1 since exempt",
+    "own": "TRUGS",
+    "text": "since trugs-web 1.0",
+    "rules": []
+  },
+  {
+    "case": "E1 since unmarked twin",
+    "own": "TRUGS",
+    "text": "trugs-web 1.0",
+    "rules": [
+      "C1"
+    ]
+  },
+  {
+    "case": "E1 before exempt",
+    "own": "TRUGS",
+    "text": "before trugs-web 1.0",
+    "rules": []
+  },
+  {
+    "case": "E1 before unmarked twin",
+    "own": "TRUGS",
+    "text": "trugs-web 1.0",
+    "rules": [
+      "C1"
+    ]
+  },
+  {
+    "case": "E1 until exempt",
+    "own": "TRUGS",
+    "text": "until trugs-web 1.0",
+    "rules": []
+  },
+  {
+    "case": "E1 until unmarked twin",
+    "own": "TRUGS",
+    "text": "trugs-web 1.0",
+    "rules": [
+      "C1"
+    ]
+  },
+  {
+    "case": "E1 legacy exempt",
+    "own": "TRUGS",
+    "text": "legacy trugs-web 1.0",
+    "rules": []
+  },
+  {
+    "case": "E1 legacy unmarked twin",
+    "own": "TRUGS",
+    "text": "trugs-web 1.0",
+    "rules": [
+      "C1"
+    ]
+  },
+  {
+    "case": "E1 earlier exempt",
+    "own": "TRUGS",
+    "text": "earlier trugs-web 1.0",
+    "rules": []
+  },
+  {
+    "case": "E1 earlier unmarked twin",
+    "own": "TRUGS",
+    "text": "trugs-web 1.0",
+    "rules": [
+      "C1"
+    ]
+  },
+  {
+    "case": "E1 previously exempt",
+    "own": "TRUGS",
+    "text": "previously trugs-web 1.0",
+    "rules": []
+  },
+  {
+    "case": "E1 previously unmarked twin",
+    "own": "TRUGS",
+    "text": "trugs-web 1.0",
+    "rules": [
+      "C1"
+    ]
+  },
+  {
+    "case": "E1 prior exempt",
+    "own": "TRUGS",
+    "text": "prior trugs-web 1.0",
+    "rules": []
+  },
+  {
+    "case": "E1 prior unmarked twin",
+    "own": "TRUGS",
+    "text": "trugs-web 1.0",
+    "rules": [
+      "C1"
+    ]
+  },
+  {
+    "case": "E1 was exempt",
+    "own": "TRUGS",
+    "text": "was trugs-web 1.0",
+    "rules": []
+  },
+  {
+    "case": "E1 was unmarked twin",
+    "own": "TRUGS",
+    "text": "trugs-web 1.0",
+    "rules": [
+      "C1"
+    ]
+  },
+  {
+    "case": "E1 were exempt",
+    "own": "TRUGS",
+    "text": "were trugs-web 1.0",
+    "rules": []
+  },
+  {
+    "case": "E1 were unmarked twin",
+    "own": "TRUGS",
+    "text": "trugs-web 1.0",
+    "rules": [
+      "C1"
+    ]
+  },
+  {
+    "case": "E1 had exempt",
+    "own": "TRUGS",
+    "text": "had trugs-web 1.0",
+    "rules": []
+  },
+  {
+    "case": "E1 had unmarked twin",
+    "own": "TRUGS",
+    "text": "trugs-web 1.0",
+    "rules": [
+      "C1"
+    ]
+  },
+  {
+    "case": "E1 Changes exempt",
+    "own": "TRUGS",
+    "text": "## Changes\n\ntrugs-web 1.0",
+    "rules": []
+  },
+  {
+    "case": "E1 Changes unmarked twin",
+    "own": "TRUGS",
+    "text": "## Today\n\ntrugs-web 1.0",
+    "rules": [
+      "C1"
+    ]
+  },
+  {
+    "case": "E1 History exempt",
+    "own": "TRUGS",
+    "text": "## History\n\ntrugs-web 1.0",
+    "rules": []
+  },
+  {
+    "case": "E1 History unmarked twin",
+    "own": "TRUGS",
+    "text": "## Today\n\ntrugs-web 1.0",
+    "rules": [
+      "C1"
+    ]
+  },
+  {
+    "case": "E1 Releases exempt",
+    "own": "TRUGS",
+    "text": "## Releases\n\ntrugs-web 1.0",
+    "rules": []
+  },
+  {
+    "case": "E1 Releases unmarked twin",
+    "own": "TRUGS",
+    "text": "## Today\n\ntrugs-web 1.0",
+    "rules": [
+      "C1"
+    ]
+  },
+  {
+    "case": "C5 quoted `coming`",
+    "own": "TRUGS",
+    "text": "TRUGS-VIEWER is `coming`",
+    "rules": []
+  },
+  {
+    "case": "C5 quoted \"coming\"",
+    "own": "TRUGS",
+    "text": "TRUGS-VIEWER is \"coming\"",
+    "rules": []
+  },
+  {
+    "case": "C5 quoted 'coming'",
+    "own": "TRUGS",
+    "text": "TRUGS-VIEWER is 'coming'",
+    "rules": []
+  },
+  {
+    "case": "C5 quoted “coming”",
+    "own": "TRUGS",
+    "text": "TRUGS-VIEWER is “coming”",
+    "rules": []
+  },
+  {
+    "case": "C5 quoted ‘coming’",
+    "own": "TRUGS",
+    "text": "TRUGS-VIEWER is ‘coming’",
+    "rules": []
+  },
+  {
+    "case": "C1 emphasis and link",
+    "own": "TRUGS",
+    "text": "[**TRUGS-WEB 1.0**](https://pypi.org/project/trugs-web/)",
+    "rules": [
+      "C1"
+    ]
+  },
+  {
+    "case": "C1 whole name",
+    "own": "TRUGS",
+    "text": "prefix-trugs-web 1.0; trugs-web_extra 1.0",
+    "rules": []
+  },
+  {
+    "case": "C5 bare specification",
+    "own": "TRUGS",
+    "text": "TRUGS is coming",
+    "rules": []
+  },
+  {
+    "case": "E1 heading scope ends",
+    "own": "TRUGS",
+    "text": "## History\ntrugs-web 1.0\n## Today\ntrugs-web 1.0",
+    "rules": [
+      "C1"
+    ]
+  },
+  {
+    "case": "E1 only version rules",
+    "own": "TRUGS-WEB",
+    "text": "Previously trugs-web was coming; Python 3.10",
+    "rules": [
+      "C4",
+      "C5"
+    ]
+  },
+  {
+    "case": "C5 code block",
+    "own": "TRUGS",
+    "text": "```text\nTRUGS-VIEWER is coming\n```",
+    "rules": []
+  },
+  {
+    "case": "E1 setext history",
+    "own": "TRUGS",
+    "text": "History\n=======\n\ntrugs-web 1.0",
+    "rules": []
+  },
+  {
+    "case": "E1 wrapped marker",
+    "own": "TRUGS",
+    "text": "As\nof 2020 trugs-web 1.0",
+    "rules": []
+  },
+  {
+    "case": "C5 wrapped phrase",
+    "own": "TRUGS",
+    "text": "TRUGS-AGENT is under\nreconstruction",
+    "rules": [
+      "C5"
+    ]
+  },
+  {
+    "case": "C5 wrapped quotation",
+    "own": "TRUGS",
+    "text": "TRUGS-VIEWER is \"a\ncoming demonstration\"",
+    "rules": []
+  },
+  {
+    "case": "C5 quotation across clauses",
+    "own": "TRUGS",
+    "text": "TRUGS-VIEWER: \"coming; unpublished\"",
+    "rules": []
+  },
+  {
+    "case": "C5 wrapped inline code",
+    "own": "TRUGS",
+    "text": "TRUGS-VIEWER is `a\ncoming demonstration`",
+    "rules": []
+  },
+  {
+    "case": "C5 unmatched tick",
+    "own": "TRUGS",
+    "text": "TRUGS-VIEWER is `coming",
+    "rules": [
+      "C5"
+    ]
+  },
+  {
+    "case": "C1 leading underscore is part of name",
+    "own": "TRUGS",
+    "text": "_trugs-web 1.0",
+    "rules": []
+  },
+  {
+    "case": "C1 matched underscore emphasis",
+    "own": "TRUGS",
+    "text": "_trugs-web_ **1.0**",
+    "rules": [
+      "C1"
+    ]
+  },
+  {
+    "case": "C3 prose wildcard exclusion",
+    "own": "TRUGS",
+    "text": "trugs-tools!=2.*",
+    "rules": [
+      "C3"
+    ]
+  },
+  {
+    "case": "C3 prose wildcard admission",
+    "own": "TRUGS",
+    "text": "trugs-tools==2.*",
+    "rules": []
+  },
+  {
+    "case": "C1 reference link target",
+    "own": "TRUGS",
+    "text": "[tool][version]\n\n[version]: https://pypi.org/project/trugs-web/1.0/",
+    "rules": [
+      "C1"
+    ]
+  },
+  {
+    "case": "C5 reference link address",
+    "own": "TRUGS",
+    "text": "[onboarding][start] is unpublished.\n\n[start]: https://trugs.ai/onboard/",
+    "rules": [
+      "C5"
+    ]
+  },
+  {
+    "case": "C5 collapsed reference",
+    "own": "TRUGS",
+    "text": "[onboarding][] is served.\n\n[onboarding]: https://trugs.ai/onboard/",
+    "rules": []
+  },
+  {
+    "case": "C5 shortcut reference",
+    "own": "TRUGS",
+    "text": "[onboarding] is unpublished.\n\n[onboarding]: https://trugs.ai/onboard/",
+    "rules": [
+      "C5"
+    ]
+  },
+  {
+    "case": "C1 wrapped package version disagree",
+    "own": "TRUGS",
+    "text": "# Today\n\npackage\nversion 9.0.\n",
+    "rules": [
+      "C1"
+    ]
+  },
+  {
+    "case": "C1 wrapped package version agree",
+    "own": "TRUGS",
+    "text": "# Today\n\npackage\nversion 2.0.0.\n",
+    "rules": []
+  },
+  {
+    "case": "C2 wrapped spec revision disagree",
+    "own": "TRUGS",
+    "text": "# Today\n\nspec\nrevision 9.0.\n",
+    "rules": [
+      "C2"
+    ]
+  },
+  {
+    "case": "C2 wrapped spec revision agree",
+    "own": "TRUGS",
+    "text": "# Today\n\nspec\nrevision 2.0.0.\n",
+    "rules": []
+  },
+  {
+    "case": "C5 complete address matching extension disagree",
+    "own": null,
+    "text": "<p>https://trugs.ai/onboard/ is coming.</p>",
+    "rules": [
+      "C5"
+    ]
+  },
+  {
+    "case": "C5 complete address foreign path agree",
+    "own": null,
+    "text": "<p>https://example.org/trugs.ai/ is coming.</p>",
+    "rules": []
+  },
+  {
+    "case": "C5 complete address foreign query agree",
+    "own": null,
+    "text": "<p>https://example.org/?next=https://trugs.ai/ is coming.</p>",
+    "rules": []
+  },
+  {
+    "case": "C5 complete address longer host agree",
+    "own": null,
+    "text": "<p>https://trugs.ai.example.org/ is coming.</p>",
+    "rules": []
+  },
+  {
+    "case": "C5 complete address longer path agree",
+    "own": null,
+    "text": "<p>https://github.com/TRUGS-LLC/TRUGS-SITExtra/ is coming.</p>",
+    "rules": []
+  },
+  {
+    "case": "C5 complete address bare matching extension disagree",
+    "own": null,
+    "text": "<p>trugs.ai/onboard/ is coming.</p>",
+    "rules": [
+      "C5"
+    ]
+  },
+  {
+    "case": "C5 complete address bare foreign path agree",
+    "own": null,
+    "text": "<p>example.org/trugs.ai/ is coming.</p>",
+    "rules": []
+  },
+  {
+    "case": "C5 complete address relative matching extension disagree",
+    "own": null,
+    "text": "<p>//trugs.ai/onboard/ is coming.</p>",
+    "rules": [
+      "C5"
+    ]
+  },
+  {
+    "case": "C5 complete address relative foreign path agree",
+    "own": null,
+    "text": "<p>//example.org/trugs.ai/ is coming.</p>",
+    "rules": []
+  },
+  {
+    "case": "C5 complete address foreign parenthesized path agree",
+    "own": null,
+    "text": "<p>https://example.org/(trugs.ai/) is coming.</p>",
+    "rules": []
+  },
+  {
+    "case": "C5 complete address foreign user info agree",
+    "own": null,
+    "text": "<p>https://person:@trugs.ai/ is coming.</p>",
+    "rules": []
+  },
+  {
+    "case": "C5 complete address foreign host percent agree",
+    "own": null,
+    "text": "<p>https://elsewhere.example%trugs.ai/ is coming.</p>",
+    "rules": []
+  }
+]

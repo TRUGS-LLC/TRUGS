@@ -29,11 +29,11 @@ The sentence IS the program. The graph IS the AST. Every valid TRUG/L sentence c
 
 ### Describe
 
-Describe builds a graph from sources so that their entities and relationships can be queried. [TRUGS-WEB](https://github.com/TRUGS-LLC/TRUGS-WEB), available as [trugs-web 2.0.0](https://pypi.org/project/trugs-web/), builds a TRUGS graph from web sources and queries it; local-folder input and the viewer TRUGS-VIEWER are coming.
+Describe builds a graph from sources so that their entities and relationships can be queried. [TRUGS-WEB](https://github.com/TRUGS-LLC/TRUGS-WEB), available as [trugs-web 2.1.0](https://pypi.org/project/trugs-web/), builds a TRUGS graph from web sources or local folders and queries it. [TRUGS-VIEWER](https://github.com/TRUGS-LLC/TRUGS-VIEWER) is a live demonstration.
 
-### Say
+### Instruct
 
-Say expresses a graph as a sentence in TRUG/L, the language of this specification. [trugs-tools 2.4.0](https://pypi.org/project/trugs-tools/) compiles and decompiles the [specification's examples](TRUGS_LANGUAGE/SPEC_examples.md) with `trug trl`; TRUGS-TRL and TRUGS-LAW are coming.
+Instruct states what must be done: a sentence in TRUG/L, the language of this specification, compiles to a graph, which is validated. [trugs-tools 2.4.0](https://pypi.org/project/trugs-tools/) compiles and decompiles the [specification's examples](TRUGS_LANGUAGE/SPEC_examples.md) with `trug trl`; TRUGS-TRL and TRUGS-LAW are coming.
 
 ### Compute
 
@@ -42,6 +42,8 @@ Compute represents calculations as graphs. [TRUGS-ACCOUNTING-CALCULATOR](https:/
 ### Govern
 
 Govern uses a graph to govern how work runs. The runner is coming.
+
+See the [version and compatibility table](COMPATIBILITY.md) for component versions, Python minima and package requirements.
 
 ## Install
 
@@ -132,7 +134,7 @@ For pushes to `main` and pull requests targeting `main`, CI runs `make check` (s
 
 ## Use It
 
-Start with the [language specification](TRUGS_LANGUAGE/) and [example graphs](EXAMPLES/). [TRUGS-AGENT](https://github.com/TRUGS-LLC/TRUGS-AGENT) is under reconstruction as the onboarding kit for AI agents.
+Start with the [language specification](TRUGS_LANGUAGE/) and [example graphs](EXAMPLES/). [TRUGS-AGENT](https://github.com/TRUGS-LLC/TRUGS-AGENT) is available as the onboarding kit for AI agents.
 
 ## Building on TRUGS
 

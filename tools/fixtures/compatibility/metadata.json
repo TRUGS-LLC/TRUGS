@@ -1,0 +1,54 @@
+[
+  {
+    "case": "C1 metadata disagree",
+    "own": "TRUGS-TOOLS",
+    "field": "version",
+    "value": "1.0.0",
+    "rules": [
+      "C1"
+    ]
+  },
+  {
+    "case": "C1 metadata agree",
+    "own": "TRUGS-TOOLS",
+    "field": "version",
+    "value": "2.4.0",
+    "rules": []
+  },
+  {
+    "case": "C3 metadata disagree",
+    "own": "TRUGS-TOOLS",
+    "field": "dependencies",
+    "value": [
+      "trugs-store>=2.1.0"
+    ],
+    "rules": [
+      "C3"
+    ]
+  },
+  {
+    "case": "C3 metadata agree",
+    "own": "TRUGS-TOOLS",
+    "field": "dependencies",
+    "value": [
+      "trugs-store>=2.0.0"
+    ],
+    "rules": []
+  },
+  {
+    "case": "C4 metadata disagree",
+    "own": "TRUGS-TOOLS",
+    "field": "requires-python",
+    "value": ">=3.10",
+    "rules": [
+      "C4"
+    ]
+  },
+  {
+    "case": "C4 metadata agree",
+    "own": "TRUGS-TOOLS",
+    "field": "requires-python",
+    "value": ">=3.11",
+    "rules": []
+  }
+]

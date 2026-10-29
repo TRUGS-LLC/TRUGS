@@ -23,7 +23,7 @@ pdflatex trugs.tex
 pdflatex trugs.tex
 ```
 
-To regenerate the counts first, run from the repository root `python3 tools/paper_vocab_counts.py` and, with `trugs-tools` 2.2.0 installed so that `trug` is on the PATH, `python3 tools/check_paper_trl.py`; the second also checks every TRL listing of the paper with the released tool.
+To regenerate the counts first, run from the repository root `python3 tools/paper_vocab_counts.py` and, with `trugs-tools` 2.4.0 installed so that `trug` is on the PATH, `python3 tools/check_paper_trl.py`; the second also checks every TRL listing of the paper with the released tool.
 
 ## Submit to arXiv
 

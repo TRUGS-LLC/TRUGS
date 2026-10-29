@@ -53,7 +53,8 @@
         "doc_makefile",
         "doc_getting_started",
         "comp_tools",
-        "example_set"
+        "example_set",
+        "doc_compatibility"
       ],
       "metric_level": "KILO_FOLDER",
       "dimension": "folder_structure"
@@ -320,7 +321,10 @@
         "tools_paper_vocab_counts",
         "tools_test_check_paper_trl",
         "tools_test_paper_vocab_counts",
-        "tools_folder_trug"
+        "tools_folder_trug",
+        "tools_check_compatibility",
+        "tools_test_check_compatibility",
+        "tools_compatibility_fixtures"
       ],
       "metric_level": "DEKA_COMPONENT",
       "dimension": "folder_structure"
@@ -1220,6 +1224,87 @@
       "contains": [],
       "metric_level": "BASE_EXAMPLE_SET",
       "dimension": "folder_structure"
+    },
+    {
+      "id": "doc_compatibility",
+      "type": "DOCUMENT",
+      "properties": {
+        "name": "COMPATIBILITY.md",
+        "purpose": "Component versions, Python minima, package requirements and offline comparison usage.",
+        "file": "COMPATIBILITY.md"
+      },
+      "parent_id": "root",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_check_compatibility",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "tools/check_compatibility.py",
+        "purpose": "Read local package metadata, README files and HTML pages and report version, requirement and status differences.",
+        "file": "tools/check_compatibility.py"
+      },
+      "parent_id": "folder_tools",
+      "contains": [],
+      "metric_level": "BASE_SPECIFICATION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_test_check_compatibility",
+      "type": "TEST_SUITE",
+      "properties": {
+        "name": "tools/test_check_compatibility.py",
+        "purpose": "Exercise comparison clauses, complete inputs and offline operation.",
+        "file": "tools/test_check_compatibility.py"
+      },
+      "parent_id": "folder_tools",
+      "contains": [],
+      "metric_level": "BASE_TEST_SUITE",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_compatibility_fixtures",
+      "type": "FOLDER",
+      "properties": {
+        "name": "tools/fixtures/compatibility",
+        "purpose": "Agreeing and disagreeing text and metadata for C1-C5 and E1.",
+        "file": "tools/fixtures/compatibility"
+      },
+      "parent_id": "folder_tools",
+      "contains": [
+        "tools_compatibility_text",
+        "tools_compatibility_metadata"
+      ],
+      "metric_level": "BASE_FOLDER",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_compatibility_text",
+      "type": "DOCUMENT",
+      "properties": {
+        "name": "tools/fixtures/compatibility/text.json",
+        "purpose": "Comparison rule fixtures.",
+        "file": "tools/fixtures/compatibility/text.json"
+      },
+      "parent_id": "tools_compatibility_fixtures",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "tools_compatibility_metadata",
+      "type": "DOCUMENT",
+      "properties": {
+        "name": "tools/fixtures/compatibility/metadata.json",
+        "purpose": "Comparison rule fixtures.",
+        "file": "tools/fixtures/compatibility/metadata.json"
+      },
+      "parent_id": "tools_compatibility_fixtures",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "folder_structure"
     }
   ],
   "edges": [
@@ -1519,6 +1604,30 @@
       "from_id": "tools_test_paper_vocab_counts",
       "to_id": "comp_tools",
       "relation": "tests",
+      "properties": {}
+    },
+    {
+      "from_id": "doc_readme",
+      "to_id": "doc_compatibility",
+      "relation": "references",
+      "properties": {}
+    },
+    {
+      "from_id": "tools_check_compatibility",
+      "to_id": "doc_compatibility",
+      "relation": "implements",
+      "properties": {}
+    },
+    {
+      "from_id": "tools_test_check_compatibility",
+      "to_id": "tools_check_compatibility",
+      "relation": "tests",
+      "properties": {}
+    },
+    {
+      "from_id": "tools_test_check_compatibility",
+      "to_id": "tools_compatibility_fixtures",
+      "relation": "references",
       "properties": {}
     }
   ]
