@@ -23,7 +23,7 @@ flowchart LR
     G -.extends.-> B["BRANCH<br/>(domain vocabulary)"]
 ```
 
-The sentence IS the program. The graph IS the AST. Every valid TRUG/L sentence compiles to a graph losslessly, and every graph decompiles back to a sentence.
+The sentence IS the program. The graph IS the AST. A valid TRUG/L sentence compiles to a graph losslessly, and a graph in the core vocabulary decompiles back to its sentence; a branch such as Compute round-trips its own graphs with its own tools.
 
 ## Four types of TRUGS
 
@@ -62,7 +62,7 @@ See [TRUGS-LLC/TRUGS-TOOLS](https://github.com/TRUGS-LLC/TRUGS-TOOLS) for the `t
 
 ## TRUGS Language
 
-TRUGS includes a formalized subset of English — 233 words drawn from computation, law, and SI prefixes — where every valid sentence compiles to a TRUG graph and every graph decompiles back to a sentence. Losslessly.
+TRUGS includes a formalized subset of English — 233 words drawn from computation, law, and SI prefixes — where a valid sentence compiles to a TRUG graph and a graph in the core vocabulary decompiles back to its sentence, losslessly; a branch's graphs round-trip with the branch's own tools.
 
 ```
 <trl>
@@ -92,7 +92,7 @@ See [TRUGS_LANGUAGE/](TRUGS_LANGUAGE/) for the complete specification.
 | Document | Description |
 |----------|-------------|
 | [SPEC_vocabulary.md](TRUGS_LANGUAGE/SPEC_vocabulary.md) | 233 words, 9 parts of speech, formal definitions |
-| [SPEC_grammar.md](TRUGS_LANGUAGE/SPEC_grammar.md) | BNF grammar, composition rules, 12 validation rules |
+| [SPEC_grammar.md](TRUGS_LANGUAGE/SPEC_grammar.md) | BNF grammar, composition rules, 16 validation rules |
 | [SPEC_examples.md](TRUGS_LANGUAGE/SPEC_examples.md) | 30 parsed examples across 13 patterns |
 | [language.trug.json](TRUGS_LANGUAGE/language.trug.json) | The opening TRUG — the language defining itself |
 
