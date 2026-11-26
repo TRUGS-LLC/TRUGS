@@ -18,7 +18,6 @@ Each package file is relative to its repository root. Requirements list dependen
 | TRUGS-SITE | none | live | none | none | none | none | https://github.com/TRUGS-LLC/TRUGS-SITE https://trugs.ai/ |
 | TRUGS-TRL | none | coming | none | none | none | none | none |
 | TRUGS-LAW | none | coming | none | none | none | none | none |
-| Govern runner | none | coming | none | none | none | none | none |
 | trugs-folder | none | withdrawn | none | none | none | none | none |
 
 The coming and withdrawn rows state only a name and status. The released and live values come from the named package files and, for Python releases, the package index JSON. TRUGS-SITE has no package file.

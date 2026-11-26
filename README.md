@@ -41,7 +41,7 @@ Compute represents calculations as graphs. [TRUGS-ACCOUNTING-CALCULATOR](https:/
 
 ### Govern
 
-Govern uses a graph to govern how work runs. The runner is coming.
+Govern uses a graph to govern how work runs. [TRUGS-RUNNER](https://github.com/TRUGS-LLC/TRUGS-RUNNER), available as [trugs-runner 0.1.0](https://pypi.org/project/trugs-runner/), offers and records actions against a fixed graph.
 
 See the [version and compatibility table](COMPATIBILITY.md) for component versions, Python minima and package requirements.
 

@@ -1,6 +1,6 @@
 # STANDARD: Dark Code Compliance
 
-**Status:** Draft v0.1.1 — adopted by `TRUGS-LLC/TRUGS#48`
+**Status:** Draft v0.1.2 — adopted by `TRUGS-LLC/TRUGS#48`
 **Applies to:** every TRUGS-LLC public repo
 **Enforced by:** `trug compliance` CLI from the companion [TRUGS-TOOLS](https://github.com/TRUGS-LLC/TRUGS-TOOLS) repository + CI gates
 **See also:** [`PAPER_dark_code.md`](PAPER_dark_code.md) (the WHY), [`PAPER_how_to_code_with_trugs.md`](PAPER_how_to_code_with_trugs.md) (the HOW)
@@ -233,7 +233,7 @@ Three hard gates apply to every TRUGS-LLC public repo:
 
 1. **No PR may decrease compliance %.** This is a policy requirement; the shipped workflow runs `trug compliance .` without an explicit target-branch baseline comparison, so it does not establish enforcement of this ratchet.
 2. **No version bump without 100% compliance.** Tag/release workflows must check `compliance_percent == 100.0` before building wheels, publishing to PyPI, etc.
-3. **No `Xepayac → TRUGS-LLC` promotion without 100% compliance.** A private-to-public repo transfer must pass the standard first.
+3. **No transfer into `TRUGS-LLC` without 100% compliance.** A private-to-public repo transfer must pass the standard first.
 
 These are hard. They are not aspirational.
 
@@ -254,7 +254,7 @@ A file can be excluded from compliance checks by listing it in `.github/complian
       "path": "vendor/third_party_lib.py",
       "reason": "Vendored from upstream; compliance applies to our code only.",
       "expires": "2027-01-01",
-      "approved_by": "Xepayac"
+      "approved_by": "maintainer"
     }
   ]
 }
@@ -305,3 +305,5 @@ When the standard changes, downstream repos may see their compliance % shift wit
 | 0.1 | 2026-04-16 | Initial draft — `TRUGS-LLC/TRUGS#48` |
 
 Correction, 2026-10-16: Draft v0.1.1 clarifies the folder graph's test-edge convention, distinguishes graph relations from TRUG/L prepositions, and corrects the compliance workflow and baseline claims to the shipped configuration. The initial draft entry above is retained.
+
+Correction, 2026-11-26: Draft v0.1.2 restates the third hard rule and the waiver example without naming an individual account. What counts as compliant is unchanged.
