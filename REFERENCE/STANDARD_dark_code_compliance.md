@@ -1,17 +1,17 @@
 # STANDARD: Dark Code Compliance
 
-**Status:** Draft v0.1.2 — adopted by `TRUGS-LLC/TRUGS#48`
-**Applies to:** every TRUGS-LLC public repo
-**Enforced by:** `trug compliance` CLI from the companion [TRUGS-TOOLS](https://github.com/TRUGS-LLC/TRUGS-TOOLS) repository + CI gates
+**Status:** Draft v0.2.0 — adopted by `TRUGS-LLC/TRUGS#48`
+**Applies to:** TRUGS-LLC's public repositories, as a guide (§7)
+**Measured by:** `trug compliance` CLI from the companion [TRUGS-TOOLS](https://github.com/TRUGS-LLC/TRUGS-TOOLS) repository, in CI where §7 says so
 **See also:** [`PAPER_dark_code.md`](PAPER_dark_code.md) (the WHY), [`PAPER_how_to_code_with_trugs.md`](PAPER_how_to_code_with_trugs.md) (the HOW)
 
 ---
 
 ## 1. Purpose & scope
 
-This standard operationalizes the four-corner verification square from `PAPER_dark_code.md` into a concrete, auditable checklist that every TRUGS-LLC public repository must pass. It is the answer to the question "how do we know a repo actually dogfoods TRUGS?"
+This standard operationalizes the four-corner verification square from `PAPER_dark_code.md` into a concrete, auditable checklist for TRUGS-LLC public repositories. It is a guide, not a condition for release; §7 says which repositories are measured and what their checks fail. It is the answer to the question "how do we know a repo actually dogfoods TRUGS?"
 
-**Applies to:** every public repo under the `TRUGS-LLC` GitHub organization.
+**Applies to:** public repos under the `TRUGS-LLC` GitHub organization, as a guide; §9 explains which languages can be measured.
 
 **Covers:** source code, tests, TRUG graph files (`.trug.json`), and prose documents (`.md`).
 
@@ -91,7 +91,7 @@ The inline comment is either:
 - On the same line after the code (`x = foo()  # MAP RECORD input TO DATA output`)
 - On the line immediately above (for long comments or multi-line logic)
 
-These are policy requirements. The builder `tools/build_language_trug.py` currently has only partial inline annotations in `parse_spec`, `build_trug` and `main`: loops, branches and assignments with calls lack the required same-line or immediately preceding TRUG/L comments. The builder therefore falls short of this policy. The current passing `trug compliance .` report checks no functions in this repository and does not verify these inline annotations.
+These are policy requirements. The builder `tools/build_language_trug.py` currently has only partial inline annotations in `parse_spec`, `build_trug` and `main`: loops, branches and assignments with calls lack the required same-line or immediately preceding TRUG/L comments. The builder therefore falls short of this policy. The current passing `trug compliance .` report does not verify these inline annotations.
 
 **Example:**
 
@@ -192,9 +192,9 @@ Every `.trug.json` file in the repo (excluding `zzz_*` archives) must:
 
 General CORE validation uses `trug validate`; `make trugs` validates the root `folder.trug.json` with the other shipped graphs. These commands do not establish enforcement of every convention listed above.
 
-## 6. CI gate
+## 6. CI in a measured repository
 
-### 6.1 Every PR targeting main runs `trug compliance`
+### 6.1 In this repository, every PR targeting main runs `trug compliance`
 
 The shipped `.github/workflows/compliance.yml` runs on every PR targeting main and every push to main. Its compliance step runs the command below; it passes neither `--strict` nor `--baseline-update` and has no separate target-branch baseline comparison or update step. The baseline ratchet described in §6.2 is a proposed workflow design, not an implemented gate here:
 
@@ -207,7 +207,7 @@ The workflow fails when the compliance command exits unsuccessfully. On failure 
 
 ### 6.2 Baseline tracking
 
-Each repo stores its current compliance baseline in `.github/compliance-baseline.json`:
+A measured repo stores its compliance baseline in `.github/compliance-baseline.json`:
 
 ```json
 {
@@ -219,23 +219,21 @@ Each repo stores its current compliance baseline in `.github/compliance-baseline
 
 Under the proposed ratchet, PRs that raise compliance would update the baseline and decreases would fail CI. A `.github/compliance-baseline.json` snapshot is present, but the shipped workflow does not fetch a target-branch snapshot or update the stored baseline. The JSON above illustrates the design rather than the current snapshot.
 
-### 6.3 Hard violations
+### 6.3 Violations to fix first
 
-The list below states hard-violation policy. The shipped CI runs the commands in §6.1 and `make check`; it does not establish enforcement of every policy item:
+The list below names the violations a measured repo should fix first. In this repository, the shipped CI runs the commands in §6.1 and `make check`; it does not establish enforcement of every policy item:
 
 - A TRUG node with an invalid `trl` property that does not parse
 - A shipped graph that fails `trug validate` (enforced by `make trugs`, within `make check`)
 - A test function with no TRUG/L comment at all (total darkness)
 
-## 7. Hard rules
+## 7. Status and the one rule
 
-Three hard gates apply to every TRUGS-LLC public repo:
+This standard is a guide. Its checks describe the practice TRUGS LLC aims for in its public repositories; meeting them is not a condition for releasing a package or making a repository public.
 
-1. **No PR may decrease compliance %.** This is a policy requirement; the shipped workflow runs `trug compliance .` without an explicit target-branch baseline comparison, so it does not establish enforcement of this ratchet.
-2. **No version bump without 100% compliance.** Tag/release workflows must check `compliance_percent == 100.0` before building wheels, publishing to PyPI, etc.
-3. **No transfer into `TRUGS-LLC` without 100% compliance.** A private-to-public repo transfer must pass the standard first.
+One rule applies to a repository that is measured: a pull request should not lower its measured compliance. Its check fails a change that falls below the figure stored in its `.github/compliance-baseline.json`; that figure is not updated automatically and is not compared with the target branch (§6.1, §6.2), so a drop that stays above the stored figure can pass.
 
-These are hard. They are not aspirational.
+Today two repositories are measured. The TRUGS specification repository scores 100% under `trug compliance` with trugs-tools 2.4.0 and runs it on every pull request targeting main and every push to main; that score does not cover every convention here (§3.2, §4.3). TRUGS-RUNNER runs it on every pull request targeting main and every push to main through its `make check`, with the trugs-tools version it pins. The other public repositories are not measured. A repository's current figure comes from running `trug compliance .` in it with a named trugs-tools version, because figures differ between versions.
 
 ## 8. Exceptions & waivers
 
@@ -289,14 +287,14 @@ A TRUGS-LLC repo written in a language without a published appendix is not compl
 
 ## 10. Change control
 
-This standard is a normative document. Changes require:
+This standard is a guide under change control. Changes require:
 
 - A PR to `TRUGS-LLC/TRUGS` against `REFERENCE/STANDARD_dark_code_compliance.md`
 - Discussion in an issue linked from the PR
 - Human approval
 - A version bump of the standard (semantic: major for breaking changes to what counts as compliant; minor for new required checks; patch for clarifications)
 
-When the standard changes, downstream repos may see their compliance % shift without any code change. CI at those repos will correctly flag the new state.
+When the standard changes, downstream repos may see their compliance % shift without any code change. CI at a measured repo may then flag the new state.
 
 ## Version history
 
@@ -307,3 +305,5 @@ When the standard changes, downstream repos may see their compliance % shift wit
 Correction, 2026-10-16: Draft v0.1.1 clarifies the folder graph's test-edge convention, distinguishes graph relations from TRUG/L prepositions, and corrects the compliance workflow and baseline claims to the shipped configuration. The initial draft entry above is retained.
 
 Correction, 2026-11-26: Draft v0.1.2 restates the third hard rule and the waiver example without naming an individual account. What counts as compliant is unchanged.
+
+Change, 2026-11-26: Draft v0.2.0 makes the standard a guide rather than a set of hard gates. Section 7 now states which repositories are measured and keeps one rule for them. What counts as compliant is unchanged.
