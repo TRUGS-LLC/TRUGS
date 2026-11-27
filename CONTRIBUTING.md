@@ -5,7 +5,7 @@ Thanks for your interest in contributing to TRUGS — the Traceable Recursive Un
 ## Quick links
 
 - **License:** [Apache 2.0](LICENSE) — all contributions are licensed under the same terms
-- **Compliance standard:** [`REFERENCE/STANDARD_dark_code_compliance.md`](REFERENCE/STANDARD_dark_code_compliance.md) — what every TRUGS-LLC repo is audited against
+- **Compliance standard:** [`REFERENCE/STANDARD_dark_code_compliance.md`](REFERENCE/STANDARD_dark_code_compliance.md) — the Dark Code guide; its §7 says which repositories are measured against it
 - **How-to guide:** [`REFERENCE/PAPER_how_to_code_with_trugs.md`](REFERENCE/PAPER_how_to_code_with_trugs.md) — practitioner reference
 - **Issue tracker:** [github.com/TRUGS-LLC/TRUGS/issues](https://github.com/TRUGS-LLC/TRUGS/issues)
 
